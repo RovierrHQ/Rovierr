@@ -3,9 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
@@ -15,7 +13,9 @@
     "expo-env.d.ts",
     "nativewind-env.d.ts"
   ],
-  "references": [{
-    "path": "../server"
-  }]
+  "references": [
+    {
+      "path": "../server"
+    }
+  ]
 }

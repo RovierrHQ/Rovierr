@@ -1,8 +1,8 @@
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { Link } from "expo-router";
-import { Drawer } from "expo-router/drawer";
+import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { Link } from 'expo-router'
+import { Drawer } from 'expo-router/drawer'
 
-import { HeaderButton } from "@/components/header-button";
+import { HeaderButton } from '@/components/header-button'
 
 const DrawerLayout = () => {
   return (
@@ -10,30 +10,30 @@ const DrawerLayout = () => {
       <Drawer.Screen
         name="index"
         options={{
-          headerTitle: "Home",
-          drawerLabel: "Home",
+          headerTitle: 'Home',
+          drawerLabel: 'Home',
           drawerIcon: ({ size, color }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
+            <Ionicons color={color} name="home-outline" size={size} />
+          )
         }}
       />
       <Drawer.Screen
         name="(tabs)"
         options={{
-          headerTitle: "Tabs",
-          drawerLabel: "Tabs",
+          headerTitle: 'Tabs',
+          drawerLabel: 'Tabs',
           drawerIcon: ({ size, color }) => (
-            <MaterialIcons name="border-bottom" size={size} color={color} />
+            <MaterialIcons color={color} name="border-bottom" size={size} />
           ),
           headerRight: () => (
-            <Link href="/modal" asChild>
+            <Link asChild href="/modal">
               <HeaderButton />
             </Link>
-          ),
+          )
         }}
       />
     </Drawer>
-  );
-};
+  )
+}
 
-export default DrawerLayout;
+export default DrawerLayout
