@@ -1,0 +1,24 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm install -g pnpm
+        - pnpm install
+    build:
+      commands:
+        # - env | grep -E '^(NEXT_PUBLIC_|POSTGRES_|DATABASE_|CLERK_SECRET_KEY|APP_ID|INSTANCE_ID|DEEPSEEK_|GROQ_|AMAZON_|RESEND|BETTER_AUTH|EMAIL_FROM|NOVU_)' >> .env
+
+        # Write all secrets to the .env file
+        # - for var in NEXT_PUBLIC_API_URL POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD CLERK_SECRET_KEY APP_ID INSTANCE_ID ANTHROPIC_API_KEY AMAZON_ACCESS_KEY_ID AMAZON_SECRET_ACCESS_KEY; do echo "$var=${!var}" >> .env; done
+        # Verify the .env file
+
+        - turbo run web#build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .pnpm-store/**/*
