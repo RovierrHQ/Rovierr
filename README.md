@@ -10,7 +10,7 @@ Our infrastructure is built for scalability, cost efficiency, and real-time perf
 - **Realtime Engine**: [Centrifugal](https://centrifugal.dev/)
 - **Infrastructure as Code (IaC)**: [OpenTofu](https://opentofu.org/)
 - **Backend API**: [Cloudflare](https://www.cloudflare.com/en-gb/)
-- **Frontend Hosting**: AWS Amplify / Vercel
+- **Frontend Hosting**: Vercel
 - **Microservices**: Hosted on [Fly.io](https://fly.io/) for cost advantages and scale-to-zero when idle
   _Planned migration to AWS when traffic increases._
 
@@ -69,5 +69,5 @@ Full documentation is available at: [docs.rovierr.com](https://docs.rovierr.com)
 ## 📌 Open Source Policy
 
 - **License**: CC BY-NC-ND 4.0
-- **Code of Conduct**: _(TODO: for Rovierr internal members)_
+- **Code of Conduct**: See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - **Contribution Process**: See [CONTRIBUTING.md](CONTRIBUTING.md)
