@@ -1,0 +1,11 @@
+{
+  "name": "@rov/shared",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc -b"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.80.5"
+  }
+}
