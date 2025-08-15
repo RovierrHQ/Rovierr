@@ -43,7 +43,7 @@ Harassment includes but is not limited to:
 
 If you experience or witness unacceptable behavior:
 
-- Contact the project owner at **contact@rovierr.com**
+- Contact the project owner at **info@rovierr.com**
 - All reports will be handled confidentially.
 
 ---
