@@ -1,75 +1,73 @@
-# rovierr
+# Rovierr
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, Hono, ORPC, and more.
+Rovierr is a modular platform designed for university students, providing essential tools and services in one ecosystem.
+Our infrastructure is built for scalability, cost efficiency, and real-time performance.
 
-## Features
+---
 
-- **TypeScript** - For type safety and improved developer experience
-- **Next.js** - Full-stack React framework
-- **React Native** - Build mobile apps using React
-- **Expo** - Tools for React Native development
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **shadcn/ui** - Reusable UI components
-- **Hono** - Lightweight, performant server framework
-- **oRPC** - End-to-end type-safe APIs with OpenAPI integration
-- **workers** - Runtime environment
-- **Drizzle** - TypeScript-first ORM
-- **PostgreSQL** - Database engine
-- **Authentication** - Email & password authentication with Better Auth
-- **Husky** - Git hooks for code quality
-- **Tauri** - Build native desktop applications
-- **Turborepo** - Optimized monorepo build system
+## 🚀 Infrastructure Overview
 
-## Getting Started
+- **Realtime Engine**: [Centrifugal](https://centrifugal.dev/)
+- **Infrastructure as Code (IaC)**: [OpenTofu](https://opentofu.org/)
+- **Backend API**: [Cloudflare](https://www.cloudflare.com/en-gb/)
+- **Frontend Hosting**: AWS Amplify / Vercel
+- **Microservices**: Hosted on [Fly.io](https://fly.io/) for cost advantages and scale-to-zero when idle
+  _Planned migration to AWS when traffic increases._
 
-First, install the dependencies:
+---
 
-```bash
-pnpm install
-```
+## 📜 License
 
-## Database Setup
+This project is licensed under the **Creative Commons Attribution–NonCommercial–NoDerivatives 4.0 International License (CC BY-NC-ND 4.0)**.
 
-This project uses PostgreSQL with Drizzle ORM.
+This means:
 
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
+- **Attribution required** (credit the project).
+- **No commercial use** without explicit permission.
+- **No modifications or derivatives** may be distributed.
 
-3. Apply the schema to your database:
+Full license text: [LICENSE](LICENSE)
 
-```bash
-pnpm db:push
-```
+---
 
-Then, run the development server:
+## 🤝 Contributing
 
-```bash
-pnpm dev
-```
+We welcome contributions! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-Use the Expo Go app to run the mobile application.
-The API is running at [http://localhost:3000](http://localhost:3000).
+- How to submit changes
+- Our branch workflow
+- License acknowledgement requirements
 
-## Project Structure
+All contributors must explicitly agree that their submissions are licensed under **CC BY-NC-ND 4.0** with no additional restrictions.
 
-```
-rovierr/
-├── apps/
-│   ├── web/         # Frontend application (Next.js)
-│   ├── native/      # Mobile application (React Native, Expo)
-│   └── server/      # Backend API (Hono, ORPC)
-```
+---
 
-## Available Scripts
+## 🌿 Git Branching Guide
 
-- `pnpm dev`: Start all applications in development mode
-- `pnpm build`: Build all applications
-- `pnpm dev:web`: Start only the web application
-- `pnpm dev:server`: Start only the server
-- `pnpm check-types`: Check TypeScript types across all apps
-- `pnpm dev:native`: Start the React Native/Expo development server
-- `pnpm db:push`: Push schema changes to database
-- `pnpm db:studio`: Open database studio UI
-- `cd apps/web && pnpm desktop:dev`: Start Tauri desktop app in development
-- `cd apps/web && pnpm desktop:build`: Build Tauri desktop app
+- **main** → Production (rovierr.com)
+- **stage** → Staging environment (qa.rovierr.com)
+- **dev** → Integration branch for all feature pull requests
+- **feature_xyz** → Feature branches (e.g., `rejoanahmed8/rov-74-admin-capability-to-update-uni-info-crud`)
+
+---
+
+## 📦 Deployment Flow
+
+1. **Local Development**: Fully containerized with Docker Compose (as much as possible).
+2. **dev.rovierr.com**: Development testing before staging.
+3. **Stage Promotion**: Weekly promotion from `dev` → `stage` (qa.rovierr.com).
+4. **Production Release**: Weekly promotion from `stage` → `main` after one week of QA.
+
+---
+
+## 📚 Documentation
+
+Full documentation is available at: [docs.rovierr.com](https://docs.rovierr.com) _(coming soon)_
+
+---
+
+## 📌 Open Source Policy
+
+- **License**: CC BY-NC-ND 4.0
+- **Code of Conduct**: _(TODO: for Rovierr internal members)_
+- **Contribution Process**: See [CONTRIBUTING.md](CONTRIBUTING.md)
