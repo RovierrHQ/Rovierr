@@ -6,7 +6,7 @@ export const authClient = createAuthClient({
   baseURL: process.env.EXPO_PUBLIC_SERVER_URL,
   plugins: [
     expoClient({
-      storagePrefix: "my-better-t-app",
+      storagePrefix: "rovierr",
       storage: SecureStore,
     }),
   ],

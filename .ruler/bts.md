@@ -1,11 +1,10 @@
 # Better-T-Stack Project Rules
 
-This is a my-better-t-app-cl project created with Better-T-Stack CLI.
+This is a rovierr project created with Better-T-Stack CLI.
 
 ## Project Structure
 
 This is a monorepo with the following structure:
-
 
 - **`apps/server/`** - Backend server (Hono)
 
@@ -36,6 +35,7 @@ Database schema files are located in `apps/server/src/db/schema/`
 ## Authentication
 
 Authentication is enabled in this project:
+
 - Server auth logic is in `apps/server/src/lib/auth.ts`
 - Native app auth client is in `apps/native/src/lib/auth-client.ts`
 
@@ -49,6 +49,7 @@ add
 ```
 
 Available addons you can add:
+
 - **Documentation**: Starlight, Fumadocs
 - **Linting**: Biome, Oxlint, Ultracite
 - **Other**: Ruler, Turborepo, PWA, Tauri, Husky

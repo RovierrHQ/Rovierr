@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "my-better-t-app",
-    "slug": "my-better-t-app",
+    "name": "rovierr",
+    "slug": "rovierr",
     "version": "1.0.0",
-    "scheme": "my-better-t-app",
+    "scheme": "rovierr",
     "web": {
       "bundler": "metro",
       "output": "static",
