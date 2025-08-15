@@ -1,23 +1,24 @@
+// biome-ignore-all lint: not critical
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { getDefaultConfig } = require("expo/metro-config");
-const { FileStore } = require("metro-cache");
-const { withNativeWind } = require("nativewind/metro");
-const path = require("node:path");
+const { getDefaultConfig } = require('expo/metro-config')
+const { FileStore } = require('metro-cache')
+const { withNativeWind } = require('nativewind/metro')
+const path = require('node:path')
 
 const config = withTurborepoManagedCache(
   withMonorepoPaths(
     withNativeWind(getDefaultConfig(__dirname), {
-      input: "./global.css",
-      configPath: "./tailwind.config.js",
-    }),
-  ),
-);
+      input: './global.css',
+      configPath: './tailwind.config.js'
+    })
+  )
+)
 
-config.resolver.unstable_enablePackageExports = true;
+config.resolver.unstable_enablePackageExports = true
 
-config.resolver.disableHierarchicalLookup = true;
+config.resolver.disableHierarchicalLookup = true
 
-module.exports = config;
+module.exports = config
 
 /**
  * Add the monorepo paths to the Metro config.
@@ -28,19 +29,19 @@ module.exports = config;
  * @returns {import('expo/metro-config').MetroConfig}
  */
 function withMonorepoPaths(config) {
-  const projectRoot = __dirname;
-  const workspaceRoot = path.resolve(projectRoot, "../..");
+  const projectRoot = __dirname
+  const workspaceRoot = path.resolve(projectRoot, '../..')
 
   // #1 - Watch all files in the monorepo
-  config.watchFolders = [workspaceRoot];
+  config.watchFolders = [workspaceRoot]
 
   // #2 - Resolve modules within the project's `node_modules` first, then all monorepo modules
   config.resolver.nodeModulesPaths = [
-    path.resolve(projectRoot, "node_modules"),
-    path.resolve(workspaceRoot, "node_modules"),
-  ];
+    path.resolve(projectRoot, 'node_modules'),
+    path.resolve(workspaceRoot, 'node_modules')
+  ]
 
-  return config;
+  return config
 }
 
 /**
@@ -53,7 +54,7 @@ function withMonorepoPaths(config) {
  */
 function withTurborepoManagedCache(config) {
   config.cacheStores = [
-    new FileStore({ root: path.join(__dirname, ".cache/metro") }),
-  ];
-  return config;
+    new FileStore({ root: path.join(__dirname, '.cache/metro') })
+  ]
+  return config
 }

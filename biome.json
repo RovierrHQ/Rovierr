@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
   "files": {
     "ignoreUnknown": false,
     "includes": [
@@ -20,7 +20,50 @@
       "!**/.source"
     ]
   },
-  "extends": [
-    "ultracite"
-  ]
+  "extends": ["ultracite"],
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "none",
+      "semicolons": "asNeeded",
+      "arrowParentheses": "always",
+      "bracketSameLine": false,
+      "quoteStyle": "single",
+      "attributePosition": "auto",
+      "bracketSpacing": true
+    }
+  },
+  "linter": {
+    "rules": {
+      "style": {
+        "useBlockStatements": "off"
+      },
+      "a11y": {
+        "useKeyWithClickEvents": "off",
+        "noStaticElementInteractions": "off",
+        "noSvgWithoutTitle": "off"
+      },
+      "performance": {
+        "noImgElement": "off",
+        "noNamespaceImport": "warn"
+      },
+      "nursery": {
+        "noNoninteractiveElementInteractions": "off",
+        "noUnknownAtRule": "off",
+        "noBitwiseOperators": {
+          "options": {
+            "allow": ["<<", ">>"]
+          }
+        }
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "options": {
+            "maxAllowedComplexity": 20
+          }
+        }
+      }
+    }
+  }
 }

@@ -1,0 +1,17 @@
+{
+  "root": false,
+  "extends": "//",
+
+  "overrides": [
+    {
+      "includes": ["app/+not-found.tsx", "app/+html.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    }
+  ]
+}
