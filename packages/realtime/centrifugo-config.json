@@ -1,0 +1,16 @@
+{
+  "client": {
+    "token": {
+      "hmac_secret_key": "${CENTRIFUGO_HMAC_SECRET_KEY}"
+    },
+    "allowed_origins": ["*"]
+  },
+  "http_api": {
+    "key": "${CENTRIFUGO_API_KEY}"
+  },
+  "admin": {
+    "password": "${CENTRIFUGO_ADMIN_PASSWORD}",
+    "secret": "${CENTRIFUGO_ADMIN_SECRET}",
+    "enabled": "${CENTRIFUGO_ADMIN_ENABLED}"
+  }
+}
