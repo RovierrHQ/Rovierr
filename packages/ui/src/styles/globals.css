@@ -1,3 +1,4 @@
+/** biome-ignore-all lint: disable for css file */
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -148,6 +149,12 @@
   --color-color-4: hsl(var(--color-4));
   --color-color-5: hsl(var(--color-5));
   --animate-rainbow: rainbow var(--speed, 2s) infinite linear;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 @layer base {

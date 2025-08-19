@@ -1,9 +1,9 @@
 'use client'
 
-import { Button, type ButtonProps } from '@rov/ui/components/ui/button'
 import { cn } from '@rov/ui/lib/utils'
 import { motion } from 'framer-motion'
 import { forwardRef } from 'react'
+import { Button, type ButtonProps } from '@/components/button.js'
 
 interface HeroProps extends React.HTMLAttributes<HTMLElement> {
   gradient?: boolean

@@ -1,8 +1,7 @@
+import Providers from '@/components/providers'
+import '@rov/ui/globals.css'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import '@rov/ui/globals.css'
-import Header from '@/components/header'
-import Providers from '@/components/providers'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -29,12 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          <div className="grid h-svh grid-rows-[auto_1fr]">
-            <Header />
-            {children}
-          </div>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )
