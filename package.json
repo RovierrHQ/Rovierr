@@ -21,13 +21,12 @@
     "db:migrate": "turbo -F server db:migrate",
     "doc": "cd apps/docs && mintlify dev --port 3333"
   },
-  "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.5.4",
     "@biomejs/biome": "2.1.2",
-    "ultracite": "5.1.2",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.2"
+    "lint-staged": "^16.1.2",
+    "turbo": "^2.5.6",
+    "ultracite": "5.1.2"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
