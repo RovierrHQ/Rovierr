@@ -13,7 +13,13 @@ export const auth = betterAuth({
   }),
   trustedOrigins: [env.CORS_ORIGIN],
   emailAndPassword: {
-    enabled: true
+    enabled: false
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+    }
   },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
