@@ -50,7 +50,7 @@ export const AnimatedThemeToggler = ({ className }: props) => {
   if (!isClient) return
   return (
     <button
-      className={cn(className)}
+      className={cn('cursor-pointer', className)}
       onClick={changeTheme}
       ref={buttonRef}
       type="button"

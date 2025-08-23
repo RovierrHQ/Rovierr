@@ -3,7 +3,7 @@ import { Card, CardContent } from '@rov/ui/components/card'
 import { cn } from '@rov/ui/lib/utils'
 import Link from 'next/link'
 
-export function LoginForm({
+export default function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
