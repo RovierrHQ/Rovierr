@@ -2,11 +2,10 @@
 
 import { AuroraBackground } from '@rov/ui/components/aurora-background'
 import { PlaceholdersAndVanishInput } from '@rov/ui/components/placeholder-vanish-input'
-import { RainbowButton } from '@rov/ui/components/rainbow-button'
 import { SparklesText } from '@rov/ui/components/text-animations/sparkles'
 import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
 import { motion } from 'motion/react'
-import Link from 'next/link'
+import UserDropdown from '@/components/user-drowpdown'
 
 export default function RovierrLandingPage() {
   return (
@@ -20,11 +19,7 @@ export default function RovierrLandingPage() {
 
           <div className="flex items-center gap-2">
             <AnimatedThemeToggler />
-            <Link href="/login">
-              <RainbowButton className="rounded-full">
-                Get Started
-              </RainbowButton>
-            </Link>
+            <UserDropdown />
           </div>
         </div>
         <motion.div
