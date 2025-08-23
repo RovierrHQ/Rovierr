@@ -6,6 +6,7 @@ import { RainbowButton } from '@rov/ui/components/rainbow-button'
 import { SparklesText } from '@rov/ui/components/text-animations/sparkles'
 import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
 import { motion } from 'motion/react'
+import Link from 'next/link'
 
 export default function RovierrLandingPage() {
   return (
@@ -19,7 +20,11 @@ export default function RovierrLandingPage() {
 
           <div className="flex items-center gap-2">
             <AnimatedThemeToggler />
-            <RainbowButton className="rounded-full">Get Started</RainbowButton>
+            <Link href="/login">
+              <RainbowButton className="rounded-full">
+                Get Started
+              </RainbowButton>
+            </Link>
           </div>
         </div>
         <motion.div
