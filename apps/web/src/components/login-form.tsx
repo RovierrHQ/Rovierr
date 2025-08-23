@@ -34,7 +34,10 @@ export default function LoginForm({
                 <Button
                   className="w-full"
                   onClick={() =>
-                    authClient.signIn.social({ provider: 'google' })
+                    authClient.signIn.social({
+                      provider: 'google',
+                      callbackURL: window.origin
+                    })
                   }
                   type="button"
                   variant="outline"
