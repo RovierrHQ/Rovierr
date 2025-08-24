@@ -35,7 +35,7 @@ function ToolList() {
           tagline: 'Interaction, Simplified.',
           description:
             'Quera is a dynamic interaction platform for live quizzes, polls, forms, and voting—whether real-time or self-paced.',
-          link: '/apps/kahoot',
+          link: '/apps/quera',
           featured: 'new',
           tags: ['quiz', 'realtime', 'classroom', 'polls', 'forms', 'voting']
         },
