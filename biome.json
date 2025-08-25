@@ -17,7 +17,8 @@
       "!**/.expo",
       "!**/.wrangler",
       "!**/wrangler.jsonc",
-      "!**/.source"
+      "!**/.source",
+      "!**/worker-configuration.d.ts"
     ]
   },
   "extends": ["ultracite"],

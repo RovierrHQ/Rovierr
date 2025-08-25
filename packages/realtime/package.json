@@ -1,0 +1,8 @@
+{
+  "name": "@rov/realtime",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc -b"
+  }
+}
