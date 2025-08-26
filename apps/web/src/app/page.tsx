@@ -3,30 +3,17 @@
 import { AuroraBackground } from '@rov/ui/components/aurora-background'
 import { PlaceholdersAndVanishInput } from '@rov/ui/components/placeholder-vanish-input'
 import { AnimatedShinyText } from '@rov/ui/components/text-animations/animated-shiny'
-import { SparklesText } from '@rov/ui/components/text-animations/sparkles'
-import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
 import { cn } from '@rov/ui/lib/utils'
 import { ArrowRightIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import ToolList from '@/components/tool-list'
-import UserDropdown from '@/components/user-drowpdown'
+import Topnav from '@/components/top-nav'
 
 export default function RovierrLandingPage() {
   return (
     <div>
       <AuroraBackground />
-      <div className="sticky top-0 z-50 border-b bg-background/10 px-4 py-2 shadow-md backdrop-blur dark:border-neutral-700 dark:bg-neutral-900/10">
-        <div className="container mx-auto flex items-center justify-between">
-          <SparklesText className="text-4xl" sparklesCount={3}>
-            Rovierr
-          </SparklesText>
-
-          <div className="flex items-center gap-2">
-            <AnimatedThemeToggler />
-            <UserDropdown />
-          </div>
-        </div>
-      </div>
+      <Topnav />
       <div className="container mx-auto">
         <motion.div
           className="relative mt-32 flex flex-col items-center justify-center gap-4 px-4"
@@ -49,7 +36,7 @@ export default function RovierrLandingPage() {
             </AnimatedShinyText>
           </div>
           <div className="text-center font-bold text-3xl text-primary md:text-6xl">
-            Ecosystem Global Student
+            Global Student Ecosystem
           </div>
           <div className="max-w-2xl py-4 text-center font-extralight text-base md:text-4xl">
             Rovierr unifies essential tools into a single platform—designed for
@@ -79,7 +66,6 @@ export default function RovierrLandingPage() {
         </motion.div>
         <ToolList />
       </div>
-      {/* <WithLoveFooter className="mt-40" /> */}
     </div>
   )
 }
