@@ -13,6 +13,7 @@
     "check-types": "turbo check-types",
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev",
+    "dev:desktop": "turbo -F web desktop:dev",
     "dev:server": "turbo -F server dev",
     "db:push": "turbo -F server db:push",
     "db:studio": "turbo -F server db:studio",
@@ -20,13 +21,12 @@
     "db:migrate": "turbo -F server db:migrate",
     "doc": "cd apps/docs && mintlify dev --port 3333"
   },
-  "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.5.4",
     "@biomejs/biome": "2.1.2",
-    "ultracite": "5.1.2",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.2"
+    "lint-staged": "^16.1.2",
+    "turbo": "^2.5.6",
+    "ultracite": "5.1.2"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [

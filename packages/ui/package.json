@@ -1,0 +1,54 @@
+{
+  "name": "@rov/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./globals.css": "./src/styles/globals.css",
+    "./postcss.config": "./postcss.config.mjs",
+    "./lib/*": "./src/lib/*.ts",
+    "./components/*": "./src/components/*.tsx",
+    "./hooks/*": "./src/hooks/*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@rov/typescript-config": "workspace:*",
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "22.13.14",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "5.8.2"
+  },
+  "dependencies": {
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-slot": "1.2.3",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "@tailwindcss/postcss": "^4.1.10",
+    "@tsparticles/engine": "^3.8.1",
+    "@tsparticles/react": "^3.0.0",
+    "@tsparticles/slim": "^3.8.1",
+    "@uidotdev/usehooks": "^2.4.1",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.16.0",
+    "js-cookie": "^3.0.5",
+    "lucide-react": "0.513.0",
+    "motion": "12.16.0",
+    "next-themes": "^0.4.6",
+    "postcss": "8.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-day-picker": "^9.9.0",
+    "react-dialog": "link:@@radix-ui/react-dialog",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "3.3.0",
+    "tailwindcss": "^4.1.10",
+    "tw-animate-css": "1.3.4"
+  }
+}
