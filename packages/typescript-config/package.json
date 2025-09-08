@@ -2,5 +2,14 @@
   "name": "@rov/typescript-config",
   "version": "0.0.0",
   "private": true,
-  "license": "MIT"
+  "license": "MIT",
+  "main": "./base.json",
+  "exports": {
+    "./base.json": "./base.json",
+    "./react-library.json": "./react-library.json",
+    "./nextjs.json": "./nextjs.json"
+  },
+  "files": [
+    "*.json"
+  ]
 }

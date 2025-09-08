@@ -11,7 +11,7 @@ import {
 } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
 import Link from 'next/link'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { use, useEffect, useMemo, useRef, useState } from 'react'
 import {
   getHostState,
   getLeaderboard,
@@ -22,8 +22,8 @@ import {
 } from '@/lib/quera-store'
 
 type Props = {
-  params: { id: string }
-  searchParams: Record<string, string | string[] | undefined>
+  params: Promise<{ id: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
 const normalize = (
@@ -100,7 +100,8 @@ const computeScore = (
   return Math.round(base * factor)
 }
 
-export default function Page({ params }: Props) {
+export default function Page(props: Props) {
+  const params = use(props.params)
   const quiz = useMemo<Quiz | null>(() => loadQuiz(params.id), [params.id])
   const [name, setName] = useState('')
   const [userId] = useState(() => `u_${makeId(10)}`)
