@@ -1,8 +1,11 @@
-import type React from 'react'
-import { SafeAreaView } from 'react-native'
+import type { PropsWithChildren } from 'react'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
-export const Container = ({ children }: { children: React.ReactNode }) => {
+export const Container = ({ children }: PropsWithChildren) => {
   return (
-    <SafeAreaView className="flex-1 bg-background">{children}</SafeAreaView>
+    <SafeAreaProvider className="flex-1 bg-background">
+      {/** biome-ignore lint/complexity/noUselessFragments: <wait for next version of safe-area-context package> */}
+      <>{children}</>
+    </SafeAreaProvider>
   )
 }
