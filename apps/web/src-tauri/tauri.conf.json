@@ -1,22 +1,24 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "rovierr",
+  "productName": "Rovierr",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.rovierr.app",
   "build": {
-    "frontendDist": "../.next",
+    "frontendDist": "../dist",
     "devUrl": "http://localhost:3001",
     "beforeDevCommand": "pnpm run dev",
-    "beforeBuildCommand": "pnpm run build"
+    "beforeBuildCommand": "npm run tauri:build"
   },
   "app": {
     "windows": [
       {
-        "title": "rovierr",
-        "width": 800,
-        "height": 600,
+        "title": "Rovierr - Global Student Ecosystem",
+        "width": 1200,
+        "height": 800,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "minWidth": 800,
+        "minHeight": 600
       }
     ],
     "security": {
@@ -32,6 +34,30 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "publisher": "Rovierr Team",
+    "copyright": "Copyright © 2025 Rovierr. All rights reserved.",
+    "category": "Productivity",
+    "shortDescription": "Global Student Ecosystem - Unifying essential tools for students",
+    "longDescription": "Rovierr unifies essential tools into a single platform—designed for students, driven by simplicity, and built to scale with you. Create quizzes, manage projects, organize events, and collaborate with students worldwide.",
+    "linux": {
+      "deb": {
+        "depends": [
+          "libwebkit2gtk-4.1-0",
+          "libgtk-3-0",
+          "libayatana-appindicator3-1"
+        ]
+      }
+    },
+    "macOS": {
+      "frameworks": [],
+      "minimumSystemVersion": "10.13",
+      "exceptionDomain": "localhost"
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    }
   }
 }

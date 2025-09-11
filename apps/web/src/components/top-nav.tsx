@@ -1,6 +1,7 @@
 import { SparklesText } from '@rov/ui/components/text-animations/sparkles'
 import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
 import Link from 'next/link'
+import DownloadButton from '@/components/download-button'
 import UserDropdown from '@/components/user-drowpdown'
 
 function Topnav({
@@ -20,6 +21,7 @@ function Topnav({
         </Link>
 
         <div className="flex items-center gap-2">
+          <DownloadButton size="sm" variant="outline" />
           {enableThemeToggle && <AnimatedThemeToggler />}
           {enableUserDropdown && <UserDropdown />}
         </div>
