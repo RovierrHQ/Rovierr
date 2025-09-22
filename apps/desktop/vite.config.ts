@@ -1,12 +1,16 @@
-import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
+import viteReact from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 const host = process.env.TAURI_DEV_HOST
-
-// https://vite.dev/config/
-export default defineConfig(async () => ({
-  plugins: [react()],
-
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    tanstackRouter({ autoCodeSplitting: true }),
+    viteReact(),
+    tailwindcss()
+  ],
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
   // 1. prevent Vite from obscuring rust errors
@@ -28,4 +32,4 @@ export default defineConfig(async () => ({
       ignored: ['**/src-tauri/**']
     }
   }
-}))
+})
