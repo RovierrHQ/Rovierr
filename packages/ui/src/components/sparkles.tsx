@@ -38,7 +38,7 @@ export const SparklesCore = (props: ParticlesProps) => {
   }, [])
   const controls = useAnimation()
 
-  const particlesLoaded = (container?: Container) => {
+  const particlesLoaded = (container?: Container): Promise<void> => {
     if (container) {
       controls.start({
         opacity: 1,
@@ -47,6 +47,7 @@ export const SparklesCore = (props: ParticlesProps) => {
         }
       })
     }
+    return Promise.resolve()
   }
 
   const generatedId = useId()
@@ -78,7 +79,9 @@ export const SparklesCore = (props: ParticlesProps) => {
                   enable: false,
                   mode: 'repulse'
                 },
-                resize: true
+                resize: {
+                  enable: true
+                }
               },
               modes: {
                 push: {
