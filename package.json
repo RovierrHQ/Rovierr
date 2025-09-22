@@ -15,7 +15,8 @@
     "db:studio": "turbo -F server db:studio",
     "db:generate": "turbo -F server db:generate",
     "db:migrate": "turbo -F server db:migrate",
-    "doc": "cd apps/docs && mintlify dev --port 3333"
+    "doc": "cd apps/docs && mintlify dev --port 3333",
+    "cl-install": "find . -name 'node_modules' -type d -prune -exec rm -rf {} + && find . -name 'pnpm-lock.yaml' -type f -delete && pnpm install"
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
