@@ -16,10 +16,10 @@
   "devDependencies": {
     "@rov/typescript-config": "workspace:*",
     "@types/js-cookie": "^3.0.6",
-    "@types/node": "22.13.14",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "typescript": "5.8.2"
+    "@types/node": "24.5.2",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.0",
+    "typescript": "5.9.2"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",
@@ -42,8 +42,8 @@
     "motion": "12.16.0",
     "next-themes": "^0.4.6",
     "postcss": "8.5.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "react-day-picker": "^9.9.0",
     "react-dialog": "link:@@radix-ui/react-dialog",
     "sonner": "^2.0.7",
