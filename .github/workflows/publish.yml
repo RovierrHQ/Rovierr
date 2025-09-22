@@ -1,13 +1,11 @@
-name: 'Publish Rovierr Desktop App'
+name: 'publish'
 
 on:
-  workflow_dispatch:
   push:
     branches:
-      - main
       - release
-    tags:
-      - 'v*'
+
+# This workflow will trigger on each push to the `release` branch to create or update a GitHub release, build your app, and upload the artifacts to the release.
 
 jobs:
   publish-tauri:
@@ -19,153 +17,46 @@ jobs:
         include:
           - platform: 'macos-latest' # for Arm based macs (M1 and above).
             args: '--target aarch64-apple-darwin'
-            target: 'aarch64-apple-darwin'
           - platform: 'macos-latest' # for Intel based macs.
             args: '--target x86_64-apple-darwin'
-            target: 'x86_64-apple-darwin'
-          - platform: 'ubuntu-22.04'
+          - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
             args: ''
-            target: 'x86_64-unknown-linux-gnu'
           - platform: 'windows-latest'
             args: ''
-            target: 'x86_64-pc-windows-msvc'
 
     runs-on: ${{ matrix.platform }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
-      - name: Setup Node.js
+      - name: setup node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'pnpm'
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-
-      - name: Install Rust stable
+      - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
+          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './apps/web/src-tauri -> target'
-
-      - name: Install frontend dependencies
-        run: pnpm install
-
-      - name: Build web app for static export
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
         run: |
-          cd apps/web
-          pnpm run build
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+        # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
+        # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
 
-      - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
+      - name: install frontend dependencies
+        run: yarn install # change this to npm, pnpm or bun depending on which one you use.
+
+      - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          projectPath: './apps/web'
-          tagName: 'v__VERSION__'
-          releaseName: 'Rovierr v__VERSION__'
-          releaseBody: |
-            ## 🎉 New Release: Rovierr v__VERSION__
-
-            ### 📥 Downloads
-            Choose the appropriate version for your operating system:
-
-            **🍎 macOS:**
-            - Apple Silicon (M1/M2/M3): `rovierr_aarch64.dmg`
-            - Intel: `rovierr_x64.dmg`
-
-            **🪟 Windows:**
-            - 64-bit: `rovierr_x64_en-US.msi`
-
-            **🐧 Linux:**
-            - x64: `rovierr_amd64.AppImage`
-
-            ### 🔧 Installation
-            - **macOS**: Download the DMG, mount it, and drag Rovierr to Applications
-            - **Windows**: Download the MSI and run it to install
-            - **Linux**: Download the AppImage, make it executable (`chmod +x`), and run it
-
-            ### 🚀 What's New
-            See the assets below to download and install this version.
-          releaseDraft: false
+          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          releaseName: 'App v__VERSION__'
+          releaseBody: 'See the assets to download this version and install.'
+          releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
-
-  # Separate job for Linux ARM builds (if needed)
-  publish-linux-arm:
-    permissions:
-      contents: write
-    runs-on: ubuntu-22.04
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/tags/v'))
-
-    strategy:
-      matrix:
-        arch: [aarch64]
-        include:
-          - arch: aarch64
-            cpu: cortex-a72
-            base_image: https://dietpi.com/downloads/images/DietPi_RPi5-ARMv8-Bookworm.img.xz
-            appimage: aarch64
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Cache rust build artifacts
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: apps/web/src-tauri
-          cache-on-failure: true
-
-      - name: Build ARM app
-        uses: pguyot/arm-runner-action@v2.6.5
-        with:
-          base_image: ${{ matrix.base_image }}
-          cpu: ${{ matrix.cpu }}
-          bind_mount_repository: true
-          image_additional_mb: 10240
-          optimize_image: no
-          commands: |
-            # Prevent Rust from complaining about $HOME not matching eid home
-            export HOME=/root
-
-            # Workaround to CI worker being stuck on Updating crates.io index
-            export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-
-            # Install setup prerequisites
-            apt-get update -y --allow-releaseinfo-change
-            apt-get autoremove -y
-            apt-get install -y --no-install-recommends --no-install-suggests curl libwebkit2gtk-4.1-dev build-essential libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf libfuse2 file
-            curl https://sh.rustup.rs -sSf | sh -s -- -y
-            . "$HOME/.cargo/env"
-            curl -fsSL https://deb.nodesource.com/setup_lts.x | bash
-            apt-get install -y nodejs
-            npm install -g pnpm
-
-            # Install frontend dependencies
-            cd apps/web && pnpm install
-
-            # Build the application
-            pnpm run desktop:build -- --verbose
-
-      - name: Get app version
-        run: echo "APP_VERSION=$(jq -r .version apps/web/src-tauri/tauri.conf.json)" >> $GITHUB_ENV
-
-      - name: Upload ARM AppImage
-        uses: actions/upload-artifact@v4
-        with:
-          name: rovierr-linux-arm64
-          path: ${{ github.workspace }}/apps/web/src-tauri/target/release/bundle/appimage/rovierr_${{ env.APP_VERSION }}_${{ matrix.appimage }}.AppImage
