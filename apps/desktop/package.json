@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@faker-js/faker": "10.0.0",
+    "@rov/auth": "workspace:*",
+    "@rov/ui": "workspace:*",
     "@tailwindcss/vite": "4.1.13",
     "@tanstack/match-sorter-utils": "8.19.4",
     "@tanstack/react-devtools": "0.7.0",
@@ -20,13 +22,11 @@
     "@tanstack/react-router-devtools": "1.131.50",
     "@tanstack/react-table": "8.21.3",
     "@tanstack/router-plugin": "1.131.50",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "tailwindcss": "4.1.13",
     "@tauri-apps/api": "2.8.0",
     "@tauri-apps/plugin-opener": "2.5.0",
-    "@rov/ui": "workspace:*",
-    "@rov/auth": "workspace:*"
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "tailwindcss": "4.1.13"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",

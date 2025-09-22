@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/demo/tanstack-query')({
-  component: TanStackQueryDemo
+export const Route = createFileRoute('/_auth/dashboard')({
+  component: Dashboard
 })
 
-function TanStackQueryDemo() {
+function Dashboard() {
   const { data } = useQuery({
     queryKey: ['todos'],
     queryFn: () =>
@@ -17,6 +17,8 @@ function TanStackQueryDemo() {
     initialData: []
   })
 
+  const { auth } = useRouteContext({ from: '/_auth/dashboard' })
+
   return (
     <div
       className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100 p-4 text-white"
@@ -26,9 +28,7 @@ function TanStackQueryDemo() {
       }}
     >
       <div className="w-full max-w-2xl rounded-xl border-8 border-black/10 bg-black/50 p-8 shadow-xl backdrop-blur-md">
-        <h1 className="mb-4 text-2xl">
-          TanStack Query Simple Promise Handling
-        </h1>
+        <h1 className="mb-4 text-2xl">Dashboard</h1>
         <ul className="mb-4 space-y-2">
           {data.map((todo) => (
             <li
@@ -36,6 +36,9 @@ function TanStackQueryDemo() {
               key={todo.id}
             >
               <span className="text-lg text-white">{todo.name}</span>
+              <span className="text-lg text-white">
+                {auth?.data?.user.name}
+              </span>
             </li>
           ))}
         </ul>

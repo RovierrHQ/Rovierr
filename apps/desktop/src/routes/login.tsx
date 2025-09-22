@@ -1,11 +1,21 @@
 import LoginForm from '@rov/ui/blocks/login-form'
 import AnimatedGridPattern from '@rov/ui/components/backgrounds/AnimatedGridPattern'
 import { cn } from '@rov/ui/lib/utils'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 // import Topnav from '@/components/top-nav'
 import { authClient } from '@/lib/auth-client'
 
 export const Route = createFileRoute('/login')({
+  beforeLoad: ({ context, search }) => {
+    // Redirect if already authenticated
+    if (context.auth?.data?.user.emailVerified) {
+      const redirectUrl = (search as { redirect: string }).redirect ?? ''
+      if (redirectUrl) {
+        throw redirect({ to: redirectUrl })
+      }
+      throw redirect({ to: '/dashboard' })
+    }
+  },
   component: RouteComponent
 })
 
