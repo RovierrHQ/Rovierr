@@ -1,15 +1,15 @@
 'use client'
 
+import type { AuthClient } from '@rov/auth'
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
 import { cn } from '@rov/ui/lib/utils'
-import Link from 'next/link'
-import { authClient } from '@/lib/auth-client'
 
 export default function LoginForm({
   className,
+  authClient,
   ...props
-}: React.ComponentProps<'div'>) {
+}: React.ComponentProps<'div'> & { authClient: AuthClient }) {
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -80,8 +80,8 @@ export default function LoginForm({
       </Card>
       <div className="text-balance text-center text-muted-foreground text-xs *:[a]:underline *:[a]:underline-offset-4 *:[a]:hover:text-primary">
         By clicking continue, you agree to our{' '}
-        <Link href="/terms-and-service">Terms of Service</Link> and{' '}
-        <Link href="/privacy-policy">Privacy Policy</Link>.
+        <a href="/terms-and-service">Terms of Service</a> and{' '}
+        <a href="/privacy-policy">Privacy Policy</a>.
       </div>
     </div>
   )

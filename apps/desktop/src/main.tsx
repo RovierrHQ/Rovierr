@@ -8,7 +8,8 @@ import * as TanStackQueryProvider from './integrations/tanstack-query/root-provi
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
-import './styles.css'
+import '@rov/ui/globals.css'
+import { authClient } from './lib/auth-client.ts'
 
 // Create a new router instance
 
@@ -16,7 +17,8 @@ const TanStackQueryProviderContext = TanStackQueryProvider.getContext()
 const router = createRouter({
   routeTree,
   context: {
-    ...TanStackQueryProviderContext
+    ...TanStackQueryProviderContext,
+    auth: undefined
   },
   defaultPreload: 'intent',
   scrollRestoration: true,
@@ -31,15 +33,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+const App = () => {
+  const auth = authClient.useSession()
+  return (
+    <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
+      <RouterProvider context={{ auth }} router={router} />
+    </TanStackQueryProvider.Provider>
+  )
+}
+
 // Render the app
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
-        <RouterProvider router={router} />
-      </TanStackQueryProvider.Provider>
+      <App />
     </StrictMode>
   )
 }

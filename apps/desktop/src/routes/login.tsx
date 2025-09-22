@@ -1,13 +1,18 @@
 import LoginForm from '@rov/ui/blocks/login-form'
 import AnimatedGridPattern from '@rov/ui/components/backgrounds/AnimatedGridPattern'
 import { cn } from '@rov/ui/lib/utils'
-import Topnav from '@/components/top-nav'
+import { createFileRoute } from '@tanstack/react-router'
+// import Topnav from '@/components/top-nav'
 import { authClient } from '@/lib/auth-client'
 
-export default function LoginPage() {
+export const Route = createFileRoute('/login')({
+  component: RouteComponent
+})
+
+function RouteComponent() {
   return (
     <div className="relative isolate h-svh overflow-hidden bg-muted">
-      <Topnav enableUserDropdown={false} />
+      {/*<Topnav enableUserDropdown={false} />*/}
       <div className="flex h-full items-center justify-center border">
         <LoginForm authClient={authClient} />
       </div>

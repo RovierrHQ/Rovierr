@@ -24,7 +24,9 @@
     "react-dom": "19.1.0",
     "tailwindcss": "4.1.13",
     "@tauri-apps/api": "2.8.0",
-    "@tauri-apps/plugin-opener": "2.5.0"
+    "@tauri-apps/plugin-opener": "2.5.0",
+    "@rov/ui": "workspace:*",
+    "@rov/auth": "workspace:*"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",

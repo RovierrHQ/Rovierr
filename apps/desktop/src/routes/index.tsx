@@ -1,8 +1,18 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import logo from '../logo.svg'
 
 export const Route = createFileRoute('/')({
-  component: App
+  component: App,
+  beforeLoad(ctx) {
+    if (!ctx.context.auth?.data?.user.emailVerified) {
+      throw redirect({
+        to: '/login',
+        search: {
+          redirect: ctx.location.href
+        }
+      })
+    }
+  }
 })
 
 function App() {
