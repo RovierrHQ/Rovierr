@@ -1,3 +1,5 @@
+'use client'
+
 import LoginForm from '@rov/ui/blocks/login-form'
 import AnimatedGridPattern from '@rov/ui/components/backgrounds/AnimatedGridPattern'
 import { cn } from '@rov/ui/lib/utils'
