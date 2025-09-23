@@ -1,14 +1,15 @@
+import LoginForm from '@rov/ui/blocks/login-form'
 import AnimatedGridPattern from '@rov/ui/components/backgrounds/AnimatedGridPattern'
 import { cn } from '@rov/ui/lib/utils'
-import LoginForm from '@/components/login-form'
 import Topnav from '@/components/top-nav'
+import { authClient } from '@/lib/auth-client'
 
 export default function LoginPage() {
   return (
     <div className="relative isolate h-svh overflow-hidden bg-muted">
       <Topnav enableUserDropdown={false} />
       <div className="flex h-full items-center justify-center border">
-        <LoginForm />
+        <LoginForm authClient={authClient} />
       </div>
       <AnimatedGridPattern
         className={cn(
