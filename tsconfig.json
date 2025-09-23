@@ -1,5 +1,24 @@
 {
+  "extends": "./packages/typescript-config/base.json",
   "compilerOptions": {
-    "strictNullChecks": true
-  }
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "paths": {
+      "@rov/shared": ["./packages/shared/src"],
+      "@rov/shared/*": ["./packages/shared/src/*"],
+      "@rov/ui": ["./packages/ui/src"],
+      "@rov/ui/*": ["./packages/ui/src/*"],
+      "@rov/typescript-config/*": ["./packages/typescript-config/*"]
+    }
+  },
+  "references": [
+    { "path": "./apps/server" },
+    { "path": "./apps/web" },
+    { "path": "./apps/native" },
+    { "path": "./packages/shared" },
+    { "path": "./packages/ui" },
+    { "path": "./packages/realtime" }
+  ],
+  "files": [],
+  "include": []
 }

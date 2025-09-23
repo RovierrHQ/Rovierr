@@ -1,0 +1,17 @@
+{
+  "extends": "../typescript-config/react-library.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@rov/ui/lib/*": ["./src/lib/*"],
+      "@rov/ui/components/*": ["./src/components/*"],
+      "@rov/ui/hooks/*": ["./src/hooks/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -11,9 +11,15 @@ export const auth = betterAuth({
 
     schema
   }),
-  trustedOrigins: [env.CORS_ORIGIN],
+  trustedOrigins: env.CORS_ORIGIN.split(','),
   emailAndPassword: {
-    enabled: true
+    enabled: false
+  },
+  socialProviders: {
+    google: {
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET
+    }
   },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,

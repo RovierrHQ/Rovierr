@@ -1,4 +1,4 @@
-import { apiStatus } from '@rov/shared'
+// import { apiStatus } from '@rov/shared'
 import { useQuery } from '@tanstack/react-query'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Container } from '@/components/container'
@@ -51,7 +51,7 @@ export default function Home() {
                 }`}
               />
               <Text className="text-muted-foreground">
-                {apiStatus(healthCheck)}
+                {/* {apiStatus(healthCheck)} */}
               </Text>
             </View>
           </View>
