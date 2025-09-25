@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev:disable": "tauri dev",
-    "build": "tsc && vite build",
+    "build:disable": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri"
   },
