@@ -1,10 +1,10 @@
-import { env } from 'cloudflare:workers'
 import { RPCHandler } from '@orpc/server/fetch'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { auth } from './lib/auth'
 import { createContext } from './lib/context'
+import { env } from './lib/env'
 import { appRouter } from './routers/index'
 
 const app = new Hono()
@@ -40,4 +40,12 @@ app.get('/', (c) => {
   return c.text('OK')
 })
 
-export default app
+// Start the server
+const port = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000
+const host = process.env.HOST || '0.0.0.0'
+
+export default {
+  port,
+  hostname: host,
+  fetch: app.fetch
+}
