@@ -6,6 +6,7 @@ import { AnimatedShinyText } from '@rov/ui/components/text-animations/animated-s
 import { cn } from '@rov/ui/lib/utils'
 import { ArrowRightIcon } from 'lucide-react'
 import { motion } from 'motion/react'
+import InstallPrompt from '@/components/install-prompt'
 import ToolList from '@/components/tool-list'
 import Topnav from '@/components/top-nav'
 
@@ -43,6 +44,7 @@ export default function RovierrLandingPage() {
             students, driven by simplicity, and built to scale with you.
           </div>
 
+          <InstallPrompt />
           <div className="mt-20 flex items-center gap-2">
             <p className="text-muted-foreground">Search</p>
 

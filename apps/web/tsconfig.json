@@ -24,7 +24,6 @@
     }
   },
   "include": [
-    "../server/worker-configuration.d.ts",
     "./**/*.ts",
     "./**/*.tsx",
     "./.next/types/**/*.ts",
