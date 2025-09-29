@@ -25,6 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta content="Rovierr" name="apple-mobile-web-app-title" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-svh antialiased`}
       >
