@@ -6,11 +6,17 @@ import { AnimatedShinyText } from '@rov/ui/components/text-animations/animated-s
 import { cn } from '@rov/ui/lib/utils'
 import { ArrowRightIcon } from 'lucide-react'
 import { motion } from 'motion/react'
+import { redirect } from 'next/navigation'
 import InstallPrompt from '@/components/install-prompt'
 import ToolList from '@/components/tool-list'
 import Topnav from '@/components/top-nav'
+import { authClient } from '@/lib/auth-client'
 
 export default function RovierrLandingPage() {
+  const { data: session } = authClient.useSession()
+  if (session) {
+    return redirect('/dashboard')
+  }
   return (
     <div>
       <AuroraBackground />
