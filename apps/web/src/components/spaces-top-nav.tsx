@@ -14,9 +14,11 @@ export function Navbar() {
           href="/"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-            <span className="font-bold text-lg text-primary">D</span>
+            <span className="font-bold text-lg text-primary">R</span>
           </div>
-          <h1 className="font-semibold text-foreground text-xl">Dashboard</h1>
+          <h1 className="hidden font-semibold text-foreground text-xl sm:block">
+            Dashboard
+          </h1>
         </Link>
 
         <SpaceSwitcher variant="compact" />
