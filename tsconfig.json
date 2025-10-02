@@ -16,11 +16,19 @@
     { "path": "./apps/web" },
     { "path": "./apps/native" },
     { "path": "./apps/desktop" },
-    { "path": "./packages/auth" },
     { "path": "./packages/shared" },
     { "path": "./packages/ui" },
     { "path": "./packages/realtime" }
   ],
   "files": [],
-  "include": []
+  "include": [],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "out",
+    ".next",
+    ".expo",
+    "build",
+    "src-tauri/target"
+  ]
 }

@@ -15,7 +15,7 @@ import { authClient } from '@/lib/auth-client'
 export default function RovierrLandingPage() {
   const { data: session } = authClient.useSession()
   if (session) {
-    return redirect('/dashboard')
+    return redirect('/spaces')
   }
   return (
     <div>
