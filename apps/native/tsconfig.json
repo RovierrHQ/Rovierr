@@ -2,6 +2,7 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "composite": true,
     "paths": {
       "@/*": ["./*"]
     }
@@ -21,5 +22,5 @@
     "nativewind-env.d.ts"
   ],
   "exclude": ["node_modules", "dist", ".expo"],
-  "references": [{ "path": "../server" }]
+  "references": [{ "path": "../server" }, { "path": "../../packages/shared" }]
 }
