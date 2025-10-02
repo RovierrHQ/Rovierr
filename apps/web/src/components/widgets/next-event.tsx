@@ -17,10 +17,6 @@ import { orpc } from '@/utils/orpc'
 
 export function NextEventWidget() {
   const [isConnecting, setIsConnecting] = useState(false)
-  const [watchInfo, setWatchInfo] = useState<{
-    channelId: string
-    resourceId: string
-  } | null>(null)
 
   // Single query that handles everything
   const { data, isLoading, refetch } = useQuery(
@@ -118,30 +114,6 @@ export function NextEventWidget() {
 
   const nextEvent = data?.events[0]
 
-  const handleStartWatch = async () => {
-    try {
-      const result = await orpc.calendar.google.watchCalendar.call()
-      setWatchInfo({
-        channelId: result.channelId || '',
-        resourceId: result.resourceId || ''
-      })
-      alert('Watch started!')
-    } catch (error) {
-      alert(`Failed to start watch: ${error}`)
-    }
-  }
-
-  const handleStopWatch = async () => {
-    if (!watchInfo) return
-    try {
-      await orpc.calendar.google.stopWatchCalendar.call(watchInfo)
-      setWatchInfo(null)
-      alert('Watch stopped!')
-    } catch (error) {
-      alert(`Failed to stop watch: ${error}`)
-    }
-  }
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -158,23 +130,6 @@ export function NextEventWidget() {
           <div>
             {data?.hasCalendarAccess ? (
               <div>
-                {/* Temporary debug buttons */}
-                <div className="mb-4 flex gap-2">
-                  <Button onClick={handleStartWatch} variant="outline">
-                    Start Watch
-                  </Button>
-                  <Button
-                    disabled={!watchInfo}
-                    onClick={handleStopWatch}
-                    variant="outline"
-                  >
-                    Stop Watch
-                  </Button>
-                  {watchInfo && (
-                    <span className="text-green-600 text-xs">● Watching</span>
-                  )}
-                </div>
-
                 {nextEvent ? (
                   <div className="space-y-2">
                     <div className="font-semibold text-lg">
