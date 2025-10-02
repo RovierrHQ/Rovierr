@@ -50,7 +50,7 @@ export function NextEventWidget() {
   // Fetch Centrifugo connection token for authenticated WebSocket
   const { data: centrifugoAuth } = useQuery(
     orpc.realtime.getConnectionToken.queryOptions({
-      enabled: !!session?.user,
+      enabled: false,
       staleTime: 55 * 60 * 1000, // 55 minutes (token expires in 1 hour)
       refetchInterval: 55 * 60 * 1000 // Refresh token before expiry
     })
