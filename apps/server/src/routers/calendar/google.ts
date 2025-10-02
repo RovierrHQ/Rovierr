@@ -15,7 +15,7 @@ const getOAuth2Client = () => {
   return new google.auth.OAuth2(
     env.GOOGLE_CLIENT_ID,
     env.GOOGLE_CLIENT_SECRET,
-    `${env.BETTER_AUTH_URL}/api/auth/callback/google`
+    `${env.BETTER_AUTH_API_URL}/callback/google`
   )
 }
 
@@ -181,7 +181,7 @@ export const googleCalendar = {
 
       // Generate a unique channel ID for this user
       const channelId = `calendar-${context.session.user.id}`
-      const webhookUrl = `${env.BETTER_AUTH_URL}/rpc-v1/calendar.webhook`
+      const webhookUrl = `${env.SERVER_URL}/rpc-v1/calendar/google/webhook`
 
       try {
         const response = await calendar.events.watch({
@@ -190,8 +190,8 @@ export const googleCalendar = {
             id: channelId,
             type: 'web_hook',
             address: webhookUrl,
-            // Optional: set expiration (max 1 week for calendar API)
-            expiration: String(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            // Optional: set expiration (max 1 year for calendar API)
+            expiration: String(Date.now() + 365 * 24 * 60 * 60 * 1000)
           }
         })
 

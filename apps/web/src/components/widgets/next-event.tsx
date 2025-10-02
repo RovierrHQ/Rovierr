@@ -13,7 +13,7 @@ import { format, isToday, isTomorrow, isYesterday } from 'date-fns'
 import { CalendarDays, ExternalLink, MapPin } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { authClient } from '@/lib/auth-client'
-import { client } from '@/utils/orpc'
+import { orpc } from '@/utils/orpc'
 
 export function NextEventWidget() {
   const [isConnecting, setIsConnecting] = useState(false)
@@ -23,18 +23,18 @@ export function NextEventWidget() {
   } | null>(null)
 
   // Single query that handles everything
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['upcomingEvents', 1], // 1 day = next 24 hours
-    queryFn: () =>
-      client.calendar.google.getUpcomingEvents({
+  const { data, isLoading, refetch } = useQuery(
+    orpc.calendar.google.getUpcomingEvents.queryOptions({
+      input: {
         days: 1,
         maxResults: 1
-      }),
-    // Only refetch on window focus (not every 30s)
-    refetchOnWindowFocus: true,
-    // Optionally refetch when network reconnects
-    refetchOnReconnect: true
-  })
+      },
+      // Only refetch on window focus (not every 30s)
+      refetchOnWindowFocus: true,
+      // Optionally refetch when network reconnects
+      refetchOnReconnect: true
+    })
+  )
 
   // Listen for OAuth callback completion
   useEffect(() => {
@@ -52,13 +52,13 @@ export function NextEventWidget() {
   const { data: session } = authClient.useSession()
 
   // Fetch Centrifugo connection token for authenticated WebSocket
-  const { data: centrifugoAuth } = useQuery({
-    queryKey: ['centrifugoToken'],
-    queryFn: () => client.realtime.getConnectionToken(),
-    enabled: !!session?.user,
-    staleTime: 55 * 60 * 1000, // 55 minutes (token expires in 1 hour)
-    refetchInterval: 55 * 60 * 1000 // Refresh token before expiry
-  })
+  const { data: centrifugoAuth } = useQuery(
+    orpc.realtime.getConnectionToken.queryOptions({
+      enabled: !!session?.user,
+      staleTime: 55 * 60 * 1000, // 55 minutes (token expires in 1 hour)
+      refetchInterval: 55 * 60 * 1000 // Refresh token before expiry
+    })
+  )
 
   const handleCalendarUpdate = useCallback(
     (message: { type: string; timestamp: number }) => {
@@ -95,7 +95,7 @@ export function NextEventWidget() {
       setTimeout(async () => {
         try {
           // Setup Google Calendar push notifications for real-time sync
-          await client.calendar.google.watchCalendar()
+          await orpc.calendar.google.watchCalendar.call()
           refetch()
         } catch {
           // Watch setup failed, but calendar is still connected
@@ -120,7 +120,7 @@ export function NextEventWidget() {
 
   const handleStartWatch = async () => {
     try {
-      const result = await client.calendar.google.watchCalendar()
+      const result = await orpc.calendar.google.watchCalendar.call()
       setWatchInfo({
         channelId: result.channelId || '',
         resourceId: result.resourceId || ''
@@ -134,7 +134,7 @@ export function NextEventWidget() {
   const handleStopWatch = async () => {
     if (!watchInfo) return
     try {
-      await client.calendar.google.stopWatchCalendar(watchInfo)
+      await orpc.calendar.google.stopWatchCalendar.call(watchInfo)
       setWatchInfo(null)
       alert('Watch stopped!')
     } catch (error) {

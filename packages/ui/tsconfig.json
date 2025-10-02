@@ -1,8 +1,9 @@
 {
   "extends": "../typescript-config/react-library.json",
   "compilerOptions": {
-    "rootDir": ".",
+    "rootDir": "src",
     "outDir": "dist",
+    "composite": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
@@ -12,6 +13,6 @@
       "@rov/ui/hooks/*": ["./src/hooks/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist"]
 }

@@ -44,7 +44,7 @@ const envSchema = z.object({
     .string()
     .min(32)
     .describe('Secret key for Better Auth (min 32 chars)'),
-  BETTER_AUTH_URL: z.url().describe('Base URL for Better Auth'),
+  SERVER_URL: z.url().describe('Base URL for Better Auth'),
 
   // Google OAuth
   GOOGLE_CLIENT_ID: z.string().min(1).describe('Google OAuth Client ID'),
@@ -122,9 +122,12 @@ function validateEnv() {
  * const pooler = env.DATABASE_URL_POOLER // string | undefined
  * ```
  */
-export const env = validateEnv()
+export const env = {
+  ...validateEnv(),
+  BETTER_AUTH_API_URL: `${validateEnv().SERVER_URL}/api/auth`
+}
 
 /**
  * Type helper for environment variables
  */
-export type Env = z.infer<typeof envSchema>
+export type Env = z.infer<typeof envSchema> & { BETTER_AUTH_API_URL: string }

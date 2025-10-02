@@ -1,6 +1,13 @@
 node_modules
 .turbo
+dist
+out
+.next
+.expo
 
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
 
 # START Ruler Generated Files
 *.bak

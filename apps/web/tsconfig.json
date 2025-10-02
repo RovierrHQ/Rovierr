@@ -20,20 +20,15 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*", "../server/src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
-    "./**/*.ts",
-    "./**/*.tsx",
-    "./.next/types/**/*.ts",
-    "./next-env.d.ts",
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["./node_modules"],
-  "references": [
-    {
-      "path": "../server"
-    }
-  ]
+  "exclude": ["node_modules", "dist", "out", ".next"],
+  "references": [{ "path": "../server" }]
 }
