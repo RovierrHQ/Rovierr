@@ -11,7 +11,14 @@ export default function LoginPage() {
     <div className="relative isolate h-svh overflow-hidden bg-muted">
       <Topnav enableUserDropdown={false} />
       <div className="flex h-full items-center justify-center border">
-        <LoginForm authClient={authClient} />
+        <LoginForm
+          handleGoogleLogin={() =>
+            authClient.signIn.social({
+              provider: 'google',
+              callbackURL: window.origin
+            })
+          }
+        />
       </div>
       <AnimatedGridPattern
         className={cn(

@@ -14,8 +14,8 @@
   "dependencies": {
     "@better-auth/expo": "1.3.13",
     "@neondatabase/serverless": "1.0.1",
-    "@orpc/client": "1.8.9",
-    "@orpc/server": "1.8.9",
+    "@orpc/client": "1.9.2",
+    "@orpc/server": "1.9.2",
     "@rov/realtime": "workspace:*",
     "better-auth": "1.3.13",
     "dotenv": "17.2.2",

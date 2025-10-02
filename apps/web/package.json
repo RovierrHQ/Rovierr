@@ -9,10 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@orpc/client": "1.8.9",
-    "@orpc/server": "1.8.9",
+    "@orpc/client": "1.9.2",
+    "@orpc/server": "1.9.2",
     "@orpc/tanstack-query": "1.9.2",
-    "@rov/auth": "workspace:*",
     "@rov/realtime": "workspace:*",
     "@rov/shared": "workspace:*",
     "@rov/ui": "workspace:*",

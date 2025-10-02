@@ -11,7 +11,7 @@ COPY apps/server/package.json ./apps/server/
 COPY packages/ ./packages/
 
 # install dependencies
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 # copy source code (excluding node_modules)
 COPY apps/server/src ./apps/server/src

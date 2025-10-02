@@ -1,4 +1,5 @@
 import { createHandler as debugLog } from 'hono-pino/debug-log'
+import type { LoggerOptions } from 'pino'
 import pino from 'pino'
 
 /**
@@ -27,7 +28,7 @@ const isTest = process.env.NODE_ENV === 'test'
  * Note: Using browser.write for Bun compatibility
  * (transport.target only works in Node.js)
  */
-export const pinoConfig = {
+export const pinoConfig: LoggerOptions = {
   level: process.env.LOG_LEVEL || 'info',
 
   // Remove base fields in dev (cleaner logs), keep in prod

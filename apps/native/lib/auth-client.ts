@@ -1,10 +1,10 @@
 import { expoClient } from '@better-auth/expo/client'
-import { initAuthClient } from '@rov/auth'
+import { createAuthClient } from 'better-auth/react'
 import { getItem, setItem } from 'expo-secure-store'
 
-export const authClient = initAuthClient(
-  process.env.EXPO_PUBLIC_SERVER_URL || '',
-  [
+export const authClient = createAuthClient({
+  baseURL: process.env.EXPO_PUBLIC_SERVER_URL || '',
+  plugins: [
     expoClient({
       storagePrefix: 'rovierr',
       storage: {
@@ -13,4 +13,4 @@ export const authClient = initAuthClient(
       }
     })
   ]
-)
+})

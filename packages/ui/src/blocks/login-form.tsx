@@ -1,15 +1,14 @@
 'use client'
 
-import type { AuthClient } from '@rov/auth'
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
 import { cn } from '@rov/ui/lib/utils'
 
 export default function LoginForm({
   className,
-  authClient,
+  handleGoogleLogin,
   ...props
-}: React.ComponentProps<'div'> & { authClient: AuthClient }) {
+}: React.ComponentProps<'div'> & { handleGoogleLogin: () => void }) {
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -33,12 +32,7 @@ export default function LoginForm({
               <div className="flex flex-col gap-4">
                 <Button
                   className="w-full"
-                  onClick={() =>
-                    authClient.signIn.social({
-                      provider: 'google',
-                      callbackURL: window.origin
-                    })
-                  }
+                  onClick={handleGoogleLogin}
                   type="button"
                   variant="outline"
                 >
