@@ -1,4 +1,5 @@
 'use client'
+
 import { Button } from '@rov/ui/components/button'
 import { Calendar as CalendarComponent } from '@rov/ui/components/calendar'
 import {
@@ -12,7 +13,6 @@ import { Input } from '@rov/ui/components/input'
 import { Textarea } from '@rov/ui/components/textarea'
 import { format, isToday } from 'date-fns'
 import { Calendar, CheckSquare, Clock, Plus, StickyNote } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { NextEventWidget } from '@/components/widgets/next-event'
 import { authClient } from '@/lib/auth-client'
@@ -30,8 +30,7 @@ interface Note {
   createdAt: Date
 }
 
-export default function Dashboard() {
-  const router = useRouter()
+export default function SummaryPage() {
   const { data: session, isPending } = authClient.useSession()
   const [currentTime, setCurrentTime] = useState(new Date())
   const [todos, setTodos] = useState<TodoItem[]>([])
@@ -47,12 +46,6 @@ export default function Dashboard() {
     }, 1000)
     return () => clearInterval(timer)
   }, [])
-
-  useEffect(() => {
-    if (!(session || isPending)) {
-      router.push('/login')
-    }
-  }, [session, isPending, router.push])
 
   const addTodo = () => {
     if (newTodo.trim()) {
