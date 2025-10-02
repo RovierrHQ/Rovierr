@@ -1,3 +1,4 @@
+import { CommandMenu } from '@/components/command-menu'
 import Providers from '@/components/providers'
 import '@rov/ui/globals.css'
 import type { Metadata } from 'next'
@@ -27,12 +28,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta content="Rovierr" name="apple-mobile-web-app-title" />
-        <link href="./manifest.json" rel="manifest" />
+        <link href="/manifest.json" rel="manifest" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-svh antialiased`}
       >
         <Providers>{children}</Providers>
+        <CommandMenu />
       </body>
     </html>
   )
