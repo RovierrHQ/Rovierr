@@ -1,14 +1,16 @@
-import { protectedProcedure, publicProcedure } from '../lib/orpc'
+import { publicProcedure } from '../lib/orpc'
+import { calendar } from './calendar'
+import { realtime } from './realtime'
 
 export const appRouter = {
   healthCheck: publicProcedure.handler(() => {
     return 'OK'
   }),
-  privateData: protectedProcedure.handler(({ context }) => {
-    return {
-      message: 'This is private',
-      user: context.session?.user
-    }
-  })
+
+  // Realtime integration
+  realtime,
+
+  // calendar integration
+  calendar
 }
 export type AppRouter = typeof appRouter

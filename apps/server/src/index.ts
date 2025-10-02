@@ -1,15 +1,20 @@
 import { RPCHandler } from '@orpc/server/fetch'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { logger } from 'hono/logger'
-import { auth } from './lib/auth'
-import { createContext } from './lib/context'
-import { env } from './lib/env'
-import { appRouter } from './routers/index'
+// import { logger, pinoConfig } from '@/lib/logger'
+import { logger as honoLogger } from 'hono/logger'
+// import { pinoLogger } from 'hono-pino'
+// import { nanoid } from 'nanoid'
+import { auth } from '@/lib/auth'
+import { createContext } from '@/lib/context'
+import { env } from '@/lib/env'
+import logger from '@/lib/logger'
+import { appRouter } from '@/routers'
 
 const app = new Hono()
 
-app.use(logger())
+// Automatic request/response logging with hono-pino
+app.use(honoLogger())
 app.use(
   '/*',
   cors({
@@ -41,8 +46,10 @@ app.get('/', (c) => {
 })
 
 // Start the server
-const port = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000
-const host = process.env.HOST || '0.0.0.0'
+const port = Number.parseInt(env.PORT, 10)
+const host = env.HOST
+
+logger.info({ port, host, env: env.NODE_ENV }, 'Server starting...')
 
 export default {
   port,
