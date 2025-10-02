@@ -5,12 +5,10 @@
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
-
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
-    "composite": true,
 
     "skipLibCheck": true,
     "strict": true,
@@ -18,11 +16,14 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    "rootDir": "src",
+    "outDir": "dist",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist", "src-tauri/target"]
+  "exclude": ["node_modules", "dist", "src-tauri/target"],
+  "references": [{ "path": "../server" }]
 }

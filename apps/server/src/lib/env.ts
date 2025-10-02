@@ -122,9 +122,10 @@ function validateEnv() {
  * const pooler = env.DATABASE_URL_POOLER // string | undefined
  * ```
  */
+const validatedEnv = validateEnv()
 export const env = {
-  ...validateEnv(),
-  BETTER_AUTH_API_URL: `${validateEnv().SERVER_URL}/api/auth`
+  ...validatedEnv,
+  BETTER_AUTH_API_URL: `${validatedEnv.SERVER_URL}/api/auth`
 }
 
 /**

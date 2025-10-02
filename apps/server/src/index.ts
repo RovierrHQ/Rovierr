@@ -25,9 +25,10 @@ app.use(
   })
 )
 
-app.on(['POST', 'GET'], `${env.BETTER_AUTH_API_URL}/**`, (c) =>
-  auth.handler(c.req.raw)
-)
+// Extract just the path from BETTER_AUTH_API_URL (e.g., "/api/auth")
+const authPath = new URL(env.BETTER_AUTH_API_URL).pathname
+
+app.on(['POST', 'GET'], `${authPath}/**`, (c) => auth.handler(c.req.raw))
 
 const handler = new RPCHandler(appRouter)
 app.use('/rpc-v1/*', async (c, next) => {
