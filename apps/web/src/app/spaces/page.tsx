@@ -13,6 +13,7 @@ import {
   Users
 } from 'lucide-react'
 import { Navbar } from '@/components/spaces-top-nav'
+import { NextEventWidget } from '@/components/widgets/next-event'
 
 export default function SummaryPage() {
   return (
@@ -63,17 +64,7 @@ export default function SummaryPage() {
             </div>
           </Card>
 
-          <Card className="border-border bg-card p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Career Goals</p>
-                <p className="mt-1 font-bold text-3xl text-foreground">3</p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-chart-4/10">
-                <Target className="h-6 w-6 text-chart-4" />
-              </div>
-            </div>
-          </Card>
+          <NextEventWidget />
         </div>
 
         {/* Main Content Grid */}

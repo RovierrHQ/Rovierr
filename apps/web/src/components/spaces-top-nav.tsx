@@ -1,7 +1,9 @@
 'use client'
 
+import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
 import Link from 'next/link'
 import { SpaceSwitcher } from './space-switcher'
+import UserDropdown from './user-drowpdown'
 
 export function Navbar() {
   return (
@@ -18,6 +20,10 @@ export function Navbar() {
         </Link>
 
         <SpaceSwitcher variant="compact" />
+        <div className="flex items-center gap-2">
+          <AnimatedThemeToggler />
+          <UserDropdown />
+        </div>
       </div>
     </nav>
   )
