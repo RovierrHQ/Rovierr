@@ -10,6 +10,7 @@ import { createContext } from '@/lib/context'
 import { env } from '@/lib/env'
 import logger from '@/lib/logger'
 import { appRouter } from '@/routers'
+import { openAPISpec } from './lib/orpc'
 
 const app = new Hono()
 
@@ -46,6 +47,10 @@ app.use('/rpc-v1/*', async (c, next) => {
 
 app.get('/', (c) => {
   return c.text('OK')
+})
+
+app.get('/api-docs', (c) => {
+  return c.json(openAPISpec)
 })
 
 // Start the server

@@ -18,7 +18,8 @@
     { "path": "./apps/desktop" },
     { "path": "./packages/shared" },
     { "path": "./packages/ui" },
-    { "path": "./packages/realtime" }
+    { "path": "./packages/realtime" },
+    { "path": "./packages/orpc-contracts" }
   ],
   "files": [],
   "include": [],

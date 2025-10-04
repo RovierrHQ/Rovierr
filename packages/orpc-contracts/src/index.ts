@@ -1,11 +1,10 @@
-import { o } from '../lib/orpc'
 import { calendar } from './calendar'
 import { realtime } from './realtime'
 
-export const appRouter = o.router({
+export const appContract = {
   // Realtime integration
   realtime,
 
   // calendar integration
   calendar
-})
+}

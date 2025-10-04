@@ -1,9 +1,55 @@
 import { expo } from '@better-auth/expo'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import {
+  emailOTP,
+  oneTap,
+  organization,
+  phoneNumber,
+  twoFactor
+} from 'better-auth/plugins'
 import { db } from '../db'
 import * as schema from '../db/schema/auth'
 import { env } from './env'
+import logger from './logger'
+
+// Define plugin types to avoid TypeScript serialization issues
+const expoPlugin = expo()
+const twoFactorPlugin = twoFactor()
+const phoneNumberPlugin = phoneNumber({
+  sendOTP: ({ phoneNumber: number, code }, request) => {
+    // Implement sending OTP code via SMS
+    logger.info({ number, code, request }, 'Sending OTP code via SMS')
+  }
+})
+const emailOTPPlugin = emailOTP({
+  async sendVerificationOTP({ email, otp, type }) {
+    if (type === 'email-verification') {
+      // Send the OTP for email verification
+      await logger.info({ email, otp, type }, 'Sending OTP code via email')
+    }
+  }
+})
+const oneTapPlugin = oneTap()
+const organizationPlugin = organization({ teams: { enabled: true } })
+
+type AuthPlugins = [
+  typeof expoPlugin,
+  typeof twoFactorPlugin,
+  typeof phoneNumberPlugin,
+  typeof emailOTPPlugin,
+  typeof oneTapPlugin,
+  typeof organizationPlugin
+]
+
+const authPlugins: AuthPlugins = [
+  expoPlugin,
+  twoFactorPlugin,
+  phoneNumberPlugin,
+  emailOTPPlugin,
+  oneTapPlugin,
+  organizationPlugin
+]
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -25,5 +71,5 @@ export const auth = betterAuth({
   },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.SERVER_URL,
-  plugins: [expo()]
+  plugins: authPlugins
 })
