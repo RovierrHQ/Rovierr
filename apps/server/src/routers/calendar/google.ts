@@ -2,7 +2,6 @@ import { ORPCError } from '@orpc/server'
 import { eq } from 'drizzle-orm'
 import type { calendar_v3 } from 'googleapis'
 import { google } from 'googleapis'
-import { z } from 'zod'
 import { db } from '@/db'
 import { account } from '@/db/schema/auth'
 import { env } from '@/lib/env'
@@ -110,9 +109,8 @@ export const googleCalendar = {
    * Google Calendar Webhook Handler
    * Receives push notifications when calendar events change
    */
-  webhook: publicProcedure
-    .route({ method: 'POST' })
-    .handler(async ({ context }) => {
+  webhook: publicProcedure.calendar.google.webhook.handler(
+    async ({ context }) => {
       // Get the channel ID from the headers
       const channelId = context.headers.get('x-goog-channel-id')
       const resourceState = context.headers.get('x-goog-resource-state')
@@ -162,12 +160,12 @@ export const googleCalendar = {
           message: 'Failed to process webhook'
         })
       }
-    }),
+    }
+  ),
 
   // Watch calendar for changes (setup push notifications)
-  watchCalendar: protectedProcedure
-    .route({ method: 'POST' })
-    .handler(async ({ context }) => {
+  watchCalendar: protectedProcedure.calendar.google.watchCalendar.handler(
+    async ({ context }) => {
       const userAccount = await getUserGoogleAccount(context.session.user.id)
 
       if (!(userAccount && hasCalendarScopes(userAccount))) {
@@ -196,9 +194,9 @@ export const googleCalendar = {
         })
 
         return {
-          channelId: response.data.id,
-          resourceId: response.data.resourceId,
-          expiration: response.data.expiration
+          channelId: response.data.id || '',
+          resourceId: response.data.resourceId || '',
+          expiration: response.data.expiration || ''
         }
       } catch (error) {
         logger.error(
@@ -209,144 +207,141 @@ export const googleCalendar = {
           message: 'Failed to setup calendar watch'
         })
       }
-    }),
+    }
+  ),
 
   // Stop watching calendar
-  stopWatchCalendar: protectedProcedure
-    .input(z.object({ channelId: z.string(), resourceId: z.string() }))
-    .route({ method: 'POST' })
-    .handler(async ({ context, input }) => {
-      const userAccount = await getUserGoogleAccount(context.session.user.id)
+  stopWatchCalendar:
+    protectedProcedure.calendar.google.stopWatchCalendar.handler(
+      async ({ context, input }) => {
+        const userAccount = await getUserGoogleAccount(context.session.user.id)
 
-      if (!(userAccount && hasCalendarScopes(userAccount))) {
-        throw new ORPCError('UNAUTHORIZED', {
-          message: 'Calendar not connected'
-        })
-      }
-
-      const accessToken = await getValidAccessToken(userAccount)
-      const calendar = getCalendarClient(accessToken)
-
-      try {
-        await calendar.channels.stop({
-          requestBody: {
-            id: input.channelId,
-            resourceId: input.resourceId
-          }
-        })
-
-        return { success: true }
-      } catch (error) {
-        logger.error(
-          { error, userId: context.session.user.id },
-          'Failed to stop calendar watch'
-        )
-        throw new ORPCError('INTERNAL_SERVER_ERROR', {
-          message: 'Failed to stop calendar watch'
-        })
-      }
-    }),
-
-  // Single unified endpoint for getting upcoming events
-  getUpcomingEvents: protectedProcedure
-    .input(
-      z.object({
-        days: z.number().min(0).max(365).default(1), // 0 = today, 1 = tomorrow, 7 = week, etc.
-        maxResults: z.number().min(1).max(50).default(10)
-      })
-    )
-    .route({ method: 'POST' })
-    .handler(async ({ context, input }) => {
-      const userAccount = await getUserGoogleAccount(context.session.user.id)
-
-      // Not connected at all
-      if (!userAccount) {
-        return {
-          connected: false,
-          hasCalendarAccess: false,
-          events: []
-        }
-      }
-
-      // Connected but no calendar scope
-      if (!hasCalendarScopes(userAccount)) {
-        return {
-          connected: true,
-          hasCalendarAccess: false,
-          events: []
-        }
-      }
-
-      // Fetch events
-      logger.info(
-        {
-          userId: context.session.user.id,
-          hasRefreshToken: !!userAccount.refreshToken,
-          tokenExpiresAt: userAccount.accessTokenExpiresAt,
-          scopes: userAccount.scope
-        },
-        'Attempting to get calendar events'
-      )
-
-      const accessToken = await getValidAccessToken(userAccount)
-      const calendar = getCalendarClient(accessToken)
-
-      const now = new Date()
-      const startTime = new Date(now)
-      startTime.setHours(0, 0, 0, 0)
-
-      const endTime = new Date(startTime)
-      endTime.setDate(endTime.getDate() + input.days)
-      endTime.setHours(23, 59, 59, 999)
-
-      try {
-        const response = await calendar.events.list({
-          calendarId: 'primary',
-          timeMin: now.toISOString(),
-          timeMax: endTime.toISOString(),
-          maxResults: input.maxResults,
-          singleEvents: true,
-          orderBy: 'startTime'
-        })
-
-        const rawEvents = response.data.items || []
-
-        const events = rawEvents
-          .filter((event: calendar_v3.Schema$Event) => {
-            return (
-              event.id &&
-              event.start &&
-              (event.start.dateTime || event.start.date)
-            )
+        if (!(userAccount && hasCalendarScopes(userAccount))) {
+          throw new ORPCError('UNAUTHORIZED', {
+            message: 'Calendar not connected'
           })
-          .map((event: calendar_v3.Schema$Event) => {
-            const eventStart = event.start?.dateTime || event.start?.date || ''
-            const eventEnd = event.end?.dateTime || event.end?.date || ''
+        }
 
-            return {
-              id: event.id || '',
-              title: event.summary || 'Untitled Event',
-              start: new Date(eventStart),
-              end: new Date(eventEnd),
-              description: event.description || null,
-              location: event.location || null,
-              htmlLink: event.htmlLink || null
+        const accessToken = await getValidAccessToken(userAccount)
+        const calendar = getCalendarClient(accessToken)
+
+        try {
+          await calendar.channels.stop({
+            requestBody: {
+              id: input.channelId,
+              resourceId: input.resourceId
             }
           })
 
-        return {
-          connected: true,
-          hasCalendarAccess: true,
-          events
+          return { success: true }
+        } catch (error) {
+          logger.error(
+            { error, userId: context.session.user.id },
+            'Failed to stop calendar watch'
+          )
+          throw new ORPCError('INTERNAL_SERVER_ERROR', {
+            message: 'Failed to stop calendar watch'
+          })
         }
-      } catch (error) {
-        logger.error(
-          { error, userId: context.session.user.id },
-          'Failed to fetch calendar events'
-        )
-        throw new ORPCError('INTERNAL_SERVER_ERROR', {
-          message: 'Failed to fetch calendar events'
-        })
       }
-    })
+    ),
+
+  // Single unified endpoint for getting upcoming events
+  getUpcomingEvents:
+    protectedProcedure.calendar.google.getUpcomingEvents.handler(
+      async ({ context, input }) => {
+        const userAccount = await getUserGoogleAccount(context.session.user.id)
+
+        // Not connected at all
+        if (!userAccount) {
+          return {
+            connected: false,
+            hasCalendarAccess: false,
+            events: []
+          }
+        }
+
+        // Connected but no calendar scope
+        if (!hasCalendarScopes(userAccount)) {
+          return {
+            connected: true,
+            hasCalendarAccess: false,
+            events: []
+          }
+        }
+
+        // Fetch events
+        logger.info(
+          {
+            userId: context.session.user.id,
+            hasRefreshToken: !!userAccount.refreshToken,
+            tokenExpiresAt: userAccount.accessTokenExpiresAt,
+            scopes: userAccount.scope
+          },
+          'Attempting to get calendar events'
+        )
+
+        const accessToken = await getValidAccessToken(userAccount)
+        const calendar = getCalendarClient(accessToken)
+
+        const now = new Date()
+        const startTime = new Date(now)
+        startTime.setHours(0, 0, 0, 0)
+
+        const endTime = new Date(startTime)
+        endTime.setDate(endTime.getDate() + input.days)
+        endTime.setHours(23, 59, 59, 999)
+
+        try {
+          const response = await calendar.events.list({
+            calendarId: 'primary',
+            timeMin: now.toISOString(),
+            timeMax: endTime.toISOString(),
+            maxResults: input.maxResults,
+            singleEvents: true,
+            orderBy: 'startTime'
+          })
+
+          const rawEvents = response.data.items || []
+
+          const events = rawEvents
+            .filter((event: calendar_v3.Schema$Event) => {
+              return (
+                event.id &&
+                event.start &&
+                (event.start.dateTime || event.start.date)
+              )
+            })
+            .map((event: calendar_v3.Schema$Event) => {
+              const eventStart =
+                event.start?.dateTime || event.start?.date || ''
+              const eventEnd = event.end?.dateTime || event.end?.date || ''
+
+              return {
+                id: event.id || '',
+                title: event.summary || 'Untitled Event',
+                start: eventStart,
+                end: eventEnd,
+                description: event.description || null,
+                location: event.location || null,
+                htmlLink: event.htmlLink || null
+              }
+            })
+
+          return {
+            connected: true,
+            hasCalendarAccess: true,
+            events
+          }
+        } catch (error) {
+          logger.error(
+            { error, userId: context.session.user.id },
+            'Failed to fetch calendar events'
+          )
+          throw new ORPCError('INTERNAL_SERVER_ERROR', {
+            message: 'Failed to fetch calendar events'
+          })
+        }
+      }
+    )
 }

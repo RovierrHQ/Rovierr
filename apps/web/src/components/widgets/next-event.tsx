@@ -136,7 +136,7 @@ export function NextEventWidget() {
                       {nextEvent.title}
                     </div>
                     <p className="text-muted-foreground text-sm">
-                      {getDateDisplay(nextEvent.start)} at{' '}
+                      {getDateDisplay(new Date(nextEvent.start))} at{' '}
                       {format(nextEvent.start, 'h:mm a')}
                     </p>
                     {nextEvent.location && (
