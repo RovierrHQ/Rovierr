@@ -6,7 +6,8 @@ import {
   oneTap,
   organization,
   phoneNumber,
-  twoFactor
+  twoFactor,
+  username
 } from 'better-auth/plugins'
 import { db } from '../db'
 import * as schema from '../db/schema/auth'
@@ -32,6 +33,7 @@ const emailOTPPlugin = emailOTP({
 })
 const oneTapPlugin = oneTap()
 const organizationPlugin = organization({ teams: { enabled: true } })
+const usernamePlugin = username()
 
 type AuthPlugins = [
   typeof expoPlugin,
@@ -39,7 +41,8 @@ type AuthPlugins = [
   typeof phoneNumberPlugin,
   typeof emailOTPPlugin,
   typeof oneTapPlugin,
-  typeof organizationPlugin
+  typeof organizationPlugin,
+  typeof usernamePlugin
 ]
 
 const authPlugins: AuthPlugins = [
@@ -48,7 +51,8 @@ const authPlugins: AuthPlugins = [
   phoneNumberPlugin,
   emailOTPPlugin,
   oneTapPlugin,
-  organizationPlugin
+  organizationPlugin,
+  usernamePlugin
 ]
 
 export const auth = betterAuth({
