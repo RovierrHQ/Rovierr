@@ -9,9 +9,11 @@ import {
   twoFactor,
   username
 } from 'better-auth/plugins'
+import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { db } from '../db'
 import * as schema from '../db/schema/auth'
+import { user as userTable } from '../db/schema/auth'
 import { env } from './env'
 import logger from './logger'
 
@@ -80,16 +82,16 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        before(user) {
-          return Promise.resolve({
-            data: {
-              ...user,
-              email: user.email.toLowerCase(),
+        async after(user) {
+          await db
+            .update(userTable)
+            .set({
               username:
-                user.username ||
+                (user.username as string) ||
                 `${user.email.split('@')[0].toLowerCase()}${nanoid()}`
-            }
-          })
+            })
+            .where(eq(userTable.id, user.id))
+            .execute()
         }
       }
     }
