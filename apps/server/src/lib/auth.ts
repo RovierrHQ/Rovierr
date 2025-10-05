@@ -9,6 +9,7 @@ import {
   twoFactor,
   username
 } from 'better-auth/plugins'
+import { nanoid } from 'nanoid'
 import { db } from '../db'
 import * as schema from '../db/schema/auth'
 import { env } from './env'
@@ -75,5 +76,22 @@ export const auth = betterAuth({
   },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.SERVER_URL,
-  plugins: authPlugins
+  plugins: authPlugins,
+  databaseHooks: {
+    user: {
+      create: {
+        before(user) {
+          return Promise.resolve({
+            data: {
+              ...user,
+              email: user.email.toLowerCase(),
+              username:
+                user.username ||
+                `${user.email.split('@')[0].toLowerCase()}${nanoid()}`
+            }
+          })
+        }
+      }
+    }
+  }
 })

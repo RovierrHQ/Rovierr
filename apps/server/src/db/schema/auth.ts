@@ -15,7 +15,7 @@ export const user = pgTable('user', {
     .notNull(),
   twoFactorEnabled: boolean('two_factor_enabled').default(false),
   phoneNumber: text('phone_number').unique(),
-  phoneNumberVerified: boolean('phone_number_verified')
+  phoneNumberVerified: boolean('phone_number_verified').default(false)
 })
 
 export const session = pgTable('session', {
