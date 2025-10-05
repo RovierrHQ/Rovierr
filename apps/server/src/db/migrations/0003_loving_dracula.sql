@@ -1,0 +1,1 @@
+ALTER TABLE "user" ALTER COLUMN "phone_number_verified" SET DEFAULT false;

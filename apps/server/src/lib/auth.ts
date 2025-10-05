@@ -6,10 +6,14 @@ import {
   oneTap,
   organization,
   phoneNumber,
-  twoFactor
+  twoFactor,
+  username
 } from 'better-auth/plugins'
+import { eq } from 'drizzle-orm'
+import { nanoid } from 'nanoid'
 import { db } from '../db'
 import * as schema from '../db/schema/auth'
+import { user as userTable } from '../db/schema/auth'
 import { env } from './env'
 import logger from './logger'
 
@@ -32,6 +36,7 @@ const emailOTPPlugin = emailOTP({
 })
 const oneTapPlugin = oneTap()
 const organizationPlugin = organization({ teams: { enabled: true } })
+const usernamePlugin = username()
 
 type AuthPlugins = [
   typeof expoPlugin,
@@ -39,7 +44,8 @@ type AuthPlugins = [
   typeof phoneNumberPlugin,
   typeof emailOTPPlugin,
   typeof oneTapPlugin,
-  typeof organizationPlugin
+  typeof organizationPlugin,
+  typeof usernamePlugin
 ]
 
 const authPlugins: AuthPlugins = [
@@ -48,7 +54,8 @@ const authPlugins: AuthPlugins = [
   phoneNumberPlugin,
   emailOTPPlugin,
   oneTapPlugin,
-  organizationPlugin
+  organizationPlugin,
+  usernamePlugin
 ]
 
 export const auth = betterAuth({
@@ -71,5 +78,22 @@ export const auth = betterAuth({
   },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.SERVER_URL,
-  plugins: authPlugins
+  plugins: authPlugins,
+  databaseHooks: {
+    user: {
+      create: {
+        async after(user) {
+          await db
+            .update(userTable)
+            .set({
+              username:
+                (user.username as string) ||
+                `${user.email.split('@')[0].toLowerCase()}${nanoid()}`
+            })
+            .where(eq(userTable.id, user.id))
+            .execute()
+        }
+      }
+    }
+  }
 })
