@@ -1,5 +1,6 @@
 'use client'
 
+import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,10 +14,15 @@ import {
 import { RainbowButton } from '@rov/ui/components/rainbow-button'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useHotkeys } from 'react-hotkeys-hook'
 import { authClient } from '@/lib/auth-client'
 
 export default function UserDropdown() {
   const { data, isPending } = authClient.useSession()
+  const router = useRouter()
+
+  useHotkeys('meta+shift+p', () => router.push('/profile'))
 
   if (isPending) return <Skeleton className="size-11 rounded-full" />
 
@@ -29,18 +35,20 @@ export default function UserDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <RainbowButton className="aspect-square rounded-full p-0">
-          {data.user.name
-            .split(' ')
-            .map((w) => w[0])
-            .join('')
-            .toUpperCase()}
-        </RainbowButton>
+        <Avatar>
+          <AvatarImage src={data.user.image ?? ''} />
+          <AvatarFallback>
+            {data.user.name
+              .split(' ')
+              .map((w) => w[0])
+              .join('')}
+          </AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push('/profile')}>
             Profile
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>

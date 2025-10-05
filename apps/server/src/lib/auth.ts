@@ -61,7 +61,6 @@ const authPlugins: AuthPlugins = [
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: 'pg',
-
     schema
   }),
   trustedOrigins: env.CORS_ORIGIN.split(','),

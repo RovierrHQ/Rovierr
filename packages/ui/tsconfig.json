@@ -5,12 +5,9 @@
     "outDir": "dist",
     "composite": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["./src/*"],
-      "@rov/ui/lib/*": ["./src/lib/*"],
-      "@rov/ui/components/*": ["./src/components/*"],
-      "@rov/ui/hooks/*": ["./src/hooks/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
