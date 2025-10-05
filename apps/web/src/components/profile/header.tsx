@@ -61,7 +61,11 @@ export default function ProfileHeader() {
                 </Link>
               )}
             </div>
-            <p className="text-muted-foreground">Senior Product Designer</p>
+            {profileInfo?.currentUniversity && (
+              <p className="text-muted-foreground">
+                {profileInfo?.currentUniversity?.name}
+              </p>
+            )}
             <div className="flex flex-wrap gap-4 text-muted-foreground text-sm">
               <div className="flex items-center gap-1">
                 <Mail className="size-4" />
@@ -69,7 +73,8 @@ export default function ProfileHeader() {
               </div>
               <div className="flex items-center gap-1">
                 <MapPin className="size-4" />
-                {profileInfo?.currentUniversity?.name}
+                {profileInfo?.currentUniversity?.city},{' '}
+                {profileInfo?.currentUniversity?.country}
               </div>
               <div className="flex items-center gap-1">
                 <Calendar className="size-4" />

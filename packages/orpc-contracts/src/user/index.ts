@@ -16,7 +16,9 @@ export const user = {
             id: z.string(),
             name: z.string(),
             logo: z.string().nullable(),
-            slug: z.string()
+            slug: z.string(),
+            country: z.string(),
+            city: z.string()
           })
           .optional(),
         studentStatusVerified: z.boolean()

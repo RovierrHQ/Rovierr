@@ -16,7 +16,9 @@ export const user = {
             id: universityTable.id,
             name: universityTable.name,
             logo: universityTable.logo,
-            slug: universityTable.slug
+            slug: universityTable.slug,
+            country: universityTable.country,
+            city: universityTable.city
           },
           studentStatusVerified: universityMemberTable.studentStatusVerified
         })
@@ -43,7 +45,9 @@ export const user = {
           id: userData.currentUniversity.id,
           name: userData.currentUniversity.name,
           slug: userData.currentUniversity.slug,
-          logo: userData.currentUniversity.logo
+          logo: userData.currentUniversity.logo,
+          country: userData.currentUniversity.country,
+          city: userData.currentUniversity.city
         },
         studentStatusVerified: userData.studentStatusVerified ?? false
       }

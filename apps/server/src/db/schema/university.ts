@@ -10,6 +10,9 @@ export const university = pgTable('university', {
   name: text('name').notNull(),
   slug: text('slug').unique().notNull(),
   logo: text('logo'),
+  country: text('country').notNull(),
+  city: text('city').notNull(),
+  address: text('address').notNull(),
   ...timestamps
 })
 
