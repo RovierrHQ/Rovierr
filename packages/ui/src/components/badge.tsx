@@ -16,10 +16,44 @@ const badgeVariants = cva(
           'border-transparent bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90',
         outline:
           'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground'
+      },
+      tone: {
+        default: '',
+        soft: `
+          rounded-full
+          bg-opacity-20
+          shadow-none
+        `
       }
     },
+    compoundVariants: [
+      {
+        variant: 'default',
+        tone: 'soft',
+        class:
+          'border-transparent bg-primary/10 text-primary hover:bg-primary/20'
+      },
+      {
+        variant: 'secondary',
+        tone: 'soft',
+        class:
+          'border-transparent bg-secondary/10 text-secondary-foreground hover:bg-secondary/20'
+      },
+      {
+        variant: 'destructive',
+        tone: 'soft',
+        class:
+          'border-transparent bg-destructive/10 text-destructive hover:bg-destructive/20'
+      },
+      {
+        variant: 'outline',
+        tone: 'soft',
+        class: 'bg-accent/10 text-foreground hover:bg-accent/20'
+      }
+    ],
     defaultVariants: {
-      variant: 'default'
+      variant: 'default',
+      tone: 'default'
     }
   }
 )
@@ -27,6 +61,7 @@ const badgeVariants = cva(
 function Badge({
   className,
   variant,
+  tone,
   asChild = false,
   ...props
 }: React.ComponentPropsWithoutRef<'span'> &
@@ -35,7 +70,7 @@ function Badge({
 
   return (
     <Comp
-      className={cn(badgeVariants({ variant }), className)}
+      className={cn(badgeVariants({ variant, tone }), className)}
       data-slot="badge"
       {...props}
     />
