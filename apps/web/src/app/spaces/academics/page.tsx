@@ -3,6 +3,18 @@
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@rov/ui/components/dialog'
+import { Input } from '@rov/ui/components/input'
+import { Label } from '@rov/ui/components/label'
+import { Textarea } from '@rov/ui/components/textarea'
+import {
   AlertCircle,
   BookOpen,
   Calendar,
@@ -11,9 +23,12 @@ import {
   Clock,
   FileText,
   GraduationCap,
+  Hash,
+  Info,
   Plus,
   TrendingUp
 } from 'lucide-react'
+import { useState } from 'react'
 import { type SidebarSection, SpaceSidebar } from '@/components/space-sidebar'
 import { Navbar } from '@/components/spaces-top-nav'
 
@@ -45,6 +60,46 @@ const sidebarSections: SidebarSection[] = [
 ]
 
 export default function AcademicsPage() {
+  const [isAddCourseOpen, setIsAddCourseOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [courseForm, setCourseForm] = useState({
+    name: '',
+    description: '',
+    code: '',
+    credits: '',
+    semester: '',
+    prerequisites: ''
+  })
+
+  const handleAddCourse = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/courses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(courseForm),
+      })
+      if (response.ok) {
+        setIsAddCourseOpen(false)
+        setCourseForm({
+          name: '',
+          description: '',
+          code: '',
+          credits: '',
+          semester: '',
+          prerequisites: ''
+        })
+        
+      }
+    } catch (error) {
+      console.error('Failed to add course:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -122,10 +177,127 @@ export default function AcademicsPage() {
                 <h3 className="font-semibold text-foreground text-lg">
                   My Courses
                 </h3>
-                <Button className="gap-2" size="sm">
-                  <Plus className="h-4 w-4" />
-                  Add Course
-                </Button>
+                <Dialog open={isAddCourseOpen} onOpenChange={setIsAddCourseOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-1 px-3 py-1.5 text-sm bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg" size="sm">
+                      <Plus className="h-4 w-4" />
+                      Add Course
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px] bg-background border-2 border-primary/20 shadow-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader className="text-center">
+                      <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                        <GraduationCap className="h-6 w-6 text-primary" />
+                      </div>
+                      <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                        Add New Course
+                      </DialogTitle>
+                      <DialogDescription className="text-muted-foreground">
+                        Fill in the details to add a new course to your academic plan.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-6 py-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className="flex items-center gap-2 text-sm font-medium">
+                          <BookOpen className="h-4 w-4 text-primary" />
+                          Course Name
+                        </Label>
+                        <Input
+                          id="name"
+                          placeholder="e.g., Introduction to Computer Science"
+                          value={courseForm.name}
+                          onChange={(e) => setCourseForm(prev => ({ ...prev, name: e.target.value }))}
+                          className="border-primary/20 focus:border-primary"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="code" className="flex items-center gap-2 text-sm font-medium">
+                            <Hash className="h-4 w-4 text-primary" />
+                            Course Code
+                          </Label>
+                          <Input
+                            id="code"
+                            placeholder="e.g., CS101"
+                            value={courseForm.code}
+                            onChange={(e) => setCourseForm(prev => ({ ...prev, code: e.target.value }))}
+                            className="border-primary/20 focus:border-primary"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="credits" className="flex items-center gap-2 text-sm font-medium">
+                            <Info className="h-4 w-4 text-primary" />
+                            Credits
+                          </Label>
+                          <Input
+                            id="credits"
+                            type="number"
+                            min="0"
+                            placeholder="e.g., 3"
+                            value={courseForm.credits}
+                            onChange={(e) => setCourseForm(prev => ({ ...prev, credits: e.target.value }))}
+                            className="border-primary/20 focus:border-primary"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="semester" className="flex items-center gap-2 text-sm font-medium">
+                          <Calendar className="h-4 w-4 text-primary" />
+                          Semester
+                        </Label>
+                        <Input
+                          id="semester"
+                          placeholder="e.g., Fall 2025"
+                          value={courseForm.semester}
+                          onChange={(e) => setCourseForm(prev => ({ ...prev, semester: e.target.value }))}
+                          className="border-primary/20 focus:border-primary"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="description" className="flex items-center gap-2 text-sm font-medium">
+                          <FileText className="h-4 w-4 text-primary" />
+                          Description
+                        </Label>
+                        <Textarea
+                          id="description"
+                          placeholder="Brief description of the course content..."
+                          value={courseForm.description}
+                          onChange={(e) => setCourseForm(prev => ({ ...prev, description: e.target.value }))}
+                          className="border-primary/20 focus:border-primary min-h-[80px]"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="prerequisites" className="flex items-center gap-2 text-sm font-medium">
+                          <AlertCircle className="h-4 w-4 text-primary" />
+                          Prerequisites
+                        </Label>
+                        <Textarea
+                          id="prerequisites"
+                          placeholder="List any required prerequisites..."
+                          value={courseForm.prerequisites}
+                          onChange={(e) => setCourseForm(prev => ({ ...prev, prerequisites: e.target.value }))}
+                          className="border-primary/20 focus:border-primary min-h-[60px]"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsAddCourseOpen(false)}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleAddCourse}
+                        disabled={isLoading || !courseForm.name || !courseForm.code}
+                        className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
+                      >
+                        {isLoading ? 'Adding...' : 'Add Course'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
               <div className="space-y-4">
                 <div className="rounded-lg border border-border bg-card/50 p-4">
