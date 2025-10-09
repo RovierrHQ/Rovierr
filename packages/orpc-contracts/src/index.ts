@@ -1,3 +1,4 @@
+import { academics } from './academics'
 import { calendar } from './calendar'
 import { realtime } from './realtime'
 import { university } from './university'
@@ -14,5 +15,8 @@ export const appContract = {
   user,
 
   // university integration
-  university
+  university,
+
+  // academics integration
+  academics
 }
