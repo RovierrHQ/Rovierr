@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
-import { timestamp } from 'drizzle-orm/pg-core'
+import { text, timestamp } from 'drizzle-orm/pg-core'
+import { nanoid } from 'nanoid'
 
 export const timestamps = {
   created_at: timestamp({ withTimezone: true, mode: 'string' })
@@ -10,3 +11,7 @@ export const timestamps = {
     .notNull()
     .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`)
 }
+
+export const primaryId = text('id')
+  .primaryKey()
+  .$default(() => nanoid())

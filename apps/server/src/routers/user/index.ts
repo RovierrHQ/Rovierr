@@ -1,10 +1,10 @@
 import { eq } from 'drizzle-orm'
 import { db } from '@/db'
-import { user as userTable } from '@/db/schema/auth'
 import {
-  universityMember as universityMemberTable,
-  university as universityTable
-} from '@/db/schema/university'
+  program as programTable,
+  userProgramEnrollment as userProgramEnrollmentTable
+} from '@/db/schema/program'
+import { university as universityTable } from '@/db/schema/university'
 import { protectedProcedure } from '@/lib/orpc'
 
 export const user = {
@@ -20,18 +20,19 @@ export const user = {
             country: universityTable.country,
             city: universityTable.city
           },
-          studentStatusVerified: universityMemberTable.studentStatusVerified
+          studentStatusVerified:
+            userProgramEnrollmentTable.studentStatusVerified
         })
-        .from(userTable)
+        .from(userProgramEnrollmentTable)
         .leftJoin(
-          universityMemberTable,
-          eq(userTable.id, universityMemberTable.userId)
+          programTable,
+          eq(programTable.id, userProgramEnrollmentTable.programId)
         )
         .leftJoin(
           universityTable,
-          eq(universityMemberTable.universityId, universityTable.id)
+          eq(universityTable.id, programTable.universityId)
         )
-        .where(eq(userTable.id, context.session.user.id))
+        .where(eq(userProgramEnrollmentTable.userId, context.session.user.id))
         .limit(1)
 
       if (!userData?.currentUniversity?.id) {
@@ -41,15 +42,8 @@ export const user = {
       }
 
       return {
-        currentUniversity: {
-          id: userData.currentUniversity.id,
-          name: userData.currentUniversity.name,
-          slug: userData.currentUniversity.slug,
-          logo: userData.currentUniversity.logo,
-          country: userData.currentUniversity.country,
-          city: userData.currentUniversity.city
-        },
-        studentStatusVerified: userData.studentStatusVerified ?? false
+        currentUniversity: userData.currentUniversity,
+        studentStatusVerified: Boolean(userData.studentStatusVerified)
       }
     }
   )

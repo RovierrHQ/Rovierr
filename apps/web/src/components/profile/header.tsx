@@ -25,7 +25,7 @@ export default function ProfileHeader() {
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="flex flex-col items-start gap-6 md:flex-row">
+        <div className="flex flex-col gap-6 md:flex-row">
           <div className="relative">
             <Avatar className="h-24 w-24">
               <AvatarImage alt="Profile" src={data?.user.image ?? ''} />
@@ -44,7 +44,7 @@ export default function ProfileHeader() {
               <Camera />
             </Button>
           </div>
-          <div className="flex-1 space-y-2">
+          <div className="my-auto h-full flex-1 space-y-2">
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
               <h1 className="font-bold text-2xl">{data?.user.name}</h1>
               {profileInfo?.studentStatusVerified ? (
@@ -71,15 +71,19 @@ export default function ProfileHeader() {
                 <Mail className="size-4" />
                 {data?.user.email}
               </div>
-              <div className="flex items-center gap-1">
-                <MapPin className="size-4" />
-                {profileInfo?.currentUniversity?.city},{' '}
-                {profileInfo?.currentUniversity?.country}
-              </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="size-4" />
-                Joined {data?.user.createdAt?.toLocaleDateString()}
-              </div>
+              {profileInfo?.currentUniversity && (
+                <>
+                  <div className="flex items-center gap-1">
+                    <MapPin className="size-4" />
+                    {profileInfo?.currentUniversity?.city},{' '}
+                    {profileInfo?.currentUniversity?.country}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="size-4" />
+                    Joined {data?.user.createdAt?.toLocaleDateString()}
+                  </div>
+                </>
+              )}
             </div>
           </div>
           <Link href="/profile/settings">

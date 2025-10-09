@@ -1,5 +1,6 @@
 import { calendar } from './calendar'
 import { realtime } from './realtime'
+import { university } from './university'
 import { user } from './user'
 
 export const appContract = {
@@ -10,5 +11,8 @@ export const appContract = {
   calendar,
 
   // user integration
-  user
+  user,
+
+  // university integration
+  university
 }
