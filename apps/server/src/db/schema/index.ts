@@ -1,3 +1,6 @@
+// export * from './assignment'
 export * from './auth'
-
-
+export * from './course'
+export * from './program'
+export * from './semester'
+export * from './university'

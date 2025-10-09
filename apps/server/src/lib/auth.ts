@@ -61,7 +61,6 @@ const authPlugins: AuthPlugins = [
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: 'pg',
-
     schema
   }),
   trustedOrigins: env.CORS_ORIGIN.split(','),
@@ -88,7 +87,7 @@ export const auth = betterAuth({
             .set({
               username:
                 (user.username as string) ||
-                `${user.email.split('@')[0].toLowerCase()}${nanoid()}`
+                `${user.email.split('@')[0].toLowerCase()}${nanoid(5)}`
             })
             .where(eq(userTable.id, user.id))
             .execute()
