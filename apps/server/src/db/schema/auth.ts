@@ -1,4 +1,5 @@
 import { boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { timestamps } from '../helper'
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -8,31 +9,24 @@ export const user = pgTable('user', {
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').default(false).notNull(),
   image: text('image'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
   twoFactorEnabled: boolean('two_factor_enabled').default(false),
   phoneNumber: text('phone_number').unique(),
-  phoneNumberVerified: boolean('phone_number_verified').default(false)
+  phoneNumberVerified: boolean('phone_number_verified').default(false),
+  ...timestamps
 })
 
 export const session = pgTable('session', {
   id: text('id').primaryKey(),
   expiresAt: timestamp('expires_at').notNull(),
   token: text('token').notNull().unique(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
   activeOrganizationId: text('active_organization_id'),
-  activeTeamId: text('active_team_id')
+  activeTeamId: text('active_team_id'),
+  ...timestamps
 })
 
 export const account = pgTable('account', {
@@ -49,10 +43,7 @@ export const account = pgTable('account', {
   refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
   scope: text('scope'),
   password: text('password'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull()
+  ...timestamps
 })
 
 export const verification = pgTable('verification', {
@@ -60,11 +51,7 @@ export const verification = pgTable('verification', {
   identifier: text('identifier').notNull(),
   value: text('value').notNull(),
   expiresAt: timestamp('expires_at').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull()
+  ...timestamps
 })
 
 export const twoFactor = pgTable('two_factor', {
@@ -82,8 +69,7 @@ export const team = pgTable('team', {
   organizationId: text('organization_id')
     .notNull()
     .references(() => organization.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').notNull(),
-  updatedAt: timestamp('updated_at').$onUpdate(() => /* @__PURE__ */ new Date())
+  ...timestamps
 })
 
 export const teamMember = pgTable('team_member', {
@@ -94,7 +80,7 @@ export const teamMember = pgTable('team_member', {
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at')
+  createdAt: timestamps.created_at
 })
 
 export const organization = pgTable('organization', {
@@ -102,7 +88,7 @@ export const organization = pgTable('organization', {
   name: text('name').notNull(),
   slug: text('slug').unique(),
   logo: text('logo'),
-  createdAt: timestamp('created_at').notNull(),
+  createdAt: timestamps.created_at,
   metadata: text('metadata')
 })
 
@@ -115,7 +101,7 @@ export const member = pgTable('member', {
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
   role: text('role').default('member').notNull(),
-  createdAt: timestamp('created_at').notNull()
+  createdAt: timestamps.created_at
 })
 
 export const invitation = pgTable('invitation', {

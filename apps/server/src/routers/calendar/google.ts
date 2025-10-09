@@ -65,8 +65,7 @@ const getValidAccessToken = async (
           accessToken: credentials.access_token,
           accessTokenExpiresAt: credentials.expiry_date
             ? new Date(credentials.expiry_date)
-            : null,
-          updatedAt: new Date()
+            : null
         })
         .where(eq(account.id, userAccount.id))
 
