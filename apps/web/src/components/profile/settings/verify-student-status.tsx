@@ -56,7 +56,7 @@ function VerifyStudentStatus() {
         </div>
       </CardHeader>
       <CardContent>
-        {!(studentVerified || showVerificationForm) && (
+        {!studentVerified && (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="mb-4 rounded-full bg-muted p-4">
               <Shield className="size-8 text-muted-foreground" />
@@ -68,18 +68,16 @@ function VerifyStudentStatus() {
               Get access to student exclusive features and more by verifying
               your enrollment
             </p>
-            <Button onClick={() => setShowVerificationForm(true)}>
-              Start Verification
-            </Button>
+            <Button>Start Verification</Button>
           </div>
         )}
 
-        {!studentVerified && showVerificationForm && (
+        {!studentVerified && (
           <div className="space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="university">University</Label>
-                <Select onValueChange={setUniversity} value={university}>
+                <Select onValueChange={() => {}} value={''}>
                   <SelectTrigger id="university">
                     <SelectValue placeholder="Select your university" />
                   </SelectTrigger>
@@ -99,45 +97,33 @@ function VerifyStudentStatus() {
 
               <div className="space-y-2">
                 <Label htmlFor="start-date">Start Date</Label>
-                <Input
-                  id="start-date"
-                  onChange={(e) => setStartDate(e.target.value)}
-                  type="date"
-                  value={startDate}
-                />
+                <Input id="start-date" onChange={(e) => {}} type="date" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="university-email">University Email</Label>
                 <Input
                   id="university-email"
-                  onChange={(e) => setUniversityEmail(e.target.value)}
+                  onChange={(e) => {}}
                   placeholder="student@university.edu"
                   type="email"
-                  value={universityEmail}
                 />
               </div>
 
-              {!showOTP && (
-                <Button className="w-full" onClick={handleSendOTP}>
-                  Send Verification Code
-                </Button>
-              )}
+              <Button className="w-full">Send Verification Code</Button>
 
-              {showOTP && (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Enter Verification Code</Label>
-                    <p className="text-muted-foreground text-sm">
-                      We sent a code to {universityEmail}
-                    </p>
-                    {/* <OTPInput length={6} onComplete={handleVerifyOTP} /> */}
-                  </div>
-                  <Button onClick={handleSendOTP} size="sm" variant="ghost">
-                    Resend Code
-                  </Button>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Enter Verification Code</Label>
+                  <p className="text-muted-foreground text-sm">
+                    We sent a code to
+                  </p>
+                  {/* <OTPInput length={6} onComplete={handleVerifyOTP} /> */}
                 </div>
-              )}
+                <Button size="sm" variant="ghost">
+                  Resend Code
+                </Button>
+              </div>
 
               <Separator />
 
