@@ -1,3 +1,4 @@
 lint-staged
 
 npx ultracite format
+pnpm check-types
