@@ -24,13 +24,9 @@ import { CheckCircle2, Shield, XCircle } from 'lucide-react'
 import { orpc } from '@/utils/orpc'
 
 function VerifyStudentStatus() {
-  const { data, isLoading } = useQuery(orpc.user.profileInfo.queryOptions())
+  const { data } = useQuery(orpc.user.profileInfo.queryOptions())
   const studentVerified = data?.studentStatusVerified
-  const {
-    data: universities,
-    isLoading: isLoadingUniversities,
-    error
-  } = useQuery(orpc.university.list.queryOptions())
+  useQuery(orpc.university.list.queryOptions())
 
   return (
     <Card>
@@ -77,7 +73,12 @@ function VerifyStudentStatus() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="university">University</Label>
-                <Select onValueChange={() => {}} value={''}>
+                <Select
+                  onValueChange={() => {
+                    // TODO: handle university selection
+                  }}
+                  value={''}
+                >
                   <SelectTrigger id="university">
                     <SelectValue placeholder="Select your university" />
                   </SelectTrigger>
@@ -97,14 +98,22 @@ function VerifyStudentStatus() {
 
               <div className="space-y-2">
                 <Label htmlFor="start-date">Start Date</Label>
-                <Input id="start-date" onChange={(e) => {}} type="date" />
+                <Input
+                  id="start-date"
+                  onChange={(_e) => {
+                    // TODO: handle start date change
+                  }}
+                  type="date"
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="university-email">University Email</Label>
                 <Input
                   id="university-email"
-                  onChange={(e) => {}}
+                  onChange={(_e) => {
+                    // TODO: handle email change
+                  }}
                   placeholder="student@university.edu"
                   type="email"
                 />

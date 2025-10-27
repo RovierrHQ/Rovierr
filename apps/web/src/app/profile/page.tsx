@@ -6,15 +6,7 @@ import {
   TabsList,
   TabsTrigger
 } from '@rov/ui/components/tabs'
-import {
-  Award,
-  Calendar,
-  Github,
-  Globe,
-  GraduationCap,
-  Linkedin,
-  Mail
-} from 'lucide-react'
+
 import { redirect } from 'next/navigation'
 import ProfileHeader from '@/components/profile/header'
 import { authClient } from '@/lib/auth-client'
