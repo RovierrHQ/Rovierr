@@ -52,7 +52,7 @@ export default function ProfilePage() {
           </TabsList>
 
           {/* About Tab */}
-          <TabsContent className="space-y-6" value="about">
+          {/*<TabsContent className="space-y-6" value="about">
             <div className="rounded-lg border bg-card p-6">
               <h2 className="mb-4 font-semibold text-xl">Bio</h2>
               {data.user.bio ? (
@@ -80,13 +80,13 @@ export default function ProfilePage() {
                 </div>
               </div>
             )}
-          </TabsContent>
+          </TabsContent>*/}
 
           {/* Academic Tab */}
           <TabsContent className="space-y-6" value="academic">
             <div className="rounded-lg border bg-card p-6">
               <h2 className="mb-4 font-semibold text-xl">Education</h2>
-              <div className="space-y-4">
+              {/*<div className="space-y-4">
                 {data.user.university && (
                   <div>
                     <div className="mb-1 flex items-center gap-2">
@@ -132,7 +132,7 @@ export default function ProfilePage() {
                     {data.user.gpa?.toFixed(2)} / 4.0
                   </p>
                 </div>
-              </div>
+              </div>*/}
             </div>
           </TabsContent>
 
@@ -140,7 +140,7 @@ export default function ProfilePage() {
           <TabsContent className="space-y-6" value="social">
             <div className="rounded-lg border bg-card p-6">
               <h2 className="mb-4 font-semibold text-xl">Social Profiles</h2>
-              {data.user.showSocialLinks ? (
+              {/*{data.user.showSocialLinks ? (
                 <div className="space-y-4">
                   {data.user.linkedinUrl && (
                     <a
@@ -207,7 +207,7 @@ export default function ProfilePage() {
                 <p className="text-muted-foreground italic">
                   Social links are hidden by this user.
                 </p>
-              )}
+              )}*/}
             </div>
           </TabsContent>
         </Tabs>

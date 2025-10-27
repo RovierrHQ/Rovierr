@@ -60,6 +60,13 @@ All contributors must explicitly agree that their submissions are licensed under
 
 ---
 
+## Dependency management with syncpack
+to update dependecies at first run check and confirm and then update
+```shell
+pnpm exec syncpack update --check --dependencies '**better-auth**'
+pnpm exec syncpack update --dependencies '**better-auth**'
+```
+
 ## 📚 Documentation
 
 Full documentation is available at: [docs.rovierr.com](https://docs.rovierr.com) _(coming soon)_

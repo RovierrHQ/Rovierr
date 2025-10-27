@@ -17,7 +17,7 @@
     "@rov/orpc-contracts": "workspace:*",
     "@rov/realtime": "workspace:*",
     "@rov/shared": "workspace:*",
-    "better-auth": "1.3.13",
+    "better-auth": "1.3.32",
     "@rov/ui": "workspace:*",
     "@tanstack/react-form": "1.23.0",
     "@tanstack/react-query": "5.89.0",

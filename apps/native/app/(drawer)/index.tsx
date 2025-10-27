@@ -1,15 +1,11 @@
-// import { apiStatus } from '@rov/shared'
-import { useQuery } from '@tanstack/react-query'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Container } from '@/components/container'
 import { SignIn } from '@/components/sign-in'
 import { SignUp } from '@/components/sign-up'
 import { authClient } from '@/lib/auth-client'
-import { orpc, queryClient } from '@/utils/orpc'
+import { queryClient } from '@/utils/orpc'
 
 export default function Home() {
-  const healthCheck = useQuery(orpc.healthCheck.queryOptions())
-  const privateData = useQuery(orpc.privateData.queryOptions())
   const { data: session } = authClient.useSession()
 
   return (
@@ -45,11 +41,11 @@ export default function Home() {
           <View className="mb-6 rounded-lg border border-border p-4">
             <Text className="mb-3 font-medium text-foreground">API Status</Text>
             <View className="flex-row items-center gap-2">
-              <View
+              {/*<View
                 className={`h-3 w-3 rounded-full ${
                   healthCheck.data ? 'bg-green-500' : 'bg-red-500'
                 }`}
-              />
+              />*/}
               <Text className="text-muted-foreground">
                 {/* {apiStatus(healthCheck)} */}
               </Text>
@@ -59,13 +55,13 @@ export default function Home() {
             <Text className="mb-3 font-medium text-foreground">
               Private Data
             </Text>
-            {privateData && (
+            {/*{privateData && (
               <View>
                 <Text className="text-muted-foreground">
                   {privateData.data?.message}
                 </Text>
               </View>
-            )}
+            )}*/}
           </View>
           {!session?.user && (
             <>

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
+    "check-types": "tsc --noEmit",
     "dev:disable": "expo start --clear",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -10,7 +11,9 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@better-auth/expo": "1.3.13",
+    "@better-auth/expo": "1.3.32",
+    "@orpc/contract": "1.9.2",
+    "better-auth": "1.3.32",
     "@expo/vector-icons": "15.0.2",
     "@orpc/client": "1.9.2",
     "@orpc/server": "1.9.2",
