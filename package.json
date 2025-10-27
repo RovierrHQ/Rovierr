@@ -22,6 +22,7 @@
     "@biomejs/biome": "2.1.2",
     "husky": "9.1.7",
     "lint-staged": "^16.1.6",
+    "syncpack": "14.0.0-alpha.23",
     "turbo": "2.5.8",
     "ultracite": "5.1.2"
   },
@@ -30,5 +31,5 @@
       "npx ultracite format"
     ]
   },
-  "packageManager": "pnpm@10.18.0"
+  "packageManager": "pnpm@10.18.1"
 }

@@ -3,10 +3,10 @@ import { text, timestamp } from 'drizzle-orm/pg-core'
 import { nanoid } from 'nanoid'
 
 export const timestamps = {
-  created_at: timestamp({ withTimezone: true, mode: 'string' })
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
     .default(sql`(now() AT TIME ZONE 'utc'::text)`)
     .notNull(),
-  updated_at: timestamp({ withTimezone: true, mode: 'string' })
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
     .default(sql`(now() AT TIME ZONE 'utc'::text)`)
     .notNull()
     .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`)

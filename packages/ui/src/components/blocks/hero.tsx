@@ -2,7 +2,7 @@
 
 import { Button, type ButtonProps } from '@rov/ui/components/button'
 import { cn } from '@rov/ui/lib/utils'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { forwardRef } from 'react'
 
 interface HeroProps extends React.HTMLAttributes<HTMLElement> {

@@ -80,7 +80,7 @@ export const teamMember = pgTable('team_member', {
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
-  createdAt: timestamps.created_at
+  createdAt: timestamps.createdAt
 })
 
 export const organization = pgTable('organization', {
@@ -88,7 +88,7 @@ export const organization = pgTable('organization', {
   name: text('name').notNull(),
   slug: text('slug').unique(),
   logo: text('logo'),
-  createdAt: timestamps.created_at,
+  createdAt: timestamps.createdAt,
   metadata: text('metadata')
 })
 
@@ -101,7 +101,7 @@ export const member = pgTable('member', {
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
   role: text('role').default('member').notNull(),
-  createdAt: timestamps.created_at
+  createdAt: timestamps.createdAt
 })
 
 export const invitation = pgTable('invitation', {
