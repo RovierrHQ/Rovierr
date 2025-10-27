@@ -8,7 +8,7 @@ Our infrastructure is built for scalability, cost efficiency, and real-time perf
 ## 🚀 Infrastructure Overview
 
 - **Realtime Engine**: [Centrifugal](https://centrifugal.dev/)
-- **Infrastructure as Code (IaC)**: [OpenTofu](https://opentofu.org/)
+- **Infrastructure as  Code (IaC)**: [OpenTofu](https://opentofu.org/)
 - **Backend API**: [Cloudflare](https://www.cloudflare.com/en-gb/)
 - **Frontend Hosting**: Vercel
 - **Microservices**: Hosted on [Fly.io](https://fly.io/) for cost advantages and scale-to-zero when idle
