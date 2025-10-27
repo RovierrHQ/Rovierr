@@ -36,7 +36,6 @@
     "@types/ws": "8.18.1",
     "drizzle-kit": "0.31.4",
     "tsdown": "0.15.4",
-    "typescript": "5.9.2",
-    "wrangler": "4.38.0"
+    "typescript": "5.9.2"
   }
 }
