@@ -2,9 +2,10 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import SpacesLayout from '@/components/layout/spaces-layout'
 import { authClient } from '@/lib/auth-client'
 
-function SpacesLayout({ children }: LayoutProps<'/spaces'>) {
+function Layout({ children }: LayoutProps<'/spaces'>) {
   const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
   useEffect(() => {
@@ -22,7 +23,7 @@ function SpacesLayout({ children }: LayoutProps<'/spaces'>) {
       </div>
     )
   }
-  return <div>{children}</div>
+  return <SpacesLayout>{children}</SpacesLayout>
 }
 
-export default SpacesLayout
+export default Layout

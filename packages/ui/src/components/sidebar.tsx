@@ -95,7 +95,7 @@ function SidebarProvider({
       // This sets the cookie to keep the sidebar state.
       Cookies.set(SIDEBAR_COOKIE_NAME, openState.toString(), {
         path: '/',
-        maxAge: SIDEBAR_COOKIE_MAX_AGE
+        expires: new Date(Date.now() + SIDEBAR_COOKIE_MAX_AGE * 1000)
       })
     },
     [setOpenProp, open]
