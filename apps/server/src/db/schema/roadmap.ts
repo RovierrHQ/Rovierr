@@ -2,14 +2,6 @@ import { pgEnum, pgTable, text } from 'drizzle-orm/pg-core'
 import { primaryId, timestamps } from '../helper'
 import { user } from './auth'
 
-const roadmapCommonField = {
-  id: primaryId,
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  ...timestamps
-}
-
 export const roadmapCategoryEnum = pgEnum('category', [
   'Feature Request',
   'Bug Report',
@@ -21,43 +13,63 @@ export const roadmapStatusEnum = pgEnum('roadmap_status_enum', [
   'preview'
 ])
 
-//..........................*****
-
 /** ========================
  *  ROADMAP LIKES ENTITY
  *  ======================== */
 export const roadmapUpvote = pgTable('roadmap_likes', {
-  ...roadmapCommonField,
+  id: primaryId,
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
   roadmapId: text('roadmap_id')
     .notNull()
-    .references(() => roadmap.id, { onDelete: 'cascade' })
+    .references(() => roadmap.id, { onDelete: 'cascade' }),
+  ...timestamps
 })
 
 /** ========================
- *  ROADMAP LIKES ENTITY
+ *  ROADMAP COMMENTS ENTITY
  *  ======================== */
 export const roadmapComments = pgTable('roadmap_comment', {
-  ...roadmapCommonField,
-  text: text('roadmap_comment').notNull()
+  id: primaryId,
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  roadmapId: text('roadmap_id')
+    .notNull()
+    .references(() => roadmap.id, { onDelete: 'cascade' }),
+  text: text('roadmap_comment').notNull(),
+  ...timestamps
 })
 
 /** ========================
  *  ROADMAP UPVOTE ENTITY
  *  ======================== */
 export const roadmapCommentUpvote = pgTable('roadmap_comment_upvote', {
-  ...roadmapCommonField,
+  id: primaryId,
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
   commentId: text('roadmap_comment_id')
     .notNull()
-    .references(() => roadmapComments.id, { onDelete: 'cascade' })
+    .references(() => roadmapComments.id, { onDelete: 'cascade' }),
+  roadmapId: text('roadmap_id')
+    .notNull()
+    .references(() => roadmap.id, { onDelete: 'cascade' }),
+  ...timestamps
 })
 
 /** ========================
  *  ROADMAP ENTITY
  *  ======================== */
 export const roadmap = pgTable('roadmap', {
-  ...roadmapCommonField,
+  id: primaryId,
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   status: roadmapStatusEnum('status').notNull(),
   category: roadmapCategoryEnum('category').notNull(),
-  description: text('description').notNull()
+  description: text('description').notNull(),
+  ...timestamps
 })
