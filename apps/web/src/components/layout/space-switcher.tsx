@@ -18,19 +18,19 @@ import {
 import { ChevronsUpDown, Plus } from 'lucide-react'
 import { useState } from 'react'
 
-export function TeamSwitcher({
-  teams
+export function SpaceSwitcher({
+  spaces
 }: {
-  teams: {
+  spaces: {
     name: string
     logo: React.ElementType
     plan: string
   }[]
 }) {
   const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = useState(teams[0])
+  const [activeSpae, setActiveSpace] = useState(spaces[0])
 
-  if (!activeTeam) {
+  if (!activeSpae) {
     return null
   }
 
@@ -44,11 +44,11 @@ export function TeamSwitcher({
               size="lg"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <activeTeam.logo className="size-4" />
+                <activeSpae.logo className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{activeTeam.name}</span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
+                <span className="truncate font-medium">{activeSpae.name}</span>
+                <span className="truncate text-xs">{activeSpae.plan}</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -60,18 +60,18 @@ export function TeamSwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Teams
+              Spaces
             </DropdownMenuLabel>
-            {teams.map((team, index) => (
+            {spaces.map((space, index) => (
               <DropdownMenuItem
                 className="gap-2 p-2"
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
+                key={space.name}
+                onClick={() => setActiveSpace(space)}
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
-                  <team.logo className="size-3.5 shrink-0" />
+                  <space.logo className="size-3.5 shrink-0" />
                 </div>
-                {team.name}
+                {space.name}
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
@@ -80,7 +80,7 @@ export function TeamSwitcher({
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <Plus className="size-4" />
               </div>
-              <div className="font-medium text-muted-foreground">Add team</div>
+              <div className="font-medium text-muted-foreground">Add space</div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

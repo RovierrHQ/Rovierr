@@ -11,19 +11,21 @@ import {
   AudioWaveform,
   BookOpen,
   Bot,
-  Command,
+  BriefcaseBusiness,
   Frame,
   GalleryVerticalEnd,
   MapIcon,
   PieChart,
+  School,
   Settings2,
-  SquareTerminal
+  SquareTerminal,
+  UserRound
 } from 'lucide-react'
 import type * as React from 'react'
 import { NavMain } from '@/components/layout/nav-main'
 import { NavProjects } from '@/components/layout/nav-projects'
 import { NavUser } from '@/components/layout/nav-user'
-import { TeamSwitcher } from '@/components/layout/team-switcher'
+import { SpaceSwitcher } from '@/components/layout/space-switcher'
 
 // This is sample data.
 const data = {
@@ -32,20 +34,30 @@ const data = {
     email: 'm@example.com',
     avatar: '/avatars/shadcn.jpg'
   },
-  teams: [
+  spaces: [
     {
-      name: 'Acme Inc',
+      name: 'Dashboard',
       logo: GalleryVerticalEnd,
       plan: 'Enterprise'
     },
     {
-      name: 'Acme Corp.',
-      logo: AudioWaveform,
+      name: 'Academics',
+      logo: School,
       plan: 'Startup'
     },
     {
-      name: 'Evil Corp.',
-      logo: Command,
+      name: 'Social',
+      logo: AudioWaveform,
+      plan: 'Free'
+    },
+    {
+      name: 'Personal',
+      logo: UserRound,
+      plan: 'Free'
+    },
+    {
+      name: 'Career',
+      logo: BriefcaseBusiness,
       plan: 'Free'
     }
   ],
@@ -159,7 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <SpaceSwitcher spaces={data.spaces} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
