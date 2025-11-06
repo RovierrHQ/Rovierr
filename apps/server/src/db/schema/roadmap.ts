@@ -3,9 +3,9 @@ import { primaryId, timestamps } from '../helper'
 import { user } from './auth'
 
 export const roadmapCategoryEnum = pgEnum('category', [
-  'Feature Request',
-  'Bug Report',
-  'Improvement'
+  'feature-request',
+  'bug-report',
+  'improvement'
 ])
 
 export const roadmapStatusEnum = pgEnum('roadmap_status_enum', [

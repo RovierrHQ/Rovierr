@@ -13,8 +13,17 @@ export const roadmap = {
       z.object({
         title: z.string(),
         status: z.enum(['publish', 'preview']),
-        category: z.enum(['Feature Request', 'Bug Report', 'Improvement']),
+        category: z.enum(['feature-request', 'bug-report', 'improvement']),
         description: z.string()
+      })
+    )
+    .output(
+      z.object({
+        id: z.string(),
+        title: z.string(),
+        description: z.string(),
+        category: z.string(),
+        status: z.string()
       })
     )
 }
