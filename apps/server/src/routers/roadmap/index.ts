@@ -1,7 +1,7 @@
 import { ORPCError } from '@orpc/client'
 import { db } from '@/db'
 import { roadmap as roadmapSchema } from '@/db/schema/roadmap'
-import { protectedProcedure } from '@/lib/orpc'
+import { protectedProcedure, publicProcedure } from '@/lib/orpc'
 
 export const roadmap = {
   add: protectedProcedure.roadmap.add.handler(async ({ input, context }) => {
@@ -20,5 +20,9 @@ export const roadmap = {
         message: 'failed to create roadmap'
       })
     }
+  }),
+
+  getall: publicProcedure.roadmap.getall.handler(async () => {
+    return await { name: 'Ababil' }
   })
 }

@@ -2,6 +2,7 @@
 
 import { AuroraBackground } from '@rov/ui/components/aurora-background'
 import AddRoadmap from '@/components/roadmap/add-roadmap'
+import RoadmapFeed from '@/components/roadmap/roadma-feed'
 import Topnav from '@/components/top-nav'
 
 const RoadmapPage = () => {
@@ -27,15 +28,7 @@ const RoadmapPage = () => {
         </header>
 
         <div className="mt-8 grid gap-8">
-          <div className="rounded-lg bg-secondary p-6 shadow-md">
-            ...content 1
-          </div>
-          <div className="rounded-lg bg-secondary p-6 shadow-md">
-            ...content 2
-          </div>
-          <div className="rounded-lg bg-secondary p-6 shadow-md">
-            ...content 3
-          </div>
+          <RoadmapFeed />
         </div>
       </div>
     </div>

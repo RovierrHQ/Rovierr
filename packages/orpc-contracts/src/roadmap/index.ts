@@ -25,5 +25,14 @@ export const roadmap = {
         category: z.string(),
         status: z.string()
       })
-    )
+    ),
+
+  getall: oc
+    .route({
+      method: 'GET',
+      description: 'Retrieve all roadmap',
+      summary: '',
+      tags: ['Roadmap']
+    })
+    .output(z.object({ name: z.string(), input: z.string().optional() }))
 }
