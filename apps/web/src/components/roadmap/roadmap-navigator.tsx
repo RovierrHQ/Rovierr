@@ -16,7 +16,10 @@ const RoadmapNavigator = () => {
       whileTap={{ scale: 0.95 }}
     >
       <Link aria-label="Open Roadmap" href="/roadmap">
-        <Button className="rounded-full p-3 shadow-2xl" variant="default">
+        <Button
+          className="size-[40px] rounded-full text-center leading-[40px] shadow-2xl"
+          variant="default"
+        >
           <span className="sr-only">Roadmap</span>
           <MapIcon className="h-5 w-5" />
         </Button>
