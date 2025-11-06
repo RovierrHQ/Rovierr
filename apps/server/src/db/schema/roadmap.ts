@@ -16,7 +16,7 @@ export const roadmapStatusEnum = pgEnum('roadmap_status_enum', [
 /** ========================
  *  ROADMAP LIKES ENTITY
  *  ======================== */
-export const roadmapUpvote = pgTable('roadmap_likes', {
+export const roadmapUpvote = pgTable('roadmap_upvote', {
   id: primaryId,
   userId: text('user_id')
     .notNull()
