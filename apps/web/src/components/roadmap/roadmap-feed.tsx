@@ -3,14 +3,14 @@
 
 const RoadmapFeed = () => {
   // const { data } = useQuery(
-  //   orpc.roadmap.getall.queryOptions({
-  //     input: {},
-  //     refetchOnWindowFocus: true,
-  //     refetchOnReconnect: true
+  //   orpc.roadmap.list.queryOptions({
+  //     input: {
+  //       query: { page: 0, limit: 2 }
+  //     }
   //   })
   // )
 
-  // console.log(data)
+  // console.log({ meta: data?.meta, list: data?.data })
 
   return <div>Roadmap Feed</div>
 }
