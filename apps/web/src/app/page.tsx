@@ -8,8 +8,8 @@ import { ArrowRightIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import { redirect } from 'next/navigation'
 import InstallPrompt from '@/components/install-prompt'
+import Topnav from '@/components/layout/top-nav'
 import ToolList from '@/components/tool-list'
-import Topnav from '@/components/top-nav'
 import { authClient } from '@/lib/auth-client'
 
 export default function RovierrLandingPage() {

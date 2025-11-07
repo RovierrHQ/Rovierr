@@ -1,11 +1,9 @@
 import { SparklesText } from '@rov/ui/components/text-animations/sparkles'
 import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
 import Link from 'next/link'
-import UserDropdown from '@/components/user-drowpdown'
 
 function Topnav({
-  enableThemeToggle = true,
-  enableUserDropdown = true
+  enableThemeToggle = true
 }: {
   enableThemeToggle?: boolean
   enableUserDropdown?: boolean
@@ -21,7 +19,6 @@ function Topnav({
 
         <div className="flex items-center gap-2">
           {enableThemeToggle && <AnimatedThemeToggler />}
-          {enableUserDropdown && <UserDropdown />}
         </div>
       </div>
     </div>
