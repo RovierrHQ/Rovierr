@@ -41,8 +41,7 @@ export const roadmap = {
           status: z.enum(['publish', 'preview']).optional().optional(),
           category: z
             .enum(['feature-request', 'bug-report', 'improvement'])
-            .optional(),
-          sort: z.enum(['most-votes', 'most-comment', 'most-recent']).optional()
+            .optional()
         })
       })
     )
