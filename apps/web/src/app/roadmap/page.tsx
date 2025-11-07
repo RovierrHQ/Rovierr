@@ -2,7 +2,7 @@
 
 import { AuroraBackground } from '@rov/ui/components/aurora-background'
 import AddRoadmap from '@/components/roadmap/add-roadmap'
-import RoadmapFeed from '@/components/roadmap/roadma-feed'
+import RoadmapFeed from '@/components/roadmap/roadmap-feed'
 import Topnav from '@/components/top-nav'
 
 const RoadmapPage = () => {
