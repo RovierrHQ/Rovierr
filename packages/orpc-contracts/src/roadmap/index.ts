@@ -27,12 +27,47 @@ export const roadmap = {
       })
     ),
 
-  getall: oc
+  list: oc
     .route({
       method: 'GET',
       description: 'Retrieve all roadmap',
-      summary: '',
       tags: ['Roadmap']
     })
-    .output(z.object({ name: z.string(), input: z.string().optional() }))
+    .input(
+      z.object({
+        query: z.object({
+          page: z.number().optional(),
+          limit: z.number().optional(),
+          status: z.enum(['publish', 'preview']).optional().optional(),
+          category: z
+            .enum(['feature-request', 'bug-report', 'improvement'])
+            .optional(),
+          sort: z.enum(['most-votes', 'most-comment', 'most-recent']).optional()
+        })
+      })
+    )
+    .output(
+      z.object({
+        meta: z
+          .object({
+            page: z.number(),
+            limit: z.number(),
+            total: z.number(),
+            totalPage: z.number()
+          })
+          .optional(),
+        data: z.array(
+          z.object({
+            id: z.string(),
+            userId: z.string(),
+            title: z.string(),
+            status: z.enum(['publish', 'preview']),
+            category: z.enum(['feature-request', 'bug-report', 'improvement']),
+            description: z.string(),
+            createdAt: z.string(),
+            updatedAt: z.string()
+          })
+        )
+      })
+    )
 }
