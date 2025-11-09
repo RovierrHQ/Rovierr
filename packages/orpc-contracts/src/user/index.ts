@@ -1,5 +1,6 @@
 import { oc } from '@orpc/contract'
 import { z } from 'zod'
+import { onboarding } from './onboarding'
 
 export const user = {
   profileInfo: oc
@@ -30,5 +31,7 @@ export const user = {
           message: z.string().default('User not found')
         })
       }
-    })
+    }),
+
+  onboarding
 }

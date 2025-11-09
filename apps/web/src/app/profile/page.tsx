@@ -8,11 +8,33 @@ import {
 } from '@rov/ui/components/tabs'
 
 import { redirect } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { VerificationBadge } from '@/components/feature-gate'
 import ProfileHeader from '@/components/profile/header'
+import { VerificationPending } from '@/components/verification-pending'
 import { authClient } from '@/lib/auth-client'
+import { client } from '@/utils/orpc'
 
 export default function ProfilePage() {
   const { data, isPending } = authClient.useSession()
+  const [verificationStatus, setVerificationStatus] = useState<{
+    isVerified: boolean
+    hasUniversityEmail: boolean
+  } | null>(null)
+
+  useEffect(() => {
+    if (data?.user) {
+      client.user.onboarding
+        .getStatus()
+        .then(setVerificationStatus)
+        .catch((error) => {
+          // Log error silently
+          if (process.env.NODE_ENV === 'development') {
+            console.error(error)
+          }
+        })
+    }
+  }, [data?.user])
 
   if (isPending) {
     return (
@@ -26,6 +48,12 @@ export default function ProfilePage() {
     redirect('/')
   }
 
+  const handleVerified = () => {
+    setVerificationStatus((prev) =>
+      prev ? { ...prev, isVerified: true } : null
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -33,6 +61,20 @@ export default function ProfilePage() {
       <div className="mx-auto max-w-5xl px-4 py-6">
         <ProfileHeader />
       </div>
+
+      {/* Verification Status Banner */}
+      {verificationStatus && !verificationStatus.isVerified && (
+        <div className="mx-auto max-w-5xl px-4 py-4">
+          <VerificationPending dismissible={true} onVerified={handleVerified} />
+        </div>
+      )}
+
+      {/* Verification Badge */}
+      {verificationStatus && (
+        <div className="mx-auto max-w-5xl px-4 py-2">
+          <VerificationBadge isVerified={verificationStatus.isVerified} />
+        </div>
+      )}
 
       {/* Content */}
       <div className="mx-auto max-w-5xl px-4 py-8">

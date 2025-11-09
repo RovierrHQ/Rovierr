@@ -6,6 +6,7 @@ import {
 } from '@/db/schema/program'
 import { university as universityTable } from '@/db/schema/university'
 import { protectedProcedure } from '@/lib/orpc'
+import { onboarding } from './onboarding'
 
 export const user = {
   profileInfo: protectedProcedure.user.profileInfo.handler(
@@ -46,5 +47,7 @@ export const user = {
         studentStatusVerified: Boolean(userData.studentStatusVerified)
       }
     }
-  )
+  ),
+
+  onboarding
 }

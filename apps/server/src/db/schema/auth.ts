@@ -1,5 +1,6 @@
 import { boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { timestamps } from '../helper'
+import { university } from './university'
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -12,6 +13,17 @@ export const user = pgTable('user', {
   twoFactorEnabled: boolean('two_factor_enabled').default(false),
   phoneNumber: text('phone_number').unique(),
   phoneNumberVerified: boolean('phone_number_verified').default(false),
+
+  // Onboarding fields
+  universityEmail: text('university_email').unique(),
+  universityId: text('university_id').references(() => university.id),
+  major: text('major'),
+  yearOfStudy: text('year_of_study'),
+  interests: text('interests').array(),
+
+  // Verification status
+  isVerified: boolean('is_verified').default(false).notNull(),
+
   ...timestamps
 })
 

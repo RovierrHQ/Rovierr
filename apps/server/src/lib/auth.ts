@@ -72,12 +72,34 @@ export const auth = betterAuth({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
       accessType: 'offline',
-      prompt: 'select_account consent'
+      prompt: 'select_account consent',
+      async onSuccess(user) {
+        // Check if user needs onboarding
+        const dbUser = await db.query.user.findFirst({
+          where: eq(userTable.id, user.id),
+          columns: { universityEmail: true }
+        })
+
+        // Redirect to onboarding if no university email is set
+        if (!dbUser?.universityEmail) {
+          return '/onboarding'
+        }
+
+        return '/spaces'
+      }
     }
   },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.SERVER_URL,
   plugins: authPlugins,
+  session: {
+    async fetchUser(userId) {
+      const user = await db.query.user.findFirst({
+        where: eq(userTable.id, userId)
+      })
+      return user
+    }
+  },
   databaseHooks: {
     user: {
       create: {
@@ -87,10 +109,18 @@ export const auth = betterAuth({
             .set({
               username:
                 (user.username as string) ||
-                `${user.email.split('@')[0].toLowerCase()}${nanoid(5)}`
+                `${user.email.split('@')[0].toLowerCase()}${nanoid(5)}`,
+              isVerified: false
             })
             .where(eq(userTable.id, user.id))
             .execute()
+
+          // Emit user.created event to PostHog
+          const { emitEvent } = await import('./events')
+          await emitEvent('user.created', user.id, {
+            email: user.email,
+            authProvider: 'google'
+          })
         }
       }
     }
