@@ -32,5 +32,5 @@
       "npx ultracite format"
     ]
   },
-  "packageManager": "pnpm@10.18.1"
+  "packageManager": "pnpm@10.20.0"
 }
