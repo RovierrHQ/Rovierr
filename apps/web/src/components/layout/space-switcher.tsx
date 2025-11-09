@@ -5,18 +5,25 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@rov/ui/components/dropdown-menu'
+import { Kbd, KbdGroup } from '@rov/ui/components/kbd'
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar
 } from '@rov/ui/components/sidebar'
-import { ChevronsUpDown, Plus } from 'lucide-react'
-import { useState } from 'react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@rov/ui/components/tooltip'
+import { cn } from '@rov/ui/lib/utils'
+import { ChevronsUpDown, Info } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 export function SpaceSwitcher({
   spaces
@@ -25,12 +32,29 @@ export function SpaceSwitcher({
     name: string
     logo: React.ElementType
     plan: string
+    url: string
   }[]
 }) {
   const { isMobile } = useSidebar()
-  const [activeSpae, setActiveSpace] = useState(spaces[0])
+  const [activeSpace, setActiveSpace] = useState(spaces[0])
+  const router = useRouter()
 
-  if (!activeSpae) {
+  // Cycle to next space
+  const cycleToNextSpace = () => {
+    const currentIndex = spaces.findIndex(
+      (space) => space.name === activeSpace.name
+    )
+    const nextIndex = (currentIndex + 1) % spaces.length
+    setActiveSpace(spaces[nextIndex])
+  }
+
+  useHotkeys('shift+tab', cycleToNextSpace, { preventDefault: true })
+
+  useEffect(() => {
+    router.push(activeSpace.url)
+  }, [activeSpace, router])
+
+  if (!activeSpace) {
     return null
   }
 
@@ -44,11 +68,11 @@ export function SpaceSwitcher({
               size="lg"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <activeSpae.logo className="size-4" />
+                <activeSpace.logo className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{activeSpae.name}</span>
-                <span className="truncate text-xs">{activeSpae.plan}</span>
+                <span className="truncate font-medium">{activeSpace.name}</span>
+                <span className="truncate text-xs">{activeSpace.plan}</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -59,12 +83,28 @@ export function SpaceSwitcher({
             side={isMobile ? 'bottom' : 'right'}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Spaces
+            <DropdownMenuLabel className="flex justify-between text-muted-foreground text-xs">
+              Spaces{' '}
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="size-4" />
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <KbdGroup>
+                    <Kbd>Shift</Kbd>
+                    <span>+</span>
+                    <Kbd>Tab</Kbd>
+                  </KbdGroup>{' '}
+                  to cycle through spaces
+                </TooltipContent>
+              </Tooltip>
             </DropdownMenuLabel>
-            {spaces.map((space, index) => (
+            {spaces.map((space) => (
               <DropdownMenuItem
-                className="gap-2 p-2"
+                className={cn(
+                  'gap-2 p-2',
+                  activeSpace.url === space.url && 'border-2 border-dashed'
+                )}
                 key={space.name}
                 onClick={() => setActiveSpace(space)}
               >
@@ -72,16 +112,16 @@ export function SpaceSwitcher({
                   <space.logo className="size-3.5 shrink-0" />
                 </div>
                 {space.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                {/* <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut> */}
               </DropdownMenuItem>
             ))}
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 p-2">
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <Plus className="size-4" />
               </div>
               <div className="font-medium text-muted-foreground">Add space</div>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

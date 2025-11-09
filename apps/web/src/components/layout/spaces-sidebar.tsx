@@ -14,9 +14,9 @@ import {
   BriefcaseBusiness,
   Frame,
   GalleryVerticalEnd,
+  GraduationCap,
   MapIcon,
   PieChart,
-  School,
   Settings2,
   SquareTerminal,
   UserRound
@@ -38,27 +38,32 @@ const data = {
     {
       name: 'Dashboard',
       logo: GalleryVerticalEnd,
-      plan: 'Enterprise'
+      plan: 'Enterprise',
+      url: '/spaces'
     },
     {
       name: 'Academics',
-      logo: School,
-      plan: 'Startup'
+      logo: GraduationCap,
+      plan: 'Startup',
+      url: '/spaces/academics'
     },
     {
       name: 'Social',
       logo: AudioWaveform,
-      plan: 'Free'
+      plan: 'Free',
+      url: '/spaces/social'
     },
     {
       name: 'Personal',
       logo: UserRound,
-      plan: 'Free'
+      plan: 'Free',
+      url: '/spaces/personal'
     },
     {
       name: 'Career',
       logo: BriefcaseBusiness,
-      plan: 'Free'
+      plan: 'Free',
+      url: '/spaces/career'
     }
   ],
   navMain: [
@@ -167,7 +172,9 @@ const data = {
   ]
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function SpacesSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
