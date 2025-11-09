@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm'
 import { pgEnum, pgTable, text } from 'drizzle-orm/pg-core'
 import { primaryId, timestamps } from '../helper'
 import { user } from './auth'
@@ -73,3 +74,10 @@ export const roadmap = pgTable('roadmap', {
   description: text('description').notNull(),
   ...timestamps
 })
+
+export const roadmapRelation = relations(roadmap, ({ one }) => ({
+  user: one(user, {
+    fields: [roadmap.userId],
+    references: [user.id]
+  })
+}))

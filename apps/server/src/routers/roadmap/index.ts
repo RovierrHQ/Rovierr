@@ -48,7 +48,10 @@ export const roadmap = {
         where: whereConditions,
         limit,
         offset,
-        orderBy: (rm, { desc }) => desc(rm.createdAt)
+        orderBy: (rm, { desc }) => desc(rm.createdAt),
+        with: {
+          user: true
+        }
       })
 
       return {
@@ -60,7 +63,8 @@ export const roadmap = {
           totalPage: Math.ceil(total / limit)
         }
       }
-    } catch {
+    } catch (err) {
+      console.log(err)
       throw new ORPCError('INTERNAL_SERVER_ERROR', {
         message: 'failed to retrieve roadmap'
       })
