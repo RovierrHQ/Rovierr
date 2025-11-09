@@ -1,6 +1,7 @@
 'use client'
 
 import { AuroraBackground } from '@rov/ui/components/aurora-background'
+import { Button } from '@rov/ui/components/button'
 import Topnav from '@/components/layout/top-nav'
 import AddRoadmap from '@/components/roadmap/add-roadmap'
 import RoadmapFeed from '@/components/roadmap/roadmap-feed'
@@ -22,7 +23,9 @@ const RoadmapPage = () => {
                   Share your ideas and help us build better features
                 </p>
               </div>
-              <AddRoadmap />
+              <AddRoadmap>
+                <Button>Submit Request</Button>
+              </AddRoadmap>
             </div>
           </div>
         </header>

@@ -1,11 +1,11 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
-import { motion } from 'framer-motion'
 import { MapIcon } from 'lucide-react'
-import Link from 'next/link'
+import { motion } from 'motion/react'
+import AddRoadmap from './add-roadmap'
 
-const RoadmapNavigator = () => {
+const RoadmapFloatButton = () => {
   return (
     <motion.div
       animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -15,7 +15,7 @@ const RoadmapNavigator = () => {
       whileHover={{ scale: 1.08 }}
       whileTap={{ scale: 0.95 }}
     >
-      <Link aria-label="Open Roadmap" href="/roadmap">
+      <AddRoadmap>
         <Button
           className="size-[40px] rounded-full text-center leading-[40px] shadow-2xl"
           variant="default"
@@ -23,9 +23,9 @@ const RoadmapNavigator = () => {
           <span className="sr-only">Roadmap</span>
           <MapIcon className="h-5 w-5" />
         </Button>
-      </Link>
+      </AddRoadmap>
     </motion.div>
   )
 }
 
-export default RoadmapNavigator
+export default RoadmapFloatButton

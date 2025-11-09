@@ -20,7 +20,7 @@ import { Textarea } from '@rov/ui/components/textarea'
 import { useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { redirect } from 'next/navigation'
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -38,7 +38,7 @@ const roadmapSchema = z.object({
 
 type RoadmapFormData = z.infer<typeof roadmapSchema>
 
-const AddRoadmap = () => {
+const AddRoadmap = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -87,13 +87,11 @@ const AddRoadmap = () => {
 
   return (
     <div>
-      <Button
+      <div
         onClick={() => (session?.user.id ? setOpen(true) : redirect('/login'))}
-        type="button"
-        variant="default"
       >
-        Submit Request
-      </Button>
+        {children}
+      </div>
 
       <Dialog onOpenChange={setOpen} open={open}>
         <DialogContent className="sm:max-w-md">
