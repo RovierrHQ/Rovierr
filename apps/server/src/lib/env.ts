@@ -79,7 +79,6 @@ const envSchema = z.object({
   // Analytics (PostHog)
   POSTHOG_API_KEY: z.string().min(1).describe('PostHog API key for analytics'),
   POSTHOG_HOST: z
-    .string()
     .url()
     .default('https://app.posthog.com')
     .describe('PostHog host URL')

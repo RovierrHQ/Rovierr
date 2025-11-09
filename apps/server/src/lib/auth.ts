@@ -2,6 +2,7 @@ import { expo } from '@better-auth/expo'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import {
+  customSession,
   emailOTP,
   oneTap,
   organization,
@@ -38,6 +39,22 @@ const oneTapPlugin = oneTap()
 const organizationPlugin = organization({ teams: { enabled: true } })
 const usernamePlugin = username()
 
+// export type Session = {}
+
+const customSessionPlugin = customSession(async ({ user, session }) => {
+  const userVerified = await db.query.user.findFirst({
+    where: eq(userTable.id, user.id),
+    columns: { isVerified: true }
+  })
+  // Add custom session data
+  return {
+    session,
+    user: {
+      ...user,
+      isVerified: Boolean(userVerified?.isVerified)
+    }
+  }
+})
 type AuthPlugins = [
   typeof expoPlugin,
   typeof twoFactorPlugin,
@@ -45,7 +62,8 @@ type AuthPlugins = [
   typeof emailOTPPlugin,
   typeof oneTapPlugin,
   typeof organizationPlugin,
-  typeof usernamePlugin
+  typeof usernamePlugin,
+  typeof customSessionPlugin
 ]
 
 const authPlugins: AuthPlugins = [
@@ -55,7 +73,8 @@ const authPlugins: AuthPlugins = [
   emailOTPPlugin,
   oneTapPlugin,
   organizationPlugin,
-  usernamePlugin
+  usernamePlugin,
+  customSessionPlugin
 ]
 
 export const auth = betterAuth({
@@ -72,34 +91,12 @@ export const auth = betterAuth({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
       accessType: 'offline',
-      prompt: 'select_account consent',
-      async onSuccess(user) {
-        // Check if user needs onboarding
-        const dbUser = await db.query.user.findFirst({
-          where: eq(userTable.id, user.id),
-          columns: { universityEmail: true }
-        })
-
-        // Redirect to onboarding if no university email is set
-        if (!dbUser?.universityEmail) {
-          return '/onboarding'
-        }
-
-        return '/spaces'
-      }
+      prompt: 'select_account consent'
     }
   },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.SERVER_URL,
   plugins: authPlugins,
-  session: {
-    async fetchUser(userId) {
-      const user = await db.query.user.findFirst({
-        where: eq(userTable.id, userId)
-      })
-      return user
-    }
-  },
   databaseHooks: {
     user: {
       create: {
