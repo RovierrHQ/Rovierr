@@ -1,10 +1,10 @@
 'use client'
 
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import { Field, FieldError, FieldLabel } from '@rov/ui/components/field'
 import {
   RadioGroup as RadioGroupContainer,
   RadioGroupItem
-} from '@/components/ui/radio-group'
+} from '@rov/ui/components/radio-group'
 import { useFieldContext } from '../context'
 
 type Option =

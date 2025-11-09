@@ -1,14 +1,14 @@
 'use client'
 
-import { useMemo } from 'react'
 import {
   Field,
   FieldContent,
   FieldError,
   FieldLabel
-} from '@/components/ui/field'
-import { Slider as SliderBase } from '@/components/ui/slider'
-import { cn } from '@/lib/utils'
+} from '@rov/ui/components/field'
+import { Slider as SliderBase } from '@rov/ui/components/slider'
+import { cn } from 'lib/utils'
+import { useMemo } from 'react'
 import { useFieldContext } from '../context'
 
 type Props = {

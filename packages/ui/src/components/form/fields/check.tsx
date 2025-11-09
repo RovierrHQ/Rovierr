@@ -1,7 +1,7 @@
 'use client'
 
-import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import { Checkbox } from '@rov/ui/components/checkbox'
+import { Field, FieldError, FieldLabel } from '@rov/ui/components/field'
 import { useFieldContext } from '../context'
 
 type Props = {

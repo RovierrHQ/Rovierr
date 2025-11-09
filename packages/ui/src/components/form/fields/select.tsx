@@ -1,18 +1,18 @@
 'use client'
 
 import {
-  Field,
-  FieldContent,
-  FieldError,
-  FieldLabel
-} from '@/components/ui/field'
-import {
   Select as SelectBase,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
+} from '@rov/ui/components//select'
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel
+} from '@rov/ui/components/field'
 import { useFieldContext } from '../context'
 
 type Option =

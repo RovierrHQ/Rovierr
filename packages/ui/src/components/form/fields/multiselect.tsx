@@ -1,17 +1,17 @@
 'use client'
 
-import { ChevronDownIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
-import { Label } from '@/components/ui/label'
+import { Badge } from '@rov/ui/components/badge'
+import { Checkbox } from '@rov/ui/components/checkbox'
+import { Field, FieldError, FieldLabel } from '@rov/ui/components/field'
+import { Label } from '@rov/ui/components/label'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+} from '@rov/ui/components/popover'
+import { cn } from 'lib/utils'
+import { ChevronDownIcon } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { useFieldContext } from '../context'
 
 type Option =

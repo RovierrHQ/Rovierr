@@ -1,13 +1,13 @@
 'use client'
 
-import type { ComponentProps } from 'react'
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldLabel
-} from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+} from '@rov/ui/components/field'
+import { Input } from '@rov/ui/components/input'
+import type { ComponentProps } from 'react'
 import { useFieldContext } from '../context'
 
 type Props = {

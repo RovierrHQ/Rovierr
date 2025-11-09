@@ -3,7 +3,7 @@
 import { createFormHook } from '@tanstack/react-form'
 import { fieldContext, formContext } from './context'
 import Calendar from './fields/calendar'
-import Currency from './fields/currency'
+
 import MultiSelect from './fields/multiselect'
 import RadioGroup from './fields/radio'
 import Select from './fields/select'
@@ -19,7 +19,6 @@ export const { useAppForm, withFieldGroup, withForm } = createFormHook({
   fieldComponents: {
     Text,
     TextArea,
-    Currency,
     Calendar,
     Slider,
     Select,

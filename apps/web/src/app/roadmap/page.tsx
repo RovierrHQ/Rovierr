@@ -1,9 +1,9 @@
 'use client'
 
 import { AuroraBackground } from '@rov/ui/components/aurora-background'
+import Topnav from '@/components/layout/top-nav'
 import AddRoadmap from '@/components/roadmap/add-roadmap'
 import RoadmapFeed from '@/components/roadmap/roadmap-feed'
-import Topnav from '@/components/top-nav'
 
 const RoadmapPage = () => {
   return (

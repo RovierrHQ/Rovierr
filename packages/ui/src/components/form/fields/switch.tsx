@@ -1,7 +1,7 @@
 'use client'
 
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
-import { Switch as SwitchBase } from '@/components/ui/switch'
+import { Field, FieldError, FieldLabel } from '@rov/ui/components/field'
+import { Switch as SwitchBase } from '@rov/ui/components/switch'
 import { useFieldContext } from '../context'
 
 type Props = {
