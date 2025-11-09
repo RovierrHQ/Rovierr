@@ -63,8 +63,8 @@ export const roadmap = {
           totalPage: Math.ceil(total / limit)
         }
       }
-    } catch (err) {
-      console.log(err)
+    } catch {
+      // console.log(err)
       throw new ORPCError('INTERNAL_SERVER_ERROR', {
         message: 'failed to retrieve roadmap'
       })

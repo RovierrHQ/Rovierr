@@ -58,7 +58,12 @@ export const roadmap = {
         data: z.array(
           z.object({
             id: z.string(),
-            userId: z.string(),
+            user: z.object({
+              id: z.string(),
+              name: z.string(),
+              email: z.string(),
+              image: z.string().nullable()
+            }),
             title: z.string(),
             status: z.enum(['publish', 'preview']),
             category: z.enum(['feature-request', 'bug-report', 'improvement']),
