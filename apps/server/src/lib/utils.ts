@@ -1,6 +1,6 @@
-import crypto from 'node:crypto'
+import { CryptoHasher } from 'bun'
 import { eq } from 'drizzle-orm'
-import type { Database } from '@/db'
+import { db } from '@/db'
 import { university as universityTable } from '@/db/schema/university'
 
 /**
@@ -17,7 +17,7 @@ export function generateOTP(): string {
  * @returns The hashed OTP as a hex string
  */
 export function hashOTP(otp: string): string {
-  return crypto.createHash('sha256').update(otp).digest('hex')
+  return new CryptoHasher('sha256').update(otp).digest('hex')
 }
 
 /**
@@ -29,8 +29,7 @@ export function hashOTP(otp: string): string {
  */
 export async function validateUniversityEmail(
   email: string,
-  universityId: string,
-  db: Database
+  universityId: string
 ): Promise<boolean> {
   const university = await db.query.university.findFirst({
     where: eq(universityTable.id, universityId)

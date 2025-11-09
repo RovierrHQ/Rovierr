@@ -16,6 +16,7 @@ import { db } from '../db'
 import * as schema from '../db/schema/auth'
 import { user as userTable } from '../db/schema/auth'
 import { env } from './env'
+import { emitEvent } from './events'
 import logger from './logger'
 
 // Define plugin types to avoid TypeScript serialization issues
@@ -113,7 +114,6 @@ export const auth = betterAuth({
             .execute()
 
           // Emit user.created event to PostHog
-          const { emitEvent } = await import('./events')
           await emitEvent('user.created', user.id, {
             email: user.email,
             authProvider: 'google'

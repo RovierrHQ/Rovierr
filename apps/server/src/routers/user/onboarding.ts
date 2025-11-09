@@ -17,8 +17,7 @@ export const onboarding = {
       // 1. Validate university email domain
       const isValidDomain = await validateUniversityEmail(
         input.universityEmail,
-        input.universityId,
-        db
+        input.universityId
       )
 
       if (!isValidDomain) {

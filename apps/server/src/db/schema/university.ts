@@ -12,5 +12,6 @@ export const university = pgTable('university', {
   country: text('country').notNull(),
   city: text('city').notNull(),
   address: text('address').notNull(),
+  validEmailDomains: text('valid_email_domains').array().notNull(),
   ...timestamps
 })
