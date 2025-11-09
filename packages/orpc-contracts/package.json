@@ -11,8 +11,8 @@
     "check-types": "tsc -b"
   },
   "dependencies": {
-    "@orpc/contract": "1.9.2",
-    "zod": "4.1.11"
+    "@orpc/contract": "1.10.4",
+    "zod": "4.1.12"
   },
   "devDependencies": {
     "typescript": "5.9.2"

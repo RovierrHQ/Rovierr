@@ -1,5 +1,4 @@
 import { expo } from '@better-auth/expo'
-import type { Auth } from 'better-auth'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import {
@@ -59,7 +58,7 @@ const authPlugins: AuthPlugins = [
   usernamePlugin
 ]
 
-export const auth: Auth = betterAuth({
+export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema
