@@ -25,7 +25,7 @@ export const roadmap = {
 
   list: publicProcedure.roadmap.list.handler(async ({ input }) => {
     try {
-      let { page, limit, status, category } = input.query ?? {}
+      let { page, limit, category } = input.query ?? {}
 
       page = Number(page) || 1
       limit = Number(limit) || 10
@@ -33,8 +33,10 @@ export const roadmap = {
       const offset = (page - 1) * limit
 
       const whereConditions = and(
-        status ? eq(roadmapSchema.status, status) : undefined,
-        category ? eq(roadmapSchema.category, category) : undefined
+        ...[
+          eq(roadmapSchema.status, 'publish'),
+          category ? eq(roadmapSchema.category, category) : undefined
+        ].filter(Boolean)
       )
 
       const totalResult = await db

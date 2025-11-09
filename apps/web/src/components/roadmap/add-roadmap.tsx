@@ -75,6 +75,14 @@ const AddRoadmap = ({ children }: { children: ReactNode }) => {
         })
       )
 
+      await queryClient.fetchQuery(
+        orpc.roadmap.list.queryOptions({
+          input: {
+            query: {}
+          }
+        })
+      )
+
       toast.success('Roadmap request submitted successfully!')
       setOpen(false)
       reset()

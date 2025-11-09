@@ -1,3 +1,5 @@
+'use client'
+
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import {
@@ -14,9 +16,10 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { useQuery } from '@tanstack/react-query'
-import { Loader2 } from 'lucide-react'
+import { Loader2, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { orpc } from '@/utils/orpc'
+import UserInfo from '../profile/user-info'
 
 const categories = [
   { label: 'All', value: 'all' },
@@ -34,7 +37,7 @@ const RoadmapFeed = () => {
       ? (category as 'feature-request' | 'bug-report' | 'improvement')
       : undefined
 
-  const { data, isLoading, isError, error } = useQuery(
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
     orpc.roadmap.list.queryOptions({
       input: {
         query: {
@@ -65,7 +68,20 @@ const RoadmapFeed = () => {
   return (
     <section className="space-y-6 py-6">
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <h2 className="font-semibold text-xl">Roadmap Feed</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="font-semibold text-xl">Roadmap Feed</h2>
+          <Button
+            disabled={isFetching}
+            onClick={() => refetch()}
+            size="icon"
+            title="Refresh feed"
+            variant="ghost"
+          >
+            <RefreshCcw
+              className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`}
+            />
+          </Button>
+        </div>
 
         <Select onValueChange={handleCategoryChange} value={category}>
           <SelectTrigger className="w-[200px]">
@@ -83,16 +99,14 @@ const RoadmapFeed = () => {
 
       {meta && (
         <div className="text-muted-foreground text-sm">
-          Page {meta.page} of {meta.totalPage} ({meta.total} total)
+          Page {meta.page} of {meta.totalPage} ({meta.total} items)
         </div>
       )}
 
       {isLoading && (
-        <div className="flex h-40 items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          <span className="ml-2 text-muted-foreground text-sm">
-            Loading roadmaps...
-          </span>
+        <div className="flex h-40 items-center justify-center gap-2 text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className="text-sm">Loading roadmaps...</span>
         </div>
       )}
 
@@ -111,11 +125,24 @@ const RoadmapFeed = () => {
       {!(isLoading || isError) && list.length > 0 && (
         <div className="grid gap-4">
           {list.map((item) => (
-            <Card className="transition hover:shadow-md" key={item.id}>
-              <CardHeader className="flex flex-row items-start justify-between">
-                <CardTitle className="font-medium text-lg">
-                  {item.title}
-                </CardTitle>
+            <Card
+              className="border border-muted/20 transition hover:shadow-md"
+              key={item.id}
+            >
+              <CardHeader className="flex items-start justify-between">
+                <div className="flex flex-col gap-1">
+                  <CardTitle className="font-medium text-lg">
+                    {item.title}
+                  </CardTitle>
+
+                  {item.user && (
+                    <UserInfo
+                      image={item.user.image || ''}
+                      name={item.user.name}
+                    />
+                  )}
+                </div>
+
                 <div className="flex gap-2">
                   <Badge className="capitalize" variant="outline">
                     {item.category.replace('-', ' ')}
@@ -130,8 +157,9 @@ const RoadmapFeed = () => {
                   </Badge>
                 </div>
               </CardHeader>
+
               <CardContent>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   {item.description}
                 </p>
                 <div className="mt-3 text-muted-foreground text-xs">
