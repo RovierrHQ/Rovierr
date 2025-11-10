@@ -7,7 +7,7 @@ import {
   FieldLabel
 } from '@rov/ui/components/field'
 import { Slider as SliderBase } from '@rov/ui/components/slider'
-import { cn } from 'lib/utils'
+import { cn } from '@rov/ui/lib/utils'
 import { useMemo } from 'react'
 import { useFieldContext } from '../context'
 

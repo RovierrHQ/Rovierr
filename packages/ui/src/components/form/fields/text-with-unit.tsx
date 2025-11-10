@@ -6,8 +6,12 @@ import {
   FieldError,
   FieldLabel
 } from '@rov/ui/components/field'
-import { InputGroupAddon, InputGroupText } from '@rov/ui/components/input-group'
-import { InputGroup, InputGroupInput } from 'components/input-group'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText
+} from '@rov/ui/components/input-group'
 import { useFieldContext } from '../context'
 
 type Props = {

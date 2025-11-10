@@ -27,5 +27,7 @@ export const { useAppForm, withFieldGroup, withForm } = createFormHook({
     TextWithUnit,
     MultiSelect
   },
-  formComponents: {}
+  formComponents: {
+    // SubmitButton
+  }
 })

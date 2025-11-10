@@ -7,26 +7,15 @@ import {
   DialogHeader,
   DialogTitle
 } from '@rov/ui/components/dialog'
-import { Input } from '@rov/ui/components/input'
-import { Label } from '@rov/ui/components/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@rov/ui/components/select'
-import { Textarea } from '@rov/ui/components/textarea'
-import { useQueryClient } from '@tanstack/react-query'
+import { useAppForm } from '@rov/ui/components/form/index'
+import { useMutation } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { type ReactNode, useState } from 'react'
-import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { authClient } from '@/lib/auth-client'
-import { zodV4Resolver } from '@/lib/zod-v4-resolver'
-import { orpc } from '@/utils/orpc'
+import { orpc, queryClient } from '@/utils/orpc'
 
 const roadmapSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters long'),
@@ -36,62 +25,47 @@ const roadmapSchema = z.object({
   category: z.enum(['feature-request', 'bug-report', 'improvement'])
 })
 
-type RoadmapFormData = z.infer<typeof roadmapSchema>
-
 const AddRoadmap = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-
   const { data: session } = authClient.useSession()
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    reset,
-    formState: { errors }
-  } = useForm<RoadmapFormData>({
-    resolver: zodV4Resolver(roadmapSchema),
+  const { mutateAsync } = useMutation(
+    orpc.roadmap.add.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: orpc.roadmap.list.key()
+        })
+      }
+    })
+  )
+  const form = useAppForm({
+    validators: {
+      onSubmit: roadmapSchema
+    },
     defaultValues: {
       title: '',
-      description: ''
+      description: '',
+      category: 'feature-request' as
+        | 'feature-request'
+        | 'bug-report'
+        | 'improvement'
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        if (!session?.user.id) return
+
+        await mutateAsync({
+          ...value,
+          status: 'preview'
+        })
+
+        toast.success('Roadmap request submitted successfully!')
+        setOpen(false)
+        form.reset()
+      } catch {
+        toast.error('Failed to submit roadmap request.')
+      }
     }
   })
-
-  const queryClient = useQueryClient()
-
-  const onSubmit = async (data: RoadmapFormData) => {
-    try {
-      if (!session?.user.id) return
-
-      setLoading(true)
-
-      await queryClient.fetchQuery(
-        orpc.roadmap.add.queryOptions({
-          input: {
-            ...data,
-            status: 'preview'
-          }
-        })
-      )
-
-      await queryClient.fetchQuery(
-        orpc.roadmap.list.queryOptions({
-          input: {
-            query: {}
-          }
-        })
-      )
-
-      toast.success('Roadmap request submitted successfully!')
-      setOpen(false)
-      reset()
-    } catch {
-      toast.error('Failed to submit roadmap request.')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <div>
@@ -111,69 +85,46 @@ const AddRoadmap = ({ children }: { children: ReactNode }) => {
             </DialogDescription>
           </DialogHeader>
 
-          <form className="mt-4 space-y-4" onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <Label className="mb-1 font-medium text-foreground text-sm">
-                Category
-              </Label>
-              <Select
-                onValueChange={(value) =>
-                  setValue('category', value as RoadmapFormData['category'], {
-                    shouldValidate: true
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="feature-request">
-                    Feature Request
-                  </SelectItem>
-                  <SelectItem value="bug-report">Bug Report</SelectItem>
-                  <SelectItem value="improvement">Improvement</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.category && (
-                <p className="mt-1 text-red-500 text-sm">
-                  {errors.category.message}
-                </p>
+          <form
+            className="mt-4 space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault()
+              form.handleSubmit()
+            }}
+          >
+            <form.AppField
+              children={(field) => (
+                <field.Select
+                  label="Category"
+                  options={['feature-request', 'bug-report', 'improvement']}
+                  placeholder="Select category"
+                />
               )}
-            </div>
+              name="category"
+            />
 
-            <div>
-              <Label className="mb-1 font-medium text-foreground text-sm">
-                Title
-              </Label>
-              <Input
-                {...register('title')}
-                placeholder="Short title for your idea"
-              />
-              {errors.title && (
-                <p className="mt-1 text-red-500 text-sm">
-                  {errors.title.message}
-                </p>
+            <form.AppField
+              children={(field) => (
+                <field.Text
+                  label="title"
+                  placeholder="Short title for your idea"
+                />
               )}
-            </div>
-
-            <div>
-              <Label className="mb-1 font-medium text-foreground text-sm">
-                Description
-              </Label>
-              <Textarea
-                {...register('description')}
-                placeholder="Describe your idea in detail..."
-              />
-              {errors.description && (
-                <p className="mt-1 text-red-500 text-sm">
-                  {errors.description.message}
-                </p>
+              name="title"
+            />
+            <form.AppField
+              children={(field) => (
+                <field.TextArea
+                  label="Description"
+                  placeholder="Describe your idea in detail..."
+                />
               )}
-            </div>
+              name="description"
+            />
 
             <DialogFooter className="pt-4">
               <Button
-                disabled={loading}
+                disabled={form.state.isSubmitting}
                 onClick={() => setOpen(false)}
                 type="button"
                 variant="outline"
@@ -181,8 +132,12 @@ const AddRoadmap = ({ children }: { children: ReactNode }) => {
                 Cancel
               </Button>
 
-              <Button disabled={loading} type="submit" variant="default">
-                {loading ? (
+              <Button
+                disabled={form.state.isSubmitting}
+                type="submit"
+                variant="default"
+              >
+                {form.state.isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}
                     Submitting...
