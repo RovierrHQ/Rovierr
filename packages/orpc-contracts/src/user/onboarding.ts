@@ -1,6 +1,16 @@
 import { oc } from '@orpc/contract'
 import { z } from 'zod'
 
+export const onboardingSubmitInput = z.object({
+  displayName: z.string().min(1, 'Display name is required').max(50),
+  profileImageUrl: z.url().nullable(),
+  universityEmail: z.email('Invalid email address'),
+  universityId: z.string().min(1, 'Please select a university'),
+  major: z.string().nullable(),
+  yearOfStudy: z.enum(['1', '2', '3', '4', 'graduate', 'phd']).nullable(),
+  interests: z.array(z.string()).max(10)
+})
+
 export const onboarding = {
   submit: oc
     .route({
@@ -10,17 +20,7 @@ export const onboarding = {
       summary: 'Submit Onboarding',
       tags: ['User', 'Onboarding']
     })
-    .input(
-      z.object({
-        displayName: z.string().min(1).max(50),
-        profileImageUrl: z.string().url().optional(),
-        universityEmail: z.string().email(),
-        universityId: z.string(),
-        major: z.string().optional(),
-        yearOfStudy: z.enum(['1', '2', '3', '4', 'graduate', 'phd']).optional(),
-        interests: z.array(z.string()).max(10).optional()
-      })
-    )
+    .input(onboardingSubmitInput)
     .output(
       z.object({
         success: z.boolean()
@@ -86,7 +86,6 @@ export const onboarding = {
       summary: 'Resend Verification OTP',
       tags: ['User', 'Onboarding']
     })
-    .input(z.object({}))
     .output(
       z.object({
         success: z.boolean()

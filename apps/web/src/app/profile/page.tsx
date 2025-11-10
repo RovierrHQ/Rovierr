@@ -24,15 +24,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (data?.user) {
-      client.user.onboarding
-        .getStatus()
-        .then(setVerificationStatus)
-        .catch((error) => {
-          // Log error silently
-          if (process.env.NODE_ENV === 'development') {
-            console.error(error)
-          }
-        })
+      client.user.onboarding.getStatus().then(setVerificationStatus)
     }
   }, [data?.user])
 

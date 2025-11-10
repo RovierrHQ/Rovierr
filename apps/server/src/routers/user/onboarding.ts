@@ -136,7 +136,7 @@ export const onboarding = {
         columns: { universityEmail: true, universityId: true }
       })
 
-      await emitEvent('user.verified', context.session.user.id, {
+      emitEvent('user.verified', context.session.user.id, {
         universityEmail: user?.universityEmail,
         universityId: user?.universityId
       })
@@ -201,7 +201,7 @@ export const onboarding = {
       return {
         isVerified: user?.isVerified ?? false,
         hasUniversityEmail: !!user?.universityEmail,
-        needsOnboarding: !user?.universityEmail
+        needsOnboarding: !(user?.universityEmail && user?.isVerified)
       }
     }
   )

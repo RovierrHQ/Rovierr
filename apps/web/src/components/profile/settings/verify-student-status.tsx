@@ -24,7 +24,7 @@ import { CheckCircle2, Shield, XCircle } from 'lucide-react'
 import { orpc } from '@/utils/orpc'
 
 function VerifyStudentStatus() {
-  const { data } = useQuery(orpc.user.profileInfo.queryOptions())
+  const { data } = useQuery(orpc.user.profile.info.queryOptions())
   const studentVerified = data?.studentStatusVerified
   useQuery(orpc.university.list.queryOptions())
 

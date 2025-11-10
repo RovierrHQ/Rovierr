@@ -13,22 +13,16 @@ type EventType = 'user.created' | 'user.onboarding_submitted' | 'user.verified'
  * @param userId - The user ID associated with the event
  * @param properties - Additional properties to include with the event
  */
-export async function emitEvent(
+export function emitEvent(
   type: EventType,
   userId: string,
   properties: Record<string, unknown>
-): Promise<void> {
+) {
   posthog.capture({
     distinctId: userId,
     event: type,
-    properties: {
-      ...properties,
-      timestamp: new Date().toISOString()
-    }
+    properties
   })
-
-  // Ensure events are flushed
-  await posthog.flush()
 }
 
 /**

@@ -19,10 +19,7 @@ export function FeatureGate({ children, fallback }: FeatureGateProps) {
       try {
         const status = await client.user.onboarding.getStatus()
         setIsVerified(status.isVerified)
-      } catch (error) {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Failed to check verification status:', error)
-        }
+      } catch {
         setIsVerified(false)
       } finally {
         setIsLoading(false)

@@ -1,51 +1,76 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
+import { onboardingSubmitInput } from '@rov/orpc-contracts/user/onboarding'
+import { Button } from '@rov/ui/components/button'
+import { useAppForm } from '@rov/ui/components/form/index'
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot
+} from '@rov/ui/components/input-otp'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { z } from 'zod'
-import { client } from '@/utils/orpc'
-
-const onboardingSchema = z.object({
-  displayName: z.string().min(1, 'Display name is required').max(50),
-  profileImageUrl: z.string().url().optional().or(z.literal('')),
-  universityEmail: z.string().email('Invalid email address'),
-  universityId: z.string().min(1, 'Please select a university'),
-  major: z.string().optional(),
-  yearOfStudy: z
-    .enum(['1', '2', '3', '4', 'graduate', 'phd'])
-    .optional()
-    .or(z.literal('')),
-  interests: z.array(z.string()).max(10).optional()
-})
-
-type OnboardingFormData = z.infer<typeof onboardingSchema>
+import type z from 'zod'
+import { client, orpc } from '@/utils/orpc'
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const [universities, setUniversities] = useState<
-    Array<{
-      id: string
-      name: string
-      slug: string
-      logo: string | null
-      country: string
-      city: string
-    }>
-  >([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showOTPInput, setShowOTPInput] = useState(false)
   const [otp, setOtp] = useState('')
-  const [isVerifying, setIsVerifying] = useState(false)
+  const [cooldownSeconds, setCooldownSeconds] = useState(0)
+  const { data: universities } = useQuery(orpc.university.list.queryOptions())
+  const { mutateAsync: handleVerifyOTP, isPending: isVerifying } = useMutation(
+    orpc.user.onboarding.verifyEmail.mutationOptions({
+      onSuccess: () => router.push('/spaces')
+    })
+  )
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm<OnboardingFormData>({
-    resolver: zodResolver(onboardingSchema)
+  const { mutateAsync: handleResendOTP, isPending: isResending } = useMutation(
+    orpc.user.onboarding.resendVerification.mutationOptions()
+  )
+
+  // Cooldown timer effect
+  useEffect(() => {
+    if (cooldownSeconds > 0) {
+      const timer = setTimeout(() => {
+        setCooldownSeconds(cooldownSeconds - 1)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [cooldownSeconds])
+
+  const startCooldown = () => {
+    setCooldownSeconds(60)
+  }
+
+  const form = useAppForm({
+    validators: { onSubmit: onboardingSubmitInput },
+    defaultValues: {
+      displayName: '',
+      profileImageUrl: null,
+      universityEmail: '',
+      universityId: '',
+      major: '',
+      yearOfStudy: '1',
+      interests: []
+    } as z.infer<typeof onboardingSubmitInput>,
+    onSubmit: async ({ value }) => {
+      try {
+        await client.user.onboarding.submit(value)
+
+        toast.success('Verification code sent to your email!')
+        setShowOTPInput(true)
+        startCooldown()
+        localStorage.setItem('profile_completed', 'true')
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to submit onboarding'
+        toast.error(errorMessage)
+      }
+    }
   })
 
   // Check if user already completed profile
@@ -53,102 +78,9 @@ export default function OnboardingPage() {
     const profileCompleted = localStorage.getItem('profile_completed')
     if (profileCompleted === 'true') {
       // Check verification status
-      client.user.onboarding
-        .getStatus()
-        .then((status) => {
-          if (status.isVerified) {
-            router.push('/spaces')
-          }
-        })
-        .catch((error) => {
-          if (process.env.NODE_ENV === 'development') {
-            console.error(error)
-          }
-        })
+      router.replace('/spaces')
     }
   }, [router])
-
-  // Fetch universities
-  useEffect(() => {
-    client.university
-      .list()
-      .then((data) => {
-        setUniversities(data.universities)
-      })
-      .catch((error) => {
-        toast.error('Failed to load universities')
-        if (process.env.NODE_ENV === 'development') {
-          console.error(error)
-        }
-      })
-  }, [])
-
-  const onSubmit = async (data: OnboardingFormData) => {
-    setIsSubmitting(true)
-
-    try {
-      await client.user.onboarding.submit({
-        displayName: data.displayName,
-        profileImageUrl: data.profileImageUrl || undefined,
-        universityEmail: data.universityEmail,
-        universityId: data.universityId,
-        major: data.major,
-        yearOfStudy: data.yearOfStudy || undefined,
-        interests: data.interests
-      })
-
-      toast.success('Verification code sent to your email!')
-      setShowOTPInput(true)
-      localStorage.setItem('profile_completed', 'true')
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to submit onboarding'
-      toast.error(errorMessage)
-      if (process.env.NODE_ENV === 'development') {
-        console.error(error)
-      }
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleVerifyOTP = async () => {
-    if (otp.length !== 6) {
-      toast.error('Please enter a 6-digit code')
-      return
-    }
-
-    setIsVerifying(true)
-
-    try {
-      await client.user.onboarding.verifyEmail({ otp })
-      toast.success('Email verified successfully!')
-      router.push('/spaces')
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Invalid or expired code'
-      toast.error(errorMessage)
-      if (process.env.NODE_ENV === 'development') {
-        console.error(error)
-      }
-    } finally {
-      setIsVerifying(false)
-    }
-  }
-
-  const handleResendOTP = async () => {
-    try {
-      await client.user.onboarding.resendVerification({})
-      toast.success('New verification code sent!')
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to resend code'
-      toast.error(errorMessage)
-      if (process.env.NODE_ENV === 'development') {
-        console.error(error)
-      }
-    }
-  }
 
   if (showOTPInput) {
     return (
@@ -171,38 +103,59 @@ export default function OnboardingPage() {
               >
                 Verification Code
               </label>
-              <input
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-center font-mono text-2xl tracking-widest focus:border-transparent focus:ring-2 focus:ring-purple-500"
+              <InputOTP
                 id="otp"
                 maxLength={6}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                placeholder="000000"
-                type="text"
+                onChange={(v) => setOtp(v)}
                 value={otp}
-              />
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                </InputOTPGroup>
+                <InputOTPSeparator />
+                <InputOTPGroup>
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
             </div>
 
             <button
               className="w-full rounded-lg bg-purple-600 px-4 py-3 font-medium text-white transition-colors hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isVerifying || otp.length !== 6}
-              onClick={handleVerifyOTP}
+              onClick={() => handleVerifyOTP({ otp })}
               type="button"
             >
               {isVerifying ? 'Verifying...' : 'Verify Email'}
             </button>
 
             <button
-              className="w-full rounded-lg px-4 py-2 font-medium text-purple-600 transition-colors hover:bg-purple-50"
-              onClick={handleResendOTP}
+              className="w-full rounded-lg px-4 py-2 font-medium text-purple-600 transition-colors hover:bg-purple-50 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isResending || cooldownSeconds > 0}
+              onClick={async () => {
+                await handleResendOTP({})
+                toast.success('Verification code resent!')
+                startCooldown()
+              }}
               type="button"
             >
-              Resend Code
+              {(() => {
+                if (cooldownSeconds > 0)
+                  return `Resend Code (${cooldownSeconds}s)`
+                if (isResending) return 'Sending...'
+                return 'Resend Code'
+              })()}
             </button>
           </div>
         </div>
       </div>
     )
   }
+
+  const isSubmitting = form.state.isSubmitting
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 p-4">
@@ -216,31 +169,23 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="space-y-6"
+          onSubmit={(e) => {
+            e.preventDefault()
+            form.handleSubmit()
+          }}
+        >
           {/* Display Name */}
-          <div>
-            <label
-              className="mb-2 block font-medium text-gray-700 text-sm"
-              htmlFor="displayName"
-            >
-              Display Name *
-            </label>
-            <input
-              id="displayName"
-              type="text"
-              {...register('displayName')}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-purple-500"
-              placeholder="John Doe"
-            />
-            {errors.displayName && (
-              <p className="mt-1 text-red-600 text-sm">
-                {errors.displayName.message}
-              </p>
+          <form.AppField
+            children={(field) => (
+              <field.Text label="Displayname" placeholder="" />
             )}
-          </div>
+            name="displayName"
+          />
 
           {/* Profile Image URL */}
-          <div>
+          {/* <div>
             <label
               className="mb-2 block font-medium text-gray-700 text-sm"
               htmlFor="profileImageUrl"
@@ -259,104 +204,69 @@ export default function OnboardingPage() {
                 {errors.profileImageUrl.message}
               </p>
             )}
-          </div>
+          </div> */}
 
           {/* University Selection */}
-          <div>
-            <label
-              className="mb-2 block font-medium text-gray-700 text-sm"
-              htmlFor="universityId"
-            >
-              University *
-            </label>
-            <select
-              id="universityId"
-              {...register('universityId')}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="">Select your university</option>
-              {universities.map((uni) => (
-                <option key={uni.id} value={uni.id}>
-                  {uni.name} - {uni.city}, {uni.country}
-                </option>
-              ))}
-            </select>
-            {errors.universityId && (
-              <p className="mt-1 text-red-600 text-sm">
-                {errors.universityId.message}
-              </p>
+          <form.AppField
+            children={(field) => (
+              <field.Select
+                label="University"
+                options={
+                  universities?.universities?.map((uni) => ({
+                    label: `${uni.name} - ${uni.city}, ${uni.country}`,
+                    value: uni.id
+                  })) ?? []
+                }
+                placeholder="Select your university"
+              />
             )}
-          </div>
+            name="universityId"
+          />
 
           {/* University Email */}
-          <div>
-            <label
-              className="mb-2 block font-medium text-gray-700 text-sm"
-              htmlFor="universityEmail"
-            >
-              University Email *
-            </label>
-            <input
-              id="universityEmail"
-              type="email"
-              {...register('universityEmail')}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-purple-500"
-              placeholder="student@university.edu"
-            />
-            {errors.universityEmail && (
-              <p className="mt-1 text-red-600 text-sm">
-                {errors.universityEmail.message}
-              </p>
+
+          <form.AppField
+            children={(field) => (
+              <field.Text
+                label="University Email"
+                placeholder="XXXXXXXXXXXXXXXXXXXXXX"
+              />
             )}
-          </div>
+            name="universityEmail"
+          />
 
           {/* Major */}
-          <div>
-            <label
-              className="mb-2 block font-medium text-gray-700 text-sm"
-              htmlFor="major"
-            >
-              Major (optional)
-            </label>
-            <input
-              id="major"
-              type="text"
-              {...register('major')}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-purple-500"
-              placeholder="Computer Science"
-            />
-          </div>
+
+          <form.AppField
+            children={(field) => (
+              <field.Text label="Major" placeholder="Computer Science" />
+            )}
+            name="major"
+          />
 
           {/* Year of Study */}
-          <div>
-            <label
-              className="mb-2 block font-medium text-gray-700 text-sm"
-              htmlFor="yearOfStudy"
-            >
-              Year of Study (optional)
-            </label>
-            <select
-              id="yearOfStudy"
-              {...register('yearOfStudy')}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="">Select year</option>
-              <option value="1">1st Year</option>
-              <option value="2">2nd Year</option>
-              <option value="3">3rd Year</option>
-              <option value="4">4th Year</option>
-              <option value="graduate">Graduate</option>
-              <option value="phd">PhD</option>
-            </select>
-          </div>
 
-          <button
-            className="w-full rounded-lg bg-purple-600 px-4 py-3 font-medium text-white transition-colors hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isSubmitting}
-            type="submit"
-          >
+          <form.AppField
+            children={(field) => (
+              <field.Select
+                label="Year of Study"
+                options={[
+                  { label: '1st Year', value: '1' },
+                  { label: '2nd Year', value: '2' },
+                  { label: '3rd Year', value: '3' },
+                  { label: '4th Year', value: '4' },
+                  { label: 'Graduate', value: 'graduate' },
+                  { label: 'PhD', value: 'phd' }
+                ]}
+                placeholder="Select your year"
+              />
+            )}
+            name="yearOfStudy"
+          />
+
+          <Button disabled={isSubmitting} type="submit">
             {isSubmitting ? 'Submitting...' : 'Continue'}
-          </button>
+          </Button>
         </form>
       </div>
     </div>
