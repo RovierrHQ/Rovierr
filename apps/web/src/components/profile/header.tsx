@@ -22,6 +22,7 @@ export default function ProfileHeader() {
     data: profileInfo
     // isLoading: isProfileInfoLoading
   } = useQuery(orpc.user.profileInfo.queryOptions())
+
   return (
     <Card>
       <CardContent className="p-6">
