@@ -65,7 +65,7 @@ export const roadmapCommentUpvote = pgTable('roadmap_comment_upvote', {
  *  ======================== */
 export const roadmap = pgTable('roadmap', {
   id: primaryId,
-  tags: text('tags').array().default([]),
+  // tags: text('tags').array().default([]),
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),

@@ -1,7 +1,7 @@
 import { ORPCError } from '@orpc/client'
 import { and, eq, sql } from 'drizzle-orm'
 import { db } from '@/db'
-import { roadmap as roadmapSchema } from '@/db/schema/roadmap'
+import { roadmap as roadmapTable } from '@/db/schema/roadmap'
 import { protectedProcedure, publicProcedure } from '@/lib/orpc'
 
 export const roadmap = {
@@ -9,7 +9,7 @@ export const roadmap = {
     async ({ input, context }) => {
       try {
         const [inserted] = await db
-          .insert(roadmapSchema)
+          .insert(roadmapTable)
           .values({
             ...input,
             userId: context.session.user.id
@@ -36,14 +36,14 @@ export const roadmap = {
 
       const whereConditions = and(
         ...[
-          eq(roadmapSchema.status, 'publish'),
-          category ? eq(roadmapSchema.category, category) : undefined
+          eq(roadmapTable.status, 'publish'),
+          category ? eq(roadmapTable.category, category) : undefined
         ].filter(Boolean)
       )
 
       const totalResult = await db
         .select({ count: sql<number>`count(*)` })
-        .from(roadmapSchema)
+        .from(roadmapTable)
         .where(whereConditions)
 
       const total = Number(totalResult[0]?.count ?? 0)
@@ -68,7 +68,6 @@ export const roadmap = {
         }
       }
     } catch {
-      // console.log(err)
       throw new ORPCError('INTERNAL_SERVER_ERROR', {
         message: 'failed to retrieve roadmap'
       })
