@@ -73,5 +73,43 @@ export const roadmap = {
           })
         )
       })
+    ),
+
+  vote: oc
+    .route({
+      method: 'POST',
+      description: 'Add vote or remove vote!',
+      tags: ['Roadmap']
+    })
+    .input(
+      z.object({
+        roadmapId: z.string()
+      })
+    )
+    .output(
+      z.object({
+        message: z.string()
+      })
+    ),
+
+  voteList: oc
+    .route({
+      method: 'GET',
+      description: 'retrieve all votes',
+      tags: ['Roadmap']
+    })
+    .input(
+      z.object({
+        roadmapId: z.string()
+      })
+    )
+    .output(
+      z.object({
+        votes: z.array(
+          z.object({
+            userId: z.string()
+          })
+        )
+      })
     )
 }
