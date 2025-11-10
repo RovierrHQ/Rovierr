@@ -46,8 +46,8 @@ const RoadmapVote: FC<RoadmapVoteProps> = ({ roadmapId }) => {
         size="sm"
         variant="outline"
       >
-        <ThumbsUp className="h-4 w-4 animate-pulse opacity-50" />
-        <span className="animate-pulse">...</span>
+        <ThumbsUp className="h-4 w-4 animate-pulse text-muted-foreground" />
+        <span className="animate-pulse text-muted-foreground">...</span>
       </Button>
     )
   }
@@ -55,7 +55,9 @@ const RoadmapVote: FC<RoadmapVoteProps> = ({ roadmapId }) => {
   return (
     <Button
       className={`flex items-center gap-2 transition-all duration-200 ${
-        voted ? 'scale-105' : 'scale-100'
+        voted
+          ? 'scale-105 bg-primary text-primary-foreground hover:bg-primary/90'
+          : 'scale-100'
       }`}
       onClick={handleVote}
       size="sm"
@@ -63,7 +65,9 @@ const RoadmapVote: FC<RoadmapVoteProps> = ({ roadmapId }) => {
     >
       <ThumbsUp
         className={`h-4 w-4 transition-all duration-200 ${
-          voted ? 'fill-current text-white' : ''
+          voted
+            ? 'text-primary-foreground'
+            : 'text-muted-foreground group-hover:text-foreground'
         }`}
       />
       <span>{totalVotes}</span>
