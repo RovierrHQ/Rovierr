@@ -77,25 +77,29 @@ This document outlines the requirements for implementing a social onboarding flo
 ## Non-Functional Requirements
 
 ### Security
+
 - OTP codes must be hashed using SHA-256 before storage
 - OTP codes must expire after 10 minutes
 - OTP codes must be single-use (deleted after successful verification)
 - University email domain validation must be enforced
 
 ### Performance
+
 - Onboarding form submission should complete within 2 seconds
 - Email delivery should occur within 30 seconds
 - OTP verification should complete within 1 second
 
 ### Usability
+
 - Onboarding is optional - users can skip and complete later from profile page
 - Users can access the profile page to complete verification at any time
 - Clear error messages for validation failures
 - Loading states for all async operations
 
 ### Technology Stack
+
 - Backend: Bun + Hono + Drizzle ORM + PostgreSQL
 - Frontend: Next.js + React + TypeScript + Tailwind CSS
-- Email: Resend
+- Email: UseSend
 - Analytics: PostHog
 - Auth: Better-Auth with Google OAuth

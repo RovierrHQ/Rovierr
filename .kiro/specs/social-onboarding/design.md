@@ -10,7 +10,7 @@ This document provides the technical design for implementing a social onboarding
 
 1. **Better-Auth** - Handles Google OAuth authentication
 2. **ORPC API** - Type-safe API endpoints for onboarding
-3. **Resend** - Email delivery service for OTP codes
+3. **usesend** - Email delivery service for OTP codes
 4. **PostHog** - Analytics and event tracking
 5. **PostgreSQL** - Data persistence via Drizzle ORM
 
@@ -41,7 +41,7 @@ export const user = pgTable('user', {
   interests: text('interests').array(),
 
   // Verification status
-  isVerified: boolean('is_verified').default(false).notNull(),
+  isVerified: boolean('is_verified').default(false).notNull()
 
   // ... existing timestamps ...
 })
@@ -59,19 +59,21 @@ The existing `verification` table structure:
 export const verification = pgTable('verification', {
   id: text('id').primaryKey(),
   identifier: text('identifier').notNull(), // Will store userId
-  value: text('value').notNull(),           // Will store hashed 6-digit OTP
+  value: text('value').notNull(), // Will store hashed 6-digit OTP
   expiresAt: timestamp('expires_at').notNull(),
   ...timestamps
 })
 ```
 
 **Usage Pattern**:
+
 - `identifier`: Store the user ID to link verification to a specific user
 - `value`: Store the hashed 6-digit OTP code (SHA-256)
 - `expiresAt`: Set to 10 minutes from creation (shorter window for OTP security)
 - After successful verification, delete the record (single-use enforcement)
 
 **OTP Generation**:
+
 - Generate a random 6-digit numeric code (000000-999999)
 - Hash the OTP before storing in database
 - Send plain OTP to user's university email
@@ -165,10 +167,11 @@ export const onboarding = {
 Location: `apps/server/src/routers/user/onboarding.ts`
 
 Key implementation details:
+
 1. Validate university email domain against university's `validEmailDomains`
 2. Generate 6-digit OTP and hash with SHA-256
 3. Store hashed OTP in verification table with 10-minute expiration
-4. Send OTP via Resend email service
+4. Send OTP via usesend email service
 5. Emit events to PostHog for analytics
 6. On verification, update user's `isVerified` field and delete OTP record
 
@@ -179,6 +182,7 @@ Key implementation details:
 Location: `apps/web/src/app/onboarding/page.tsx`
 
 Features:
+
 - Multi-step form with React Hook Form + Zod validation
 - University selection dropdown (populated via ORPC)
 - Profile image upload (optional)
@@ -191,6 +195,7 @@ Features:
 ### Verification Components
 
 1. **VerificationPending** (`apps/web/src/components/verification-pending.tsx`)
+
    - Reusable OTP input component
    - Resend OTP button
    - Can be used on onboarding page and profile page
@@ -215,6 +220,7 @@ Location: `apps/web/src/app/profile/page.tsx`
 Location: `apps/server/src/services/email/templates/otp.ts`
 
 Features:
+
 - Styled HTML email with gradient header
 - Large, centered 6-digit OTP code
 - Clear expiration notice (10 minutes)
@@ -251,6 +257,7 @@ Location: `apps/server/src/lib/auth.ts`
 Location: `apps/server/src/lib/events.ts`
 
 Events tracked:
+
 - `user.created` - When user signs up via Google
 - `user.onboarding_submitted` - When user submits onboarding form
 - `user.verified` - When user completes email verification
@@ -260,6 +267,7 @@ Events tracked:
 ## Security Considerations
 
 ### OTP Security
+
 - Generate 6-digit random numeric codes
 - Store hashed OTPs in database (SHA-256)
 - Implement OTP expiration (10 minutes)
@@ -267,6 +275,7 @@ Events tracked:
 - Short expiration window reduces attack surface
 
 ### Email Validation
+
 - Validate email domain against university's approved domains
 - Check for duplicate university emails
 - Prevent email enumeration attacks
@@ -274,11 +283,13 @@ Events tracked:
 ## Performance Optimization
 
 ### Database Optimization
+
 - Index on `universityEmail` for fast lookups
 - Index on `identifier` in verification table for OTP validation
 - Index on `value` in verification table for hashed OTP lookups
 
 ### Caching Strategy
+
 - Cache university list for dropdown (1 hour TTL)
 - Store `profile_completed` flag in localStorage for client-side tracking
 - Invalidate localStorage on profile updates
@@ -286,6 +297,7 @@ Events tracked:
 ## Error Handling
 
 Error codes:
+
 - `VALIDATION_ERROR` - Form validation failed
 - `TOKEN_EXPIRED` - OTP has expired
 - `TOKEN_INVALID` - OTP doesn't match
@@ -296,17 +308,20 @@ Error codes:
 ## Testing Strategy
 
 ### Unit Tests
+
 - OTP generation and hashing
 - Email domain validation
 - OTP expiration logic
 
 ### Integration Tests
+
 - Complete onboarding flow
 - OTP verification flow
 - Resend OTP functionality
 - Error scenarios
 
 ### E2E Tests
+
 - Happy path: Sign in → Onboard → Verify → Access features
 - Edge cases: Expired OTP, invalid OTP, resend flow
 

@@ -70,7 +70,7 @@ const envSchema = z.object({
       'HMAC secret for signing Centrifugo connection tokens (min 32 chars)'
     ),
 
-  // Email (Resend)
+  // Email (UseSend)
   USESEND_API_KEY: z
     .string()
     .min(1)

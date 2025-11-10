@@ -1,9 +1,9 @@
-import { Resend } from 'resend'
+import { UseSend } from 'usesend-js'
 import { env } from '@/lib/env'
 import { logger } from '@/lib/logger'
 import { generateOTPEmail } from './templates/otp'
 
-const resend = new Resend(env.USESEND_API_KEY)
+const usesend = new UseSend(env.USESEND_API_KEY, 'https://usesend.rovierr.com')
 
 interface SendOTPEmailParams {
   to: string
@@ -16,7 +16,7 @@ interface SendOTPEmailParams {
  * @param params - Email parameters including recipient, display name, and OTP
  * @throws Error if email delivery fails
  */
-export async function sendOTPEmail(params: SendOTPEmailParams): Promise<void> {
+export async function sendOTPEmail(params: SendOTPEmailParams) {
   const { subject, html, text } = generateOTPEmail({
     displayName: params.displayName,
     otp: params.otp,
@@ -24,8 +24,8 @@ export async function sendOTPEmail(params: SendOTPEmailParams): Promise<void> {
   })
 
   try {
-    await resend.emails.send({
-      from: 'Rovierr <noreply@rovierr.com>',
+    await usesend.emails.send({
+      from: 'Rovierr <noreply@clubs.rovierr.com>',
       to: params.to,
       subject,
       html,
