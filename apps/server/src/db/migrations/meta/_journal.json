@@ -15,6 +15,27 @@
       "when": 1759995011936,
       "tag": "0001_material_true_believers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1762325747448,
+      "tag": "0002_young_multiple_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1762413801177,
+      "tag": "0003_motionless_venus",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1762422752366,
+      "tag": "0004_swift_butterfly",
+      "breakpoints": true
     }
   ]
 }

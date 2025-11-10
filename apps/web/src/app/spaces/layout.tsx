@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import SpacesLayout from '@/components/layout/spaces-layout'
+import RoadmapFloatButton from '@/components/roadmap/roadmap-float-button'
 import { authClient } from '@/lib/auth-client'
 
 function Layout({ children }: LayoutProps<'/spaces'>) {
@@ -21,7 +22,12 @@ function Layout({ children }: LayoutProps<'/spaces'>) {
   if (!session?.user) {
     redirect('/login')
   }
-  return <SpacesLayout>{children}</SpacesLayout>
+  return (
+    <SpacesLayout>
+      {children}
+      <RoadmapFloatButton />
+    </SpacesLayout>
+  )
 }
 
 export default Layout

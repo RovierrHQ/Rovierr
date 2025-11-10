@@ -1,5 +1,7 @@
+import { relations } from 'drizzle-orm'
 import { boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { timestamps } from '../helper'
+import { roadmap } from './roadmap'
 import { university } from './university'
 
 export const user = pgTable('user', {
@@ -26,6 +28,10 @@ export const user = pgTable('user', {
 
   ...timestamps
 })
+
+export const usersRelations = relations(user, ({ many }) => ({
+  roadmap: many(roadmap)
+}))
 
 export const session = pgTable('session', {
   id: text('id').primaryKey(),
