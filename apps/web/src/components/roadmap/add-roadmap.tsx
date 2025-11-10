@@ -29,7 +29,7 @@ const AddRoadmap = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false)
   const { data: session } = authClient.useSession()
   const { mutateAsync } = useMutation(
-    orpc.roadmap.add.mutationOptions({
+    orpc.roadmap.create.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: orpc.roadmap.list.key()

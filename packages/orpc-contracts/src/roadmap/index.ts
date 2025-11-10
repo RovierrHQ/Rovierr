@@ -2,7 +2,7 @@ import { oc } from '@orpc/contract'
 import { z } from 'zod'
 
 export const roadmap = {
-  add: oc
+  create: oc
     .route({
       method: 'POST',
       description: 'Create new Roadmap',
