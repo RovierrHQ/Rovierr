@@ -20,6 +20,7 @@ import { Loader2, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { orpc } from '@/utils/orpc'
 import UserInfo from '../profile/user-info'
+import RoadmapVote from './roadmap-vote'
 
 const categories = [
   { label: 'All', value: 'all' },
@@ -143,18 +144,12 @@ const RoadmapFeed = () => {
                   )}
                 </div>
 
-                <div className="flex gap-2">
-                  <Badge className="capitalize" variant="outline">
-                    {item.category.replace('-', ' ')}
-                  </Badge>
-                  <Badge
-                    className="capitalize"
-                    variant={
-                      item.status === 'publish' ? 'default' : 'secondary'
-                    }
-                  >
-                    {item.status}
-                  </Badge>
+                <div className="flex flex-col gap-3">
+                  <div className="space-x-2">
+                    <Badge className="capitalize" variant="outline">
+                      {item.category.replace('-', ' ')}
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
 
@@ -168,6 +163,9 @@ const RoadmapFeed = () => {
                     dateStyle: 'medium',
                     timeStyle: 'short'
                   })}
+                </div>
+                <div className="flex justify-end">
+                  <RoadmapVote roadmapId={item.id} />
                 </div>
               </CardContent>
             </Card>
