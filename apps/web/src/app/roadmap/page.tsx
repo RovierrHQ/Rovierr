@@ -1,6 +1,5 @@
 'use client'
 
-import { AuroraBackground } from '@rov/ui/components/aurora-background'
 import { Button } from '@rov/ui/components/button'
 import Topnav from '@/components/layout/top-nav'
 import AddRoadmap from '@/components/roadmap/add-roadmap'
@@ -9,7 +8,6 @@ import RoadmapFeed from '@/components/roadmap/roadmap-feed'
 const RoadmapPage = () => {
   return (
     <div>
-      <AuroraBackground />
       <Topnav />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <header className="rounded-lg border-border border-b bg-card">
@@ -30,7 +28,7 @@ const RoadmapPage = () => {
           </div>
         </header>
 
-        <div className="mt-8 grid gap-8">
+        <div className="mt-8 space-y-2">
           <RoadmapFeed />
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import SpacesLayout from '@/components/layout/spaces-layout'
-import RoadmapNavigator from '@/components/roadmap/roadmap-navigator'
+import RoadmapFloatButton from '@/components/roadmap/roadmap-float-button'
 import { authClient } from '@/lib/auth-client'
 
 function Layout({ children }: LayoutProps<'/spaces'>) {
@@ -27,7 +27,7 @@ function Layout({ children }: LayoutProps<'/spaces'>) {
   return (
     <SpacesLayout>
       {children}
-      <RoadmapNavigator />
+      <RoadmapFloatButton />
     </SpacesLayout>
   )
 }
