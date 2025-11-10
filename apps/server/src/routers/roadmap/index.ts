@@ -1,7 +1,7 @@
 import { ORPCError } from '@orpc/client'
 import { and, eq, sql } from 'drizzle-orm'
 import { db } from '@/db'
-import { roadmap as roadmapTable } from '@/db/schema/roadmap'
+import { roadmap as roadmapTable, roadmapUpvote } from '@/db/schema/roadmap'
 import { protectedProcedure, publicProcedure } from '@/lib/orpc'
 
 export const roadmap = {
@@ -70,6 +70,77 @@ export const roadmap = {
     } catch {
       throw new ORPCError('INTERNAL_SERVER_ERROR', {
         message: 'failed to retrieve roadmap'
+      })
+    }
+  }),
+
+  vote: publicProcedure.roadmap.vote.handler(async ({ input, context }) => {
+    try {
+      const { roadmapId } = input
+      const userId = context.session?.user.id
+
+      if (!userId) {
+        throw new ORPCError('UNAUTHORIZED', {
+          message: 'login required to vote'
+        })
+      }
+
+      const [roadmapData] = await db
+        .select()
+        .from(roadmapTable)
+        .where(eq(roadmapTable.id, roadmapId))
+
+      if (!roadmapData) {
+        throw new ORPCError('NOT_FOUND', { message: 'roadmap not found' })
+      }
+
+      const [existingVote] = await db
+        .select()
+        .from(roadmapUpvote)
+        .where(
+          and(
+            eq(roadmapUpvote.roadmapId, roadmapId),
+            eq(roadmapUpvote.userId, userId)
+          )
+        )
+
+      if (existingVote) {
+        await db
+          .delete(roadmapUpvote)
+          .where(
+            and(
+              eq(roadmapUpvote.roadmapId, roadmapId),
+              eq(roadmapUpvote.userId, userId)
+            )
+          )
+
+        return { message: 'vote removed', voted: false }
+      }
+
+      await db.insert(roadmapUpvote).values({
+        roadmapId,
+        userId
+      })
+
+      return { message: 'vote added', voted: true }
+    } catch {
+      throw new ORPCError('INTERNAL_SERVER_ERROR', {
+        message: 'failed to toggle vote'
+      })
+    }
+  }),
+
+  voteList: publicProcedure.roadmap.voteList.handler(async ({ input }) => {
+    try {
+      const { roadmapId } = input
+      const votes = await db
+        .select()
+        .from(roadmapUpvote)
+        .where(eq(roadmapUpvote.roadmapId, roadmapId))
+      return { votes }
+    } catch {
+      throw new ORPCError('INTERNAL_SERVER_ERROR', {
+        message: 'failed to retrieve vote list'
       })
     }
   })
