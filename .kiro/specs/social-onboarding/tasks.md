@@ -156,7 +156,7 @@ This implementation plan breaks down the social onboarding feature into discrete
     - _Requirements: 1.2, 3.4_
 
 - [x] 10. Add environment variables and configuration
-  - Add `RESEND_API_KEY` to `.env` files
+  - Add `USESEND_API_KEY` to `.env` files
   - Add `POSTHOG_API_KEY` and `POSTHOG_HOST` to `.env` files
   - Add `APP_URL` for email link generation
   - Update `.env.example` files with new variables

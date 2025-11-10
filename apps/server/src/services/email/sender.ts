@@ -3,7 +3,7 @@ import { env } from '@/lib/env'
 import { logger } from '@/lib/logger'
 import { generateOTPEmail } from './templates/otp'
 
-const resend = new Resend(env.RESEND_API_KEY)
+const resend = new Resend(env.USESEND_API_KEY)
 
 interface SendOTPEmailParams {
   to: string

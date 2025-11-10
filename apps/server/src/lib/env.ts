@@ -71,10 +71,10 @@ const envSchema = z.object({
     ),
 
   // Email (Resend)
-  RESEND_API_KEY: z
+  USESEND_API_KEY: z
     .string()
     .min(1)
-    .describe('Resend API key for sending emails'),
+    .describe('Usesend API key for sending emails'),
 
   // Analytics (PostHog)
   POSTHOG_API_KEY: z.string().min(1).describe('PostHog API key for analytics'),

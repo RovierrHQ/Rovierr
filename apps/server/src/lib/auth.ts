@@ -79,11 +79,15 @@ const authPlugins: AuthPlugins = [
 ]
 
 export const auth = betterAuth({
+  appName: 'Rovierr',
+  baseURL: env.SERVER_URL,
+  secret: env.BETTER_AUTH_SECRET,
+  trustedOrigins: env.CORS_ORIGIN.split(','),
+  plugins: authPlugins,
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema
   }),
-  trustedOrigins: env.CORS_ORIGIN.split(','),
   emailAndPassword: {
     enabled: false
   },
@@ -95,9 +99,6 @@ export const auth = betterAuth({
       prompt: 'select_account consent'
     }
   },
-  secret: env.BETTER_AUTH_SECRET,
-  baseURL: env.SERVER_URL,
-  plugins: authPlugins,
   databaseHooks: {
     user: {
       create: {
@@ -120,6 +121,11 @@ export const auth = betterAuth({
           })
         }
       }
+    }
+  },
+  advanced: {
+    crossSubDomainCookies: {
+      enabled: true
     }
   }
 })
