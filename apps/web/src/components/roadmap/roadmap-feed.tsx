@@ -126,10 +126,10 @@ const RoadmapFeed = () => {
       )}
 
       {!(isLoading || isError) && list.length > 0 && (
-        <div className="grid gap-4">
+        <div className="space-y-4">
           {list.map((item) => (
             <Card
-              className="border border-muted/20 transition hover:shadow-md"
+              className="border border-muted transition hover:shadow-md"
               key={item.id}
             >
               <CardHeader className="flex items-start justify-between">
@@ -159,7 +159,7 @@ const RoadmapFeed = () => {
                 <p className="text-muted-foreground text-sm leading-relaxed">
                   {item.description}
                 </p>
-                <div className="mt-3 text-muted-foreground text-xs">
+                <div className="mt-3 text-muted-foreground/80 text-xs">
                   Created:{' '}
                   {new Date(item.createdAt).toLocaleString(undefined, {
                     dateStyle: 'medium',
