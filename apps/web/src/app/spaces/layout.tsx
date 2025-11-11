@@ -8,6 +8,7 @@ import { authClient } from '@/lib/auth-client'
 
 function Layout({ children }: LayoutProps<'/spaces'>) {
   const router = useRouter()
+
   const { data: session, isPending } = authClient.useSession()
   useEffect(() => {
     if (!(session || isPending)) {
@@ -24,6 +25,7 @@ function Layout({ children }: LayoutProps<'/spaces'>) {
       </div>
     )
   }
+
   return (
     <SpacesLayout>
       {children}

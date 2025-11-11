@@ -16,23 +16,10 @@ import {
   SidebarMenuItem,
   useSidebar
 } from '@rov/ui/components/sidebar'
-import {
-  Folder,
-  Forward,
-  type LucideIcon,
-  MoreHorizontal,
-  Trash2
-} from 'lucide-react'
+import { Folder, Forward, MoreHorizontal, Trash2 } from 'lucide-react'
+import type { IProjects } from '@/data/space-sidebar-data'
 
-export function NavProjects({
-  projects
-}: {
-  projects: {
-    name: string
-    url: string
-    icon: LucideIcon
-  }[]
-}) {
+export function NavProjects({ projects }: { projects: IProjects[] }) {
   const { isMobile } = useSidebar()
 
   return (

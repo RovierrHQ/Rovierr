@@ -15,22 +15,10 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem
 } from '@rov/ui/components/sidebar'
-import { ChevronRight, type LucideIcon } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import type { INavMain } from '@/data/space-sidebar-data'
 
-export function NavMain({
-  items
-}: {
-  items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
-}) {
+export function NavMain({ items }: { items: INavMain[] }) {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
