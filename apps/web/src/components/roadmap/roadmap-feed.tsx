@@ -16,10 +16,11 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { useQuery } from '@tanstack/react-query'
-import { Loader2, RefreshCcw } from 'lucide-react'
+import { Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { orpc } from '@/utils/orpc'
 import UserInfo from '../profile/user-info'
+import RoadmapComments from './roadmap-comments'
 import RoadmapVote from './roadmap-vote'
 
 const categories = [
@@ -32,6 +33,7 @@ const categories = [
 const RoadmapFeed = () => {
   const [category, setCategory] = useState<string>(categories[0].value)
   const [page, setPage] = useState<number>(1)
+  const [openCommentsId, setOpenCommentsId] = useState<string | null>(null)
 
   const normalizedCategory =
     category !== 'all'
@@ -164,8 +166,16 @@ const RoadmapFeed = () => {
                     timeStyle: 'short'
                   })}
                 </div>
-                <div className="flex justify-end">
-                  <RoadmapVote roadmapId={item.id} />
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    onClick={() => setOpenCommentsId(item.id)}
+                    size="sm"
+                    variant="outline"
+                  >
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    <span>{item.comments?.length ?? 0}</span>
+                  </Button>
+                  <RoadmapVote roadmapId={item.id} upvotes={item.upvotes} />
                 </div>
               </CardContent>
             </Card>
@@ -196,6 +206,17 @@ const RoadmapFeed = () => {
           </Button>
         </div>
       )}
+
+      {list.map((item) => (
+        <RoadmapComments
+          comments={item.comments ?? []}
+          key={`comments-${item.id}`}
+          onOpenChange={(open) => setOpenCommentsId(open ? item.id : null)}
+          open={openCommentsId === item.id}
+          roadmapId={item.id}
+          roadmapTitle={item.title}
+        />
+      ))}
     </section>
   )
 }

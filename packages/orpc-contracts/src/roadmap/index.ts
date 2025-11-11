@@ -1,6 +1,27 @@
 import { oc } from '@orpc/contract'
 import { z } from 'zod'
 
+const commentSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  user: z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string(),
+    image: z.string().nullable()
+  }),
+  upvotes: z.array(
+    z.object({
+      id: z.string(),
+      userId: z.string(),
+      createdAt: z.string(),
+      updatedAt: z.string()
+    })
+  )
+})
+
 export const roadmap = {
   create: oc
     .route({
@@ -69,7 +90,17 @@ export const roadmap = {
             category: z.enum(['feature-request', 'bug-report', 'improvement']),
             description: z.string(),
             createdAt: z.string(),
-            updatedAt: z.string()
+            updatedAt: z.string(),
+            upvotes: z.array(
+              z.object({
+                id: z.string(),
+                userId: z.string(),
+                roadmapId: z.string(),
+                createdAt: z.string(),
+                updatedAt: z.string()
+              })
+            ),
+            comments: z.array(commentSchema)
           })
         )
       })
@@ -92,24 +123,18 @@ export const roadmap = {
       })
     ),
 
-  voteList: oc
+  createComment: oc
     .route({
-      method: 'GET',
-      description: 'retrieve all votes',
+      method: 'POST',
+      description: 'Create a new comment on a roadmap item',
+      summary: 'Create comment',
       tags: ['Roadmap']
     })
     .input(
       z.object({
-        roadmapId: z.string()
+        roadmapId: z.string(),
+        text: z.string().min(1, 'Comment text is required')
       })
     )
-    .output(
-      z.object({
-        votes: z.array(
-          z.object({
-            userId: z.string()
-          })
-        )
-      })
-    )
+    .output(commentSchema)
 }

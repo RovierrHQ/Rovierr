@@ -1,30 +1,63 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ThumbsUp } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import type { FC } from 'react'
+import { useMemo } from 'react'
 import { authClient } from '@/lib/auth-client'
-import { orpc, queryClient } from '@/utils/orpc'
+import { orpc } from '@/utils/orpc'
 
 type RoadmapVoteProps = {
   roadmapId: string
+  upvotes?: Array<{
+    id: string
+    userId: string
+    roadmapId: string
+    createdAt: string
+    updatedAt: string
+  }>
 }
 
-const RoadmapVote: FC<RoadmapVoteProps> = ({ roadmapId }) => {
+const RoadmapVote: FC<RoadmapVoteProps> = ({
+  roadmapId,
+  upvotes: upvotesProp
+}) => {
   const { data: session } = authClient.useSession()
   const userId = session?.user.id
+  const queryClient = useQueryClient()
 
-  const { data, isLoading } = useQuery(
-    orpc.roadmap.voteList.queryOptions({ input: { roadmapId } })
-  )
+  // Get upvotes from prop or from list query cache
+  const upvotes = useMemo(() => {
+    if (upvotesProp) return upvotesProp
+
+    // Try to get from list query cache
+    const listData = queryClient.getQueryData(orpc.roadmap.list.key()) as
+      | {
+          data: Array<{
+            id: string
+            upvotes: Array<{
+              id: string
+              userId: string
+              roadmapId: string
+              createdAt: string
+              updatedAt: string
+            }>
+          }>
+        }
+      | undefined
+
+    const roadmap = listData?.data?.find((item) => item.id === roadmapId)
+    return roadmap?.upvotes ?? []
+  }, [upvotesProp, roadmapId, queryClient])
 
   const { mutateAsync, isPending } = useMutation(
     orpc.roadmap.vote.mutationOptions({
       onSuccess: () => {
+        // Invalidate list query to refresh upvotes
         queryClient.invalidateQueries({
-          queryKey: orpc.roadmap.voteList.key({ input: { roadmapId } })
+          queryKey: orpc.roadmap.list.key()
         })
       }
     })
@@ -35,10 +68,10 @@ const RoadmapVote: FC<RoadmapVoteProps> = ({ roadmapId }) => {
     await mutateAsync({ roadmapId })
   }
 
-  const voted = data?.votes?.some((vote) => vote.userId === userId) ?? false
-  const totalVotes = data?.votes?.length ?? 0
+  const voted = upvotes.some((vote) => vote.userId === userId)
+  const totalVotes = upvotes.length
 
-  if (isLoading || isPending) {
+  if (isPending) {
     return (
       <Button
         className="flex items-center gap-2"

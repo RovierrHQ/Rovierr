@@ -1,7 +1,11 @@
 import { ORPCError } from '@orpc/client'
 import { and, eq, sql } from 'drizzle-orm'
 import { db } from '@/db'
-import { roadmap as roadmapTable, roadmapUpvote } from '@/db/schema/roadmap'
+import {
+  roadmapComments,
+  roadmap as roadmapTable,
+  roadmapUpvote
+} from '@/db/schema/roadmap'
 import { protectedProcedure, publicProcedure } from '@/lib/orpc'
 
 export const roadmap = {
@@ -41,25 +45,36 @@ export const roadmap = {
         ].filter(Boolean)
       )
 
-      const totalResult = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(roadmapTable)
-        .where(whereConditions)
+      // Single query using relational API with upvotes included
+      // Get count separately as it's needed for pagination metadata
+      const [countResult, roadmaps] = await Promise.all([
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(roadmapTable)
+          .where(whereConditions),
+        db.query.roadmap.findMany({
+          where: whereConditions,
+          limit,
+          offset,
+          orderBy: (rm, { desc: descFn }) => descFn(rm.createdAt),
+          with: {
+            user: true,
+            upvotes: true,
+            comments: {
+              with: {
+                user: true,
+                upvotes: true
+              },
+              orderBy: (comment, { asc: ascFn }) => ascFn(comment.createdAt)
+            }
+          }
+        })
+      ])
 
-      const total = Number(totalResult[0]?.count ?? 0)
-
-      const result = await db.query.roadmap.findMany({
-        where: whereConditions,
-        limit,
-        offset,
-        orderBy: (rm, { desc }) => desc(rm.createdAt),
-        with: {
-          user: true
-        }
-      })
+      const total = Number(countResult[0]?.count ?? 0)
 
       return {
-        data: result,
+        data: roadmaps,
         meta: {
           page,
           limit,
@@ -130,18 +145,56 @@ export const roadmap = {
     }
   }),
 
-  voteList: publicProcedure.roadmap.voteList.handler(async ({ input }) => {
-    try {
-      const { roadmapId } = input
-      const votes = await db
-        .select()
-        .from(roadmapUpvote)
-        .where(eq(roadmapUpvote.roadmapId, roadmapId))
-      return { votes }
-    } catch {
-      throw new ORPCError('INTERNAL_SERVER_ERROR', {
-        message: 'failed to retrieve vote list'
-      })
+  createComment: protectedProcedure.roadmap.createComment.handler(
+    async ({ input, context }) => {
+      try {
+        const { roadmapId, text } = input
+        const userId = context.session.user.id
+
+        // Validate roadmap exists
+        const [roadmapData] = await db
+          .select()
+          .from(roadmapTable)
+          .where(eq(roadmapTable.id, roadmapId))
+
+        if (!roadmapData) {
+          throw new ORPCError('NOT_FOUND', { message: 'roadmap not found' })
+        }
+
+        // Create comment
+        const [createdComment] = await db
+          .insert(roadmapComments)
+          .values({
+            roadmapId,
+            userId,
+            text
+          })
+          .returning()
+
+        // Fetch comment with relations
+        const commentWithRelations = await db.query.roadmapComments.findFirst({
+          where: (comment, { eq: eqFn }) => eqFn(comment.id, createdComment.id),
+          with: {
+            user: true,
+            upvotes: true
+          }
+        })
+
+        if (!commentWithRelations) {
+          throw new ORPCError('INTERNAL_SERVER_ERROR', {
+            message: 'failed to retrieve created comment'
+          })
+        }
+
+        return commentWithRelations
+      } catch (error) {
+        if (error instanceof ORPCError) {
+          throw error
+        }
+        throw new ORPCError('INTERNAL_SERVER_ERROR', {
+          message: 'failed to create comment'
+        })
+      }
     }
-  })
+  )
 }

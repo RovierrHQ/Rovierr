@@ -76,9 +76,55 @@ export const roadmap = pgTable('roadmap', {
   ...timestamps
 })
 
-export const roadmapRelation = relations(roadmap, ({ one }) => ({
+export const roadmapRelation = relations(roadmap, ({ one, many }) => ({
   user: one(user, {
     fields: [roadmap.userId],
     references: [user.id]
+  }),
+  upvotes: many(roadmapUpvote),
+  comments: many(roadmapComments)
+}))
+
+export const roadmapUpvoteRelation = relations(roadmapUpvote, ({ one }) => ({
+  roadmap: one(roadmap, {
+    fields: [roadmapUpvote.roadmapId],
+    references: [roadmap.id]
+  }),
+  user: one(user, {
+    fields: [roadmapUpvote.userId],
+    references: [user.id]
   })
 }))
+
+export const roadmapCommentsRelation = relations(
+  roadmapComments,
+  ({ one, many }) => ({
+    user: one(user, {
+      fields: [roadmapComments.userId],
+      references: [user.id]
+    }),
+    roadmap: one(roadmap, {
+      fields: [roadmapComments.roadmapId],
+      references: [roadmap.id]
+    }),
+    upvotes: many(roadmapCommentUpvote)
+  })
+)
+
+export const roadmapCommentUpvoteRelation = relations(
+  roadmapCommentUpvote,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [roadmapCommentUpvote.userId],
+      references: [user.id]
+    }),
+    comment: one(roadmapComments, {
+      fields: [roadmapCommentUpvote.commentId],
+      references: [roadmapComments.id]
+    }),
+    roadmap: one(roadmap, {
+      fields: [roadmapCommentUpvote.roadmapId],
+      references: [roadmap.id]
+    })
+  })
+)
