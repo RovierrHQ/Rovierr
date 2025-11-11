@@ -11,7 +11,7 @@ import {
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Loader2, ThumbsUp } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import type { FC } from 'react'
 import { toast } from 'sonner'
@@ -19,6 +19,7 @@ import { z } from 'zod'
 import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
 import UserInfo from '../profile/user-info'
+import CommentVote from './comment-vote'
 
 const commentSchema = z.object({
   text: z.string().min(1, 'Comment cannot be empty')
@@ -122,10 +123,11 @@ const RoadmapComments: FC<RoadmapCommentsProps> = ({
                       image={comment.user.image || ''}
                       name={comment.user.name}
                     />
-                    <div className="flex items-center gap-2 text-muted-foreground text-xs">
-                      <ThumbsUp className="h-3 w-3" />
-                      <span>{comment.upvotes.length}</span>
-                    </div>
+                    <CommentVote
+                      commentId={comment.id}
+                      commentUserId={comment.user.id}
+                      upvotes={comment.upvotes}
+                    />
                   </div>
                   <p className="text-sm leading-relaxed">{comment.text}</p>
                   <div className="text-muted-foreground text-xs">

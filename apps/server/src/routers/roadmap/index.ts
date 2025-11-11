@@ -3,6 +3,7 @@ import { and, eq, sql } from 'drizzle-orm'
 import { db } from '@/db'
 import {
   roadmapComments,
+  roadmapCommentUpvote,
   roadmap as roadmapTable,
   roadmapUpvote
 } from '@/db/schema/roadmap'
@@ -193,6 +194,79 @@ export const roadmap = {
         }
         throw new ORPCError('INTERNAL_SERVER_ERROR', {
           message: 'failed to create comment'
+        })
+      }
+    }
+  ),
+
+  voteComment: publicProcedure.roadmap.voteComment.handler(
+    async ({ input, context }) => {
+      try {
+        const { commentId } = input
+        const userId = context.session?.user.id
+
+        if (!userId) {
+          throw new ORPCError('UNAUTHORIZED', {
+            message: 'login required to vote'
+          })
+        }
+
+        // Get comment with user info to check ownership
+        const [commentData] = await db
+          .select()
+          .from(roadmapComments)
+          .where(eq(roadmapComments.id, commentId))
+
+        if (!commentData) {
+          throw new ORPCError('NOT_FOUND', { message: 'comment not found' })
+        }
+
+        // Prevent users from voting on their own comments
+        if (commentData.userId === userId) {
+          throw new ORPCError('FORBIDDEN', {
+            message: 'cannot vote on your own comment'
+          })
+        }
+
+        // Check if vote already exists
+        const [existingVote] = await db
+          .select()
+          .from(roadmapCommentUpvote)
+          .where(
+            and(
+              eq(roadmapCommentUpvote.commentId, commentId),
+              eq(roadmapCommentUpvote.userId, userId)
+            )
+          )
+
+        if (existingVote) {
+          // Remove vote
+          await db
+            .delete(roadmapCommentUpvote)
+            .where(
+              and(
+                eq(roadmapCommentUpvote.commentId, commentId),
+                eq(roadmapCommentUpvote.userId, userId)
+              )
+            )
+
+          return { message: 'vote removed' }
+        }
+
+        // Add vote
+        await db.insert(roadmapCommentUpvote).values({
+          commentId,
+          userId,
+          roadmapId: commentData.roadmapId
+        })
+
+        return { message: 'vote added' }
+      } catch (error) {
+        if (error instanceof ORPCError) {
+          throw error
+        }
+        throw new ORPCError('INTERNAL_SERVER_ERROR', {
+          message: 'failed to toggle vote'
         })
       }
     }

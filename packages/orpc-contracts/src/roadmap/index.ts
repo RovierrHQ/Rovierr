@@ -136,5 +136,23 @@ export const roadmap = {
         text: z.string().min(1, 'Comment text is required')
       })
     )
-    .output(commentSchema)
+    .output(commentSchema),
+
+  voteComment: oc
+    .route({
+      method: 'POST',
+      description: 'Add vote or remove vote on a comment',
+      summary: 'Vote comment',
+      tags: ['Roadmap']
+    })
+    .input(
+      z.object({
+        commentId: z.string()
+      })
+    )
+    .output(
+      z.object({
+        message: z.string()
+      })
+    )
 }
