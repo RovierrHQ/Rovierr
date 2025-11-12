@@ -7,42 +7,7 @@ export const spaces: types.ISpaces[] = [
     logo: lr.GalleryVerticalEnd,
     plan: 'Enterprise',
     url: '/spaces',
-    isActive: true
-  },
-  {
-    name: types.SpacesNames.ACADEMICS,
-    logo: lr.GraduationCap,
-    plan: 'Startup',
-    url: '/spaces/academics',
-    isActive: false
-  },
-  {
-    name: types.SpacesNames.SOCIAL,
-    logo: lr.AudioWaveform,
-    plan: 'Free',
-    url: '/spaces/social',
-    isActive: false
-  },
-  {
-    name: types.SpacesNames.PERSONAL,
-    logo: lr.UserRound,
-    plan: 'Free',
-    url: '/spaces/personal',
-    isActive: false
-  },
-  {
-    name: types.SpacesNames.CAREER,
-    logo: lr.BriefcaseBusiness,
-    plan: 'Free',
-    url: '/spaces/career',
-    isActive: false
-  },
-  {
-    name: types.SpacesNames.CLUBS,
-    logo: lr.Users,
-    plan: 'Free',
-    url: '/spaces/clubs',
-    isActive: true,
+    isActive: false,
     childrenItems: [
       {
         title: 'Playground',
@@ -88,6 +53,41 @@ export const spaces: types.ISpaces[] = [
         ]
       }
     ]
+  },
+  {
+    name: types.SpacesNames.ACADEMICS,
+    logo: lr.GraduationCap,
+    plan: 'Startup',
+    url: '/spaces/academics',
+    isActive: false
+  },
+  {
+    name: types.SpacesNames.SOCIAL,
+    logo: lr.AudioWaveform,
+    plan: 'Free',
+    url: '/spaces/social',
+    isActive: false
+  },
+  {
+    name: types.SpacesNames.PERSONAL,
+    logo: lr.UserRound,
+    plan: 'Free',
+    url: '/spaces/personal',
+    isActive: false
+  },
+  {
+    name: types.SpacesNames.CAREER,
+    logo: lr.BriefcaseBusiness,
+    plan: 'Free',
+    url: '/spaces/career',
+    isActive: false
+  },
+  {
+    name: types.SpacesNames.CLUBS,
+    logo: lr.Users,
+    plan: 'Free',
+    url: '/spaces/clubs',
+    isActive: true
   }
 ]
 
