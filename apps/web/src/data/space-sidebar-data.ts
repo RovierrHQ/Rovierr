@@ -84,10 +84,48 @@ export const spaces: types.ISpaces[] = [
   },
   {
     name: types.SpacesNames.CLUBS,
-    logo: lr.Users,
+    logo: lr.Club,
     plan: 'Free',
     url: '/spaces/clubs',
-    isActive: true
+    isActive: true,
+    childrenItems: [
+      {
+        title: 'Clubs & Societies',
+        url: '/spaces/clubs/societies',
+        icon: lr.Users,
+        isActive: true,
+        items: [
+          {
+            title: 'Campus Feed',
+            url: '/spaces/clubs/societies/campus-feed'
+          },
+          {
+            title: 'My Clubs',
+            url: '/spaces/clubs/societies/my-clubs'
+          },
+          {
+            title: 'Events',
+            url: '/spaces/clubs/societies/events'
+          }
+        ]
+      },
+      {
+        title: 'Discover',
+        url: '/spaces/clubs/discover',
+        icon: lr.Compass,
+        isActive: false,
+        items: [
+          {
+            title: 'Browse Clubs',
+            url: '/spaces/clubs/discover/browse-clubs'
+          },
+          {
+            title: 'Network',
+            url: '/spaces/clubs/discover/network'
+          }
+        ]
+      }
+    ]
   }
 ]
 
