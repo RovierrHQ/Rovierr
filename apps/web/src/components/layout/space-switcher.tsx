@@ -24,17 +24,19 @@ import { ChevronsUpDown, Info } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import type { ISpaces } from '@/data/space-sidebar-data'
+import type { ISpaces } from '@/types/types-space-sidebar-data'
 
 export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
   const { isMobile } = useSidebar()
-  const [activeSpace, setActiveSpace] = useState(spaces[0])
+  const [activeSpace, setActiveSpace] = useState(
+    spaces.find((space) => space.isActive)
+  )
   const router = useRouter()
 
   // Cycle to next space
   const cycleToNextSpace = () => {
     const currentIndex = spaces.findIndex(
-      (space) => space.name === activeSpace.name
+      (space) => space.name === activeSpace?.name
     )
     const nextIndex = (currentIndex + 1) % spaces.length
     setActiveSpace(spaces[nextIndex])
@@ -43,7 +45,7 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
   useHotkeys('shift+tab', cycleToNextSpace, { preventDefault: true })
 
   useEffect(() => {
-    router.push(activeSpace.url)
+    router.push(activeSpace?.url || '/spaces/clubs')
   }, [activeSpace, router])
 
   if (!activeSpace) {

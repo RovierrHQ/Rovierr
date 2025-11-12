@@ -17,7 +17,7 @@ import {
   useSidebar
 } from '@rov/ui/components/sidebar'
 import { Folder, Forward, MoreHorizontal, Trash2 } from 'lucide-react'
-import type { IProjects } from '@/data/space-sidebar-data'
+import type { IProjects } from '@/types/types-space-sidebar-data'
 
 export function NavProjects({ projects }: { projects: IProjects[] }) {
   const { isMobile } = useSidebar()
@@ -63,12 +63,12 @@ export function NavProjects({ projects }: { projects: IProjects[] }) {
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem>
+        {/* <SidebarMenuItem>
           <SidebarMenuButton className="text-sidebar-foreground/70">
             <MoreHorizontal className="text-sidebar-foreground/70" />
             <span>More</span>
           </SidebarMenuButton>
-        </SidebarMenuItem>
+        </SidebarMenuItem> */}
       </SidebarMenu>
     </SidebarGroup>
   )

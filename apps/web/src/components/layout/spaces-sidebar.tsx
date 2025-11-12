@@ -9,14 +9,18 @@ import {
 } from '@rov/ui/components/sidebar'
 import { usePathname, useRouter } from 'next/navigation'
 
-import { type ComponentProps, useEffect } from 'react'
-import { NavMain } from '@/components/layout/nav-main'
+import { type ComponentProps, useEffect, useState } from 'react'
 import { NavProjects } from '@/components/layout/nav-projects'
 import { NavUser } from '@/components/layout/nav-user'
 import { SpaceSwitcher } from '@/components/layout/space-switcher'
-import { navMain, projects, spaces } from '@/data/space-sidebar-data'
+import { projects, spaces } from '@/data/space-sidebar-data'
+import type { ISpacesChildrenItems } from '@/types/types-space-sidebar-data'
+import SpacesNav from './spaces-nav'
 
 export function SpacesSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
+  const [currentSpaceChildren, setCurrentSpaceChildren] = useState<
+    ISpacesChildrenItems[]
+  >([])
   const pathname = usePathname()
   const router = useRouter()
 
@@ -24,8 +28,13 @@ export function SpacesSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     const activeSpaces = spaces.filter(
       (space) => space.isActive && pathname.includes(space.url)
     )
-    if (!activeSpaces.length) router.push('/spaces')
-  }, [router.push, pathname.includes])
+
+    if (!activeSpaces.length) router.push('/spaces/clubs')
+
+    setCurrentSpaceChildren(
+      activeSpaces.find((space) => space.url === pathname)?.childrenItems || []
+    )
+  }, [router.push, pathname])
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -33,7 +42,7 @@ export function SpacesSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         <SpaceSwitcher spaces={spaces} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
+        <SpacesNav spacesChildrenItems={currentSpaceChildren} />
         <NavProjects projects={projects} />
       </SidebarContent>
       <SidebarFooter>

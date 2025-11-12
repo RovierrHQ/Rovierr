@@ -16,14 +16,18 @@ import {
   SidebarMenuSubItem
 } from '@rov/ui/components/sidebar'
 import { ChevronRight } from 'lucide-react'
-import type { INavMain } from '@/data/space-sidebar-data'
+import type { ISpacesChildrenItems } from '@/types/types-space-sidebar-data'
 
-export function NavMain({ items }: { items: INavMain[] }) {
+const SpacesNav = ({
+  spacesChildrenItems
+}: {
+  spacesChildrenItems: ISpacesChildrenItems[]
+}) => {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
+        {spacesChildrenItems?.map((item) => (
           <Collapsible
             asChild
             className="group/collapsible"
@@ -58,3 +62,5 @@ export function NavMain({ items }: { items: INavMain[] }) {
     </SidebarGroup>
   )
 }
+
+export default SpacesNav
