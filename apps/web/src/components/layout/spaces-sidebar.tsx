@@ -7,7 +7,7 @@ import {
   SidebarHeader,
   SidebarRail
 } from '@rov/ui/components/sidebar'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 import { type ComponentProps, useEffect, useState } from 'react'
 import { NavProjects } from '@/components/layout/nav-projects'
@@ -22,19 +22,15 @@ export function SpacesSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     ISpacesChildrenItems[]
   >([])
   const pathname = usePathname()
-  const router = useRouter()
 
   useEffect(() => {
-    const activeSpaces = spaces.filter(
-      (space) => space.isActive && pathname.includes(space.url)
-    )
-
-    if (!activeSpaces.length) router.push('/spaces/clubs')
+    const spacesRoot = `${pathname.split('/').slice(0, 3).join('/')}`
 
     setCurrentSpaceChildren(
-      activeSpaces.find((space) => space.url === pathname)?.childrenItems || []
+      spaces.find((space) => space.isActive && space.url.startsWith(spacesRoot))
+        ?.childrenItems || []
     )
-  }, [router.push, pathname])
+  }, [pathname])
 
   return (
     <Sidebar collapsible="icon" {...props}>
