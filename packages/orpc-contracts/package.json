@@ -1,0 +1,21 @@
+{
+  "name": "@rov/orpc-contracts",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc -b"
+  },
+  "dependencies": {
+    "@orpc/contract": "1.10.4",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "typescript": "5.9.2"
+  }
+}

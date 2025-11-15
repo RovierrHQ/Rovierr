@@ -1,0 +1,68 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Rovierr Documentation",
+  "description": "Rovierr Documentation",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg",
+    "href": "https://rovierr.com"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#07C983",
+    "dark": "#0D9373"
+  },
+
+  "topbarLinks": [
+    {
+      "name": "Support",
+      "url": "mailto:info@rovierr.com"
+    }
+  ],
+
+  "tabs": [
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    }
+  ],
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": ["introduction", "quickstart", "development"]
+      },
+      {
+        "group": "Essentials",
+        "pages": [
+          "essentials/markdown",
+          "essentials/code",
+          "essentials/images",
+          "essentials/settings",
+          "essentials/navigation",
+          "essentials/reusable-snippets"
+        ]
+      },
+      {
+        "group": "API Documentation",
+        "pages": ["api-reference/introduction"]
+      },
+      {
+        "group": "Endpoints",
+        "openapi": {
+          "source": "api-reference/openapi.json"
+        }
+      }
+    ]
+  },
+  "api": {
+    "openapi": "http://localhost:3000/api-docs"
+  },
+  "footerSocials": {
+    "x": "https://x.com/rovierr",
+    "github": "https://github.com/rovierr",
+    "linkedin": "https://linkedin.com/company/rovierr"
+  }
+}

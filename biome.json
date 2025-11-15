@@ -37,6 +37,9 @@
   },
   "linter": {
     "rules": {
+      "correctness": {
+        "noChildrenProp": "off"
+      },
       "style": {
         "useBlockStatements": "off"
       },

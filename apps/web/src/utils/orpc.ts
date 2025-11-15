@@ -1,28 +1,32 @@
 import { createORPCClient } from '@orpc/client'
 import { RPCLink } from '@orpc/client/fetch'
-import type { RouterClient } from '@orpc/server'
+import {
+  type ContractRouterClient,
+  inferRPCMethodFromContractRouter
+} from '@orpc/contract'
 import { createTanstackQueryUtils } from '@orpc/tanstack-query'
+import { appContract } from '@rov/orpc-contracts'
 import { QueryCache, QueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { appRouter } from '../../../server/src/routers'
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
-      toast.error(`Error: ${error.message}`, {
-        action: {
-          label: 'retry',
-          onClick: () => {
-            queryClient.invalidateQueries()
-          }
-        }
-      })
+      toast.error(`Error: ${error.message}`)
     }
-  })
+  }),
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      retry: false,
+      refetchOnWindowFocus: false
+    }
+  }
 })
 
 export const link = new RPCLink({
   url: `${process.env.NEXT_PUBLIC_SERVER_URL}/rpc-v1`,
+  method: inferRPCMethodFromContractRouter(appContract),
   fetch(url, options) {
     return fetch(url, {
       ...options,
@@ -31,6 +35,7 @@ export const link = new RPCLink({
   }
 })
 
-export const client: RouterClient<typeof appRouter> = createORPCClient(link)
+export const client: ContractRouterClient<typeof appContract> =
+  createORPCClient(link)
 
 export const orpc = createTanstackQueryUtils(client)

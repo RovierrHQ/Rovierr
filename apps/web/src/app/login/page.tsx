@@ -3,7 +3,7 @@
 import LoginForm from '@rov/ui/blocks/login-form'
 import AnimatedGridPattern from '@rov/ui/components/backgrounds/AnimatedGridPattern'
 import { cn } from '@rov/ui/lib/utils'
-import Topnav from '@/components/top-nav'
+import Topnav from '@/components/layout/top-nav'
 import { authClient } from '@/lib/auth-client'
 
 export default function LoginPage() {

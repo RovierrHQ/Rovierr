@@ -1,6 +1,5 @@
 'use client'
 
-// biome-ignore lint/performance/noNamespaceImport: all are required
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { cn } from '@rov/ui/lib/utils'
 import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'

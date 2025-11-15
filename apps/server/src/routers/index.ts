@@ -1,16 +1,23 @@
-import { publicProcedure } from '../lib/orpc'
+import { o } from '../lib/orpc'
 import { calendar } from './calendar'
 import { realtime } from './realtime'
+import { roadmap } from './roadmap'
+import { university } from './university'
+import { user } from './user'
 
-export const appRouter = {
-  healthCheck: publicProcedure.handler(() => {
-    return 'OK'
-  }),
-
+export const appRouter = o.router({
   // Realtime integration
   realtime,
 
   // calendar integration
-  calendar
-}
-export type AppRouter = typeof appRouter
+  calendar,
+
+  // user integration
+  user,
+
+  // university integration
+  university,
+
+  // roadmap integration
+  roadmap
+})

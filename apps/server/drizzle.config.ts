@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noProcessEnv: config file */
 import { defineConfig } from 'drizzle-kit'
 
 export default defineConfig({
