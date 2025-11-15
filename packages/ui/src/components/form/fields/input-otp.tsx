@@ -6,35 +6,40 @@ import {
   FieldError,
   FieldLabel
 } from '@rov/ui/components/field'
-import { Textarea as TextAreaBase } from '@rov/ui/components/textarea'
-import type { ComponentProps } from 'react'
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot
+} from '@rov/ui/components/input-otp'
 import { useFieldContext } from '../context'
 
 type Props = {
   label?: string
   description?: string
-} & ComponentProps<'textarea'>
+  maxlength?: number
+}
 
-function TextArea({ label, placeholder, description, ...props }: Props) {
+function OTP({ label, description, maxlength = 6 }: Props) {
   const field = useFieldContext<string>()
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
   return (
     <Field data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
-      <TextAreaBase
-        aria-invalid={isInvalid}
-        autoComplete={field.name}
-        id={field.name}
-        name={field.name}
-        onBlur={field.handleBlur}
-        onChange={(e) => field.handleChange(e.target.value)}
-        placeholder={placeholder}
+      <InputOTP
+        maxLength={maxlength}
+        onChange={(value) => field.handleChange(value)}
         value={field.state.value}
-        {...props}
-      />
+      >
+        <InputOTPGroup>
+          {Array.from({ length: maxlength }).map((_, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: okay for otp
+            <InputOTPSlot index={index} key={index} />
+          ))}
+        </InputOTPGroup>
+      </InputOTP>
       {description && <FieldDescription>{description}</FieldDescription>}
       {isInvalid && <FieldError errors={field.state.meta.errors} />}
     </Field>
   )
 }
-export default TextArea
+export default OTP

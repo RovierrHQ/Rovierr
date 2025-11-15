@@ -12,16 +12,16 @@ import { toast } from 'sonner'
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
-      toast.error(`Error: ${error.message}`, {
-        action: {
-          label: 'retry',
-          onClick: () => {
-            queryClient.invalidateQueries()
-          }
-        }
-      })
+      toast.error(`Error: ${error.message}`)
     }
-  })
+  }),
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      retry: false,
+      refetchOnWindowFocus: false
+    }
+  }
 })
 
 export const link = new RPCLink({
