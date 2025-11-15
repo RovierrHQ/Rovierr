@@ -24,25 +24,19 @@ import { ChevronsUpDown, Info } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import type { ISpaces } from '@/types/types-space-sidebar-data'
 
-export function SpaceSwitcher({
-  spaces
-}: {
-  spaces: {
-    name: string
-    logo: React.ElementType
-    plan: string
-    url: string
-  }[]
-}) {
+export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
   const { isMobile } = useSidebar()
-  const [activeSpace, setActiveSpace] = useState(spaces[0])
+  const [activeSpace, setActiveSpace] = useState(
+    spaces.find((space) => space.isActive)
+  )
   const router = useRouter()
 
   // Cycle to next space
   const cycleToNextSpace = () => {
     const currentIndex = spaces.findIndex(
-      (space) => space.name === activeSpace.name
+      (space) => space.name === activeSpace?.name
     )
     const nextIndex = (currentIndex + 1) % spaces.length
     setActiveSpace(spaces[nextIndex])
@@ -51,7 +45,7 @@ export function SpaceSwitcher({
   useHotkeys('shift+tab', cycleToNextSpace, { preventDefault: true })
 
   useEffect(() => {
-    router.push(activeSpace.url)
+    router.push(activeSpace?.url || '/spaces/clubs')
   }, [activeSpace, router])
 
   if (!activeSpace) {
@@ -99,22 +93,24 @@ export function SpaceSwitcher({
                 </TooltipContent>
               </Tooltip>
             </DropdownMenuLabel>
-            {spaces.map((space) => (
-              <DropdownMenuItem
-                className={cn(
-                  'gap-2 p-2',
-                  activeSpace.url === space.url && 'border-2 border-dashed'
-                )}
-                key={space.name}
-                onClick={() => setActiveSpace(space)}
-              >
-                <div className="flex size-6 items-center justify-center rounded-md border">
-                  <space.logo className="size-3.5 shrink-0" />
-                </div>
-                {space.name}
-                {/* <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut> */}
-              </DropdownMenuItem>
-            ))}
+            {spaces
+              .filter((space) => space.isActive)
+              .map((space) => (
+                <DropdownMenuItem
+                  className={cn(
+                    'gap-2 p-2',
+                    activeSpace.url === space.url && 'border-2 border-dashed'
+                  )}
+                  key={space.name}
+                  onClick={() => setActiveSpace(space)}
+                >
+                  <div className="flex size-6 items-center justify-center rounded-md border">
+                    <space.logo className="size-3.5 shrink-0" />
+                  </div>
+                  {space.name}
+                  {/* <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut> */}
+                </DropdownMenuItem>
+              ))}
             {/* <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 p-2">
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">

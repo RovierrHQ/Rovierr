@@ -15,27 +15,20 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem
 } from '@rov/ui/components/sidebar'
-import { ChevronRight, type LucideIcon } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import Link from 'next/link'
+import type { ISpacesChildrenItems } from '@/types/types-space-sidebar-data'
 
-export function NavMain({
-  items
+const SpacesNav = ({
+  spacesChildrenItems
 }: {
-  items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
-}) {
+  spacesChildrenItems: ISpacesChildrenItems[]
+}) => {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
+        {spacesChildrenItems?.map((item) => (
           <Collapsible
             asChild
             className="group/collapsible"
@@ -55,9 +48,9 @@ export function NavMain({
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
+                        <Link href={subItem.url}>
                           <span>{subItem.title}</span>
-                        </a>
+                        </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   ))}
@@ -70,3 +63,5 @@ export function NavMain({
     </SidebarGroup>
   )
 }
+
+export default SpacesNav

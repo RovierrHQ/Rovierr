@@ -16,23 +16,10 @@ import {
   SidebarMenuItem,
   useSidebar
 } from '@rov/ui/components/sidebar'
-import {
-  Folder,
-  Forward,
-  type LucideIcon,
-  MoreHorizontal,
-  Trash2
-} from 'lucide-react'
+import { Folder, Forward, MoreHorizontal, Trash2 } from 'lucide-react'
+import type { IProjects } from '@/types/types-space-sidebar-data'
 
-export function NavProjects({
-  projects
-}: {
-  projects: {
-    name: string
-    url: string
-    icon: LucideIcon
-  }[]
-}) {
+export function NavProjects({ projects }: { projects: IProjects[] }) {
   const { isMobile } = useSidebar()
 
   return (
@@ -76,12 +63,12 @@ export function NavProjects({
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem>
+        {/* <SidebarMenuItem>
           <SidebarMenuButton className="text-sidebar-foreground/70">
             <MoreHorizontal className="text-sidebar-foreground/70" />
             <span>More</span>
           </SidebarMenuButton>
-        </SidebarMenuItem>
+        </SidebarMenuItem> */}
       </SidebarMenu>
     </SidebarGroup>
   )
