@@ -1,4 +1,4 @@
-import { SparklesText } from '@/components/text-animations/sparkles'
+import { SparklesText } from '@rov/ui/components/text-animations/sparkles'
 
 function BrandLogo() {
   return (

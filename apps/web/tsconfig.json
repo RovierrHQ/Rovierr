@@ -14,7 +14,6 @@
     "verbatimModuleSyntax": true,
     "jsx": "preserve",
     "incremental": true,
-    "composite": true,
     "plugins": [
       {
         "name": "next"
@@ -30,10 +29,5 @@
     "src/**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "dist", "out", ".next"],
-  "references": [
-    { "path": "../server" },
-    { "path": "../../packages/shared" },
-    { "path": "../../packages/ui" }
-  ]
+  "exclude": ["node_modules", "dist", "out", ".next"]
 }

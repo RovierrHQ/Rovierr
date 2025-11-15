@@ -4,9 +4,8 @@ import { protectedProcedure } from '../lib/orpc'
 
 export const realtime = {
   // Get Centrifugo connection token for authenticated user
-  getConnectionToken: protectedProcedure
-    .route({ method: 'GET' })
-    .handler(async ({ context }) => {
+  getConnectionToken: protectedProcedure.realtime.getConnectionToken.handler(
+    async ({ context }) => {
       const secret = env.CENTRIFUGO_HMAC_SECRET_KEY
 
       if (!secret) {
@@ -23,5 +22,6 @@ export const realtime = {
         token,
         expiresIn: 3600 // seconds
       }
-    })
+    }
+  )
 }
