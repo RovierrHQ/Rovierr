@@ -1,19 +1,13 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { redirect } from 'next/navigation'
 import SpacesLayout from '@/components/layout/spaces-layout'
 import RoadmapFloatButton from '@/components/roadmap/roadmap-float-button'
 import { authClient } from '@/lib/auth-client'
 
 function Layout({ children }: LayoutProps<'/spaces'>) {
-  const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
-  useEffect(() => {
-    if (!(session || isPending)) {
-      router.push('/login')
-    }
-  }, [session, isPending, router.push])
+
   if (isPending) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -23,6 +17,10 @@ function Layout({ children }: LayoutProps<'/spaces'>) {
         </div>
       </div>
     )
+  }
+
+  if (!session?.user) {
+    redirect('/login')
   }
   return (
     <SpacesLayout>

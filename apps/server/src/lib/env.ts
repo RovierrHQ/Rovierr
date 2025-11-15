@@ -68,7 +68,20 @@ const envSchema = z.object({
     .optional()
     .describe(
       'HMAC secret for signing Centrifugo connection tokens (min 32 chars)'
-    )
+    ),
+
+  // Email (UseSend)
+  USESEND_API_KEY: z
+    .string()
+    .min(1)
+    .describe('Usesend API key for sending emails'),
+
+  // Analytics (PostHog)
+  POSTHOG_API_KEY: z.string().min(1).describe('PostHog API key for analytics'),
+  POSTHOG_HOST: z
+    .url()
+    .default('https://app.posthog.com')
+    .describe('PostHog host URL')
 })
 
 /**

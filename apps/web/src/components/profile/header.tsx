@@ -21,7 +21,7 @@ export default function ProfileHeader() {
   const {
     data: profileInfo
     // isLoading: isProfileInfoLoading
-  } = useQuery(orpc.user.profileInfo.queryOptions())
+  } = useQuery(orpc.user.profile.info.queryOptions())
 
   return (
     <Card>
