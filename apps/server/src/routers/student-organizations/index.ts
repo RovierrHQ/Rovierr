@@ -1,9 +1,8 @@
 import { ORPCError } from '@orpc/server'
+import { organization as organizationTable } from '@rov/db'
 import { eq } from 'drizzle-orm'
 import { db } from '@/db'
-import { organization as organizationTable } from '@/db/schema/auth'
 import { auth } from '@/lib/auth'
-import { env } from '@/lib/env'
 import { protectedProcedure } from '@/lib/orpc'
 
 export const studentOrganizations = {

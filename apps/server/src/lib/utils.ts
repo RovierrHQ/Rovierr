@@ -1,7 +1,7 @@
+import { university as universityTable } from '@rov/db'
 import { CryptoHasher } from 'bun'
 import { eq } from 'drizzle-orm'
 import { db } from '@/db'
-import { university as universityTable } from '@/db/schema/university'
 
 /**
  * Generate a random 6-digit OTP code

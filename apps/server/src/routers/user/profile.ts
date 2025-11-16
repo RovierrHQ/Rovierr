@@ -1,10 +1,10 @@
-import { eq } from 'drizzle-orm'
-import { db } from '@/db'
 import {
   program as programTable,
+  university as universityTable,
   userProgramEnrollment as userProgramEnrollmentTable
-} from '@/db/schema/program'
-import { university as universityTable } from '@/db/schema/university'
+} from '@rov/db'
+import { eq } from 'drizzle-orm'
+import { db } from '@/db'
 import { protectedProcedure } from '@/lib/orpc'
 
 export const profile = {

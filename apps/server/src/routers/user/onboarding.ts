@@ -1,11 +1,8 @@
 import { ORPCError } from '@orpc/server'
+import { user as userTable, verification as verificationTable } from '@rov/db'
 import { and, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { db } from '@/db'
-import {
-  user as userTable,
-  verification as verificationTable
-} from '@/db/schema/auth'
 import { emitEvent } from '@/lib/events'
 import { protectedProcedure } from '@/lib/orpc'
 import { generateOTP, hashOTP, validateUniversityEmail } from '@/lib/utils'
