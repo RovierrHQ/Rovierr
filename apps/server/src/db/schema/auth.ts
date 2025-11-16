@@ -124,9 +124,8 @@ export const organization = pgTable('organization', {
     .notNull(),
   isVerified: boolean('is_verified').default(false).notNull(),
   universityId: text('university_id').references(() => university.id),
-  tags: text('tags', {
-    enum: ['academic', 'social', 'professional', 'other']
-  }).array(),
+  description: text('description'),
+  tags: text('tags').array(),
   metadata: text('metadata'),
   ...timestamps
 })
