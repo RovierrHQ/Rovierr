@@ -83,7 +83,12 @@ export function createAuth(config: AuthConfig) {
     }
   })
   const oneTapPlugin = oneTap()
-  const organizationPlugin = organization({ teams: { enabled: true } })
+  const organizationPlugin = organization({
+    teams: { enabled: true },
+    dynamicAccessControl: {
+      enabled: true
+    }
+  })
   const usernamePlugin = username()
 
   const customSessionPlugin = customSession(async ({ user, session }) => {

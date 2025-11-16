@@ -47,15 +47,15 @@ const CreateClubPage = () => {
 
         toast.success('Club created successfully!')
         router.push(`/spaces/clubs/joined/${result.organizationId}`)
-      } catch (error) {
+      } catch (_error) {
         // Handle specific error types
-        const errorMessage =
-          error && typeof error === 'object' && 'data' in error
-            ? (error.data as { message?: string })?.message
-            : error instanceof Error
-              ? error.message
-              : 'Failed to create club. Please try again.'
-        toast.error(errorMessage)
+        // const errorMessage =
+        //   error && typeof error === 'object' && 'data' in error
+        //     ? (error.data as { message?: string })?.message
+        //     : error instanceof Error
+        //       ? error.message
+        //       : 'Failed to create club. Please try again.'
+        // toast.error(errorMessage)
       }
     }
   })
