@@ -9,13 +9,13 @@ import { authClient } from '@/lib/auth-client'
 export default function LoginPage() {
   return (
     <div className="relative isolate h-svh overflow-hidden bg-muted">
-      <Topnav enableUserDropdown={false} />
+      <Topnav loginButton={false} />
       <div className="flex h-full items-center justify-center border">
         <LoginForm
           handleGoogleLogin={() =>
             authClient.signIn.social({
               provider: 'google',
-              callbackURL: window.origin
+              callbackURL: `${window.origin}/spaces/clubs`
             })
           }
         />
