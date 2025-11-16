@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider } from '@rov/ui/components/sidebar'
 import { MicIcon, SearchIcon } from 'lucide-react'
 import type { FC, PropsWithChildren } from 'react'
 import { SpacesSidebar } from '@/components/layout/spaces-sidebar'
+import VerifyUniversityEmail from '../verify/email-verification-flow'
 import { SpacesHeader } from './spaces-greeting'
 
 const SpacesLayout: FC<PropsWithChildren> = ({ children }) => {
@@ -27,6 +28,8 @@ const SpacesLayout: FC<PropsWithChildren> = ({ children }) => {
           </InputGroup>
         </header>
         {children}
+
+        <VerifyUniversityEmail />
       </SidebarInset>
     </SidebarProvider>
   )
