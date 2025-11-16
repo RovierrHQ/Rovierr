@@ -8,13 +8,19 @@ import type {
   SidebarTree
 } from '@/components/layout/use-space-sidebar-items'
 import { useSpaceSidebarItems } from '@/components/layout/use-space-sidebar-items'
+import { authClient } from '@/lib/auth-client'
 
 const ClubsLayout = ({ children }: { children: ReactNode }) => {
   const { setSidebarTree } = useSpaceSidebarItems()
+  const { data: organizations } = authClient.useListOrganizations()
 
   useEffect(() => {
-    // TODO: Fetch from API when ready
-    const joinedClubs: Array<{ id: string; name: string }> = []
+    // Map organizations from better-auth to the format expected by sidebar
+    const joinedClubs: Array<{ id: string; name: string }> =
+      organizations?.map((org) => ({
+        id: org.id,
+        name: org.name
+      })) ?? []
 
     // Build club nodes with sub-items
     const clubNodes: SidebarNode[] = joinedClubs.map((club) => ({
@@ -137,7 +143,7 @@ const ClubsLayout = ({ children }: { children: ReactNode }) => {
     return () => {
       setSidebarTree(null)
     }
-  }, [setSidebarTree])
+  }, [setSidebarTree, organizations])
 
   return <div>{children}</div>
 }
