@@ -28,7 +28,6 @@ const SpacesLayout: FC<PropsWithChildren> = ({ children }) => {
           </InputGroup>
         </header>
         {children}
-
         <VerifyUniversityEmail />
       </SidebarInset>
     </SidebarProvider>
