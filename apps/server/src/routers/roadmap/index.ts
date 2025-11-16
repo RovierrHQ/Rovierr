@@ -1,12 +1,12 @@
 import { ORPCError } from '@orpc/client'
-import { and, eq, sql } from 'drizzle-orm'
-import { db } from '@/db'
 import {
   roadmapComments,
   roadmapCommentUpvote,
   roadmap as roadmapTable,
   roadmapUpvote
-} from '@/db/schema/roadmap'
+} from '@rov/db'
+import { and, eq, sql } from 'drizzle-orm'
+import { db } from '@/db'
 import { protectedProcedure, publicProcedure } from '@/lib/orpc'
 
 export const roadmap = {

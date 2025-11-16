@@ -9,7 +9,7 @@ import { authClient } from '@/lib/auth-client'
 export default function LoginPage() {
   return (
     <section className="relative isolate h-svh overflow-hidden">
-      <Topnav enableUserDropdown={false} />
+      <Topnav loginButton={false} />
 
       <div className="mx-auto grid h-[calc(100svh-64px)] max-w-7xl grid-cols-1 md:grid-cols-2">
         <div className="flex h-full flex-col justify-center space-y-6 bg-muted/40 p-8 md:p-10">
@@ -53,7 +53,7 @@ export default function LoginPage() {
               onClick={() => {
                 authClient.signIn.social({
                   provider: 'google',
-                  callbackURL: window.origin
+                  callbackURL: `${window.origin}/spaces/clubs`
                 })
               }}
             >

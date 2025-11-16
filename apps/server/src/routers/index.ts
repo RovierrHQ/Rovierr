@@ -2,6 +2,7 @@ import { o } from '../lib/orpc'
 import { calendar } from './calendar'
 import { realtime } from './realtime'
 import { roadmap } from './roadmap'
+import { studentOrganizations } from './student-organizations'
 import { university } from './university'
 import { user } from './user'
 
@@ -19,5 +20,8 @@ export const appRouter = o.router({
   university,
 
   // roadmap integration
-  roadmap
+  roadmap,
+
+  // student organizations integration
+  studentOrganizations
 })
