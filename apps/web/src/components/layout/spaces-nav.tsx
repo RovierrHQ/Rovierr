@@ -26,7 +26,7 @@ const SpacesNav = ({
 }) => {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>My Clubs</SidebarGroupLabel>
       <SidebarMenu>
         {spacesChildrenItems?.map((item) => (
           <Collapsible

@@ -6,7 +6,7 @@ const ClubsPage = () => {
   const router = useRouter()
 
   useEffect(() => {
-    router.replace('/spaces/clubs/societies/campus-feed')
+    router.replace('/spaces/clubs/campus-feed')
   }, [router])
 
   return null

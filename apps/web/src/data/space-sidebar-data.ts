@@ -97,7 +97,7 @@ export const spaces: types.ISpaces[] = [
         items: [
           {
             title: 'Campus Feed',
-            url: '/spaces/clubs/societies/campus-feed'
+            url: '/spaces/clubs/campus-feed'
           },
           {
             title: 'My Clubs',

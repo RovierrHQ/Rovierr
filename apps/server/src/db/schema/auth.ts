@@ -23,6 +23,16 @@ export const user = pgTable('user', {
   yearOfStudy: text('year_of_study'),
   interests: text('interests').array(),
 
+  //  social fields
+  bio: text('bio'),
+  website: text('website'),
+  whatsapp: text('whatsapp'),
+  telegram: text('telegram'),
+  instagram: text('instagram'),
+  facebook: text('facebook'),
+  twitter: text('twitter'),
+  linkedin: text('linkedin'),
+
   // Verification status
   isVerified: boolean('is_verified').default(false).notNull(),
 
@@ -106,8 +116,19 @@ export const organization = pgTable('organization', {
   name: text('name').notNull(),
   slug: text('slug').unique(),
   logo: text('logo'),
-  createdAt: timestamps.createdAt,
-  metadata: text('metadata')
+  type: text('type', { enum: ['student', 'university'] })
+    .default('student')
+    .notNull(),
+  visibility: text('visibility', { enum: ['public', 'campus_only', 'private'] })
+    .default('public')
+    .notNull(),
+  isVerified: boolean('is_verified').default(false).notNull(),
+  universityId: text('university_id').references(() => university.id),
+  tags: text('tags', {
+    enum: ['academic', 'social', 'professional', 'other']
+  }).array(),
+  metadata: text('metadata'),
+  ...timestamps
 })
 
 export const member = pgTable('member', {

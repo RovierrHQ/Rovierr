@@ -19,12 +19,18 @@ import {
 import { Folder, Forward, MoreHorizontal, Trash2 } from 'lucide-react'
 import type { IProjects } from '@/types/types-space-sidebar-data'
 
-export function NavProjects({ projects }: { projects: IProjects[] }) {
+export function NavProjects({
+  projects,
+  label = 'Projects'
+}: {
+  projects: IProjects[]
+  label?: string
+}) {
   const { isMobile } = useSidebar()
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
