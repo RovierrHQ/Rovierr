@@ -45,7 +45,7 @@ const GetVerificationOTP = ({
 
   return (
     <Dialog open={true}>
-      <div className="fixed inset-0 z-40 bg-black/80" />
+      <div className="fixed inset-0 z-40 " />
       <DialogContent className="max-w-sm rounded-2xl" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Verify University Email</DialogTitle>
@@ -77,6 +77,7 @@ const GetVerificationOTP = ({
               onClick={() => {
                 authClient.signOut()
               }}
+              type="button"
               variant="outline"
             >
               Logout

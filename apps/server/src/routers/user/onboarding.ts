@@ -39,7 +39,7 @@ export const onboarding = {
         .update(userTable)
         .set({
           name: input.displayName,
-          image: input.profileImageUrl,
+          image: input.profileImageUrl || undefined,
           universityEmail: input.universityEmail,
           universityId: input.universityId,
           major: input.major,

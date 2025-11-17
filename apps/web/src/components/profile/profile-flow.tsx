@@ -13,11 +13,14 @@ import {
   Phone,
   User
 } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { type JSX, useEffect, useReducer } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { orpc, queryClient } from '@/utils/orpc'
+
+/* ---------------------------- SCHEMAS ---------------------------- */
 
 const basicSchema = z.object({
   fullName: z.string().min(3, 'Full name must be at least 3 characters'),
@@ -37,7 +40,6 @@ const socialSchema = z.object({
 
 type BasicValues = z.infer<typeof basicSchema>
 type SocialValues = z.infer<typeof socialSchema>
-
 type FlowStep = 1 | 2 | 3
 
 type ProfileState = {
@@ -70,6 +72,8 @@ const initialState: ProfileState = {
   }
 }
 
+/* ---------------------------- REDUCER ---------------------------- */
+
 function reducer(state: ProfileState, action: Action): ProfileState {
   switch (action.type) {
     case 'SET_STEP':
@@ -85,10 +89,31 @@ function reducer(state: ProfileState, action: Action): ProfileState {
   }
 }
 
+/* ---------------------------- CARD WRAPPER ---------------------------- */
+
+function CardWrapper({
+  title,
+  children
+}: {
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <Card className="w-full rounded-md p-6 shadow-sm">
+      <CardContent className="p-0">
+        <h2 className="mb-6 text-center font-semibold text-2xl">{title}</h2>
+        {children}
+      </CardContent>
+    </Card>
+  )
+}
+
+/* ---------------------------- ROOT FLOW ---------------------------- */
+
 export default function ProfileFlow(): JSX.Element {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { data: onboardingStatus } = useQuery(
-    orpc.user.onboarding.getStatus.queryOptions()
+    orpc.user.onboarding.getStatus.queryOptions({ refetchOnMount: 'always' })
   )
   const router = useRouter()
 
@@ -97,12 +122,38 @@ export default function ProfileFlow(): JSX.Element {
   }, [onboardingStatus, router])
 
   return (
-    <div className="flex w-full justify-center py-10">
+    <div className="flex min-h-screen w-full items-center justify-center py-10">
       <div className="w-full max-w-md">
-        <ProgressTabs
-          onChange={(s) => dispatch({ type: 'SET_STEP', step: s })}
-          step={state.step}
+        {/* ------------------ PROGRESS BAR ------------------ */}
+        <Image
+          alt="rovierr Login page"
+          className="mx-auto my-5"
+          height={28}
+          src="/rovierr-login-logo.svg"
+          width={96}
         />
+
+        <div className="mb-6 w-full">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full bg-primary transition-all duration-500"
+              style={{
+                width: (() => {
+                  switch (state.step) {
+                    case 1:
+                      return '33%'
+                    case 2:
+                      return '66%'
+                    case 3:
+                      return '100%'
+                    default:
+                      return '0%'
+                  }
+                })()
+              }}
+            />
+          </div>
+        </div>
 
         {state.step === 1 && (
           <StepBasic
@@ -137,52 +188,7 @@ export default function ProfileFlow(): JSX.Element {
   )
 }
 
-function ProgressTabs({
-  step,
-  onChange
-}: {
-  step: FlowStep
-  onChange: (s: FlowStep) => void
-}) {
-  const tabClass = (active: boolean) =>
-    `flex-1 cursor-pointer text-sm font-medium py-3 text-center ${active ? 'text-gray-900' : 'text-gray-500'}`
-
-  return (
-    <div className="mb-6 rounded-2xl border bg-white p-1">
-      <div className="flex">
-        <div className={tabClass(step === 1)} onClick={() => onChange(1)}>
-          Basic Info
-        </div>
-        <div className={tabClass(step === 2)} onClick={() => onChange(2)}>
-          Social
-        </div>
-        <div className={tabClass(step === 3)} onClick={() => onChange(3)}>
-          Review
-        </div>
-      </div>
-
-      <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-gray-100">
-        <div
-          className="h-full bg-sky-500 transition-[width] duration-200"
-          style={{
-            width: (() => {
-              switch (step) {
-                case 1:
-                  return '33.33%'
-                case 2:
-                  return '66.66%'
-                case 3:
-                  return '100%'
-                default:
-                  return '0%'
-              }
-            })()
-          }}
-        />
-      </div>
-    </div>
-  )
-}
+/* ---------------------------- STEP 1: BASIC ---------------------------- */
 
 function StepBasic({
   initial,
@@ -198,85 +204,79 @@ function StepBasic({
   })
 
   return (
-    <Card className="w-full rounded-2xl p-6 shadow-sm">
-      <CardContent>
-        <h2 className="mb-6 text-center font-semibold text-2xl">
-          Complete your profile
-        </h2>
+    <CardWrapper title="Complete your profile">
+      <p className="py-5 font-bold">Basic Information</p>
 
-        <h3 className="mb-4 font-medium">Basic Information</h3>
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault()
+          form.handleSubmit()
+        }}
+      >
+        <form.AppField name="fullName">
+          {(field) => (
+            <field.Text label="Full Name *" placeholder="Enter your name" />
+          )}
+        </form.AppField>
 
-        <form
-          className="space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault()
-            form.handleSubmit()
-          }}
-        >
-          <form.AppField name="fullName">
-            {(field) => (
-              <field.Text label="Full Name *" placeholder="Enter your name" />
-            )}
-          </form.AppField>
+        <form.AppField name="preferredName">
+          {(field) => (
+            <field.Text label="Preferred Name" placeholder="Display name" />
+          )}
+        </form.AppField>
 
-          <form.AppField name="preferredName">
-            {(field) => (
-              <field.Text label="Preferred Name" placeholder="Display name" />
-            )}
-          </form.AppField>
+        <form.AppField name="major">
+          {(field) => (
+            <field.Select
+              label="Major/Department"
+              options={['Computer Science', 'Business', 'Engineering']}
+              placeholder="Select your major"
+            />
+          )}
+        </form.AppField>
 
-          <form.AppField name="major">
-            {(field) => (
-              <field.Select
-                label="Major/Department"
-                options={['Computer Science', 'Business', 'Engineering']}
-                placeholder="Select your major"
-              />
-            )}
-          </form.AppField>
+        <form.AppField name="universityEmail">
+          {(field) => (
+            <field.Text
+              label="University Email"
+              placeholder="Enter university email"
+            />
+          )}
+        </form.AppField>
 
-          <form.AppField name="universityEmail">
-            {(field) => (
-              <field.Text
-                label="university Email"
-                placeholder="Select your university Email"
-              />
-            )}
-          </form.AppField>
+        <form.AppField name="universityId">
+          {(field) => (
+            <field.Text label="University ID" placeholder="Enter your ID" />
+          )}
+        </form.AppField>
 
-          <form.AppField name="universityId">
-            {(field) => (
-              <field.Text
-                label="university Id"
-                placeholder="Select your university Id"
-              />
-            )}
-          </form.AppField>
+        <form.AppField name="year">
+          {(field) => (
+            <field.Select
+              label="Year of Study"
+              options={[
+                { label: '1st Year', value: '1' },
+                { label: '2nd Year', value: '2' },
+                { label: '3rd Year', value: '3' },
+                { label: '4th Year', value: '4' },
+                { label: 'Graduate', value: 'graduate' },
+                { label: 'PhD', value: 'phd' }
+              ]}
+              placeholder="Select your year"
+            />
+          )}
+        </form.AppField>
 
-          <form.AppField name="year">
-            {(field) => (
-              <field.Select
-                label="Year of Study"
-                options={[
-                  { label: '1st Year', value: '1' },
-                  { label: '2nd Year', value: '2' },
-                  { label: '3rd Year', value: '3' },
-                  { label: '4th Year', value: '4' },
-                  { label: 'Graduate', value: 'graduate' },
-                  { label: 'PhD', value: 'phd' }
-                ]}
-                placeholder="Select your year"
-              />
-            )}
-          </form.AppField>
-          <Button className="mt-4 w-full" type="submit">
-            Next
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        <Button className="mt-4 w-full" type="submit">
+          Next
+        </Button>
+      </form>
+    </CardWrapper>
   )
 }
+
+/* ---------------------------- STEP 2: SOCIAL ---------------------------- */
 
 function StepSocial({
   initial,
@@ -294,60 +294,64 @@ function StepSocial({
   })
 
   return (
-    <Card className="w-full rounded-2xl p-6 shadow-sm">
-      <CardContent>
-        <h2 className="mb-6 text-center font-semibold text-2xl">
-          Complete your profile
-        </h2>
-
-        <h3 className="mb-2 font-medium">Connect Social Links</h3>
-        <p className="mb-4 text-gray-500 text-sm">
-          Optional – you can skip if you want
+    <CardWrapper title="Complete your profile">
+      <div className="my-5">
+        <p className="font-semibold text-lg">Connect Social links</p>
+        <p className="text-muted-foreground text-sm">
+          Optional - Skip if you want
         </p>
+      </div>
 
-        <form
-          className="space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault()
-            form.handleSubmit()
-          }}
-        >
-          <form.AppField name="whatsapp">
-            {(field) => (
-              <field.Text label="Whatsapp" placeholder="Whatsapp number" />
-            )}
-          </form.AppField>
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault()
+          form.handleSubmit()
+        }}
+      >
+        <form.AppField name="whatsapp">
+          {(field) => (
+            <field.Text label="Whatsapp" placeholder="Whatsapp number" />
+          )}
+        </form.AppField>
 
-          <form.AppField name="linkedin">
-            {(field) => (
-              <field.Text
-                label="LinkedIn Profile URL"
-                placeholder="LinkedIn profile URL"
-              />
-            )}
-          </form.AppField>
+        <form.AppField name="linkedin">
+          {(field) => (
+            <field.Text
+              label="LinkedIn Profile URL"
+              placeholder="LinkedIn profile URL"
+            />
+          )}
+        </form.AppField>
 
-          <form.AppField name="instagram">
-            {(field) => (
-              <field.Text label="Instagram" placeholder="@username" />
-            )}
-          </form.AppField>
+        <form.AppField name="instagram">
+          {(field) => <field.Text label="Instagram" placeholder="@username" />}
+        </form.AppField>
 
-          <form.AppField name="wechat">
-            {(field) => <field.Text label="WeChat" placeholder="WeChat ID" />}
-          </form.AppField>
+        <form.AppField name="wechat">
+          {(field) => <field.Text label="WeChat" placeholder="WeChat ID" />}
+        </form.AppField>
 
-          <div className="flex justify-between pt-4">
-            <Button onClick={onBack} type="button" variant="outline">
-              Back
-            </Button>
-            <Button type="submit">Next</Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+        <div className="flex justify-between gap-3 pt-4">
+          <Button
+            className="w-[40%] basis-[40%]"
+            onClick={onBack}
+            type="button"
+            variant="outline"
+          >
+            Back
+          </Button>
+
+          <Button className="w-[60%] basis-[60%]" type="submit">
+            Next
+          </Button>
+        </div>
+      </form>
+    </CardWrapper>
   )
 }
+
+/* ---------------------------- STEP 3: REVIEW ---------------------------- */
 
 function StepReview({
   data,
@@ -367,6 +371,7 @@ function StepReview({
       }
     })
   )
+  const router = useRouter()
 
   const handleSubmit = async () => {
     try {
@@ -383,6 +388,7 @@ function StepReview({
       })
 
       toast.success('Profile updated successfully')
+      router.push('/spaces')
       onReset()
     } catch {
       toast.error('Failed to submit profile')
@@ -390,70 +396,62 @@ function StepReview({
   }
 
   return (
-    <Card className="w-full rounded-2xl p-6 shadow-sm">
-      <CardContent>
-        <h2 className="mb-6 text-center font-semibold text-2xl">
-          Review Your Information
-        </h2>
-
-        <div className="space-y-3 text-gray-800">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-gray-600" />
-            <span>
-              {data.fullName ?? '—'}
-              {data.preferredName ? ` (${data.preferredName})` : ''}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-4 w-4 text-gray-600" />
-            <span>{data.major ?? '—'}</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-gray-600" />
-            <span>{data.year ?? '—'}</span>
-          </div>
-
-          <h3 className="mt-4 mb-2 font-medium">Connected Accounts</h3>
-
-          <div className="flex flex-wrap gap-2">
-            {data.whatsapp && <Tag icon={<Phone size={14} />}>Whatsapp</Tag>}
-            {data.linkedin && <Tag icon={<Linkedin size={14} />}>LinkedIn</Tag>}
-            {data.instagram && (
-              <Tag icon={<Instagram size={14} />}>Instagram</Tag>
-            )}
-            {data.wechat && (
-              <Tag icon={<MessageCircle size={14} />}>WeChat</Tag>
-            )}
-
-            {!(
-              data.whatsapp ||
-              data.linkedin ||
-              data.instagram ||
-              data.wechat
-            ) && <p className="text-gray-500 text-sm">No connected accounts</p>}
-          </div>
+    <CardWrapper title="Review Your Information">
+      <div className="space-y-3 text-gray-800">
+        <div className="flex items-center gap-2">
+          <User className="h-4 w-4 text-gray-600" />
+          <span>
+            {data.fullName ?? '—'}
+            {data.preferredName ? ` (${data.preferredName})` : ''}
+          </span>
         </div>
 
-        <Button
-          className="mt-6 w-full"
-          disabled={isPending}
-          onClick={handleSubmit}
-        >
-          {isPending ? 'Submitting...' : 'Complete'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <GraduationCap className="h-4 w-4 text-gray-600" />
+          <span>{data.major ?? '—'}</span>
+        </div>
 
-        <Button
-          className="mt-2 w-full"
-          disabled={isPending}
-          onClick={onBack}
-          variant="outline"
-        >
-          Back
-        </Button>
-      </CardContent>
-    </Card>
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-gray-600" />
+          <span>{data.year ?? '—'}</span>
+        </div>
+
+        <h3 className="mt-4 mb-2 font-medium">Connected Accounts</h3>
+
+        <div className="flex flex-wrap gap-2">
+          {data.whatsapp && <Tag icon={<Phone size={14} />}>Whatsapp</Tag>}
+          {data.linkedin && <Tag icon={<Linkedin size={14} />}>LinkedIn</Tag>}
+          {data.instagram && (
+            <Tag icon={<Instagram size={14} />}>Instagram</Tag>
+          )}
+          {data.wechat && <Tag icon={<MessageCircle size={14} />}>WeChat</Tag>}
+
+          {!(
+            data.whatsapp ||
+            data.linkedin ||
+            data.instagram ||
+            data.wechat
+          ) && <p className="text-gray-500 text-sm">No connected accounts</p>}
+        </div>
+      </div>
+
+      <Button
+        className="mt-6 w-full"
+        disabled={isPending}
+        onClick={handleSubmit}
+      >
+        {isPending ? 'Submitting...' : 'Complete'}
+      </Button>
+
+      <Button
+        className="mt-2 w-full"
+        disabled={isPending}
+        onClick={onBack}
+        variant="outline"
+      >
+        Back
+      </Button>
+    </CardWrapper>
   )
 }
 

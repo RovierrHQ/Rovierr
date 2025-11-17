@@ -1,3 +1,4 @@
+'use client'
 import {
   InputGroup,
   InputGroupAddon,
@@ -7,7 +8,7 @@ import { SidebarInset, SidebarProvider } from '@rov/ui/components/sidebar'
 import { MicIcon, SearchIcon } from 'lucide-react'
 import type { FC, PropsWithChildren } from 'react'
 import { SpacesSidebar } from '@/components/layout/spaces-sidebar'
-import VerifyUniversityEmail from '../verify/email-verification-flow'
+
 import { SpacesHeader } from './spaces-greeting'
 import { SpaceSidebarItemsProvider } from './use-space-sidebar-items'
 
@@ -30,7 +31,6 @@ const SpacesLayout: FC<PropsWithChildren> = ({ children }) => {
             </InputGroup>
           </header>
           {children}
-          <VerifyUniversityEmail />
         </SidebarInset>
       </SidebarProvider>
     </SpaceSidebarItemsProvider>
