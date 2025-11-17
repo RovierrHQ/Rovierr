@@ -25,8 +25,6 @@ import { orpc, queryClient } from '@/utils/orpc'
 const basicSchema = z.object({
   fullName: z.string().min(3, 'Full name must be at least 3 characters'),
   preferredName: z.string().optional(),
-  universityEmail: z.string().email('Enter a valid university email address'),
-  universityId: z.string().min(1, 'Enter a valid university Id'),
   major: z.string().min(1, 'Major is required'),
   year: z.string().min(1, 'Year is required')
 })
@@ -60,9 +58,7 @@ const initialState: ProfileState = {
     fullName: '',
     preferredName: '',
     major: '',
-    year: '',
-    universityEmail: '',
-    universityId: ''
+    year: ''
   },
   social: {
     whatsapp: '',
@@ -236,21 +232,6 @@ function StepBasic({
           )}
         </form.AppField>
 
-        <form.AppField name="universityEmail">
-          {(field) => (
-            <field.Text
-              label="University Email"
-              placeholder="Enter university email"
-            />
-          )}
-        </form.AppField>
-
-        <form.AppField name="universityId">
-          {(field) => (
-            <field.Text label="University ID" placeholder="Enter your ID" />
-          )}
-        </form.AppField>
-
         <form.AppField name="year">
           {(field) => (
             <field.Select
@@ -378,8 +359,6 @@ function StepReview({
       await mutateAsync({
         displayName: data.preferredName || data.fullName || '',
         profileImageUrl: null,
-        universityEmail: data.universityEmail || '',
-        universityId: data.universityId || '',
         major: data.major ?? null,
         yearOfStudy:
           (data.year as '1' | '2' | '3' | '4' | 'graduate' | 'phd' | null) ??

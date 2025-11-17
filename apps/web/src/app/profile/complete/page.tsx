@@ -4,7 +4,7 @@ import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
 import { useAppForm } from '@rov/ui/components/form/index'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { Calendar, CircleDashed, GraduationCap, Mail, User } from 'lucide-react'
+import { Calendar, CircleDashed, GraduationCap, User } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { type JSX, useEffect, useReducer } from 'react'
@@ -17,8 +17,6 @@ import { orpc, queryClient } from '@/utils/orpc'
 const basicSchema = z.object({
   fullName: z.string().min(3, 'Full name must be at least 3 characters'),
   preferredName: z.string().optional(),
-  universityEmail: z.string().email('Enter a valid university email address'),
-  universityId: z.string().min(1, 'Enter a valid university Id'),
   major: z.string().min(1, 'Major is required'),
   year: z.string().min(1, 'Year is required')
 })
@@ -52,9 +50,7 @@ const initialState: ProfileState = {
     fullName: '',
     preferredName: '',
     major: '',
-    year: '',
-    universityEmail: '',
-    universityId: ''
+    year: ''
   },
   social: {
     whatsapp: '',
@@ -110,11 +106,19 @@ export default function ProfileFlow(): JSX.Element {
   const router = useRouter()
 
   useEffect(() => {
-    if (onboardingStatus?.hasUniversityEmail && !onboardingStatus?.isVerified)
-      return router.push('/verify')
+    if (!onboardingStatus) return
 
-    if (onboardingStatus?.hasUniversityEmail && onboardingStatus?.isVerified)
-      return router.push('/spaces')
+    if (!onboardingStatus.isVerified) {
+      router.push('/verify')
+    }
+    const hasCompletedProfile =
+      typeof window === 'undefined'
+        ? true
+        : window.localStorage.getItem('profileCompleted') === 'true'
+
+    if (!onboardingStatus.needsOnboarding && hasCompletedProfile) {
+      router.push('/spaces')
+    }
   }, [onboardingStatus, router])
 
   return (
@@ -229,21 +233,6 @@ function StepBasic({
               options={['Computer Science', 'Business', 'Engineering']}
               placeholder="Select your major"
             />
-          )}
-        </form.AppField>
-
-        <form.AppField name="universityEmail">
-          {(field) => (
-            <field.Text
-              label="University Email"
-              placeholder="Enter university email"
-            />
-          )}
-        </form.AppField>
-
-        <form.AppField name="universityId">
-          {(field) => (
-            <field.Text label="University ID" placeholder="Enter your ID" />
           )}
         </form.AppField>
 
@@ -374,8 +363,6 @@ function StepReview({
       await mutateAsync({
         displayName: data.preferredName || data.fullName || '',
         profileImageUrl: null,
-        universityEmail: data.universityEmail || '',
-        universityId: data.universityId || '',
         major: data.major ?? null,
         yearOfStudy:
           (data.year as '1' | '2' | '3' | '4' | 'graduate' | 'phd' | null) ??
@@ -384,7 +371,15 @@ function StepReview({
       })
 
       toast.success('Profile updated successfully')
-      router.push('/verify')
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('profileCompleted', 'true')
+      }
+
+      const nextName = data.preferredName || data.fullName || ''
+      const params = new URLSearchParams({ from: 'profile' })
+      if (nextName) params.set('name', nextName)
+
+      router.push(`/verify?${params.toString()}`)
       onReset()
     } catch {
       toast.error('Failed to submit profile')
@@ -405,11 +400,6 @@ function StepReview({
         <div className="flex items-center gap-2">
           <GraduationCap className="h-4 w-4 text-gray-600" />
           <span>{data.major ?? '—'}</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Mail className="h-4 w-4 text-gray-600" />
-          <span>{data.universityEmail ?? '—'}</span>
         </div>
 
         <div className="flex items-center gap-2">

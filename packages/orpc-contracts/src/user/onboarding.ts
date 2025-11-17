@@ -4,14 +4,41 @@ import { z } from 'zod'
 export const onboardingSubmitInput = z.object({
   displayName: z.string().min(1, 'Display name is required').max(50),
   profileImageUrl: z.url().nullable(),
-  universityEmail: z.email('Invalid email address'),
-  universityId: z.string().min(1, 'Please select a university'),
   major: z.string().nullable(),
   yearOfStudy: z.enum(['1', '2', '3', '4', 'graduate', 'phd']).nullable(),
   interests: z.array(z.string()).max(10)
 })
 
 export const onboarding = {
+  startVerification: oc
+    .route({
+      method: 'POST',
+      description:
+        'Set university email for the current user and send verification OTP',
+      summary: 'Start University Email Verification',
+      tags: ['User', 'Onboarding']
+    })
+    .input(
+      z.object({
+        universityEmail: z.email('Invalid email address'),
+        universityId: z.string().min(1, 'Please select a university')
+      })
+    )
+    .output(
+      z.object({
+        success: z.boolean()
+      })
+    )
+    .errors({
+      UNIVERSITY_EMAIL_TAKEN: {
+        data: z.object({
+          message: z
+            .string()
+            .default('This university email is already registered')
+        })
+      }
+    }),
+
   submit: oc
     .route({
       method: 'POST',

@@ -9,7 +9,7 @@ import {
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
 import { Label } from '@rov/ui/components/label'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Info } from 'lucide-react'
 import { toast } from 'sonner'
 import z from 'zod'
@@ -17,7 +17,8 @@ import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
 
 const schema = z.object({
-  email: z.email()
+  email: z.email(),
+  universityId: z.string().min(1, 'Select your university')
 })
 
 const GetVerificationOTP = ({
@@ -26,15 +27,19 @@ const GetVerificationOTP = ({
   onSuccess: (email: string) => void
 }) => {
   const { mutateAsync } = useMutation(
-    orpc.user.onboarding.resendVerification.mutationOptions()
+    orpc.user.onboarding.startVerification.mutationOptions()
   )
+  const { data: universities } = useQuery(orpc.university.list.queryOptions())
 
   const form = useAppForm({
     validators: { onSubmit: schema },
-    defaultValues: { email: '' },
+    defaultValues: { email: '', universityId: '' },
     onSubmit: async ({ value }) => {
       try {
-        await mutateAsync({})
+        await mutateAsync({
+          universityEmail: value.email,
+          universityId: value.universityId
+        })
         onSuccess?.(value.email)
         form.reset()
       } catch {
@@ -62,6 +67,22 @@ const GetVerificationOTP = ({
           }}
         >
           <Label htmlFor="email">University Email</Label>
+
+          <form.AppField
+            children={(field) => (
+              <field.Select
+                label="University"
+                options={
+                  universities?.universities?.map((uni) => ({
+                    label: `${uni.name} - ${uni.city}, ${uni.country}`,
+                    value: uni.id
+                  })) ?? []
+                }
+                placeholder="Select your university"
+              />
+            )}
+            name="universityId"
+          />
 
           <form.AppField
             children={(field) => <field.Text placeholder="Email" />}

@@ -9,12 +9,112 @@ import { generateOTP, hashOTP, validateUniversityEmail } from '@/lib/utils'
 import { sendOTPEmail } from '@/services/email/sender'
 
 export const onboarding = {
+  startVerification:
+    protectedProcedure.user.onboarding.startVerification.handler(
+      async ({ input, context }) => {
+        // 1. Check if university email is already taken by another user
+        const existingUser = await db.query.user.findFirst({
+          where: eq(userTable.universityEmail, input.universityEmail)
+        })
+
+        if (existingUser && existingUser.id !== context.session.user.id) {
+          throw new ORPCError('UNIVERSITY_EMAIL_TAKEN', {
+            message: 'This university email is already registered'
+          })
+        }
+
+        // 2. Validate university email domain with selected university
+        const isValidDomain = await validateUniversityEmail(
+          input.universityEmail,
+          input.universityId
+        )
+
+        if (!isValidDomain) {
+          throw new ORPCError('INVALID_UNIVERSITY_DOMAIN', {
+            message: 'Email domain does not match university requirements'
+          })
+        }
+
+        // 3. Update user with the provided university info
+        await db
+          .update(userTable)
+          .set({
+            universityEmail: input.universityEmail,
+            universityId: input.universityId
+          })
+          .where(eq(userTable.id, context.session.user.id))
+
+        // 4. Generate 6-digit OTP
+        const otp = generateOTP()
+        const hashedOTP = hashOTP(otp)
+
+        // 5. Delete any existing verification records for this user
+        await db
+          .delete(verificationTable)
+          .where(eq(verificationTable.identifier, context.session.user.id))
+
+        // 6. Store in verification table
+        await db.insert(verificationTable).values({
+          id: nanoid(),
+          identifier: context.session.user.id,
+          value: hashedOTP,
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+        })
+
+        // 7. Get user display name for email template
+        const user = await db.query.user.findFirst({
+          where: eq(userTable.id, context.session.user.id),
+          columns: { name: true }
+        })
+
+        // 8. Send OTP email
+        await sendOTPEmail({
+          to: input.universityEmail,
+          displayName: user?.name ?? 'there',
+          otp
+        })
+
+        return { success: true }
+      }
+    ),
+
   submit: protectedProcedure.user.onboarding.submit.handler(
     async ({ input, context }) => {
-      // 1. Validate university email domain
+      // 1. Ensure university information exists
+      const userRecord = await db.query.user.findFirst({
+        where: eq(userTable.id, context.session.user.id),
+        columns: {
+          universityEmail: true,
+          universityId: true
+        }
+      })
+
+      if (!userRecord) {
+        throw new ORPCError('UNIVERSITY_EMAIL_TAKEN', {
+          message:
+            'Please add your university email before completing your profile'
+        })
+      }
+
+      const { universityEmail, universityId } = userRecord
+
+      if (!universityEmail) {
+        throw new ORPCError('UNIVERSITY_EMAIL_TAKEN', {
+          message:
+            'Please add your university email before completing your profile'
+        })
+      }
+
+      if (!universityId) {
+        throw new ORPCError('UNIVERSITY_EMAIL_TAKEN', {
+          message:
+            'Please add your university email before completing your profile'
+        })
+      }
+
       const isValidDomain = await validateUniversityEmail(
-        input.universityEmail,
-        input.universityId
+        universityEmail,
+        universityId
       )
 
       if (!isValidDomain) {
@@ -23,41 +123,28 @@ export const onboarding = {
         })
       }
 
-      // 2. Check if university email is already taken
-      const existingUser = await db.query.user.findFirst({
-        where: eq(userTable.universityEmail, input.universityEmail)
-      })
-
-      if (existingUser && existingUser.id !== context.session.user.id) {
-        throw new ORPCError('UNIVERSITY_EMAIL_TAKEN', {
-          message: 'This university email is already registered'
-        })
-      }
-
-      // 3. Update user record with onboarding data
+      // 2. Update user record with onboarding data
       await db
         .update(userTable)
         .set({
           name: input.displayName,
           image: input.profileImageUrl || undefined,
-          universityEmail: input.universityEmail,
-          universityId: input.universityId,
           major: input.major,
           yearOfStudy: input.yearOfStudy,
           interests: input.interests
         })
         .where(eq(userTable.id, context.session.user.id))
 
-      // 4. Generate 6-digit OTP
+      // 3. Generate 6-digit OTP
       const otp = generateOTP()
       const hashedOTP = hashOTP(otp)
 
-      // 5. Delete any existing verification records for this user
+      // 4. Delete any existing verification records for this user
       await db
         .delete(verificationTable)
         .where(eq(verificationTable.identifier, context.session.user.id))
 
-      // 6. Store in verification table
+      // 5. Store in verification table
       await db.insert(verificationTable).values({
         id: nanoid(),
         identifier: context.session.user.id,
@@ -65,17 +152,17 @@ export const onboarding = {
         expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
       })
 
-      // 7. Send OTP email via Resend
+      // 6. Send OTP email via Resend
       await sendOTPEmail({
-        to: input.universityEmail,
+        to: universityEmail,
         displayName: input.displayName,
         otp
       })
 
-      // 8. Emit analytics event to PostHog
+      // 7. Emit analytics event to PostHog
       await emitEvent('user.onboarding_submitted', context.session.user.id, {
-        universityEmail: input.universityEmail,
-        universityId: input.universityId,
+        universityEmail,
+        universityId,
         major: input.major,
         yearOfStudy: input.yearOfStudy
       })
@@ -191,14 +278,17 @@ export const onboarding = {
         where: eq(userTable.id, context.session.user.id),
         columns: {
           isVerified: true,
-          universityEmail: true
+          universityEmail: true,
+          universityId: true
         }
       })
+
+      const hasCompletedProfile = Boolean(user?.universityId)
 
       return {
         isVerified: user?.isVerified ?? false,
         hasUniversityEmail: !!user?.universityEmail,
-        needsOnboarding: !(user?.universityEmail && user?.isVerified)
+        needsOnboarding: !hasCompletedProfile
       }
     }
   )

@@ -16,8 +16,21 @@ function Layout({ children }: LayoutProps<'/spaces'>) {
   )
 
   useEffect(() => {
-    if (!onboardingStatus?.hasUniversityEmail) router.push('/profile/complete')
-    if (!onboardingStatus?.isVerified) router.push('/verify')
+    if (!onboardingStatus) return
+
+    if (!onboardingStatus.isVerified) {
+      router.push('/verify')
+      return
+    }
+
+    const hasCompletedProfile =
+      typeof window === 'undefined'
+        ? true
+        : window.localStorage.getItem('profileCompleted') === 'true'
+
+    if (onboardingStatus.needsOnboarding || !hasCompletedProfile) {
+      router.push('/profile/complete')
+    }
   }, [onboardingStatus, router])
 
   if (isPending) {
