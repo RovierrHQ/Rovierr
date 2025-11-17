@@ -1,9 +1,9 @@
 import { ORPCError } from '@orpc/server'
 import {
-  accounts as accountsTable,
   attachments as attachmentsTable,
   categories as categoriesTable,
   events as eventsTable,
+  ledgerAccounts as ledgerAccountsTable,
   organization as organizationTable,
   transactionEntries as transactionEntriesTable,
   transactionSplits as transactionSplitsTable,
@@ -115,8 +115,8 @@ export const expenses = {
       const userId = context.session.user.id
 
       // Verify account exists and belongs to user/club
-      const account = await db.query.accounts.findFirst({
-        where: eq(accountsTable.id, input.accountId)
+      const account = await db.query.ledgerAccounts.findFirst({
+        where: eq(ledgerAccountsTable.id, input.accountId)
       })
 
       if (!account) {
@@ -262,16 +262,16 @@ export const expenses = {
         }
 
         // Get or create club liability account
-        let clubAccount = await db.query.accounts.findFirst({
+        let clubAccount = await db.query.ledgerAccounts.findFirst({
           where: and(
-            eq(accountsTable.ownerClubId, input.clubId),
-            eq(accountsTable.type, 'liability')
+            eq(ledgerAccountsTable.ownerClubId, input.clubId),
+            eq(ledgerAccountsTable.type, 'liability')
           )
         })
 
         if (!clubAccount) {
           const [newAccount] = await db
-            .insert(accountsTable)
+            .insert(ledgerAccountsTable)
             .values({
               ownerClubId: input.clubId,
               name: 'Reimbursements Payable',
@@ -283,16 +283,16 @@ export const expenses = {
         }
 
         // Get or create user receivable account
-        let userAccount = await db.query.accounts.findFirst({
+        let userAccount = await db.query.ledgerAccounts.findFirst({
           where: and(
-            eq(accountsTable.ownerUserId, userId),
-            eq(accountsTable.type, 'asset')
+            eq(ledgerAccountsTable.ownerUserId, userId),
+            eq(ledgerAccountsTable.type, 'asset')
           )
         })
 
         if (!userAccount) {
           const [newAccount] = await db
-            .insert(accountsTable)
+            .insert(ledgerAccountsTable)
             .values({
               ownerUserId: userId,
               name: 'Reimbursements Receivable',
@@ -453,11 +453,11 @@ export const expenses = {
       const userId = context.session.user.id
 
       // Verify accounts
-      const lenderAccount = await db.query.accounts.findFirst({
-        where: eq(accountsTable.id, input.lenderAccountId)
+      const lenderAccount = await db.query.ledgerAccounts.findFirst({
+        where: eq(ledgerAccountsTable.id, input.lenderAccountId)
       })
-      const borrowerAccount = await db.query.accounts.findFirst({
-        where: eq(accountsTable.id, input.borrowerAccountId)
+      const borrowerAccount = await db.query.ledgerAccounts.findFirst({
+        where: eq(ledgerAccountsTable.id, input.borrowerAccountId)
       })
 
       if (!(lenderAccount && borrowerAccount)) {
@@ -512,11 +512,11 @@ export const expenses = {
         const userId = context.session.user.id
 
         // Verify accounts
-        const fromAccount = await db.query.accounts.findFirst({
-          where: eq(accountsTable.id, input.fromAccountId)
+        const fromAccount = await db.query.ledgerAccounts.findFirst({
+          where: eq(ledgerAccountsTable.id, input.fromAccountId)
         })
-        const toAccount = await db.query.accounts.findFirst({
-          where: eq(accountsTable.id, input.toAccountId)
+        const toAccount = await db.query.ledgerAccounts.findFirst({
+          where: eq(ledgerAccountsTable.id, input.toAccountId)
         })
 
         if (!(fromAccount && toAccount)) {
@@ -578,8 +578,8 @@ export const expenses = {
       const userId = context.session.user.id
 
       // Get all user accounts
-      const userAccounts = await db.query.accounts.findMany({
-        where: eq(accountsTable.ownerUserId, userId)
+      const userAccounts = await db.query.ledgerAccounts.findMany({
+        where: eq(ledgerAccountsTable.ownerUserId, userId)
       })
 
       // Calculate balances for each account
@@ -637,7 +637,7 @@ export const expenses = {
             sql`${transactionsTable.id} IN (
               SELECT transaction_id FROM transaction_entries
               WHERE account_id IN (
-                SELECT id FROM accounts WHERE owner_user_id = ${userId}
+                SELECT id FROM ledger_accounts WHERE owner_user_id = ${userId}
               ) AND amount > 0
             )`
           )
@@ -655,7 +655,7 @@ export const expenses = {
             sql`${transactionsTable.id} IN (
               SELECT transaction_id FROM transaction_entries
               WHERE account_id IN (
-                SELECT id FROM accounts WHERE owner_user_id = ${userId}
+                SELECT id FROM ledger_accounts WHERE owner_user_id = ${userId}
               ) AND amount < 0
             )`
           )
@@ -879,16 +879,16 @@ export const expenses = {
       > = []
 
       if (query?.userId) {
-        conditions.push(eq(accountsTable.ownerUserId, query.userId))
+        conditions.push(eq(ledgerAccountsTable.ownerUserId, query.userId))
       } else if (query?.clubId) {
-        conditions.push(eq(accountsTable.ownerClubId, query.clubId))
+        conditions.push(eq(ledgerAccountsTable.ownerClubId, query.clubId))
       } else {
         // Default to current user
-        conditions.push(eq(accountsTable.ownerUserId, userId))
+        conditions.push(eq(ledgerAccountsTable.ownerUserId, userId))
       }
 
-      const accounts = await db.query.accounts.findMany({
-        where: and(...conditions, isNull(accountsTable.archivedAt))
+      const accounts = await db.query.ledgerAccounts.findMany({
+        where: and(...conditions, isNull(ledgerAccountsTable.archivedAt))
       })
 
       return {
@@ -911,7 +911,7 @@ export const expenses = {
       const ownerUserId = input.ownerUserId || userId
 
       const [account] = await db
-        .insert(accountsTable)
+        .insert(ledgerAccountsTable)
         .values({
           ownerUserId: input.ownerClubId ? null : ownerUserId,
           ownerClubId: input.ownerClubId || null,

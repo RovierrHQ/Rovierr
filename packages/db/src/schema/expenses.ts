@@ -11,9 +11,9 @@ import { primaryId, timestamps } from '../helper'
 import { organization, user } from './auth'
 
 /** ========================
- *  ACCOUNTS
+ *  LEDGER ACCOUNTS
  *  ======================== */
-export const accounts = pgTable('accounts', {
+export const ledgerAccounts = pgTable('ledger_accounts', {
   id: primaryId,
   // Personal accounts (ownerUserId) or club accounts (ownerClubId)
   ownerUserId: text('owner_user_id').references(() => user.id, {
@@ -114,7 +114,7 @@ export const transactionEntries = pgTable('transaction_entries', {
     .references(() => transactions.id, { onDelete: 'cascade' }),
   accountId: text('account_id')
     .notNull()
-    .references(() => accounts.id, { onDelete: 'cascade' }),
+    .references(() => ledgerAccounts.id, { onDelete: 'cascade' }),
   // debit: positive; credit: negative
   amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
   memo: text('memo'),
@@ -132,7 +132,7 @@ export const transactionSplits = pgTable('transaction_splits', {
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
-  accountId: text('account_id').references(() => accounts.id, {
+  accountId: text('account_id').references(() => ledgerAccounts.id, {
     onDelete: 'set null'
   }),
   shareAmount: numeric('share_amount', { precision: 12, scale: 2 }).notNull(),
@@ -156,18 +156,21 @@ export const attachments = pgTable('attachments', {
 })
 
 // Relations
-export const accountsRelations = relations(accounts, ({ one, many }) => ({
-  ownerUser: one(user, {
-    fields: [accounts.ownerUserId],
-    references: [user.id]
-  }),
-  ownerClub: one(organization, {
-    fields: [accounts.ownerClubId],
-    references: [organization.id]
-  }),
-  transactionEntries: many(transactionEntries),
-  transactionSplits: many(transactionSplits)
-}))
+export const ledgerAccountsRelations = relations(
+  ledgerAccounts,
+  ({ one, many }) => ({
+    ownerUser: one(user, {
+      fields: [ledgerAccounts.ownerUserId],
+      references: [user.id]
+    }),
+    ownerClub: one(organization, {
+      fields: [ledgerAccounts.ownerClubId],
+      references: [organization.id]
+    }),
+    transactionEntries: many(transactionEntries),
+    transactionSplits: many(transactionSplits)
+  })
+)
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   club: one(organization, {
@@ -221,9 +224,9 @@ export const transactionEntriesRelations = relations(
       fields: [transactionEntries.transactionId],
       references: [transactions.id]
     }),
-    account: one(accounts, {
+    account: one(ledgerAccounts, {
       fields: [transactionEntries.accountId],
-      references: [accounts.id]
+      references: [ledgerAccounts.id]
     })
   })
 )
@@ -239,9 +242,9 @@ export const transactionSplitsRelations = relations(
       fields: [transactionSplits.userId],
       references: [user.id]
     }),
-    account: one(accounts, {
+    account: one(ledgerAccounts, {
       fields: [transactionSplits.accountId],
-      references: [accounts.id]
+      references: [ledgerAccounts.id]
     })
   })
 )

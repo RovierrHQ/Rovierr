@@ -1,6 +1,7 @@
 import { neon, neonConfig } from '@neondatabase/serverless'
 import { drizzle } from 'drizzle-orm/neon-http'
 import ws from 'ws'
+// biome-ignore lint/performance/noNamespaceImport: okay to import all schema
 import * as schema from './schema'
 
 neonConfig.webSocketConstructor = ws
