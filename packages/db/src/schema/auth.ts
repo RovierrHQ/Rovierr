@@ -126,6 +126,7 @@ export const organization = pgTable('organization', {
   name: text('name').notNull(),
   slug: text('slug').unique(),
   logo: text('logo'),
+  banner: text('banner'),
   type: text('type', { enum: ['student', 'university'] })
     .default('student')
     .notNull(),

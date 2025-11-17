@@ -127,6 +127,11 @@ export function createAuth(config: AuthConfig) {
             type: 'string[]',
             input: true,
             required: false
+          },
+          banner: {
+            type: 'string',
+            input: true,
+            required: false
           }
         }
       }
