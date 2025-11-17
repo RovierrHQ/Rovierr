@@ -9,6 +9,7 @@ import RadioGroup from './fields/radio'
 import Select from './fields/select'
 import Slider from './fields/slider'
 import Switch from './fields/switch'
+import TagInput from './fields/tag-input'
 import Text from './fields/text'
 import TextArea from './fields/text-area'
 import TextWithUnit from './fields/text-with-unit'
@@ -26,7 +27,8 @@ export const { useAppForm, withFieldGroup, withForm } = createFormHook({
     RadioGroup,
     TextWithUnit,
     MultiSelect,
-    OTP
+    OTP,
+    TagInput
   },
   formComponents: {
     // SubmitButton

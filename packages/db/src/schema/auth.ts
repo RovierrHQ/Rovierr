@@ -91,6 +91,16 @@ export const twoFactor = pgTable('two_factor', {
     .references(() => user.id, { onDelete: 'cascade' })
 })
 
+export const organizationRole = pgTable('organization_role', {
+  id: text('id').primaryKey(),
+  organizationId: text('organization_id')
+    .notNull()
+    .references(() => organization.id, { onDelete: 'cascade' }),
+  role: text('role').notNull(),
+  permission: text('permission').notNull(),
+  ...timestamps
+})
+
 export const team = pgTable('team', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -116,6 +126,7 @@ export const organization = pgTable('organization', {
   name: text('name').notNull(),
   slug: text('slug').unique(),
   logo: text('logo'),
+  banner: text('banner'),
   type: text('type', { enum: ['student', 'university'] })
     .default('student')
     .notNull(),

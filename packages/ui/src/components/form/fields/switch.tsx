@@ -6,17 +6,27 @@ import { useFieldContext } from '../context'
 
 type Props = {
   label?: string
+  containerClassName?: string
+  orientation?: 'horizontal' | 'vertical' | 'responsive'
 } & React.ComponentProps<typeof SwitchBase>
 
-function Switch({ label, ...props }: Props) {
+function Switch({
+  label,
+  containerClassName = 'border rounded-lg p-4',
+  orientation = 'horizontal',
+  ...props
+}: Props) {
   const field = useFieldContext<boolean>()
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
   return (
-    <Field data-invalid={isInvalid} orientation="responsive">
+    <Field
+      className={containerClassName}
+      data-invalid={isInvalid}
+      orientation={orientation}
+    >
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <SwitchBase
         checked={field.state.value}
-        className="data-[state=checked]:bg-icon-active"
         disabled={props.disabled}
         onCheckedChange={field.handleChange}
         {...props}

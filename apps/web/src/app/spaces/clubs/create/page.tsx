@@ -3,25 +3,44 @@
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { useMutation } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
 
-const createClubSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100),
-  description: z.string().min(1, 'Description is required').max(1000),
-  tags: z.array(z.string())
-})
+const createClubSchema = z
+  .object({
+    name: z.string().min(1, 'Name is required').max(100),
+    description: z.string().min(1, 'Description is required').max(1000),
+    type: z.enum(['student', 'university']),
+    universityId: z.string().optional(),
+    tags: z.array(z.string())
+  })
+  .refine(
+    (data) => {
+      // University organizations must be linked to a university
+      if (data.type === 'university') {
+        return !!data.universityId && data.universityId.length > 0
+      }
+      // Student clubs can optionally be affiliated with a university
+      return true
+    },
+    {
+      message:
+        'University selection is required for university official organizations',
+      path: ['universityId']
+    }
+  )
 
 const CreateClubPage = () => {
   const router = useRouter()
-  const { mutateAsync, isPending } = useMutation(
-    orpc.studentOrganizations.create.mutationOptions()
-  )
+  const { data: universities } = useQuery(orpc.university.list.queryOptions())
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useAppForm({
     validators: {
@@ -30,32 +49,44 @@ const CreateClubPage = () => {
     defaultValues: {
       name: '',
       description: '',
+      type: 'student' as 'student' | 'university',
+      universityId: '',
       tags: [] as string[]
-    },
+    } as z.infer<typeof createClubSchema>,
     onSubmit: async ({ value }) => {
       try {
-        // Parse comma-separated tags string to array
-        const tagsArray = value.tags
-          ? value.tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0)
-          : []
+        setIsSubmitting(true)
 
-        const result = await mutateAsync({
+        // Generate slug from name
+        const slug = value.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+
+        // Create organization using Better Auth client
+        const result = await authClient.organization.create({
           name: value.name,
+          slug,
+          type: value.type,
+          universityId: value.universityId || undefined,
           description: value.description,
-          tags: tagsArray
+          tags: value.tags
         })
 
+        if (!result?.data?.id) {
+          throw new Error('Failed to create organization')
+        }
+
         toast.success('Club created successfully!')
-        router.push(`/spaces/clubs/joined/${result.organizationId}`)
-      } catch (_error) {
-        // Handle specific error types
-        // const errorMessage =
-        //   error && typeof error === 'object' && 'data' in error
-        //     ? (error.data as { message?: string })?.message
-        //     : error instanceof Error
-        //       ? error.message
-        //       : 'Failed to create club. Please try again.'
-        // toast.error(errorMessage)
+        router.push(`/spaces/clubs/joined/${result.data.id}`)
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to create club. Please try again.'
+        toast.error(errorMessage)
+      } finally {
+        setIsSubmitting(false)
       }
     }
   })
@@ -103,9 +134,38 @@ const CreateClubPage = () => {
 
           <form.AppField
             children={(field) => (
-              <field.Text
+              <field.Switch
+                checked={field.state.value === 'university'}
+                label="University Official Organization"
+                onCheckedChange={(checked) => {
+                  field.handleChange(checked ? 'university' : 'student')
+                }}
+              />
+            )}
+            name="type"
+          />
+
+          <form.AppField
+            children={(field) => (
+              <field.Select
+                label="University Affiliation (Optional)"
+                options={
+                  universities?.universities?.map((uni) => ({
+                    label: `${uni.name} - ${uni.city}, ${uni.country}`,
+                    value: uni.id
+                  })) ?? []
+                }
+                placeholder="Select if affiliated with a university"
+              />
+            )}
+            name="universityId"
+          />
+
+          <form.AppField
+            children={(field) => (
+              <field.TagInput
                 label="Tags"
-                placeholder="e.g., Technology, Arts, Sports (comma-separated)"
+                placeholder="Type a tag and press Enter"
               />
             )}
             name="tags"
@@ -114,10 +174,10 @@ const CreateClubPage = () => {
           <div className="flex gap-4">
             <Button
               className="flex-1"
-              disabled={form.state.isSubmitting || isPending}
+              disabled={form.state.isSubmitting || isSubmitting}
               type="submit"
             >
-              {form.state.isSubmitting || isPending ? (
+              {form.state.isSubmitting || isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating...
@@ -127,7 +187,7 @@ const CreateClubPage = () => {
               )}
             </Button>
             <Button
-              disabled={form.state.isSubmitting || isPending}
+              disabled={form.state.isSubmitting || isSubmitting}
               onClick={() => router.back()}
               type="button"
               variant="outline"

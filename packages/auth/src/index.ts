@@ -3,7 +3,7 @@ import type { DB } from '@rov/db'
 import {
   account,
   invitation,
-  member,
+  member as memberTable,
   organization as organizationTable,
   session as sessionTable,
   team,
@@ -26,6 +26,7 @@ import {
 } from 'better-auth/plugins'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
+import { ac, admin, member, owner } from './permissions'
 
 export interface AuthConfig {
   appName: string
@@ -85,8 +86,55 @@ export function createAuth(config: AuthConfig) {
   const oneTapPlugin = oneTap()
   const organizationPlugin = organization({
     teams: { enabled: true },
+    ac,
+    roles: {
+      owner,
+      admin,
+      member
+    },
     dynamicAccessControl: {
       enabled: true
+    },
+    schema: {
+      organization: {
+        additionalFields: {
+          type: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          visibility: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          isVerified: {
+            type: 'boolean',
+            input: false,
+            required: false
+          },
+          universityId: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          description: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          tags: {
+            type: 'string[]',
+            input: true,
+            required: false
+          },
+          banner: {
+            type: 'string',
+            input: true,
+            required: false
+          }
+        }
+      }
     }
   })
   const usernamePlugin = username()
@@ -139,7 +187,7 @@ export function createAuth(config: AuthConfig) {
       schema: {
         account,
         invitation,
-        member,
+        member: memberTable,
         organization: organizationTable,
         session: sessionTable,
         team,

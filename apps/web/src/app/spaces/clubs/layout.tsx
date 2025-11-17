@@ -8,13 +8,24 @@ import type {
   SidebarTree
 } from '@/components/layout/use-space-sidebar-items'
 import { useSpaceSidebarItems } from '@/components/layout/use-space-sidebar-items'
+import { authClient } from '@/lib/auth-client'
 
 const ClubsLayout = ({ children }: { children: ReactNode }) => {
   const { setSidebarTree } = useSpaceSidebarItems()
-
+  const { data: organizations, isPending } = authClient.useListOrganizations()
   useEffect(() => {
-    // TODO: Fetch from API when ready
-    const joinedClubs: Array<{ id: string; name: string }> = []
+    // Don't update sidebar while data is still loading
+    if (isPending) {
+      return
+    }
+
+    // Map organizations from better-auth to the format expected by sidebar
+    // Only show empty state if data has loaded (not undefined) and there are no organizations
+    const joinedClubs: Array<{ id: string; name: string }> =
+      organizations?.map((org) => ({
+        id: org.id,
+        name: org.name
+      })) ?? []
 
     // Build club nodes with sub-items
     const clubNodes: SidebarNode[] = joinedClubs.map((club) => ({
@@ -59,8 +70,10 @@ const ClubsLayout = ({ children }: { children: ReactNode }) => {
     }))
 
     // Build My Clubs group children - either clubs or empty state
+    // At this point, isPending is false, so organizations is either an array or undefined
+    // If it's an array with items, show clubs; if empty array, show empty state
     const myClubsChildren: SidebarNode[] =
-      joinedClubs.length > 0
+      organizations && organizations.length > 0
         ? clubNodes
         : [
             {
@@ -137,7 +150,7 @@ const ClubsLayout = ({ children }: { children: ReactNode }) => {
     return () => {
       setSidebarTree(null)
     }
-  }, [setSidebarTree])
+  }, [setSidebarTree, organizations, isPending])
 
   return <div>{children}</div>
 }

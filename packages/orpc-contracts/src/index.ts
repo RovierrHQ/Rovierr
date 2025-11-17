@@ -1,7 +1,9 @@
 import { calendar } from './calendar'
+import { expenses } from './expenses'
 import { realtime } from './realtime'
 import { roadmap } from './roadmap'
 import { studentOrganizations } from './student-organizations'
+import { tasks } from './tasks'
 import { university } from './university'
 import { user } from './user'
 
@@ -22,5 +24,11 @@ export const appContract = {
   roadmap,
 
   // student organizations integration
-  studentOrganizations
+  studentOrganizations,
+
+  // expenses integration
+  expenses,
+
+  // tasks integration
+  tasks
 }

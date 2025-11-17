@@ -1,10 +1,26 @@
-import * as lr from 'lucide-react'
+import {
+  AudioWaveform,
+  BookOpen,
+  Bot,
+  BriefcaseBusiness,
+  Club,
+  Compass,
+  Frame,
+  GalleryVerticalEnd,
+  GraduationCap,
+  MapIcon,
+  PieChart,
+  Settings2,
+  SquareTerminal,
+  UserRound,
+  Users
+} from 'lucide-react'
 import * as types from '@/types/types-space-sidebar-data'
 
 export const spaces: types.ISpaces[] = [
   {
     name: types.SpacesNames.SPACES,
-    logo: lr.GalleryVerticalEnd,
+    logo: GalleryVerticalEnd,
     plan: 'Enterprise',
     url: '/spaces',
     isActive: false,
@@ -12,7 +28,7 @@ export const spaces: types.ISpaces[] = [
       {
         title: 'Playground',
         url: '#',
-        icon: lr.SquareTerminal,
+        icon: SquareTerminal,
         isActive: true,
         items: [
           { title: 'History', url: '#' },
@@ -23,7 +39,7 @@ export const spaces: types.ISpaces[] = [
       {
         title: 'Models',
         url: '#',
-        icon: lr.Bot,
+        icon: Bot,
         items: [
           { title: 'Genesis', url: '#' },
           { title: 'Explorer', url: '#' },
@@ -33,7 +49,7 @@ export const spaces: types.ISpaces[] = [
       {
         title: 'Documentation',
         url: '#',
-        icon: lr.BookOpen,
+        icon: BookOpen,
         items: [
           { title: 'Introduction', url: '#' },
           { title: 'Get Started', url: '#' },
@@ -44,7 +60,7 @@ export const spaces: types.ISpaces[] = [
       {
         title: 'Settings',
         url: '#',
-        icon: lr.Settings2,
+        icon: Settings2,
         items: [
           { title: 'General', url: '#' },
           { title: 'Team', url: '#' },
@@ -56,35 +72,35 @@ export const spaces: types.ISpaces[] = [
   },
   {
     name: types.SpacesNames.ACADEMICS,
-    logo: lr.GraduationCap,
+    logo: GraduationCap,
     plan: 'Startup',
     url: '/spaces/academics',
     isActive: false
   },
   {
     name: types.SpacesNames.SOCIAL,
-    logo: lr.AudioWaveform,
+    logo: AudioWaveform,
     plan: 'Free',
     url: '/spaces/social',
     isActive: false
   },
   {
     name: types.SpacesNames.PERSONAL,
-    logo: lr.UserRound,
+    logo: UserRound,
     plan: 'Free',
     url: '/spaces/personal',
     isActive: false
   },
   {
     name: types.SpacesNames.CAREER,
-    logo: lr.BriefcaseBusiness,
+    logo: BriefcaseBusiness,
     plan: 'Free',
     url: '/spaces/career',
     isActive: false
   },
   {
     name: types.SpacesNames.CLUBS,
-    logo: lr.Club,
+    logo: Club,
     plan: 'Free',
     url: '/spaces/clubs',
     isActive: true,
@@ -92,7 +108,7 @@ export const spaces: types.ISpaces[] = [
       {
         title: 'Clubs & Societies',
         url: '/spaces/clubs/societies',
-        icon: lr.Users,
+        icon: Users,
         isActive: true,
         items: [
           {
@@ -112,7 +128,7 @@ export const spaces: types.ISpaces[] = [
       {
         title: 'Discover',
         url: '/spaces/clubs/discover',
-        icon: lr.Compass,
+        icon: Compass,
         isActive: false,
         items: [
           {
@@ -133,16 +149,16 @@ export const projects: types.IProjects[] = [
   {
     name: 'Design Engineering',
     url: '#',
-    icon: lr.Frame
+    icon: Frame
   },
   {
     name: 'Sales & Marketing',
     url: '#',
-    icon: lr.PieChart
+    icon: PieChart
   },
   {
     name: 'Travel',
     url: '#',
-    icon: lr.MapIcon
+    icon: MapIcon
   }
 ]
