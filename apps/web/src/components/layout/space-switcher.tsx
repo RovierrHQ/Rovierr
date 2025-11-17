@@ -20,11 +20,13 @@ import {
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
 import { cn } from '@rov/ui/lib/utils'
+import { useQuery } from '@tanstack/react-query'
 import { ChevronsUpDown, Info } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import type { ISpaces } from '@/types/types-space-sidebar-data'
+import { orpc } from '@/utils/orpc'
 
 export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
   const { isMobile } = useSidebar()
@@ -32,6 +34,9 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
     spaces.find((space) => space.isActive)
   )
   const router = useRouter()
+  const { data: onboardingStatus } = useQuery(
+    orpc.user.onboarding.getStatus.queryOptions()
+  )
 
   // Cycle to next space
   const cycleToNextSpace = () => {
@@ -45,8 +50,11 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
   useHotkeys('shift+tab', cycleToNextSpace, { preventDefault: true })
 
   useEffect(() => {
+    if (!onboardingStatus?.hasUniversityEmail)
+      return router.push('/profile/complete')
+
     router.push(activeSpace?.url || '/spaces/clubs')
-  }, [activeSpace, router])
+  }, [activeSpace, router, onboardingStatus])
 
   if (!activeSpace) {
     return null
