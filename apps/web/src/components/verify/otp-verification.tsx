@@ -66,7 +66,7 @@ const OtpVerification = ({
         showCloseButton={false}
       >
         <DialogHeader>
-          <DialogTitle className="font-semibold text-2xl">
+          <DialogTitle className="text-center font-semibold text-2xl">
             Enter Verification Code
           </DialogTitle>
         </DialogHeader>

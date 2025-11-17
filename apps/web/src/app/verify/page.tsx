@@ -27,7 +27,7 @@ export default function VerifyPage() {
       setShowWelcome(true)
       const timer = setTimeout(() => {
         router.push('/spaces')
-      }, 3000)
+      }, 4000)
 
       return () => clearTimeout(timer)
     }
@@ -47,10 +47,10 @@ export default function VerifyPage() {
     return (
       <div className="flex h-[60vh] w-full items-center justify-center px-4">
         <Card className="w-full max-w-sm shadow-md">
-          <CardContent className="flex flex-col gap-2 py-8 text-center">
+          <CardContent className="flex flex-col gap-2 py-8">
             <p className="text-muted-foreground">Account Created 🎉</p>
             <h1 className="font-semibold text-2xl">{welcomeHeading}</h1>
-            <p className="font-semibold text-muted-foreground">
+            <p className="mt-5 font-semibold text-muted-foreground">
               Redirecting you to your Club Societies...
             </p>
           </CardContent>
