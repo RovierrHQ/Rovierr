@@ -11,13 +11,18 @@ export default function LoginPage() {
     <section className="relative isolate min-h-svh overflow-hidden">
       <div className="mx-auto grid min-h-svh grid-cols-1 md:grid-cols-2">
         <div className="flex h-full flex-col justify-center space-y-6 bg-muted/40 p-6 sm:p-8 md:p-10">
-          <Image
-            alt="rovierr Login page"
-            className="top-5 left-5 sm:top-8 sm:left-8 md:absolute"
-            height={28}
-            src="/rovierr-login-logo.svg"
-            width={96}
-          />
+          <div className="top-10 left-10 flex h-auto w-auto items-center gap-2 md:absolute">
+            <Image
+              alt="Rovierr Login page"
+              className="h-5 w-auto sm:h-6 md:h-7"
+              height={28}
+              src="/logo.svg"
+              width={96}
+            />
+            <span className="font-semibold text-base sm:text-lg md:text-xl">
+              Rovierr
+            </span>
+          </div>
 
           <div className="mx-auto w-full max-w-sm space-y-8 sm:max-w-md lg:max-w-lg lg:space-y-10">
             <Image
