@@ -9,8 +9,8 @@ import { generateOTP, hashOTP, validateUniversityEmail } from '@/lib/utils'
 import { sendOTPEmail } from '@/services/email/sender'
 
 export const onboarding = {
-  startVerification:
-    protectedProcedure.user.onboarding.startVerification.handler(
+  sendVerificationOTP:
+    protectedProcedure.user.onboarding.sendVerificationOTP.handler(
       async ({ input, context }) => {
         // 1. Check if university email is already taken by another user
         const existingUser = await db.query.user.findFirst({
@@ -80,12 +80,13 @@ export const onboarding = {
 
   submit: protectedProcedure.user.onboarding.submit.handler(
     async ({ input, context }) => {
-      // 1. Ensure university information exists
+      // 1. Get user record with all needed fields
       const userRecord = await db.query.user.findFirst({
         where: eq(userTable.id, context.session.user.id),
         columns: {
           universityEmail: true,
-          universityId: true
+          universityId: true,
+          image: true
         }
       })
 
@@ -96,7 +97,7 @@ export const onboarding = {
         })
       }
 
-      const { universityEmail, universityId } = userRecord
+      const { universityEmail, universityId, image } = userRecord
 
       if (!universityEmail) {
         throw new ORPCError('UNIVERSITY_EMAIL_TAKEN', {
@@ -128,7 +129,7 @@ export const onboarding = {
         .update(userTable)
         .set({
           name: input.displayName,
-          image: input.profileImageUrl || undefined,
+          image: input.profileImageUrl ?? image ?? undefined,
           major: input.major,
           yearOfStudy: input.yearOfStudy,
           interests: input.interests

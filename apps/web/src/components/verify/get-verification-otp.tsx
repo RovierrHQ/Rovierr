@@ -8,7 +8,6 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { Label } from '@rov/ui/components/label'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Info } from 'lucide-react'
 import { toast } from 'sonner'
@@ -27,7 +26,7 @@ const GetVerificationOTP = ({
   onSuccess: (email: string) => void
 }) => {
   const { mutateAsync } = useMutation(
-    orpc.user.onboarding.startVerification.mutationOptions()
+    orpc.user.onboarding.sendVerificationOTP.mutationOptions()
   )
   const { data: universities } = useQuery(orpc.university.list.queryOptions())
 
@@ -66,8 +65,6 @@ const GetVerificationOTP = ({
             form.handleSubmit()
           }}
         >
-          <Label htmlFor="email">University Email</Label>
-
           <form.AppField
             children={(field) => (
               <field.Select
@@ -84,14 +81,45 @@ const GetVerificationOTP = ({
             name="universityId"
           />
 
-          <form.AppField
-            children={(field) => <field.Text placeholder="Email" />}
-            name="email"
-          />
+          <form.Field name="universityId">
+            {(universityField) => {
+              const selectedUniversity = universities?.universities?.find(
+                (uni) => uni.id === universityField.state.value
+              )
+              const emailPlaceholder = selectedUniversity
+                ?.validEmailDomains?.[0]
+                ? `student@${selectedUniversity.validEmailDomains[0]}`
+                : 'Email'
 
-          <p className="flex items-center gap-2 text-muted-foreground text-xs">
-            <Info size={14} /> Use your <strong>.edu</strong> email address
-          </p>
+              return (
+                <>
+                  <form.AppField
+                    children={(field) => (
+                      <field.Text placeholder={emailPlaceholder} />
+                    )}
+                    name="email"
+                  />
+
+                  {selectedUniversity && (
+                    <p className="flex items-center gap-2 text-muted-foreground text-xs">
+                      <Info size={14} /> Use your university email (
+                      {selectedUniversity.validEmailDomains.map(
+                        (domain: string, i: number) => (
+                          <span key={domain}>
+                            <strong>@{domain}</strong>
+                            {i <
+                              selectedUniversity.validEmailDomains.length - 1 &&
+                              ' or '}
+                          </span>
+                        )
+                      )}
+                      )
+                    </p>
+                  )}
+                </>
+              )
+            }}
+          </form.Field>
 
           <DialogFooter>
             <Button

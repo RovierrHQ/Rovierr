@@ -10,12 +10,12 @@ export const onboardingSubmitInput = z.object({
 })
 
 export const onboarding = {
-  startVerification: oc
+  sendVerificationOTP: oc
     .route({
       method: 'POST',
       description:
         'Set university email for the current user and send verification OTP',
-      summary: 'Start University Email Verification',
+      summary: 'Send Verification OTP',
       tags: ['User', 'Onboarding']
     })
     .input(
