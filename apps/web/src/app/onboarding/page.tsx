@@ -9,7 +9,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot
 } from '@rov/ui/components/input-otp'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -21,7 +21,6 @@ export default function OnboardingPage() {
   const [showOTPInput, setShowOTPInput] = useState(false)
   const [otp, setOtp] = useState('')
   const [cooldownSeconds, setCooldownSeconds] = useState(0)
-  const { data: universities } = useQuery(orpc.university.list.queryOptions())
   const { mutateAsync: handleVerifyOTP, isPending: isVerifying } = useMutation(
     orpc.user.onboarding.verifyEmail.mutationOptions({
       onSuccess: () => router.push('/spaces')
@@ -51,8 +50,6 @@ export default function OnboardingPage() {
     defaultValues: {
       displayName: '',
       profileImageUrl: null,
-      universityEmail: '',
-      universityId: '',
       major: '',
       yearOfStudy: '1',
       interests: []
@@ -205,35 +202,6 @@ export default function OnboardingPage() {
               </p>
             )}
           </div> */}
-
-          {/* University Selection */}
-          <form.AppField
-            children={(field) => (
-              <field.Select
-                label="University"
-                options={
-                  universities?.universities?.map((uni) => ({
-                    label: `${uni.name} - ${uni.city}, ${uni.country}`,
-                    value: uni.id
-                  })) ?? []
-                }
-                placeholder="Select your university"
-              />
-            )}
-            name="universityId"
-          />
-
-          {/* University Email */}
-
-          <form.AppField
-            children={(field) => (
-              <field.Text
-                label="University Email"
-                placeholder="XXXXXXXXXXXXXXXXXXXXXX"
-              />
-            )}
-            name="universityEmail"
-          />
 
           {/* Major */}
 

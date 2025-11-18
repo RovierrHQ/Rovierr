@@ -19,7 +19,8 @@ export const university = {
             logo: z.string().nullable(),
             country: z.string(),
             city: z.string(),
-            address: z.string()
+            address: z.string(),
+            validEmailDomains: z.array(z.string())
           })
         )
       })
