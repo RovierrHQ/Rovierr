@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.rexcode.rovierr",
   "build": {
-    "beforeDevCommand": "pnpm vite",
+    "beforeDevCommand": "bun vite",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm build",
+    "beforeBuildCommand": "bun build",
     "frontendDist": "../dist"
   },
   "app": {

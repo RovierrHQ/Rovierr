@@ -3,8 +3,9 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm install -g pnpm
-        - pnpm install
+        - curl -fsSL https://bun.sh/install | bash
+        - export PATH="$HOME/.bun/bin:$PATH"
+        - bun install
     build:
       commands:
         # - env | grep -E '^(NEXT_PUBLIC_|POSTGRES_|DATABASE_|CLERK_SECRET_KEY|APP_ID|INSTANCE_ID|DEEPSEEK_|GROQ_|AMAZON_|RESEND|BETTER_AUTH|EMAIL_FROM|NOVU_)' >> .env
@@ -21,4 +22,4 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
-      - .pnpm-store/**/*
+      - .bun/install/cache/**/*

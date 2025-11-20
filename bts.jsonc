@@ -22,7 +22,7 @@
   ],
   "examples": [],
   "auth": true,
-  "packageManager": "pnpm",
+  "packageManager": "bun",
   "dbSetup": "neon",
   "api": "orpc",
   "webDeploy": "none"
