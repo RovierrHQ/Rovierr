@@ -26,3 +26,30 @@ bun db:push
 ```
 
 This will push the current schema state to the database without creating a migration file. Remember to generate a proper migration before merging to main branch.
+
+## Docker
+
+Build from root:
+
+```bash
+docker build -f apps/server/Dockerfile -t rovierr-server .
+```
+
+Run the container (with environment variables):
+
+```bash
+docker run -d -p 3000:3000 --env-file apps/server/.env --name rovierr-server rovierr-server
+```
+
+View logs:
+
+```bash
+docker logs -f rovierr-server
+```
+
+Stop and remove the container:
+
+```bash
+docker stop rovierr-server
+docker rm rovierr-server
+```
