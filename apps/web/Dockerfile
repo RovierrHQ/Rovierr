@@ -1,5 +1,5 @@
-# use the official Bun image
-FROM oven/bun:1 AS base
+# Build stage
+FROM oven/bun:1 AS builder
 WORKDIR /usr/src/app
 
 # copy package files and lockfile first for better caching
@@ -37,8 +37,6 @@ COPY packages/typescript-config ./packages/typescript-config/
 
 # build the Next.js app
 # Accept all NEXT_PUBLIC_* environment variables as build args (injected by platform)
-# These will be automatically collected and written to .env.production for Next.js
-# Pattern matches Amplify workflow: env | grep -E '^NEXT_PUBLIC_'
 ARG NEXT_PUBLIC_SERVER_URL
 ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
 ARG NEXT_PUBLIC_POSTHOG_KEY
@@ -62,10 +60,23 @@ RUN bun run build
 # Remove .env.production after build (security best practice)
 RUN rm -f .env.production
 
+# Production stage
+FROM oven/bun:1 AS runner
+WORKDIR /usr/src/app
+
+# Copy standalone build output from builder
+# Next.js standalone mode includes only production dependencies
+# The standalone output structure: .next/standalone contains the full app structure
+COPY --from=builder /usr/src/app/apps/web/.next/standalone ./
+COPY --from=builder /usr/src/app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /usr/src/app/apps/web/public ./apps/web/public
+
 # run the app
 USER bun
 ARG PORT=3001
 ENV PORT=${PORT}
+ENV NODE_ENV=production
 EXPOSE ${PORT}
+# In standalone mode, server.js is in apps/web directory
 WORKDIR /usr/src/app/apps/web
-CMD bun run next start --port ${PORT}
+CMD ["bun", "server.js"]
