@@ -3,7 +3,7 @@ FROM oven/bun:1 AS base
 WORKDIR /usr/src/app
 
 # copy package files first for better caching
-COPY package.json bun.lock ./
+COPY package.json ./
 COPY apps/server/package.json ./apps/server/
 COPY packages/auth/package.json ./packages/auth/
 COPY packages/db/package.json ./packages/db/
@@ -13,7 +13,7 @@ COPY packages/shared/package.json ./packages/shared/
 
 # install dependencies with cache mount and filter to only server workspace (production only)
 RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile --production --filter server...
+    bun install --production --filter server...
 
 # copy source code and config files (grouped by package for efficiency)
 COPY apps/server/src apps/server/tsconfig.json apps/server/drizzle.config.ts ./apps/server/
