@@ -14,7 +14,7 @@ import {
 } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/react'
 import type { Auth } from './index'
-import { ac, admin, member, owner } from './permissions'
+import { ac } from './permissions'
 
 /**
  * Web Auth Client Configuration
@@ -56,11 +56,7 @@ export function createWebAuthClient(config: WebAuthClientConfig) {
       }),
       organizationClient({
         ac,
-        roles: {
-          owner,
-          admin,
-          member
-        },
+
         dynamicAccessControl: {
           enabled: true
         },

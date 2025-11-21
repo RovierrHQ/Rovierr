@@ -25,15 +25,15 @@ export const ac = createAccessControl(statement)
  * Define roles with their permissions
  * These roles extend the default roles with custom permissions
  */
-export const owner = ac.newRole({
+export const defaultPresident = ac.newRole({
   ...ownerAc.statements
 })
 
-export const admin = ac.newRole({
+export const defaultVicePresident = ac.newRole({
   ...adminAc.statements
 })
 
-export const member = ac.newRole({
+export const defaultMember = ac.newRole({
   ...memberAc.statements
 })
 

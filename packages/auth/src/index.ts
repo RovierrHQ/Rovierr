@@ -4,6 +4,7 @@ import {
   account,
   invitation,
   member as memberTable,
+  organizationRole as organizationRoleTable,
   organization as organizationTable,
   session as sessionTable,
   team,
@@ -13,7 +14,7 @@ import {
   verification
 } from '@rov/db'
 import type { BetterAuthOptions } from 'better-auth'
-import { betterAuth } from 'better-auth'
+import { betterAuth, logger } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import {
   customSession,
@@ -26,7 +27,12 @@ import {
 } from 'better-auth/plugins'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import { ac, admin, member, owner } from './permissions'
+import {
+  ac,
+  defaultMember,
+  defaultPresident,
+  defaultVicePresident
+} from './permissions'
 
 export interface AuthConfig {
   appName: string
@@ -38,24 +44,39 @@ export interface AuthConfig {
     clientId: string
     clientSecret: string
   }
-  callbacks?: {
-    onUserCreated?: (user: {
-      id: string
-      email: string
-      name: string
-      [key: string]: unknown
-    }) => Promise<void>
-    sendOTP?: (params: {
-      phoneNumber: string
-      code: string
-      request?: Request
-    }) => void
-    sendEmailOTP?: (params: {
-      email: string
-      otp: string
-      type: string
-    }) => Promise<void>
-  }
+}
+
+/**
+ * Create default roles for an organization
+ * Maps Better Auth roles: owner -> president, admin -> vice-president, member -> member
+ */
+export async function createDefaultOrganizationRoles(
+  db: DB,
+  organizationId: string
+) {
+  const defaultRoles = [
+    {
+      role: 'president',
+      permission: JSON.stringify(defaultPresident.statements)
+    },
+    {
+      role: 'vice-president',
+      permission: JSON.stringify(defaultVicePresident.statements)
+    },
+    {
+      role: 'member',
+      permission: JSON.stringify(defaultMember.statements)
+    }
+  ]
+
+  await db.insert(organizationRoleTable).values(
+    defaultRoles.map((r) => ({
+      id: nanoid(),
+      organizationId,
+      role: r.role,
+      permission: r.permission
+    }))
+  )
 }
 
 /**
@@ -69,29 +90,25 @@ export function createAuth(config: AuthConfig) {
   const twoFactorPlugin = twoFactor()
   const phoneNumberPlugin = phoneNumber({
     sendOTP: (params, request) => {
-      config.callbacks?.sendOTP?.({
+      logger.error('sendOTP', {
         phoneNumber: params.phoneNumber,
         code: params.code,
         request: request ?? undefined
       })
+      return Promise.resolve()
     }
   })
   const emailOTPPlugin = emailOTP({
-    async sendVerificationOTP({ email, otp, type }) {
-      if (type === 'email-verification') {
-        await config.callbacks?.sendEmailOTP?.({ email, otp, type })
-      }
+    sendVerificationOTP({ email, otp, type }) {
+      logger.error('sendVerificationOTP', { email, otp, type })
+      return Promise.resolve()
     }
   })
   const oneTapPlugin = oneTap()
   const organizationPlugin = organization({
     teams: { enabled: true },
     ac,
-    roles: {
-      owner,
-      admin,
-      member
-    },
+    creatorRole: 'president',
     dynamicAccessControl: {
       enabled: true
     },
@@ -134,6 +151,14 @@ export function createAuth(config: AuthConfig) {
             required: false
           }
         }
+      }
+    },
+    organizationHooks: {
+      // Create default roles after organization is created
+      afterCreateOrganization: async ({ organization: org }) => {
+        if (!org?.id) return
+
+        await createDefaultOrganizationRoles(config.db, org.id)
       }
     }
   })
@@ -194,7 +219,8 @@ export function createAuth(config: AuthConfig) {
         teamMember,
         twoFactor: twoFactorTable,
         user: userTable,
-        verification
+        verification,
+        organizationRole: organizationRoleTable
       }
     }),
     emailAndPassword: {
@@ -224,9 +250,6 @@ export function createAuth(config: AuthConfig) {
               })
               .where(eq(userTable.id, user.id))
               .execute()
-
-            // Call the user created callback if provided
-            await config.callbacks?.onUserCreated?.(user)
           }
         }
       }
