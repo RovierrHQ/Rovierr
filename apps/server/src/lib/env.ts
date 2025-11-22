@@ -76,6 +76,9 @@ const envSchema = z.object({
     .min(1)
     .describe('Usesend API key for sending emails'),
 
+  // Web URL
+  WEB_URL: z.url().describe('Web URL for the web app'),
+
   // Analytics (PostHog)
   POSTHOG_API_KEY: z.string().min(1).describe('PostHog API key for analytics'),
   POSTHOG_HOST: z

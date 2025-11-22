@@ -77,8 +77,8 @@ const CreateClubPage = () => {
           throw new Error('Failed to create organization')
         }
 
-        toast.success('Club created successfully!')
-        router.push(`/spaces/clubs/joined/${result.data.id}`)
+        toast.success('Society created successfully!')
+        router.push(`/spaces/societies/mine/${result.data.id}`)
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -95,16 +95,16 @@ const CreateClubPage = () => {
     <div className="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6">
         <Button asChild size="sm" variant="ghost">
-          <Link href="/spaces/clubs">
+          <Link href="/spaces/societies">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Clubs
+            Back to Societies
           </Link>
         </Button>
       </div>
 
       <Card className="p-6">
         <h1 className="mb-6 font-semibold text-2xl sm:text-3xl">
-          Create a New Club
+          Create a New Society
         </h1>
 
         <form
@@ -116,7 +116,10 @@ const CreateClubPage = () => {
         >
           <form.AppField
             children={(field) => (
-              <field.Text label="Club Name" placeholder="Enter club name" />
+              <field.Text
+                label="Society Name"
+                placeholder="Enter society name"
+              />
             )}
             name="name"
           />
@@ -183,7 +186,7 @@ const CreateClubPage = () => {
                   Creating...
                 </>
               ) : (
-                'Create Club'
+                'Create Society'
               )}
             </Button>
             <Button

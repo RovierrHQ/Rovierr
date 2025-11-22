@@ -102,42 +102,42 @@ export const spaces: types.ISpaces[] = [
     name: types.SpacesNames.CLUBS,
     logo: Club,
     plan: 'Free',
-    url: '/spaces/clubs',
+    url: '/spaces/societies',
     isActive: true,
     childrenItems: [
       {
-        title: 'Clubs & Societies',
-        url: '/spaces/clubs/societies',
+        title: 'Societies',
+        url: '/spaces/societies',
         icon: Users,
         isActive: true,
         items: [
           {
             title: 'Campus Feed',
-            url: '/spaces/clubs/campus-feed'
+            url: '/spaces/societies/campus-feed'
           },
           {
-            title: 'My Clubs',
-            url: '/spaces/clubs/societies/my-clubs'
+            title: 'Mine',
+            url: '/spaces/societies/mine'
           },
           {
             title: 'Events',
-            url: '/spaces/clubs/societies/events'
+            url: '/spaces/societies/discover/events'
           }
         ]
       },
       {
         title: 'Discover',
-        url: '/spaces/clubs/discover',
+        url: '/spaces/societies/discover',
         icon: Compass,
         isActive: false,
         items: [
           {
-            title: 'Browse Clubs',
-            url: '/spaces/clubs/discover/browse-clubs'
+            title: 'Browse Societies',
+            url: '/spaces/societies/discover/browse-clubs'
           },
           {
             title: 'Network',
-            url: '/spaces/clubs/discover/network'
+            url: '/spaces/societies/discover/network'
           }
         ]
       }

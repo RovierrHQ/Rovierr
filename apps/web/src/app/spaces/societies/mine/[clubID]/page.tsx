@@ -63,7 +63,7 @@ const ClubProfilePage = () => {
         <Card>
           <CardContent className="p-6">
             <p className="text-muted-foreground">
-              Club not found or you don't have access to it.
+              Society not found or you don't have access to it.
             </p>
           </CardContent>
         </Card>
@@ -85,7 +85,7 @@ const ClubProfilePage = () => {
         <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
           {banner ? (
             <img
-              alt="Club banner"
+              alt="Society banner"
               className="h-full w-full object-cover"
               src={banner}
             />

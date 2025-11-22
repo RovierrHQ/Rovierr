@@ -45,7 +45,7 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
   useHotkeys('shift+tab', cycleToNextSpace, { preventDefault: true })
 
   useEffect(() => {
-    router.push(activeSpace?.url || '/spaces/clubs')
+    router.push(activeSpace?.url || '/spaces/societies')
   }, [activeSpace, router])
 
   if (!activeSpace) {

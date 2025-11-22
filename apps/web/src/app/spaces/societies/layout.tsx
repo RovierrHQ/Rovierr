@@ -10,7 +10,7 @@ import type {
 import { useSpaceSidebarItems } from '@/components/layout/use-space-sidebar-items'
 import { authClient } from '@/lib/auth-client'
 
-const ClubsLayout = ({ children }: { children: ReactNode }) => {
+const SocietiesLayout = ({ children }: { children: ReactNode }) => {
   const { setSidebarTree } = useSpaceSidebarItems()
   const { data: organizations, isPending } = authClient.useListOrganizations()
   useEffect(() => {
@@ -21,74 +21,74 @@ const ClubsLayout = ({ children }: { children: ReactNode }) => {
 
     // Map organizations from better-auth to the format expected by sidebar
     // Only show empty state if data has loaded (not undefined) and there are no organizations
-    const joinedClubs: Array<{ id: string; name: string }> =
+    const joinedSocieties: Array<{ id: string; name: string }> =
       organizations?.map((org) => ({
         id: org.id,
         name: org.name
       })) ?? []
 
-    // Build club nodes with sub-items
-    const clubNodes: SidebarNode[] = joinedClubs.map((club) => ({
-      id: `club-${club.id}`,
-      title: club.name,
+    // Build society nodes with sub-items
+    const societyNodes: SidebarNode[] = joinedSocieties.map((society) => ({
+      id: `society-${society.id}`,
+      title: society.name,
       type: 'collapsible',
-      url: `/spaces/clubs/joined/${club.id}`,
+      url: `/spaces/societies/mine/${society.id}`,
       icon: Users,
       isActive: false,
       children: [
         {
-          id: `club-${club.id}-discussion`,
+          id: `society-${society.id}-discussion`,
           title: 'Discussion',
           type: 'item',
-          url: `/spaces/clubs/joined/${club.id}/discussion`
+          url: `/spaces/societies/mine/${society.id}/discussion`
         },
         {
-          id: `club-${club.id}-tasks`,
+          id: `society-${society.id}-tasks`,
           title: 'Tasks',
           type: 'item',
-          url: `/spaces/clubs/joined/${club.id}/tasks`
+          url: `/spaces/societies/mine/${society.id}/tasks`
         },
         {
-          id: `club-${club.id}-expenses`,
+          id: `society-${society.id}-expenses`,
           title: 'Expense Tracking',
           type: 'item',
-          url: `/spaces/clubs/joined/${club.id}/expenses`
+          url: `/spaces/societies/mine/${society.id}/expenses`
         },
         {
-          id: `club-${club.id}-email`,
+          id: `society-${society.id}-email`,
           title: 'Email',
           type: 'item',
-          url: `/spaces/clubs/joined/${club.id}/email`
+          url: `/spaces/societies/mine/${society.id}/email`
         },
         {
-          id: `club-${club.id}-members`,
+          id: `society-${society.id}-members`,
           title: 'Members',
           type: 'item',
-          url: `/spaces/clubs/joined/${club.id}/members`
+          url: `/spaces/societies/mine/${society.id}/members`
         }
       ]
     }))
 
-    // Build My Clubs group children - either clubs or empty state
+    // Build My Societies group children - either societies or empty state
     // At this point, isPending is false, so organizations is either an array or undefined
-    // If it's an array with items, show clubs; if empty array, show empty state
-    const myClubsChildren: SidebarNode[] =
+    // If it's an array with items, show societies; if empty array, show empty state
+    const mySocietiesChildren: SidebarNode[] =
       organizations && organizations.length > 0
-        ? clubNodes
+        ? societyNodes
         : [
             {
-              id: 'no-clubs-empty-state',
-              title: "You haven't joined any clubs yet",
+              id: 'no-societies-empty-state',
+              title: "You haven't joined any societies yet",
               type: 'empty-state',
-              emptyStateMessage: "You haven't joined any clubs yet",
+              emptyStateMessage: "You haven't joined any societies yet",
               emptyStateActions: [
                 {
-                  label: 'Join an existing club',
-                  url: '/spaces/clubs/discover/browse-clubs'
+                  label: 'Join an existing society',
+                  url: '/spaces/societies/discover/browse-clubs'
                 },
                 {
-                  label: 'Create a new club',
-                  url: '/spaces/clubs/create'
+                  label: 'Create a new society',
+                  url: '/spaces/societies/create'
                 }
               ]
             }
@@ -102,15 +102,15 @@ const ClubsLayout = ({ children }: { children: ReactNode }) => {
           id: 'campus-feed',
           title: 'Campus Feed',
           type: 'item',
-          url: '/spaces/clubs/campus-feed',
+          url: '/spaces/societies/campus-feed',
           icon: Home
         },
-        // My Clubs group
+        // My Societies group
         {
-          id: 'my-clubs-group',
-          title: 'My Clubs',
+          id: 'my-societies-group',
+          title: 'My Societies',
           type: 'group-header',
-          children: myClubsChildren
+          children: mySocietiesChildren
         },
         // Discover group
         {
@@ -119,24 +119,24 @@ const ClubsLayout = ({ children }: { children: ReactNode }) => {
           type: 'group-header',
           children: [
             {
-              id: 'browse-clubs',
-              title: 'Browse Clubs',
+              id: 'browse-societies',
+              title: 'Browse Societies',
               type: 'item',
-              url: '/spaces/clubs/discover/browse-clubs',
+              url: '/spaces/societies/discover/browse-clubs',
               icon: Compass
             },
             {
               id: 'events',
               title: 'Events',
               type: 'item',
-              url: '/spaces/clubs/discover/events',
+              url: '/spaces/societies/discover/events',
               icon: Calendar
             },
             {
               id: 'network',
               title: 'Network',
               type: 'item',
-              url: '/spaces/clubs/discover/network',
+              url: '/spaces/societies/discover/network',
               icon: Network
             }
           ]
@@ -155,4 +155,4 @@ const ClubsLayout = ({ children }: { children: ReactNode }) => {
   return <div>{children}</div>
 }
 
-export default ClubsLayout
+export default SocietiesLayout

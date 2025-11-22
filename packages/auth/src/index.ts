@@ -13,12 +13,15 @@ import {
   user as userTable,
   verification
 } from '@rov/db'
-import type { BetterAuthOptions } from 'better-auth'
-import { betterAuth, logger } from 'better-auth'
+import type { BetterAuthOptions, User } from 'better-auth'
+import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import {
   customSession,
   emailOTP,
+  type Invitation,
+  type Member,
+  type Organization,
   oneTap,
   organization,
   phoneNumber,
@@ -40,6 +43,38 @@ export interface AuthConfig {
   secret: string
   trustedOrigins: string[]
   db: DB
+  emails: {
+    sendEmailVerificationOTP: ({
+      email,
+      otp,
+      type
+    }: {
+      email: string
+      otp: string
+      type: 'sign-in' | 'email-verification' | 'forget-password'
+    }) => Promise<void>
+    sendPhoneNumberVerificationOTP: ({
+      phoneNumber,
+      code
+    }: {
+      phoneNumber: string
+      code: string
+    }) => Promise<void>
+    sendInvitationEmail: ({
+      email,
+      organization,
+      inviter
+    }: {
+      id: string
+      role: string
+      email: string
+      organization: Organization
+      invitation: Invitation
+      inviter: Member & {
+        user: User
+      }
+    }) => Promise<void>
+  }
   google: {
     clientId: string
     clientSecret: string
@@ -89,19 +124,13 @@ export function createAuth(config: AuthConfig) {
   const expoPlugin = expo()
   const twoFactorPlugin = twoFactor()
   const phoneNumberPlugin = phoneNumber({
-    sendOTP: (params, request) => {
-      logger.error('sendOTP', {
-        phoneNumber: params.phoneNumber,
-        code: params.code,
-        request: request ?? undefined
-      })
-      return Promise.resolve()
+    sendOTP: (params) => {
+      return config.emails.sendPhoneNumberVerificationOTP(params)
     }
   })
   const emailOTPPlugin = emailOTP({
-    sendVerificationOTP({ email, otp, type }) {
-      logger.error('sendVerificationOTP', { email, otp, type })
-      return Promise.resolve()
+    sendVerificationOTP(params) {
+      return config.emails.sendEmailVerificationOTP(params)
     }
   })
   const oneTapPlugin = oneTap()
@@ -112,6 +141,10 @@ export function createAuth(config: AuthConfig) {
     dynamicAccessControl: {
       enabled: true
     },
+    sendInvitationEmail(data) {
+      return config.emails.sendInvitationEmail(data)
+    },
+
     schema: {
       organization: {
         additionalFields: {

@@ -2,14 +2,14 @@
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-const ClubsPage = () => {
+const SocietiesPage = () => {
   const router = useRouter()
 
   useEffect(() => {
-    router.replace('/spaces/clubs/campus-feed')
+    router.replace('/spaces/societies/campus-feed')
   }, [router])
 
   return null
 }
 
-export default ClubsPage
+export default SocietiesPage

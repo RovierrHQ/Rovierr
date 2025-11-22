@@ -15,7 +15,7 @@ export default function LoginPage() {
           handleGoogleLogin={() =>
             authClient.signIn.social({
               provider: 'google',
-              callbackURL: `${window.origin}/spaces/clubs`
+              callbackURL: `${window.origin}/spaces/societies`
             })
           }
         />
