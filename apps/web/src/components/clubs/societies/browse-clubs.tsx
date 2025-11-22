@@ -6,6 +6,8 @@ import { Card } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useQuery } from '@tanstack/react-query'
+import { Plus } from 'lucide-react'
+import Link from 'next/link'
 import { orpc } from '@/utils/orpc'
 
 // Helper function to get icon from tags or default
@@ -44,7 +46,15 @@ const BrowseClubs = () => {
     return (
       <div>
         <div className="mb-6">
-          <Input className="mb-4" placeholder="Search clubs..." />
+          <div className="mb-4 flex items-center gap-4">
+            <Input className="flex-1" placeholder="Search clubs..." />
+            <Button asChild>
+              <Link href="/spaces/clubs/create">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Club
+              </Link>
+            </Button>
+          </div>
           <div className="flex gap-2 overflow-x-auto pb-2">
             <Badge className="cursor-pointer" variant="default">
               All
@@ -93,7 +103,15 @@ const BrowseClubs = () => {
     return (
       <div>
         <div className="mb-6">
-          <Input className="mb-4" placeholder="Search clubs..." />
+          <div className="mb-4 flex items-center gap-4">
+            <Input className="flex-1" placeholder="Search clubs..." />
+            <Button asChild>
+              <Link href="/spaces/clubs/create">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Club
+              </Link>
+            </Button>
+          </div>
           <div className="flex gap-2 overflow-x-auto pb-2">
             <Badge className="cursor-pointer" variant="default">
               All
@@ -122,7 +140,15 @@ const BrowseClubs = () => {
   return (
     <div>
       <div className="mb-6">
-        <Input className="mb-4" placeholder="Search clubs..." />
+        <div className="mb-4 flex items-center gap-4">
+          <Input className="flex-1" placeholder="Search clubs..." />
+          <Button asChild>
+            <Link href="/spaces/clubs/create">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Club
+            </Link>
+          </Button>
+        </div>
         <div className="flex gap-2 overflow-x-auto pb-2">
           <Badge className="cursor-pointer" variant="default">
             All
