@@ -1,5 +1,6 @@
 'use client'
 
+import { statement } from '@rov/auth'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import {
@@ -23,15 +24,11 @@ interface PermissionEditorProps {
   initialPermissions?: Record<string, string[]>
 }
 
-// Default statements from Better Auth organization plugin
-// These are the available resources and actions
-const defaultResources: Record<string, string[]> = {
-  organization: ['create', 'read', 'update', 'delete'],
-  member: ['create', 'read', 'update', 'delete'],
-  invitation: ['create', 'read', 'update', 'delete'],
-  team: ['create', 'read', 'update', 'delete'],
-  ac: ['read', 'write'] // Access control permissions
-}
+// Use the statement from permissions.ts to ensure we only show valid permissions
+// Convert readonly arrays to mutable arrays for compatibility
+const defaultResources: Record<string, string[]> = Object.fromEntries(
+  Object.entries(statement).map(([key, value]) => [key, [...value]])
+) as Record<string, string[]>
 
 export function PermissionEditor({
   permissions,

@@ -1,19 +1,24 @@
 import { createAccessControl } from 'better-auth/plugins/access'
-import {
-  adminAc,
-  defaultStatements,
-  memberAc,
-  ownerAc
-} from 'better-auth/plugins/organization/access'
 
 /**
  * Define custom permissions for the organization plugin
  * This extends the default permissions with custom resources and actions
  */
-const statement = {
-  ...defaultStatements
-  // Add custom resources and actions here if needed
-  // Example: project: ["create", "update", "delete", "share"]
+export const statement = {
+  organization: ['update', 'delete'],
+  member: ['create', 'update', 'delete'],
+  invitation: ['create', 'cancel'],
+  team: ['create', 'update', 'delete'],
+  ac: ['create', 'read', 'update', 'delete']
+  // more permission as we build feature
+  // like: task: ["create", "update", "delete"],
+  // like: event: ["create", "update", "delete"],
+  // like: document: ["create", "update", "delete"],
+  // like: note: ["create", "update", "delete"],
+  // like: reminder: ["create", "update", "delete"],
+  // like: file: ["create", "update", "delete"],
+  // like: folder: ["create", "update", "delete"],
+  // like: label: ["create", "update", "delete"],
 } as const
 
 /**
@@ -26,15 +31,27 @@ export const ac = createAccessControl(statement)
  * These roles extend the default roles with custom permissions
  */
 export const defaultPresident = ac.newRole({
-  ...ownerAc.statements
+  organization: ['update', 'delete'],
+  member: ['create', 'update', 'delete'],
+  invitation: ['create', 'cancel'],
+  team: ['create', 'update', 'delete'],
+  ac: ['create', 'read', 'update', 'delete']
 })
 
 export const defaultVicePresident = ac.newRole({
-  ...adminAc.statements
+  organization: ['update'],
+  invitation: ['create', 'cancel'],
+  member: ['create', 'update', 'delete'],
+  team: ['create', 'update', 'delete'],
+  ac: ['create', 'read', 'update', 'delete']
 })
 
 export const defaultMember = ac.newRole({
-  ...memberAc.statements
+  organization: [],
+  member: [],
+  invitation: [],
+  team: [],
+  ac: ['read']
 })
 
 // Export the statement type for use in other files

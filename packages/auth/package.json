@@ -6,6 +6,7 @@
   "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./permissions": "./src/permissions.ts",
     "./client": "./src/client.ts",
     "./client/web": "./src/client-web.ts",
     "./client/native": "./src/client-native.ts"
