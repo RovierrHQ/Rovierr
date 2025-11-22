@@ -105,15 +105,10 @@ export function ChangeRoleDialog({
 
   // Build role options (built-in + custom roles)
   const roleOptions = [
-    { label: 'Member', value: 'member' },
-    { label: 'Admin', value: 'admin' },
-    { label: 'Owner', value: 'owner' },
-    ...roles
-      .filter((r) => !['member', 'admin', 'owner'].includes(r.role))
-      .map((r) => ({
-        label: r.role,
-        value: r.role
-      }))
+    ...roles.map((r) => ({
+      label: r.role,
+      value: r.role
+    }))
   ]
 
   return (

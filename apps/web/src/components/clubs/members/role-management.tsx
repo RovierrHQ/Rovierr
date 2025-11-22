@@ -339,20 +339,21 @@ function CreateRoleDialog({ onCreate, onClose }: CreateRoleDialogProps) {
   })
 
   return (
-    <DialogContent className="max-w-2xl">
-      <DialogHeader>
+    <DialogContent className="flex max-h-[calc(100vh-4rem)] max-w-2xl flex-col overflow-hidden p-0">
+      <DialogHeader className="sticky top-0 z-10 border-b bg-background px-6 pt-6 pb-4">
         <DialogTitle>Create Custom Role</DialogTitle>
         <DialogDescription>
           Create a new role with custom permissions for this organization
         </DialogDescription>
       </DialogHeader>
       <form
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
         onSubmit={(e) => {
           e.preventDefault()
           form.handleSubmit()
         }}
       >
-        <div className="space-y-4 py-4">
+        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
           <form.AppField
             children={(field) => (
               <field.Text
@@ -382,7 +383,7 @@ function CreateRoleDialog({ onCreate, onClose }: CreateRoleDialogProps) {
             />
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="sticky bottom-0 border-t bg-background px-6 py-4">
           <Button
             disabled={form.state.isSubmitting}
             onClick={onClose}
@@ -496,12 +497,12 @@ function EditRoleDialog({
   }
 
   return (
-    <DialogContent className="max-w-2xl">
-      <DialogHeader>
+    <DialogContent className="flex max-h-[calc(100vh-4rem)] max-w-2xl flex-col overflow-hidden p-0">
+      <DialogHeader className="sticky top-0 z-10 border-b bg-background px-6 pt-6 pb-4">
         <DialogTitle>Edit Role: {roleData.data.role}</DialogTitle>
         <DialogDescription>Update permissions for this role</DialogDescription>
       </DialogHeader>
-      <div className="space-y-4 py-4">
+      <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
         <div>
           <div className="mb-2 font-medium text-sm">Permissions</div>
           <PermissionEditor
@@ -511,7 +512,7 @@ function EditRoleDialog({
           />
         </div>
       </div>
-      <DialogFooter>
+      <DialogFooter className="sticky bottom-0 border-t bg-background px-6 py-4">
         <Button
           disabled={updateRoleMutation.isPending}
           onClick={onClose}

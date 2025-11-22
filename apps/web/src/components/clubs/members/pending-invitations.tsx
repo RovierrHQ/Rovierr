@@ -1,5 +1,15 @@
 'use client'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@rov/ui/components/alert-dialog'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import {
@@ -13,6 +23,7 @@ import { Skeleton } from '@rov/ui/components/skeleton'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { Mail, RefreshCw, X } from 'lucide-react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
 import { InviteMemberDialog } from './invite-member-dialog'
@@ -25,6 +36,10 @@ export function PendingInvitations({
   organizationId
 }: PendingInvitationsProps) {
   const queryClient = useQueryClient()
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [invitationToCancel, setInvitationToCancel] = useState<string | null>(
+    null
+  )
 
   const {
     data: invitations,
@@ -104,11 +119,16 @@ export function PendingInvitations({
     await resendInvitationMutation.mutateAsync(invitationId)
   }
 
-  const handleCancelInvitation = async (invitationId: string) => {
-    if (!confirm('Are you sure you want to cancel this invitation?')) {
-      return
-    }
-    await cancelInvitationMutation.mutateAsync(invitationId)
+  const handleCancelInvitationClick = (invitationId: string) => {
+    setInvitationToCancel(invitationId)
+    setCancelDialogOpen(true)
+  }
+
+  const handleConfirmCancel = async () => {
+    if (!invitationToCancel) return
+    await cancelInvitationMutation.mutateAsync(invitationToCancel)
+    setCancelDialogOpen(false)
+    setInvitationToCancel(null)
   }
 
   if (isLoading) {
@@ -226,7 +246,9 @@ export function PendingInvitations({
                           resendInvitationMutation.isPending ||
                           cancelInvitationMutation.isPending
                         }
-                        onClick={() => handleCancelInvitation(invitation.id)}
+                        onClick={() =>
+                          handleCancelInvitationClick(invitation.id)
+                        }
                         size="sm"
                         variant="ghost"
                       >
@@ -240,6 +262,27 @@ export function PendingInvitations({
           </div>
         )}
       </CardContent>
+
+      <AlertDialog onOpenChange={setCancelDialogOpen} open={cancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Invitation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this invitation? This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No, keep it</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmCancel}
+              variant="destructive"
+            >
+              Yes, cancel invitation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }
