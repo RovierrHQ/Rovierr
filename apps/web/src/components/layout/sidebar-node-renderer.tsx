@@ -24,8 +24,16 @@ function SidebarNodeRenderer({ node }: { node: SidebarNode }) {
   if (node.type === 'group-header') {
     return (
       <SidebarGroup>
-        <SidebarGroupLabel>{node.title}</SidebarGroupLabel>
-        <SidebarMenu>
+        {node.url ? (
+          <SidebarGroupLabel>
+            <Link className="hover:text-sidebar-foreground" href={node.url}>
+              {node.title}
+            </Link>
+          </SidebarGroupLabel>
+        ) : (
+          <SidebarGroupLabel>{node.title}</SidebarGroupLabel>
+        )}
+        <SidebarMenu className="gap-1.5">
           {node.children?.map((child) => (
             <SidebarNodeRenderer key={child.id} node={child} />
           ))}
@@ -63,18 +71,18 @@ function SidebarNodeRenderer({ node }: { node: SidebarNode }) {
 
   if (node.type === 'collapsible') {
     return (
-      <Collapsible
-        asChild
-        className="group/collapsible"
-        defaultOpen={node.isActive}
-      >
+      <Collapsible className="group/collapsible" defaultOpen={node.isActive}>
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton asChild={!!node.url} tooltip={node.title}>
+            <SidebarMenuButton
+              asChild={!!node.url}
+              className="px-3 py-2.5"
+              tooltip={node.title}
+            >
               {node.url ? (
                 <Link href={node.url}>
                   {node.icon && <node.icon />}
-                  <span>{node.title}</span>
+                  <span className="truncate">{node.title}</span>
                   {node.children && (
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   )}
@@ -82,7 +90,7 @@ function SidebarNodeRenderer({ node }: { node: SidebarNode }) {
               ) : (
                 <>
                   {node.icon && <node.icon />}
-                  <span>{node.title}</span>
+                  <span className="truncate">{node.title}</span>
                   {node.children && (
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   )}
@@ -92,10 +100,10 @@ function SidebarNodeRenderer({ node }: { node: SidebarNode }) {
           </CollapsibleTrigger>
           {node.children && (
             <CollapsibleContent>
-              <SidebarMenuSub>
+              <SidebarMenuSub className="gap-1.5">
                 {node.children.map((child) => (
                   <SidebarMenuSubItem key={child.id}>
-                    <SidebarMenuSubButton asChild>
+                    <SidebarMenuSubButton asChild className="px-3 py-2">
                       <Link href={child.url || '#'}>
                         <span>{child.title}</span>
                       </Link>
@@ -112,14 +120,22 @@ function SidebarNodeRenderer({ node }: { node: SidebarNode }) {
 
   // Regular item
   return (
-    <SidebarMenuItem>
-      <SidebarMenuButton asChild tooltip={node.title}>
-        <Link href={node.url || '#'}>
-          {node.icon && <node.icon />}
-          <span>{node.title}</span>
-        </Link>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
+    <SidebarGroup className="px-3 py-3">
+      <SidebarMenu className="gap-1.5">
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            asChild
+            className="px-3 py-2.5"
+            tooltip={node.title}
+          >
+            <Link href={node.url || '#'}>
+              {node.icon && <node.icon />}
+              <span className="truncate">{node.title}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarGroup>
   )
 }
 

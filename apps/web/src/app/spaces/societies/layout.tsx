@@ -65,6 +65,12 @@ const SocietiesLayout = ({ children }: { children: ReactNode }) => {
           title: 'Members',
           type: 'item',
           url: `/spaces/societies/mine/${society.id}/members`
+        },
+        {
+          id: `society-${society.id}-teams`,
+          title: 'Teams',
+          type: 'item',
+          url: `/spaces/societies/mine/${society.id}/teams`
         }
       ]
     }))
@@ -110,6 +116,7 @@ const SocietiesLayout = ({ children }: { children: ReactNode }) => {
           id: 'my-societies-group',
           title: 'My Societies',
           type: 'group-header',
+          url: '/spaces/societies/mine',
           children: mySocietiesChildren
         },
         // Discover group

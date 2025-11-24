@@ -56,7 +56,9 @@ export function createWebAuthClient(config: WebAuthClientConfig) {
       }),
       organizationClient({
         ac,
-
+        teams: {
+          enabled: true
+        },
         dynamicAccessControl: {
           enabled: true
         },
