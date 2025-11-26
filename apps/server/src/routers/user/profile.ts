@@ -58,6 +58,7 @@ export const profile = {
           username: true,
           email: true,
           image: true,
+          bannerImage: true,
           bio: true,
           website: true,
           phoneNumber: true,
@@ -68,7 +69,9 @@ export const profile = {
           facebook: true,
           twitter: true,
           linkedin: true,
-          createdAt: true
+          createdAt: true,
+          major: true,
+          yearOfStudy: true
         }
       })
 
@@ -109,6 +112,7 @@ export const profile = {
         username: user.username,
         email: user.email,
         image: user.image,
+        bannerImage: user.bannerImage,
         bio: user.bio,
         website: user.website,
         phoneNumber: user.phoneNumber,
@@ -125,7 +129,9 @@ export const profile = {
         studentStatusVerified: Boolean(
           enrollmentData?.studentStatusVerified ?? false
         ),
-        createdAt: new Date(user.createdAt)
+        createdAt: new Date(user.createdAt),
+        major: user.major,
+        yearOfStudy: user.yearOfStudy
       }
     }
   ),
@@ -169,6 +175,8 @@ export const profile = {
       if (input.bio !== undefined) updateData.bio = input.bio || null
       if (input.website !== undefined)
         updateData.website = input.website || null
+      if (input.bannerImage !== undefined)
+        updateData.bannerImage = input.bannerImage || null
       if (input.whatsapp !== undefined)
         updateData.whatsapp = input.whatsapp || null
       if (input.telegram !== undefined)
@@ -313,6 +321,86 @@ export const profile = {
       activities,
       total,
       hasMore: offset + limit < total
+    }
+  }),
+
+  public: protectedProcedure.user.profile.public.handler(async ({ input }) => {
+    // Get user by username
+    const user = await db.query.user.findFirst({
+      where: eq(userTable.username, input.username),
+      columns: {
+        id: true,
+        name: true,
+        username: true,
+        image: true,
+        bannerImage: true,
+        bio: true,
+        website: true,
+        whatsapp: true,
+        telegram: true,
+        instagram: true,
+        facebook: true,
+        twitter: true,
+        linkedin: true,
+        createdAt: true,
+        major: true,
+        yearOfStudy: true
+      }
+    })
+
+    if (!user?.username) {
+      throw new ORPCError('NOT_FOUND', {
+        message: 'User not found'
+      })
+    }
+
+    // Get university info
+    const [enrollmentData] = await db
+      .select({
+        currentUniversity: {
+          id: universityTable.id,
+          name: universityTable.name,
+          logo: universityTable.logo,
+          city: universityTable.city,
+          country: universityTable.country
+        },
+        studentStatusVerified: userProgramEnrollmentTable.studentStatusVerified
+      })
+      .from(userProgramEnrollmentTable)
+      .leftJoin(
+        programTable,
+        eq(programTable.id, userProgramEnrollmentTable.programId)
+      )
+      .leftJoin(
+        universityTable,
+        eq(universityTable.id, programTable.universityId)
+      )
+      .where(eq(userProgramEnrollmentTable.userId, user.id))
+      .limit(1)
+
+    return {
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      image: user.image,
+      bannerImage: user.bannerImage,
+      bio: user.bio,
+      website: user.website,
+      socialLinks: {
+        whatsapp: user.whatsapp,
+        telegram: user.telegram,
+        instagram: user.instagram,
+        facebook: user.facebook,
+        twitter: user.twitter,
+        linkedin: user.linkedin
+      },
+      currentUniversity: enrollmentData?.currentUniversity ?? null,
+      studentStatusVerified: Boolean(
+        enrollmentData?.studentStatusVerified ?? false
+      ),
+      createdAt: new Date(user.createdAt),
+      major: user.major,
+      yearOfStudy: user.yearOfStudy
     }
   })
 }

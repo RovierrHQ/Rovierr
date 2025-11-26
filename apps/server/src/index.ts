@@ -20,7 +20,7 @@ app.use(
   '/*',
   cors({
     origin: env.CORS_ORIGIN.split(',') || '',
-    allowMethods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
+    allowMethods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
     allowHeaders: ['Content-Type', 'Authorization', 'Cookie'],
     credentials: true
   })

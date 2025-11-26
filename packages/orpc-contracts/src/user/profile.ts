@@ -1,14 +1,6 @@
 import { oc } from '@orpc/contract'
 import { z } from 'zod'
-
-const socialLinksSchema = z.object({
-  whatsapp: z.string().nullable(),
-  telegram: z.string().nullable(),
-  instagram: z.string().nullable(),
-  facebook: z.string().nullable(),
-  twitter: z.string().nullable(),
-  linkedin: z.string().nullable()
-})
+import { profileUpdateSchema, socialLinksSchema } from './profile-schemas'
 
 export const profile = {
   info: oc
@@ -55,6 +47,7 @@ export const profile = {
         username: z.string().nullable(),
         email: z.string(),
         image: z.string().nullable(),
+        bannerImage: z.string().nullable(),
         bio: z.string().nullable(),
         website: z.string().nullable(),
         phoneNumber: z.string().nullable(),
@@ -70,7 +63,9 @@ export const profile = {
           })
           .nullable(),
         studentStatusVerified: z.boolean(),
-        createdAt: z.date()
+        createdAt: z.date(),
+        major: z.string().nullable(),
+        yearOfStudy: z.string().nullable()
       })
     )
     .errors({
@@ -88,25 +83,7 @@ export const profile = {
       summary: 'Update Profile',
       tags: ['User']
     })
-    .input(
-      z.object({
-        name: z.string().min(1).max(100).optional(),
-        username: z
-          .string()
-          .min(3)
-          .max(30)
-          .regex(/^[a-zA-Z0-9_-]+$/)
-          .optional(),
-        bio: z.string().max(500).optional(),
-        website: z.string().url().optional().or(z.literal('')),
-        whatsapp: z.string().optional().or(z.literal('')),
-        telegram: z.string().optional().or(z.literal('')),
-        instagram: z.string().optional().or(z.literal('')),
-        facebook: z.string().optional().or(z.literal('')),
-        twitter: z.string().optional().or(z.literal('')),
-        linkedin: z.string().optional().or(z.literal(''))
-      })
-    )
+    .input(profileUpdateSchema)
     .output(
       z.object({
         success: z.boolean(),
@@ -210,6 +187,51 @@ export const profile = {
     )
     .errors({
       UNAUTHORIZED: {
+        data: z.object({
+          message: z.string().default('User not found')
+        })
+      }
+    }),
+
+  public: oc
+    .route({
+      method: 'GET',
+      description: 'Gets the public profile for a user by username.',
+      summary: 'Get Public Profile',
+      tags: ['User']
+    })
+    .input(
+      z.object({
+        username: z.string().min(1)
+      })
+    )
+    .output(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        username: z.string(),
+        image: z.string().nullable(),
+        bannerImage: z.string().nullable(),
+        bio: z.string().nullable(),
+        website: z.string().nullable(),
+        socialLinks: socialLinksSchema,
+        currentUniversity: z
+          .object({
+            id: z.string(),
+            name: z.string(),
+            logo: z.string().nullable(),
+            city: z.string(),
+            country: z.string()
+          })
+          .nullable(),
+        studentStatusVerified: z.boolean(),
+        createdAt: z.date(),
+        major: z.string().nullable(),
+        yearOfStudy: z.string().nullable()
+      })
+    )
+    .errors({
+      NOT_FOUND: {
         data: z.object({
           message: z.string().default('User not found')
         })
