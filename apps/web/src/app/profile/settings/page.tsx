@@ -8,9 +8,9 @@ import {
 } from '@rov/ui/components/tabs'
 import { CornerUpLeft } from 'lucide-react'
 import Link from 'next/link'
-import Profile from '@/components/profile/settings/profile'
-import Security from '@/components/profile/settings/security'
-import VerifyStudentStatus from '@/components/profile/settings/verify-student-status'
+import { ProfileSettings } from '@/components/profile/tabs/settings/profile-settings'
+import { SecuritySettings } from '@/components/profile/tabs/settings/security-settings'
+import { VerificationSettings } from '@/components/profile/tabs/settings/verification-settings'
 
 export default function SettingsPage() {
   return (
@@ -41,17 +41,17 @@ export default function SettingsPage() {
 
         {/* Student Status Tab */}
         <TabsContent className="space-y-6" value="student">
-          <VerifyStudentStatus />
+          <VerificationSettings />
         </TabsContent>
 
         {/* Security Tab */}
         <TabsContent className="space-y-6" value="security">
-          <Security />
+          <SecuritySettings />
         </TabsContent>
 
         {/* Profile Tab */}
         <TabsContent className="space-y-6" value="profile">
-          <Profile />
+          <ProfileSettings />
         </TabsContent>
       </Tabs>
     </div>
