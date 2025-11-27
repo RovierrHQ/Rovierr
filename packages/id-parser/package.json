@@ -1,0 +1,8 @@
+{
+  "name": "@rov/id-parser",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "docker compose -f ../../docker-compose.yml up --watch id-parser"
+  }
+}

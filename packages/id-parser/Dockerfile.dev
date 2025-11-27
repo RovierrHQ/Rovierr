@@ -1,5 +1,5 @@
-# Production Dockerfile
-# Optimized for smaller image size and faster builds
+# Development Dockerfile
+# Optimized for hot reloading and development experience
 
 FROM python:3.10-slim
 
@@ -17,16 +17,16 @@ WORKDIR /app
 # Copy dependency files first (for better layer caching)
 COPY pyproject.toml uv.lock* ./
 
-# Install production dependencies only
-RUN uv sync --frozen --no-dev
+# Install all dependencies (including dev dependencies for debugging)
+RUN uv sync --frozen
 
 # Install PaddlePaddle CPU separately (special index)
 RUN uv pip install paddlepaddle==3.2.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
 
-# Copy application code
-COPY . .
+# Note: Application code will be mounted as volume in docker-compose
+# This allows hot reloading without rebuilding the image
 
 EXPOSE 8000
 
-# Production: no reload, single worker
-CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Development: with reload flag for hot module reloading
+CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

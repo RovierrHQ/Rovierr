@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import {
   Bell,
@@ -21,37 +22,37 @@ export function AccountSettings() {
       </div>
 
       <div className="space-y-2">
-        <button className="flex w-full items-center justify-between rounded-lg bg-secondary/30 p-3 transition-colors hover:bg-secondary/50">
+        <Button className="flex w-full items-center justify-between rounded-lg bg-secondary/30 p-3 transition-colors hover:bg-secondary/50">
           <div className="flex items-center gap-3">
             <Lock className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium text-sm">Privacy Settings</span>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        </button>
+        </Button>
 
-        <button className="flex w-full items-center justify-between rounded-lg bg-secondary/30 p-3 transition-colors hover:bg-secondary/50">
+        <Button className="flex w-full items-center justify-between rounded-lg bg-secondary/30 p-3 transition-colors hover:bg-secondary/50">
           <div className="flex items-center gap-3">
             <Bell className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium text-sm">Notifications</span>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        </button>
+        </Button>
 
-        <button className="flex w-full items-center justify-between rounded-lg bg-secondary/30 p-3 transition-colors hover:bg-secondary/50">
+        <Button className="flex w-full items-center justify-between rounded-lg bg-secondary/30 p-3 transition-colors hover:bg-secondary/50">
           <div className="flex items-center gap-3">
             <HelpCircle className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium text-sm">Help & Support</span>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        </button>
+        </Button>
 
-        <button className="flex w-full items-center justify-between rounded-lg bg-destructive/10 p-3 text-destructive transition-colors hover:bg-destructive/20">
+        <Button className="flex w-full items-center justify-between rounded-lg bg-destructive/10 p-3 text-destructive transition-colors hover:bg-destructive/20">
           <div className="flex items-center gap-3">
             <LogOut className="h-4 w-4" />
             <span className="font-medium text-sm">Sign Out</span>
           </div>
           <ChevronRight className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
     </Card>
   )

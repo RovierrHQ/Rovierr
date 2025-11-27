@@ -1,10 +1,38 @@
-__pycache__
-*.pyc
-*.pyo
-*.pyd
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
 .Python
-.venv
+.venv/
 venv/
-.uv/
-*.log
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Project specific
+*.log
+*.tmp
+/tmp/
+
+# Node (if any)
+node_modules/
+package-lock.json
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+*.md

@@ -8,13 +8,19 @@ import { useQuery } from '@tanstack/react-query'
 import { Calendar, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { authClient } from '@/lib/auth-client'
 
 export function ClubsTab() {
   const router = useRouter()
   const { data: organizations, isLoading } = useQuery({
-    queryFn: () => {
-      // TODO: Replace with proper organization list endpoint when available
-      return Promise.resolve([])
+    queryFn: async () => {
+      const response = await authClient.organization.list()
+      if (response.data) {
+        return response.data
+      }
+      if (response.error) {
+        throw new Error(response.error.message)
+      }
     },
     queryKey: ['organizations', 'list']
   })
@@ -52,7 +58,7 @@ export function ClubsTab() {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
-        {organizations.map((org: any) => (
+        {organizations.map((org) => (
           <Card
             className="cursor-pointer transition-colors hover:bg-accent"
             key={org.id}

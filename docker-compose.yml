@@ -28,3 +28,28 @@ services:
     env_file:
       - ./packages/realtime/.env
     restart: unless-stopped
+
+  id-parser:
+    container_name: rovierr-id-parser
+    build:
+      context: ./packages/id-parser
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8001:8000"
+    volumes:
+      # Mount source code for hot reloading
+      - ./packages/id-parser:/app
+      # Use anonymous volumes to exclude cache directories (prevents host conflicts)
+      - /app/__pycache__
+      - /app/.venv
+    restart: unless-stopped
+    develop:
+      watch:
+        # Rebuild container when Dockerfile or dependencies change
+        # Note: File changes are handled by volume mount + uvicorn --reload
+        - action: rebuild
+          path: ./packages/id-parser/Dockerfile.dev
+        - action: rebuild
+          path: ./packages/id-parser/pyproject.toml
+        - action: rebuild
+          path: ./packages/id-parser/uv.lock
