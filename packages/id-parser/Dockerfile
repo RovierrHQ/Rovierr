@@ -6,6 +6,7 @@ FROM python:3.10-slim
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     libglib2.0-0 libgl1 libsm6 libxrender1 libxext6 \
+    libgomp1 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
