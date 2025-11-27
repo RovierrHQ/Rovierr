@@ -84,7 +84,17 @@ const envSchema = z.object({
   POSTHOG_HOST: z
     .url()
     .default('https://app.posthog.com')
-    .describe('PostHog host URL')
+    .describe('PostHog host URL'),
+
+  // ID Parser Service (Private)
+  ID_PARSER_URL: z
+    .url()
+    .optional()
+    .describe('ID Parser service URL (private, only accessible from backend)'),
+  ID_PARSER_API_KEY: z
+    .string()
+    .min(1)
+    .describe('API key for ID Parser service authentication (required)')
 })
 
 /**

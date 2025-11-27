@@ -25,6 +25,11 @@ Thumbs.db
 *.tmp
 /tmp/
 
+# Environment files (use Docker env vars in production)
+.env
+.env.local
+.env.*.local
+
 # Node (if any)
 node_modules/
 package-lock.json

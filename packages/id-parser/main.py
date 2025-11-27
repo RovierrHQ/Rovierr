@@ -1,10 +1,19 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Header, HTTPException
 from paddleocr import PaddleOCR
 import numpy as np
 import cv2
 import re
 import logging
 import sys
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env file in development (only if it exists)
+# In production, environment variables are set by Docker/Koyeb
+env_path = Path(__file__).parent / '.env'
+if env_path.exists():
+    load_dotenv(env_path)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -13,7 +22,32 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Log if .env was loaded
+if env_path.exists():
+    logger.info(f"Loaded environment variables from {env_path}")
+
 app = FastAPI()
+
+# Required API key for authentication (set via environment variable or .env file)
+API_KEY = os.getenv("API_KEY", "")
+if not API_KEY:
+    logger.warning("API_KEY is not set - service will reject all requests")
+
+def verify_api_key(x_api_key: str | None = None):
+    """Verify API key (required)"""
+    if not API_KEY:
+        raise HTTPException(
+            status_code=500,
+            detail="API key not configured on server"
+        )
+    if not x_api_key or x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    return True
+
+@app.get("/")
+async def health_check():
+    """Health check endpoint for Koyeb monitoring"""
+    return {"status": "ok", "service": "id-parser"}
 
 ocr = PaddleOCR(
     use_doc_orientation_classify=False,
@@ -64,7 +98,12 @@ def detect_university(text):
     return None
 
 @app.post("/parse")
-async def parse(file: UploadFile = File(...)):
+async def parse(
+    file: UploadFile = File(...),
+    x_api_key: str | None = Header(None, alias="X-API-Key")
+):
+    # Verify API key if configured
+    verify_api_key(x_api_key)
     print(f"\n{'='*60}")
     print(f"Received file: {file.filename}, content_type: {file.content_type}")
 

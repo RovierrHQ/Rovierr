@@ -29,4 +29,5 @@ RUN uv pip install paddlepaddle==3.2.0 -i https://www.paddlepaddle.org.cn/packag
 EXPOSE 8000
 
 # Development: with reload flag for hot module reloading
-CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# --reload-exclude excludes patterns that shouldn't trigger reloads
+CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-exclude", "*.pyc", "--reload-exclude", "__pycache__"]
