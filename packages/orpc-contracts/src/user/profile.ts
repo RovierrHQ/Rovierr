@@ -236,5 +236,134 @@ export const profile = {
           message: z.string().default('User not found')
         })
       }
-    })
+    }),
+
+  verifyStudent: {
+    uploadIdCard: oc
+      .route({
+        method: 'POST',
+        description: 'Upload and parse student ID card image',
+        summary: 'Upload Student ID Card',
+        tags: ['User']
+      })
+      .input(
+        z.object({
+          imageBase64: z.string().describe('Base64 encoded image data')
+        })
+      )
+      .output(
+        z.object({
+          university: z.string().nullable(),
+          studentId: z.string().nullable(),
+          expiryDate: z.string().nullable(),
+          rawText: z.array(z.string())
+        })
+      )
+      .errors({
+        INVALID_IMAGE: {
+          data: z.object({
+            message: z.string().default('Invalid image format')
+          })
+        },
+        PARSING_FAILED: {
+          data: z.object({
+            message: z.string().default('Failed to parse student ID')
+          })
+        }
+      }),
+
+    sendVerificationOTP: oc
+      .route({
+        method: 'POST',
+        description: 'Send OTP verification code to university email',
+        summary: 'Send Verification OTP',
+        tags: ['User']
+      })
+      .input(
+        z.object({
+          email: z.email('Invalid email address'),
+          universityId: z.string().min(1, 'University ID is required')
+        })
+      )
+      .output(
+        z.object({
+          success: z.boolean()
+        })
+      )
+      .errors({
+        INVALID_EMAIL_DOMAIN: {
+          data: z.object({
+            message: z
+              .string()
+              .default('Email domain does not match university')
+          })
+        },
+        EMAIL_SEND_FAILED: {
+          data: z.object({
+            message: z.string().default('Failed to send verification email')
+          })
+        }
+      }),
+
+    verifyOTP: oc
+      .route({
+        method: 'POST',
+        description: 'Verify OTP code and update student status',
+        summary: 'Verify OTP',
+        tags: ['User']
+      })
+      .input(
+        z.object({
+          otp: z
+            .string()
+            .length(6, 'OTP must be 6 digits')
+            .regex(/^\d{6}$/, 'OTP must be 6 digits')
+        })
+      )
+      .output(
+        z.object({
+          success: z.boolean(),
+          verified: z.boolean()
+        })
+      )
+      .errors({
+        TOKEN_INVALID: {
+          data: z.object({
+            message: z.string().default('Invalid OTP code')
+          })
+        },
+        TOKEN_EXPIRED: {
+          data: z.object({
+            message: z
+              .string()
+              .default('OTP has expired. Please request a new one.')
+          })
+        }
+      }),
+
+    resendOTP: oc
+      .route({
+        method: 'POST',
+        description: 'Resend verification OTP to university email',
+        summary: 'Resend Verification OTP',
+        tags: ['User']
+      })
+      .output(
+        z.object({
+          success: z.boolean()
+        })
+      )
+      .errors({
+        USER_NOT_FOUND: {
+          data: z.object({
+            message: z.string().default('University email not found')
+          })
+        },
+        EMAIL_SEND_FAILED: {
+          data: z.object({
+            message: z.string().default('Failed to send verification email')
+          })
+        }
+      })
+  }
 }

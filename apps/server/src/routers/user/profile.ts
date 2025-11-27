@@ -3,11 +3,19 @@ import {
   program as programTable,
   university as universityTable,
   userProgramEnrollment as userProgramEnrollmentTable,
-  user as userTable
+  user as userTable,
+  verification as verificationTable
 } from '@rov/db'
 import { and, eq } from 'drizzle-orm'
+import { nanoid } from 'nanoid'
 import { db } from '@/db'
 import { protectedProcedure } from '@/lib/orpc'
+import { generateOTP, hashOTP, validateUniversityEmail } from '@/lib/utils'
+import { sendOTPEmail } from '@/services/email/sender'
+import { idParserClient } from '@/services/id-parser/client'
+
+// Regex for base64 image data URL prefix
+const BASE64_IMAGE_REGEX = /^data:image\/\w+;base64,/
 
 export const profile = {
   info: protectedProcedure.user.profile.info.handler(async ({ context }) => {
@@ -402,5 +410,204 @@ export const profile = {
       major: user.major,
       yearOfStudy: user.yearOfStudy
     }
-  })
+  }),
+
+  verifyStudent: {
+    uploadIdCard:
+      protectedProcedure.user.profile.verifyStudent.uploadIdCard.handler(
+        async ({ input }) => {
+          try {
+            // Convert base64 to Buffer
+            const base64Data = input.imageBase64.replace(BASE64_IMAGE_REGEX, '')
+            const buffer = Buffer.from(base64Data, 'base64')
+
+            // Parse ID using ID parser service
+            const result = await idParserClient.parse(buffer, 'id-card.jpg')
+
+            return {
+              university: result.university,
+              studentId: result.student_id,
+              expiryDate: result.expiry_date,
+              rawText: result.raw_text
+            }
+          } catch (error) {
+            throw new ORPCError('PARSING_FAILED', {
+              message:
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to parse student ID'
+            })
+          }
+        }
+      ),
+
+    sendVerificationOTP:
+      protectedProcedure.user.profile.verifyStudent.sendVerificationOTP.handler(
+        async ({ input, context }) => {
+          // Find university by ID
+          const university = await db.query.university.findFirst({
+            where: eq(universityTable.id, input.universityId)
+          })
+
+          if (!university) {
+            throw new ORPCError('INVALID_EMAIL_DOMAIN', {
+              message: 'University not found'
+            })
+          }
+
+          // Validate email domain
+          const isValidDomain = await validateUniversityEmail(
+            input.email,
+            input.universityId
+          )
+
+          if (!isValidDomain) {
+            throw new ORPCError('INVALID_EMAIL_DOMAIN', {
+              message: `Email domain does not match ${university.name} requirements`
+            })
+          }
+
+          // Get user info
+          const user = await db.query.user.findFirst({
+            where: eq(userTable.id, context.session.user.id),
+            columns: { name: true }
+          })
+
+          // Generate OTP
+          const otp = generateOTP()
+          const hashedOTP = hashOTP(otp)
+
+          // Delete existing verification records
+          await db
+            .delete(verificationTable)
+            .where(eq(verificationTable.identifier, context.session.user.id))
+
+          // Store verification record
+          await db.insert(verificationTable).values({
+            id: nanoid(),
+            identifier: context.session.user.id,
+            value: hashedOTP,
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+          })
+
+          // Send OTP email
+          try {
+            await sendOTPEmail({
+              to: input.email,
+              displayName: user?.name ?? 'User',
+              otp
+            })
+          } catch {
+            throw new ORPCError('EMAIL_SEND_FAILED', {
+              message: 'Failed to send verification email'
+            })
+          }
+
+          return { success: true }
+        }
+      ),
+
+    verifyOTP: protectedProcedure.user.profile.verifyStudent.verifyOTP.handler(
+      async ({ input, context }) => {
+        // Hash the provided OTP
+        const hashedOTP = hashOTP(input.otp)
+
+        // Find verification record
+        const verification = await db.query.verification.findFirst({
+          where: and(
+            eq(verificationTable.identifier, context.session.user.id),
+            eq(verificationTable.value, hashedOTP)
+          )
+        })
+
+        if (!verification) {
+          throw new ORPCError('TOKEN_INVALID', {
+            message: 'Invalid OTP code'
+          })
+        }
+
+        // Check expiration
+        if (verification.expiresAt < new Date()) {
+          await db
+            .delete(verificationTable)
+            .where(eq(verificationTable.id, verification.id))
+
+          throw new ORPCError('TOKEN_EXPIRED', {
+            message: 'OTP has expired. Please request a new one.'
+          })
+        }
+
+        // Get user's primary enrollment
+        const enrollment = await db.query.userProgramEnrollment.findFirst({
+          where: and(
+            eq(userProgramEnrollmentTable.userId, context.session.user.id),
+            eq(userProgramEnrollmentTable.isPrimary, true)
+          )
+        })
+
+        if (enrollment) {
+          // Update student status verified
+          await db
+            .update(userProgramEnrollmentTable)
+            .set({ studentStatusVerified: true })
+            .where(eq(userProgramEnrollmentTable.id, enrollment.id))
+        }
+
+        // Delete verification record (single-use)
+        await db
+          .delete(verificationTable)
+          .where(eq(verificationTable.id, verification.id))
+
+        return { success: true, verified: true }
+      }
+    ),
+
+    resendOTP: protectedProcedure.user.profile.verifyStudent.resendOTP.handler(
+      async ({ context }) => {
+        // Get user's university email
+        const user = await db.query.user.findFirst({
+          where: eq(userTable.id, context.session.user.id),
+          columns: { universityEmail: true, name: true }
+        })
+
+        if (!user?.universityEmail) {
+          throw new ORPCError('USER_NOT_FOUND', {
+            message: 'University email not found'
+          })
+        }
+
+        // Generate new OTP
+        const otp = generateOTP()
+        const hashedOTP = hashOTP(otp)
+
+        // Delete old verification records
+        await db
+          .delete(verificationTable)
+          .where(eq(verificationTable.identifier, context.session.user.id))
+
+        // Store new verification record
+        await db.insert(verificationTable).values({
+          id: nanoid(),
+          identifier: context.session.user.id,
+          value: hashedOTP,
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+        })
+
+        // Send OTP email
+        try {
+          await sendOTPEmail({
+            to: user.universityEmail,
+            displayName: user.name ?? 'User',
+            otp
+          })
+        } catch {
+          throw new ORPCError('EMAIL_SEND_FAILED', {
+            message: 'Failed to send verification email'
+          })
+        }
+
+        return { success: true }
+      }
+    )
+  }
 }
