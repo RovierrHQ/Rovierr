@@ -33,6 +33,7 @@ import QRCode from 'react-qr-code'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
+import { ImageUploadDialog } from './image-upload-dialog'
 
 interface ProfileHeroProps {
   isVerified: boolean
@@ -44,6 +45,9 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
     orpc.user.profile.details.queryOptions()
   )
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isProfileImageDialogOpen, setIsProfileImageDialogOpen] =
+    useState(false)
+  const [isBannerDialogOpen, setIsBannerDialogOpen] = useState(false)
 
   const user = session?.user
 
@@ -128,6 +132,7 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
         <button
           aria-label="Edit banner image"
           className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-background/20 text-white shadow-lg backdrop-blur-md transition-colors hover:bg-background/30"
+          onClick={() => setIsBannerDialogOpen(true)}
           type="button"
         >
           <Camera className="h-4 w-4" />
@@ -145,7 +150,10 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
 
               {/* Smaller avatar on mobile */}
               <Avatar className="relative h-28 w-28 border-4 border-primary shadow-2xl ring-2 ring-background sm:h-40 sm:w-40">
-                <AvatarImage alt={user.name || 'User'} src={user.image ?? ''} />
+                <AvatarImage
+                  alt={user.name || 'User'}
+                  src={profileDetails.image ?? user.image ?? ''}
+                />
                 <AvatarFallback className="bg-primary/10 text-3xl text-primary sm:text-4xl">
                   {initials || 'U'}
                 </AvatarFallback>
@@ -154,6 +162,7 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
               <button
                 aria-label="Change profile picture"
                 className="absolute right-1 bottom-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground shadow-xl transition-all hover:scale-105 hover:bg-primary/90 sm:h-11 sm:w-11"
+                onClick={() => setIsProfileImageDialogOpen(true)}
                 type="button"
               >
                 <Camera className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -380,6 +389,20 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
           </div>
         </div>
       </div>
+
+      {/* Image Upload Dialogs */}
+      <ImageUploadDialog
+        currentImageUrl={profileDetails.image ?? null}
+        onOpenChange={setIsProfileImageDialogOpen}
+        open={isProfileImageDialogOpen}
+        type="profile"
+      />
+      <ImageUploadDialog
+        currentImageUrl={profileDetails.bannerImage}
+        onOpenChange={setIsBannerDialogOpen}
+        open={isBannerDialogOpen}
+        type="banner"
+      />
     </div>
   )
 }

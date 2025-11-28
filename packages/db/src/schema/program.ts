@@ -1,20 +1,31 @@
 import { boolean, date, pgTable, text } from 'drizzle-orm/pg-core'
 import { primaryId, timestamps } from '../helper'
 import { user } from './auth'
-import { university } from './university'
+import { institution } from './institution'
 
 /** ========================
  *  PROGRAM (Degree / Major)
  *  ======================== */
 export const program = pgTable('program', {
   id: primaryId,
-  universityId: text('university_id')
+  institutionId: text('institution_id')
     .notNull()
-    .references(() => university.id, { onDelete: 'cascade' }),
-  code: text('code').notNull(), // e.g., BSC-CS
-  name: text('name').notNull(), // e.g., B.Sc. in Computer Science
+    .references(() => institution.id, { onDelete: 'cascade' }),
+  code: text('code'), // e.g., BSC-CS
+  name: text('name').notNull(), // e.g., B.Sc. in Computer Science, grade 7, A level etc
   description: text('description'),
-  degreeLevel: text('degree_level').notNull(), // e.g., Bachelor, Master, PhD
+  degreeLevel: text('degree_level', {
+    enum: [
+      'higher_secondary',
+      'secondary',
+      'primary',
+      'undergraduate',
+      'postgraduate',
+      'diploma',
+      'certificate',
+      'other'
+    ]
+  }).notNull(),
   isVerified: boolean('is_verified').default(false),
   ...timestamps
 })
@@ -22,7 +33,7 @@ export const program = pgTable('program', {
 /** ========================
  *  USER PROGRAM ENROLLMENT
  *  ======================== */
-export const userProgramEnrollment = pgTable('user_program_enrollment', {
+export const programEnrollment = pgTable('program_enrollment', {
   id: primaryId,
   userId: text('user_id')
     .notNull()
@@ -30,9 +41,10 @@ export const userProgramEnrollment = pgTable('user_program_enrollment', {
   programId: text('program_id')
     .notNull()
     .references(() => program.id, { onDelete: 'cascade' }),
-  studentStatusVerified: boolean('student_status_verified').default(false),
   startedOn: date('started_on'),
   graduatedOn: date('graduated_on'),
-  isPrimary: boolean('is_primary').default(false),
+  type: text('type', {
+    enum: ['major', 'minor', 'certificate', 'other']
+  }).notNull(),
   ...timestamps
 })

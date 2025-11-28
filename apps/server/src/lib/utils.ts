@@ -1,4 +1,4 @@
-import { university as universityTable } from '@rov/db'
+import { institution as institutionTable } from '@rov/db'
 import { CryptoHasher } from 'bun'
 import { eq } from 'drizzle-orm'
 import { db } from '@/db'
@@ -21,23 +21,22 @@ export function hashOTP(otp: string): string {
 }
 
 /**
- * Validate that an email domain matches one of the university's valid domains
+ * Validate that an email domain matches one of the institution's valid domains
  * @param email - The email address to validate
- * @param universityId - The ID of the university to check against
- * @param db - The database instance
- * @returns True if the email domain is valid for the university
+ * @param institutionId - The ID of the institution to check against
+ * @returns True if the email domain is valid for the institution
  */
 export async function validateUniversityEmail(
   email: string,
-  universityId: string
+  institutionId: string
 ): Promise<boolean> {
-  const university = await db.query.university.findFirst({
-    where: eq(universityTable.id, universityId)
+  const institution = await db.query.institution.findFirst({
+    where: eq(institutionTable.id, institutionId)
   })
 
-  if (!university) return false
+  if (!institution) return false
 
-  return university.validEmailDomains.some((domain) =>
+  return institution.validEmailDomains.some((domain) =>
     email.toLowerCase().endsWith(domain.toLowerCase())
   )
 }

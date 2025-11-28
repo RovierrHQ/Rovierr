@@ -94,7 +94,22 @@ const envSchema = z.object({
   ID_PARSER_API_KEY: z
     .string()
     .min(1)
-    .describe('API key for ID Parser service authentication (required)')
+    .describe('API key for ID Parser service authentication (required)'),
+
+  // AWS S3 (Image Storage)
+  AWS_REGION: z
+    .string()
+    .min(1)
+    .describe('AWS region for S3 bucket (e.g., us-east-1)'),
+  AWS_ACCESS_KEY_ID: z.string().min(1).describe('AWS access key ID for S3'),
+  AWS_SECRET_ACCESS_KEY: z
+    .string()
+    .min(1)
+    .describe('AWS secret access key for S3'),
+  AWS_S3_BUCKET_NAME: z
+    .string()
+    .min(1)
+    .describe('S3 bucket name for storing images')
 })
 
 /**

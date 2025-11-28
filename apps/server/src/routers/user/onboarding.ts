@@ -1,5 +1,9 @@
 import { ORPCError } from '@orpc/server'
-import { user as userTable, verification as verificationTable } from '@rov/db'
+import {
+  instituitionEnrollment as institutionEnrollmentTable,
+  user as userTable,
+  verification as verificationTable
+} from '@rov/db'
 import { and, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { db } from '@/db'
@@ -23,12 +27,16 @@ export const onboarding = {
         })
       }
 
-      // 2. Check if university email is already taken
-      const existingUser = await db.query.user.findFirst({
-        where: eq(userTable.universityEmail, input.universityEmail)
-      })
+      // 2. Check if institution email is already taken
+      const existingEnrollment =
+        await db.query.instituitionEnrollment.findFirst({
+          where: eq(institutionEnrollmentTable.email, input.universityEmail)
+        })
 
-      if (existingUser && existingUser.id !== context.session.user.id) {
+      if (
+        existingEnrollment &&
+        existingEnrollment.userId !== context.session.user.id
+      ) {
         throw new ORPCError('UNIVERSITY_EMAIL_TAKEN', {
           message: 'This university email is already registered'
         })
@@ -40,24 +48,47 @@ export const onboarding = {
         .set({
           name: input.displayName,
           image: input.profileImageUrl,
-          universityEmail: input.universityEmail,
-          universityId: input.universityId,
-          major: input.major,
-          yearOfStudy: input.yearOfStudy,
           interests: input.interests
         })
         .where(eq(userTable.id, context.session.user.id))
 
-      // 4. Generate 6-digit OTP
+      // 4. Create or update institution enrollment
+      const existingUserEnrollment =
+        await db.query.instituitionEnrollment.findFirst({
+          where: eq(institutionEnrollmentTable.userId, context.session.user.id)
+        })
+
+      if (existingUserEnrollment) {
+        await db
+          .update(institutionEnrollmentTable)
+          .set({
+            institutionId: input.universityId,
+            email: input.universityEmail,
+            studentId: input.universityEmail.split('@')[0] // Use email prefix as student ID temporarily
+          })
+          .where(eq(institutionEnrollmentTable.id, existingUserEnrollment.id))
+      } else {
+        await db.insert(institutionEnrollmentTable).values({
+          id: nanoid(),
+          userId: context.session.user.id,
+          institutionId: input.universityId,
+          email: input.universityEmail,
+          studentId: input.universityEmail.split('@')[0], // Use email prefix as student ID temporarily
+          emailVerified: false,
+          studentStatusVerified: false
+        })
+      }
+
+      // 5. Generate 6-digit OTP
       const otp = generateOTP()
       const hashedOTP = hashOTP(otp)
 
-      // 5. Delete any existing verification records for this user
+      // 6. Delete any existing verification records for this user
       await db
         .delete(verificationTable)
         .where(eq(verificationTable.identifier, context.session.user.id))
 
-      // 6. Store in verification table
+      // 7. Store in verification table
       await db.insert(verificationTable).values({
         id: nanoid(),
         identifier: context.session.user.id,
@@ -65,14 +96,14 @@ export const onboarding = {
         expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
       })
 
-      // 7. Send OTP email via Resend
+      // 8. Send OTP email via Resend
       await sendOTPEmail({
         to: input.universityEmail,
         displayName: input.displayName,
         otp
       })
 
-      // 8. Emit analytics event to PostHog
+      // 9. Emit analytics event to PostHog
       await emitEvent('user.onboarding_submitted', context.session.user.id, {
         universityEmail: input.universityEmail,
         universityId: input.universityId,
@@ -127,15 +158,22 @@ export const onboarding = {
         .delete(verificationTable)
         .where(eq(verificationTable.id, verification.id))
 
-      // 6. Emit analytics event to PostHog
-      const user = await db.query.user.findFirst({
-        where: eq(userTable.id, context.session.user.id),
-        columns: { universityEmail: true, universityId: true }
+      // 6. Update institution enrollment email verified status
+      const enrollment = await db.query.instituitionEnrollment.findFirst({
+        where: eq(institutionEnrollmentTable.userId, context.session.user.id)
       })
 
+      if (enrollment) {
+        await db
+          .update(institutionEnrollmentTable)
+          .set({ emailVerified: true })
+          .where(eq(institutionEnrollmentTable.id, enrollment.id))
+      }
+
+      // 7. Emit analytics event to PostHog
       emitEvent('user.verified', context.session.user.id, {
-        universityEmail: user?.universityEmail,
-        universityId: user?.universityId
+        universityEmail: enrollment?.email,
+        universityId: enrollment?.institutionId
       })
 
       return { success: true, verified: true }
@@ -162,22 +200,28 @@ export const onboarding = {
           expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
         })
 
-        // 4. Get user's university email
-        const user = await db.query.user.findFirst({
-          where: eq(userTable.id, context.session.user.id),
-          columns: { universityEmail: true, name: true }
+        // 4. Get user's institution enrollment email
+        const enrollment = await db.query.instituitionEnrollment.findFirst({
+          where: eq(institutionEnrollmentTable.userId, context.session.user.id),
+          columns: { email: true }
         })
 
-        if (!user?.universityEmail) {
+        if (!enrollment?.email) {
           throw new ORPCError('USER_NOT_FOUND', {
-            message: 'University email not found'
+            message: 'Institution email not found'
           })
         }
 
+        // Get user name
+        const user = await db.query.user.findFirst({
+          where: eq(userTable.id, context.session.user.id),
+          columns: { name: true }
+        })
+
         // 5. Send OTP email
         await sendOTPEmail({
-          to: user.universityEmail,
-          displayName: user.name,
+          to: enrollment.email,
+          displayName: user?.name ?? 'User',
           otp
         })
 
@@ -190,15 +234,22 @@ export const onboarding = {
       const user = await db.query.user.findFirst({
         where: eq(userTable.id, context.session.user.id),
         columns: {
-          isVerified: true,
-          universityEmail: true
+          isVerified: true
+        }
+      })
+
+      const enrollment = await db.query.instituitionEnrollment.findFirst({
+        where: eq(institutionEnrollmentTable.userId, context.session.user.id),
+        columns: {
+          email: true,
+          emailVerified: true
         }
       })
 
       return {
         isVerified: user?.isVerified ?? false,
-        hasUniversityEmail: !!user?.universityEmail,
-        needsOnboarding: !(user?.universityEmail && user?.isVerified)
+        hasUniversityEmail: !!enrollment?.email,
+        needsOnboarding: !(enrollment?.email && user?.isVerified)
       }
     }
   )

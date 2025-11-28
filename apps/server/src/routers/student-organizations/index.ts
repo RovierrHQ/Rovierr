@@ -1,8 +1,8 @@
 import { ORPCError } from '@orpc/server'
 import {
+  instituitionEnrollment as institutionEnrollmentTable,
   member as memberTable,
-  organization as organizationTable,
-  user as userTable
+  organization as organizationTable
 } from '@rov/db'
 import { and, desc, eq, or, sql } from 'drizzle-orm'
 import { db } from '@/db'
@@ -81,28 +81,28 @@ export const studentOrganizations = {
 
           const offset = (page - 1) * limit
 
-          // Get user's universityId if authenticated
-          let userUniversityId: string | null = null
+          // Get user's institutionId if authenticated
+          let userInstitutionId: string | null = null
           if (context.session?.user?.id) {
-            const [userData] = await db
-              .select({
-                universityId: userTable.universityId
-              })
-              .from(userTable)
-              .where(eq(userTable.id, context.session.user.id))
-              .limit(1)
+            const enrollment = await db.query.instituitionEnrollment.findFirst({
+              where: eq(
+                institutionEnrollmentTable.userId,
+                context.session.user.id
+              ),
+              columns: { institutionId: true }
+            })
 
-            userUniversityId = userData?.universityId ?? null
+            userInstitutionId = enrollment?.institutionId ?? null
           }
 
           // Build visibility filter
-          // Include: public organizations, and campus_only if user's university matches
-          const visibilityConditions = userUniversityId
+          // Include: public organizations, and campus_only if user's institution matches
+          const visibilityConditions = userInstitutionId
             ? or(
                 eq(organizationTable.visibility, 'public'),
                 and(
                   eq(organizationTable.visibility, 'campus_only'),
-                  eq(organizationTable.universityId, userUniversityId)
+                  eq(organizationTable.institutionId, userInstitutionId)
                 )
               )
             : eq(organizationTable.visibility, 'public')

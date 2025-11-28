@@ -1,65 +1,78 @@
 import { boolean, pgTable, text } from 'drizzle-orm/pg-core'
 import { primaryId, timestamps } from '../helper'
 import { user } from './auth'
-import { semester, userSemester } from './semester'
-import { university } from './university'
+import { department, institution, institutionalTerm } from './institution'
 
 /** ========================
  *  COURSE
+ *  Master course catalog per institution
  *  ======================== */
 export const course = pgTable('course', {
   id: primaryId,
-  universityId: text('university_id')
+  institutionId: text('institution_id')
     .notNull()
-    .references(() => university.id, { onDelete: 'cascade' }),
-  code: text('code').notNull(), // e.g., CSCI 3130
+    .references(() => institution.id, { onDelete: 'cascade' }),
+  code: text('code'), // e.g., 'CSCI2100'
   title: text('title').notNull(),
   description: text('description'),
+  defaultCredits: text('default_credits'), // e.g., '3' or '4'
+  departmentId: text('department_id').references(() => department.id, {
+    onDelete: 'set null'
+  }),
+
+  // just in case. safely removable. but lets keep it for now
   createdBy: text('created_by').references(() => user.id, {
-    onDelete: 'cascade'
+    onDelete: 'set null'
   }), // user-created courses
   isVerified: boolean('is_verified').default(false),
   ...timestamps
 })
 
 /** ========================
- *  SEMESTER COURSE OFFERINGS
+ *  COURSE OFFERING
+ *  Represents a specific course offering in a term (shared across users)
+ *  Links course + institutional term + section details
+ *  Enables LMS-style social features and discovery
  *  ======================== */
-export const semesterCourse = pgTable('semester_course', {
+export const courseOffering = pgTable('course_offering', {
   id: primaryId,
+
   courseId: text('course_id')
     .notNull()
     .references(() => course.id, { onDelete: 'cascade' }),
-  semesterId: text('semester_id')
-    .notNull()
-    .references(() => semester.id, { onDelete: 'cascade' }),
-  ...timestamps
-})
 
-export const section = pgTable('section', {
-  id: primaryId,
-  semesterCourseId: text('semester_course_id')
+  termId: text('term_id')
     .notNull()
-    .references(() => semesterCourse.id, { onDelete: 'cascade' }),
-  code: text('code').notNull(), // e.g., "A", "B", or "LAB1"
-  schedule: text('schedule'), // optional: timing info
+    .references(() => institutionalTerm.id, { onDelete: 'cascade' }),
+
+  section: text('section'), // e.g., "A", "B", "TUT01", "LAB002"
+  instructor: text('instructor'),
+  capacity: text('capacity'), // Optional enrollment capacity
+  schedule: text('schedule'), // Optional JSON or text — "Mon 2PM-4PM"
+
   ...timestamps
 })
 
 /** ========================
- *  USER COURSE ENROLLMENT
+ *  COURSE ENROLLMENT
+ *  User's enrollment in a course offering
+ *  Links user's personal term to a course offering (or direct course for flexibility)
  *  ======================== */
-export const userCourseEnrollment = pgTable('user_course_enrollment', {
+export const courseEnrollment = pgTable('course_enrollment', {
   id: primaryId,
-  userSemesterId: text('user_semester_id')
+  termId: text('term_id')
     .notNull()
-    .references(() => userSemester.id, { onDelete: 'cascade' }),
-  semesterCourseId: text('semester_course_id')
-    .notNull()
-    .references(() => semesterCourse.id, { onDelete: 'cascade' }),
-  sectionId: text('section_id')
-    .notNull()
-    .references(() => section.id, { onDelete: 'cascade' }),
-  grade: text('grade'),
+    .references(() => institutionalTerm.id, { onDelete: 'cascade' }),
+  courseId: text('course_id').references(() => course.id, {
+    onDelete: 'cascade'
+  }),
+  courseOfferingId: text('course_offering_id').references(
+    () => courseOffering.id,
+    { onDelete: 'set null' }
+  ), // Preferred: links to institutional offering for classmates/social features
+  credits: text('credits').notNull(),
+  grade: text('grade'), // e.g., 'A', 'A-', 'B+'
+  gradePoints: text('grade_points'), // e.g., '4.0', '3.7'
+  status: text('status').notNull().default('in_progress'), // 'in_progress' | 'completed' | 'withdrawn'
   ...timestamps
 })
