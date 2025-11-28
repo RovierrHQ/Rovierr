@@ -43,7 +43,6 @@ export async function generateMetadata({
 
 export default async function PublicProfilePage({ params }: PageProps) {
   const { username } = await params
-
   try {
     const profile = await orpc.user.profile.public.call({ username })
 

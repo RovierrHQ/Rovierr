@@ -27,27 +27,83 @@ export const profileUpdateSchema = z.object({
     )
     .optional(),
   bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
+  summary: z
+    .string()
+    .max(2000, 'Summary must be less than 2000 characters')
+    .optional(),
   website: z.url('Invalid URL').optional().or(z.literal('')),
   image: z.string().optional().or(z.literal('')),
   bannerImage: z.string().optional().or(z.literal('')),
-  whatsapp: z.string().optional().or(z.literal('')),
-  telegram: z.string().optional().or(z.literal('')),
-  instagram: z.string().optional().or(z.literal('')),
-  facebook: z.string().optional().or(z.literal('')),
-  twitter: z.string().optional().or(z.literal('')),
-  linkedin: z.string().optional().or(z.literal(''))
+  whatsapp: z
+    .string()
+    .max(50, 'WhatsApp number must be less than 50 characters')
+    .optional()
+    .or(z.literal('')),
+  telegram: z
+    .string()
+    .max(50, 'Telegram username must be less than 50 characters')
+    .optional()
+    .or(z.literal('')),
+  instagram: z
+    .string()
+    .max(100, 'Instagram handle must be less than 100 characters')
+    .optional()
+    .or(z.literal('')),
+  facebook: z
+    .string()
+    .max(100, 'Facebook handle must be less than 100 characters')
+    .optional()
+    .or(z.literal('')),
+  twitter: z
+    .string()
+    .max(100, 'Twitter handle must be less than 100 characters')
+    .optional()
+    .or(z.literal('')),
+  linkedin: z
+    .string()
+    .max(100, 'LinkedIn handle must be less than 100 characters')
+    .optional()
+    .or(z.literal(''))
 })
 
 // About tab schema (subset of profile update)
 export const aboutUpdateSchema = z.object({
   bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
+  summary: z
+    .string()
+    .max(2000, 'Summary must be less than 2000 characters')
+    .optional(),
   website: z.url('Invalid URL').optional().or(z.literal('')),
-  whatsapp: z.string().optional().or(z.literal('')),
-  telegram: z.string().optional().or(z.literal('')),
-  instagram: z.string().optional().or(z.literal('')),
-  facebook: z.string().optional().or(z.literal('')),
-  twitter: z.string().optional().or(z.literal('')),
-  linkedin: z.string().optional().or(z.literal(''))
+  whatsapp: z
+    .string()
+    .max(50, 'WhatsApp number must be less than 50 characters')
+    .optional()
+    .or(z.literal('')),
+  telegram: z
+    .string()
+    .max(50, 'Telegram username must be less than 50 characters')
+    .optional()
+    .or(z.literal('')),
+  instagram: z
+    .string()
+    .max(100, 'Instagram handle must be less than 100 characters')
+    .optional()
+    .or(z.literal('')),
+  facebook: z
+    .string()
+    .max(100, 'Facebook handle must be less than 100 characters')
+    .optional()
+    .or(z.literal('')),
+  twitter: z
+    .string()
+    .max(100, 'Twitter handle must be less than 100 characters')
+    .optional()
+    .or(z.literal('')),
+  linkedin: z
+    .string()
+    .max(100, 'LinkedIn handle must be less than 100 characters')
+    .optional()
+    .or(z.literal(''))
 })
 
 // Verification settings schema

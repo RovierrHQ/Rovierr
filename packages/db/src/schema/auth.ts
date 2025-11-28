@@ -23,6 +23,7 @@ export const user = pgTable('user', {
 
   //  social fields
   bio: text('bio'),
+  summary: text('summary'),
   website: text('website'),
   whatsapp: text('whatsapp'),
   telegram: text('telegram'),

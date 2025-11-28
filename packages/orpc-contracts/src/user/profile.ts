@@ -49,6 +49,7 @@ export const profile = {
         image: z.string().nullable(),
         bannerImage: z.string().nullable(),
         bio: z.string().nullable(),
+        summary: z.string().nullable(),
         website: z.string().nullable(),
         phoneNumber: z.string().nullable(),
         phoneNumberVerified: z.boolean(),
@@ -92,6 +93,7 @@ export const profile = {
           name: z.string(),
           username: z.string().nullable(),
           bio: z.string().nullable(),
+          summary: z.string().nullable(),
           website: z.string().nullable(),
           socialLinks: socialLinksSchema
         })
@@ -213,6 +215,7 @@ export const profile = {
         image: z.string().nullable(),
         bannerImage: z.string().nullable(),
         bio: z.string().nullable(),
+        summary: z.string().nullable(),
         website: z.string().nullable(),
         socialLinks: socialLinksSchema,
         currentUniversity: z

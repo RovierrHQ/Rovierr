@@ -9,6 +9,12 @@ import {
   CardTitle
 } from '@rov/ui/components/card'
 import { useAppForm } from '@rov/ui/components/form/index'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText
+} from '@rov/ui/components/input-group'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Edit,
@@ -24,7 +30,25 @@ import {
 import { useState } from 'react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
+import {
+  buildFacebookUrl,
+  buildInstagramUrl,
+  buildLinkedInUrl,
+  buildTelegramUrl,
+  buildTwitterUrl,
+  buildWhatsAppUrl,
+  extractFacebookHandle,
+  extractInstagramHandle,
+  extractLinkedInHandle,
+  extractTelegramUsername,
+  extractTwitterHandle,
+  extractWhatsAppNumber
+} from '@/lib/social-links'
 import { orpc } from '@/utils/orpc'
+
+// Regex patterns defined at top level for performance
+const PLUS_PREFIX_REGEX = /^\+/
+const AT_PREFIX_REGEX = /^@/
 
 export function AboutTab() {
   const [isEditing, setIsEditing] = useState(false)
@@ -38,6 +62,7 @@ export function AboutTab() {
     validators: { onSubmit: aboutUpdateSchema },
     defaultValues: {
       bio: '',
+      summary: '',
       website: '',
       whatsapp: '',
       telegram: '',
@@ -48,8 +73,45 @@ export function AboutTab() {
     } as z.infer<typeof aboutUpdateSchema>,
     onSubmit: async ({ value }) => {
       try {
-        await orpc.user.profile.update.call(value)
-        queryClient.invalidateQueries({ queryKey: ['user', 'profile'] })
+        // Convert handles/phone numbers to full URLs before submitting
+        const submitValue = {
+          ...value,
+          whatsapp: value.whatsapp
+            ? buildWhatsAppUrl(value.whatsapp)
+            : value.whatsapp,
+          telegram: value.telegram
+            ? buildTelegramUrl(value.telegram)
+            : value.telegram,
+          instagram: value.instagram
+            ? buildInstagramUrl(value.instagram)
+            : value.instagram,
+          facebook: value.facebook
+            ? buildFacebookUrl(value.facebook)
+            : value.facebook,
+          twitter: value.twitter
+            ? buildTwitterUrl(value.twitter)
+            : value.twitter,
+          linkedin: value.linkedin
+            ? buildLinkedInUrl(value.linkedin)
+            : value.linkedin
+        }
+        await orpc.user.profile.update.call(submitValue)
+        // Invalidate and refetch all profile-related queries
+        // Use exact query key from queryOptions for profile details
+        const detailsQueryKey =
+          orpc.user.profile.details.queryOptions().queryKey
+        await queryClient.invalidateQueries({ queryKey: detailsQueryKey })
+        await queryClient.refetchQueries({ queryKey: detailsQueryKey })
+        // Also invalidate broader profile queries to catch any other components
+        await queryClient.invalidateQueries({
+          predicate: (query) => {
+            const key = query.queryKey
+            return (
+              Array.isArray(key) && key[0] === 'user' && key[1] === 'profile'
+            )
+          }
+        })
+
         setIsEditing(false)
         toast.success('Profile updated successfully')
       } catch (error) {
@@ -62,16 +124,33 @@ export function AboutTab() {
   const handleEditClick = () => {
     if (profileDetails) {
       form.setFieldValue('bio', profileDetails.bio ?? '')
+      form.setFieldValue('summary', profileDetails.summary ?? '')
       form.setFieldValue('website', profileDetails.website ?? '')
-      form.setFieldValue('whatsapp', profileDetails.socialLinks.whatsapp ?? '')
-      form.setFieldValue('telegram', profileDetails.socialLinks.telegram ?? '')
+      // Extract handles/phone numbers from URLs
+      form.setFieldValue(
+        'whatsapp',
+        extractWhatsAppNumber(profileDetails.socialLinks.whatsapp ?? '')
+      )
+      form.setFieldValue(
+        'telegram',
+        extractTelegramUsername(profileDetails.socialLinks.telegram ?? '')
+      )
       form.setFieldValue(
         'instagram',
-        profileDetails.socialLinks.instagram ?? ''
+        extractInstagramHandle(profileDetails.socialLinks.instagram ?? '')
       )
-      form.setFieldValue('facebook', profileDetails.socialLinks.facebook ?? '')
-      form.setFieldValue('twitter', profileDetails.socialLinks.twitter ?? '')
-      form.setFieldValue('linkedin', profileDetails.socialLinks.linkedin ?? '')
+      form.setFieldValue(
+        'facebook',
+        extractFacebookHandle(profileDetails.socialLinks.facebook ?? '')
+      )
+      form.setFieldValue(
+        'twitter',
+        extractTwitterHandle(profileDetails.socialLinks.twitter ?? '')
+      )
+      form.setFieldValue(
+        'linkedin',
+        extractLinkedInHandle(profileDetails.socialLinks.linkedin ?? '')
+      )
     }
     setIsEditing(true)
   }
@@ -103,42 +182,48 @@ export function AboutTab() {
       label: 'WhatsApp',
       icon: MessageSquare,
       color: 'text-green-600',
-      placeholder: 'https://wa.me/...'
+      placeholder: '+1234567890',
+      prefix: 'wa.me/'
     },
     {
       key: 'telegram',
       label: 'Telegram',
       icon: MessageSquare,
       color: 'text-blue-500',
-      placeholder: 'https://t.me/...'
+      placeholder: 'username',
+      prefix: 't.me/'
     },
     {
       key: 'instagram',
       label: 'Instagram',
       icon: Instagram,
       color: 'text-pink-600',
-      placeholder: 'https://instagram.com/...'
+      placeholder: 'username',
+      prefix: 'instagram.com/'
     },
     {
       key: 'facebook',
       label: 'Facebook',
       icon: Facebook,
       color: 'text-blue-600',
-      placeholder: 'https://facebook.com/...'
+      placeholder: 'username',
+      prefix: 'facebook.com/'
     },
     {
       key: 'twitter',
       label: 'Twitter',
       icon: Twitter,
       color: 'text-sky-500',
-      placeholder: 'https://twitter.com/...'
+      placeholder: 'username',
+      prefix: 'twitter.com/'
     },
     {
       key: 'linkedin',
       label: 'LinkedIn',
       icon: Linkedin,
       color: 'text-blue-700',
-      placeholder: 'https://linkedin.com/in/...'
+      placeholder: 'username',
+      prefix: 'linkedin.com/in/'
     }
   ]
 
@@ -168,29 +253,63 @@ export function AboutTab() {
             )}
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
           {isEditing ? (
-            <form.AppField
-              children={(field) => (
-                <field.TextArea
-                  description={`${field.state.value?.length || 0}/500 characters`}
-                  label="Bio"
-                  placeholder="Tell us about yourself..."
-                  rows={4}
-                />
-              )}
-              name="bio"
-            />
+            <>
+              <form.AppField
+                children={(field) => (
+                  <field.TextArea
+                    description={`${field.state.value?.length || 0}/500 characters`}
+                    label="Bio"
+                    placeholder="Tell us about yourself in a few words..."
+                    rows={2}
+                  />
+                )}
+                name="bio"
+              />
+              <form.AppField
+                children={(field) => (
+                  <field.TextArea
+                    description={`${field.state.value?.length || 0}/2000 characters`}
+                    label="Summary"
+                    placeholder="Write a more detailed summary about yourself..."
+                    rows={6}
+                  />
+                )}
+                name="summary"
+              />
+            </>
           ) : (
-            <div>
+            <div className="space-y-4">
               {profileDetails?.bio ? (
-                <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {profileDetails.bio}
-                </p>
+                <div>
+                  <p className="mb-1 font-medium text-sm">Bio</p>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {profileDetails.bio}
+                  </p>
+                </div>
               ) : (
-                <p className="text-muted-foreground text-sm italic">
-                  No bio added yet. Click edit to add one.
-                </p>
+                <div>
+                  <p className="mb-1 font-medium text-sm">Bio</p>
+                  <p className="text-muted-foreground text-sm italic">
+                    No bio added yet. Click edit to add one.
+                  </p>
+                </div>
+              )}
+              {profileDetails?.summary ? (
+                <div>
+                  <p className="mb-1 font-medium text-sm">Summary</p>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {profileDetails.summary}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="mb-1 font-medium text-sm">Summary</p>
+                  <p className="text-muted-foreground text-sm italic">
+                    No summary added yet. Click edit to add one.
+                  </p>
+                </div>
               )}
             </div>
           )}
@@ -248,6 +367,101 @@ export function AboutTab() {
             <div className="space-y-4">
               {socialLinks.map((social) => {
                 const Icon = social.icon
+                const renderInput = (field: {
+                  state: {
+                    meta: { isTouched: boolean; isValid: boolean }
+                    value: string | undefined
+                  }
+                  name: string
+                  handleBlur: () => void
+                  handleChange: (value: string) => void
+                }) => {
+                  if (social.key === 'whatsapp') {
+                    return (
+                      <InputGroup>
+                        <InputGroupAddon align="inline-start">
+                          <InputGroupText>+</InputGroupText>
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          aria-invalid={
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid
+                          }
+                          autoComplete={field.name}
+                          id={field.name}
+                          name={field.name}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            // Remove + if user types it, we add it via prefix
+                            field.handleChange(
+                              value.replace(PLUS_PREFIX_REGEX, '')
+                            )
+                          }}
+                          placeholder={social.placeholder}
+                          type="tel"
+                          value={field.state.value ?? ''}
+                        />
+                      </InputGroup>
+                    )
+                  }
+                  if (social.key === 'telegram') {
+                    return (
+                      <InputGroup>
+                        <InputGroupAddon align="inline-start">
+                          <InputGroupText>@</InputGroupText>
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          aria-invalid={
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid
+                          }
+                          autoComplete={field.name}
+                          id={field.name}
+                          name={field.name}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            // Remove @ if user types it, we add it via prefix
+                            field.handleChange(
+                              value.replace(AT_PREFIX_REGEX, '')
+                            )
+                          }}
+                          placeholder={social.placeholder}
+                          type="text"
+                          value={field.state.value ?? ''}
+                        />
+                      </InputGroup>
+                    )
+                  }
+                  return (
+                    <InputGroup>
+                      <InputGroupAddon align="inline-start">
+                        <InputGroupText>
+                          https://www.{social.prefix}
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        aria-invalid={
+                          field.state.meta.isTouched &&
+                          !field.state.meta.isValid
+                        }
+                        autoComplete={field.name}
+                        id={field.name}
+                        name={field.name}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          // Remove @ if user types it
+                          field.handleChange(value.replace(AT_PREFIX_REGEX, ''))
+                        }}
+                        placeholder={social.placeholder}
+                        type="text"
+                        value={field.state.value ?? ''}
+                      />
+                    </InputGroup>
+                  )
+                }
                 return (
                   <form.AppField
                     children={(field) => (
@@ -258,10 +472,7 @@ export function AboutTab() {
                             {social.label}
                           </span>
                         </div>
-                        <field.Text
-                          placeholder={social.placeholder}
-                          type="url"
-                        />
+                        {renderInput(field)}
                       </div>
                     )}
                     key={social.key}

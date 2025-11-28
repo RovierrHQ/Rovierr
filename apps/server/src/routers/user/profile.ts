@@ -11,7 +11,7 @@ import {
 import { and, desc, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { db } from '@/db'
-import { protectedProcedure } from '@/lib/orpc'
+import { protectedProcedure, publicProcedure } from '@/lib/orpc'
 import { generateOTP, hashOTP, validateUniversityEmail } from '@/lib/utils'
 import { sendOTPEmail } from '@/services/email/sender'
 import { idParserClient } from '@/services/id-parser/client'
@@ -114,6 +114,7 @@ export const profile = {
         image: imageUrl,
         bannerImage: bannerImageUrl,
         bio: user.bio,
+        summary: user.summary,
         website: user.website,
         phoneNumber: user.phoneNumber,
         phoneNumberVerified: user.phoneNumberVerified ?? false,
@@ -242,6 +243,8 @@ export const profile = {
       if (input.name !== undefined) updateData.name = input.name
       if (input.username !== undefined) updateData.username = input.username
       if (input.bio !== undefined) updateData.bio = input.bio || null
+      if (input.summary !== undefined)
+        updateData.summary = input.summary || null
       if (input.website !== undefined)
         updateData.website = input.website || null
       if (input.whatsapp !== undefined)
@@ -276,6 +279,7 @@ export const profile = {
           name: updatedUser.name,
           username: updatedUser.username,
           bio: updatedUser.bio,
+          summary: updatedUser.summary,
           website: updatedUser.website,
           socialLinks: {
             whatsapp: updatedUser.whatsapp,
@@ -383,7 +387,7 @@ export const profile = {
     }
   }),
 
-  public: protectedProcedure.user.profile.public.handler(async ({ input }) => {
+  public: publicProcedure.user.profile.public.handler(async ({ input }) => {
     // Get user by username
     const user = await db.query.user.findFirst({
       where: eq(userTable.username, input.username)
@@ -435,6 +439,7 @@ export const profile = {
       image: imageUrl,
       bannerImage: bannerImageUrl,
       bio: user.bio,
+      summary: user.summary,
       website: user.website,
       socialLinks: {
         whatsapp: user.whatsapp,

@@ -1,7 +1,6 @@
 'use client'
 
 import { Card } from '@rov/ui/components/card'
-import { Progress } from '@rov/ui/components/progress'
 import { Award, CheckCircle2, Shield, Users } from 'lucide-react'
 
 export function Achievements() {
@@ -12,16 +11,6 @@ export function Achievements() {
           <Award className="h-5 w-5 text-primary" />
           <h3 className="font-semibold text-lg">Achievements</h3>
         </div>
-      </div>
-
-      {/* Contribution Level */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Contribution Level</span>
-          <span className="font-semibold text-primary">Level 8</span>
-        </div>
-        <Progress className="h-2" value={65} />
-        <p className="text-muted-foreground text-xs">350 XP until next level</p>
       </div>
 
       <div className="space-y-3">

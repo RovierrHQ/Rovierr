@@ -3,7 +3,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
-import { Card } from '@rov/ui/components/card'
 import {
   Dialog,
   DialogContent,
@@ -113,17 +112,15 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
       {/* Full-width Hero Banner */}
       <div className="relative h-64 w-full overflow-hidden">
         {/* Banner Image/Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/90 via-purple-600/80 to-cyan-600/90">
-          {profileDetails.bannerImage ? (
-            <img
-              alt="Profile Banner"
-              className="h-full w-full object-cover opacity-40 mix-blend-overlay"
-              src={profileDetails.bannerImage}
-            />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-600" />
-          )}
-        </div>
+        {profileDetails.bannerImage ? (
+          <img
+            alt="Profile Banner"
+            className="h-full w-full object-cover"
+            src={profileDetails.bannerImage}
+          />
+        ) : (
+          <div className="absolute inset-0 h-full w-full bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-600" />
+        )}
 
         {/* Blur overlay near bottom */}
         <div className="absolute right-0 bottom-0 left-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent" />
@@ -225,7 +222,7 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
                 </div>
 
                 {profileDetails.bio && (
-                  <p className="mx-auto max-w-lg text-pretty text-muted-foreground text-sm leading-relaxed sm:mx-0">
+                  <p className="mx-auto line-clamp-2 max-w-lg text-pretty text-muted-foreground text-sm leading-relaxed sm:mx-0">
                     {profileDetails.bio}
                   </p>
                 )}
@@ -363,29 +360,6 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
                 </Dialog>
               </div>
             </div>
-          </div>
-
-          {/* XP Card - keep centered below */}
-          <div className="flex flex-col items-center gap-4">
-            <Card className="w-full max-w-sm border-border/50 bg-gradient-to-br from-card/80 to-card/40 p-4 backdrop-blur-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg">
-                    <Sparkles className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium text-muted-foreground text-sm">
-                      Contribution Level
-                    </p>
-                    <p className="font-bold text-xl">Campus Champion</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-2xl text-primary">2,450</p>
-                  <p className="text-muted-foreground text-xs">XP Points</p>
-                </div>
-              </div>
-            </Card>
           </div>
         </div>
       </div>
