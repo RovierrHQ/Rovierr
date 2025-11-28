@@ -1,7 +1,7 @@
 import { boolean, date, pgTable, text } from 'drizzle-orm/pg-core'
 import { primaryId, timestamps } from '../helper'
 import { user } from './auth'
-import { institution } from './institution'
+import { instituitionEnrollment, institution } from './institution'
 
 /** ========================
  *  PROGRAM (Degree / Major)
@@ -41,6 +41,9 @@ export const programEnrollment = pgTable('program_enrollment', {
   programId: text('program_id')
     .notNull()
     .references(() => program.id, { onDelete: 'cascade' }),
+  instituitionEnrollmentId: text('instituition_enrollment_id')
+    .notNull()
+    .references(() => instituitionEnrollment.id, { onDelete: 'cascade' }),
   startedOn: date('started_on'),
   graduatedOn: date('graduated_on'),
   type: text('type', {

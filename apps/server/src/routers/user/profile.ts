@@ -4,17 +4,23 @@ import {
   institution as institutionTable,
   programEnrollment as programEnrollmentTable,
   program as programTable,
+  studentIdCard as studentIdCardTable,
   user as userTable,
   verification as verificationTable
 } from '@rov/db'
-import { and, eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { db } from '@/db'
 import { protectedProcedure } from '@/lib/orpc'
 import { generateOTP, hashOTP, validateUniversityEmail } from '@/lib/utils'
 import { sendOTPEmail } from '@/services/email/sender'
 import { idParserClient } from '@/services/id-parser/client'
-import { deleteImageFromS3, uploadImageToS3 } from '@/services/s3'
+import {
+  deleteImageFromS3,
+  getPresignedUrlFromFullUrl,
+  isS3Url,
+  uploadImageToS3
+} from '@/services/s3'
 
 // Regex for base64 image data URL prefix
 const BASE64_IMAGE_REGEX = /^data:image\/\w+;base64,/
@@ -57,26 +63,7 @@ export const profile = {
     async ({ context }) => {
       // Get user data
       const user = await db.query.user.findFirst({
-        where: eq(userTable.id, context.session.user.id),
-        columns: {
-          id: true,
-          name: true,
-          username: true,
-          email: true,
-          image: true,
-          bannerImage: true,
-          bio: true,
-          website: true,
-          phoneNumber: true,
-          phoneNumberVerified: true,
-          whatsapp: true,
-          telegram: true,
-          instagram: true,
-          facebook: true,
-          twitter: true,
-          linkedin: true,
-          createdAt: true
-        }
+        where: eq(userTable.id, context.session.user.id)
       })
 
       if (!user) {
@@ -106,13 +93,26 @@ export const profile = {
         .where(eq(institutionEnrollmentTable.userId, context.session.user.id))
         .limit(1)
 
+      // Generate presigned URLs for S3 images
+      const imageUrl =
+        user.image && isS3Url(user.image)
+          ? await getPresignedUrlFromFullUrl(user.image).catch(() => user.image)
+          : user.image
+
+      const bannerImageUrl =
+        user.bannerImage && isS3Url(user.bannerImage)
+          ? await getPresignedUrlFromFullUrl(user.bannerImage).catch(
+              () => user.bannerImage
+            )
+          : user.bannerImage
+
       return {
         id: user.id,
         name: user.name,
         username: user.username,
         email: user.email,
-        image: user.image,
-        bannerImage: user.bannerImage,
+        image: imageUrl,
+        bannerImage: bannerImageUrl,
         bio: user.bio,
         website: user.website,
         phoneNumber: user.phoneNumber,
@@ -257,28 +257,11 @@ export const profile = {
       if (input.linkedin !== undefined)
         updateData.linkedin = input.linkedin || null
 
-      await db
+      const [updatedUser] = await db
         .update(userTable)
         .set(updateData)
         .where(eq(userTable.id, context.session.user.id))
-
-      // Fetch updated user data
-      const updatedUser = await db.query.user.findFirst({
-        where: eq(userTable.id, context.session.user.id),
-        columns: {
-          id: true,
-          name: true,
-          username: true,
-          bio: true,
-          website: true,
-          whatsapp: true,
-          telegram: true,
-          instagram: true,
-          facebook: true,
-          twitter: true,
-          linkedin: true
-        }
-      })
+        .returning()
 
       if (!updatedUser) {
         throw new ORPCError('UNAUTHORIZED', {
@@ -403,23 +386,7 @@ export const profile = {
   public: protectedProcedure.user.profile.public.handler(async ({ input }) => {
     // Get user by username
     const user = await db.query.user.findFirst({
-      where: eq(userTable.username, input.username),
-      columns: {
-        id: true,
-        name: true,
-        username: true,
-        image: true,
-        bannerImage: true,
-        bio: true,
-        website: true,
-        whatsapp: true,
-        telegram: true,
-        instagram: true,
-        facebook: true,
-        twitter: true,
-        linkedin: true,
-        createdAt: true
-      }
+      where: eq(userTable.username, input.username)
     })
 
     if (!user?.username) {
@@ -448,12 +415,25 @@ export const profile = {
       .where(eq(institutionEnrollmentTable.userId, user.id))
       .limit(1)
 
+    // Generate presigned URLs for S3 images
+    const imageUrl =
+      user.image && isS3Url(user.image)
+        ? await getPresignedUrlFromFullUrl(user.image).catch(() => user.image)
+        : user.image
+
+    const bannerImageUrl =
+      user.bannerImage && isS3Url(user.bannerImage)
+        ? await getPresignedUrlFromFullUrl(user.bannerImage).catch(
+            () => user.bannerImage
+          )
+        : user.bannerImage
+
     return {
       id: user.id,
       name: user.name,
       username: user.username,
-      image: user.image,
-      bannerImage: user.bannerImage,
+      image: imageUrl,
+      bannerImage: bannerImageUrl,
       bio: user.bio,
       website: user.website,
       socialLinks: {
@@ -475,18 +455,141 @@ export const profile = {
   }),
 
   verifyStudent: {
+    listIdCards:
+      protectedProcedure.user.profile.verifyStudent.listIdCards.handler(
+        async ({ context }) => {
+          // Get all student ID cards with enrollment verification status in a single query
+          const idCardsWithEnrollments = await db
+            .select({
+              id: studentIdCardTable.id,
+              imageUrl: studentIdCardTable.imageUrl,
+              parsingResult: studentIdCardTable.parsingResult,
+              createdAt: studentIdCardTable.createdAt,
+              enrollmentVerified:
+                institutionEnrollmentTable.studentStatusVerified
+            })
+            .from(studentIdCardTable)
+            .leftJoin(
+              institutionEnrollmentTable,
+              and(
+                eq(
+                  institutionEnrollmentTable.studentIdCardId,
+                  studentIdCardTable.id
+                ),
+                eq(institutionEnrollmentTable.userId, context.session.user.id)
+              )
+            )
+            .where(eq(studentIdCardTable.userId, context.session.user.id))
+            .orderBy(desc(studentIdCardTable.createdAt))
+
+          // Deduplicate and check if any enrollment is verified for each ID card
+          const idCardMap = new Map<
+            string,
+            {
+              id: string
+              imageUrl: string
+              parsingResult: unknown
+              createdAt: string
+              isVerified: boolean
+            }
+          >()
+
+          for (const row of idCardsWithEnrollments) {
+            const existing = idCardMap.get(row.id)
+            const isVerified =
+              row.enrollmentVerified === true || (existing?.isVerified ?? false)
+
+            if (!existing) {
+              idCardMap.set(row.id, {
+                id: row.id,
+                imageUrl: row.imageUrl,
+                parsingResult: row.parsingResult,
+                createdAt: row.createdAt,
+                isVerified
+              })
+            } else if (isVerified && !existing.isVerified) {
+              existing.isVerified = true
+            }
+          }
+
+          // Generate presigned URLs for all ID card images
+          const idCardsWithPresignedUrls = await Promise.all(
+            Array.from(idCardMap.values()).map(async (card) => {
+              const parsingResult = card.parsingResult as {
+                university: string | null
+                student_id: string | null
+                expiry_date: string | null
+                raw_text: string[]
+              } | null
+
+              const imageUrl = isS3Url(card.imageUrl)
+                ? await getPresignedUrlFromFullUrl(card.imageUrl).catch(
+                    () => card.imageUrl
+                  )
+                : card.imageUrl
+
+              return {
+                id: card.id,
+                imageUrl,
+                university: parsingResult?.university ?? null,
+                studentId: parsingResult?.student_id ?? null,
+                expiryDate: parsingResult?.expiry_date ?? null,
+                createdAt: new Date(card.createdAt),
+                isVerified: card.isVerified
+              }
+            })
+          )
+
+          return {
+            idCards: idCardsWithPresignedUrls
+          }
+        }
+      ),
+
     uploadIdCard:
       protectedProcedure.user.profile.verifyStudent.uploadIdCard.handler(
-        async ({ input }) => {
+        async ({ input, context }) => {
           try {
             // Convert base64 to Buffer
             const base64Data = input.imageBase64.replace(BASE64_IMAGE_REGEX, '')
             const buffer = Buffer.from(base64Data, 'base64')
 
+            // Upload image to S3
+            const imageUrl = await uploadImageToS3(
+              input.imageBase64,
+              'id-cards',
+              context.session.user.id
+            )
+
             // Parse ID using ID parser service
             const result = await idParserClient.parse(buffer, 'id-card.jpg')
 
+            const parsingResult = {
+              university: result.university,
+              student_id: result.student_id,
+              expiry_date: result.expiry_date,
+              raw_text: result.raw_text
+            }
+
+            // Create student ID card entry
+            const [studentIdCard] = await db
+              .insert(studentIdCardTable)
+              .values({
+                id: nanoid(),
+                userId: context.session.user.id,
+                imageUrl,
+                parsingResult
+              })
+              .returning()
+
+            if (!studentIdCard) {
+              throw new ORPCError('INTERNAL_SERVER_ERROR', {
+                message: 'Failed to create student ID card'
+              })
+            }
+
             return {
+              id: studentIdCard.id,
               university: result.university,
               studentId: result.student_id,
               expiryDate: result.expiry_date,
@@ -500,6 +603,52 @@ export const profile = {
                   : 'Failed to parse student ID'
             })
           }
+        }
+      ),
+
+    deleteIdCard:
+      protectedProcedure.user.profile.verifyStudent.deleteIdCard.handler(
+        async ({ input, context }) => {
+          // Check if ID card exists and belongs to user
+          const idCard = await db.query.studentIdCard.findFirst({
+            where: and(
+              eq(studentIdCardTable.id, input.id),
+              eq(studentIdCardTable.userId, context.session.user.id)
+            ),
+            columns: { id: true, imageUrl: true }
+          })
+
+          if (!idCard) {
+            throw new ORPCError('NOT_FOUND', {
+              message: 'Student ID card not found'
+            })
+          }
+
+          // Check if ID card is associated with a verified enrollment
+          const enrollment = await db.query.instituitionEnrollment.findFirst({
+            where: and(
+              eq(institutionEnrollmentTable.studentIdCardId, input.id),
+              eq(institutionEnrollmentTable.userId, context.session.user.id)
+            ),
+            columns: { studentStatusVerified: true }
+          })
+
+          if (enrollment?.studentStatusVerified) {
+            throw new ORPCError('FORBIDDEN', {
+              message:
+                'Cannot delete student ID card associated with verified enrollment'
+            })
+          }
+
+          // Delete image from S3
+          await deleteImageFromS3(idCard.imageUrl)
+
+          // Delete student ID card record
+          await db
+            .delete(studentIdCardTable)
+            .where(eq(studentIdCardTable.id, input.id))
+
+          return { success: true }
         }
       ),
 
@@ -529,11 +678,73 @@ export const profile = {
             })
           }
 
+          // Verify student ID card exists and belongs to user
+          const studentIdCard = await db.query.studentIdCard.findFirst({
+            where: and(
+              eq(studentIdCardTable.id, input.studentIdCardId),
+              eq(studentIdCardTable.userId, context.session.user.id)
+            ),
+            columns: {
+              id: true,
+              parsingResult: true
+            }
+          })
+
+          if (!studentIdCard) {
+            throw new ORPCError('NOT_FOUND', {
+              message: 'Student ID card not found'
+            })
+          }
+
           // Get user info
           const user = await db.query.user.findFirst({
             where: eq(userTable.id, context.session.user.id),
             columns: { name: true }
           })
+
+          // Extract student ID from parsing result if available
+          const parsingResult = studentIdCard.parsingResult as
+            | {
+                student_id: string | null
+              }
+            | undefined
+
+          // Check for enrollment for the SPECIFIC university
+          const enrollmentForUniversity =
+            await db.query.instituitionEnrollment.findFirst({
+              where: and(
+                eq(institutionEnrollmentTable.userId, context.session.user.id),
+                eq(institutionEnrollmentTable.institutionId, input.universityId)
+              ),
+              columns: { id: true }
+            })
+
+          // currently we dont allow multiple enrollments for the same university
+          if (enrollmentForUniversity) {
+            // Update existing enrollment for this university
+            await db
+              .update(institutionEnrollmentTable)
+              .set({
+                email: input.email,
+                studentId:
+                  parsingResult?.student_id ?? input.email.split('@')[0],
+                studentIdCardId: input.studentIdCardId,
+                verificationStep: 'otp'
+              })
+              .where(
+                eq(institutionEnrollmentTable.id, enrollmentForUniversity.id)
+              )
+          } else {
+            // Create new enrollment for this university
+            await db.insert(institutionEnrollmentTable).values({
+              userId: context.session.user.id,
+              institutionId: input.universityId,
+              email: input.email,
+              studentId: parsingResult?.student_id ?? input.email.split('@')[0],
+              studentIdCardId: input.studentIdCardId,
+              verificationStep: 'otp'
+            })
+          }
 
           // Generate OTP
           const otp = generateOTP()
@@ -604,18 +815,33 @@ export const profile = {
           where: eq(institutionEnrollmentTable.userId, context.session.user.id)
         })
 
-        if (enrollment) {
-          // Update student status verified
-          await db
-            .update(institutionEnrollmentTable)
-            .set({ studentStatusVerified: true })
-            .where(eq(institutionEnrollmentTable.id, enrollment.id))
+        if (!enrollment) {
+          throw new ORPCError('USER_NOT_FOUND', {
+            message: 'Institution enrollment not found'
+          })
         }
 
-        // Delete verification record (single-use)
-        await db
-          .delete(verificationTable)
-          .where(eq(verificationTable.id, verification.id))
+        // Run updates in parallel
+        await Promise.all([
+          // Update user as verified
+          db
+            .update(userTable)
+            .set({ isVerified: true })
+            .where(eq(userTable.id, context.session.user.id)),
+          // Update enrollment: set student status verified, email verified, and clear verification step
+          db
+            .update(institutionEnrollmentTable)
+            .set({
+              studentStatusVerified: true,
+              emailVerified: true,
+              verificationStep: null
+            })
+            .where(eq(institutionEnrollmentTable.id, enrollment.id)),
+          // Delete verification record (single-use)
+          db
+            .delete(verificationTable)
+            .where(eq(verificationTable.id, verification.id))
+        ])
 
         return { success: true, verified: true }
       }
@@ -673,6 +899,66 @@ export const profile = {
 
         return { success: true }
       }
-    )
+    ),
+
+    getVerificationStatus:
+      protectedProcedure.user.profile.verifyStudent.getVerificationStatus.handler(
+        async ({ context }) => {
+          const user = await db.query.user.findFirst({
+            where: eq(userTable.id, context.session.user.id),
+            columns: { isVerified: true }
+          })
+
+          const enrollment = await db.query.instituitionEnrollment.findFirst({
+            where: eq(
+              institutionEnrollmentTable.userId,
+              context.session.user.id
+            ),
+            columns: {
+              email: true,
+              emailVerified: true,
+              studentStatusVerified: true,
+              verificationStep: true,
+              studentIdCardId: true
+            }
+          })
+
+          // Get student ID card data if enrollment has one
+          let parsedData: {
+            university: string | null
+            studentId: string | null
+          } | null = null
+          if (enrollment?.studentIdCardId) {
+            const studentIdCard = await db.query.studentIdCard.findFirst({
+              where: eq(studentIdCardTable.id, enrollment.studentIdCardId),
+              columns: { parsingResult: true }
+            })
+
+            const parsingResult = studentIdCard?.parsingResult as
+              | {
+                  university: string | null
+                  student_id: string | null
+                }
+              | undefined
+
+            if (parsingResult) {
+              parsedData = {
+                university: parsingResult.university,
+                studentId: parsingResult.student_id
+              }
+            }
+          }
+
+          return {
+            isVerified: user?.isVerified ?? false,
+            hasUniversityEmail: !!enrollment?.email,
+            emailVerified: enrollment?.emailVerified ?? false,
+            studentStatusVerified: enrollment?.studentStatusVerified ?? false,
+            verificationStep: enrollment?.verificationStep ?? null,
+            hasIdCard: !!enrollment?.studentIdCardId,
+            parsedData
+          }
+        }
+      )
   }
 }

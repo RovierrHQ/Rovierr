@@ -28,7 +28,7 @@ export function VerificationPending({
     setIsVerifying(true)
 
     try {
-      await client.user.onboarding.verifyEmail({ otp })
+      await client.user.profile.verifyStudent.verifyOTP({ otp })
       toast.success('Email verified successfully!')
       onVerified?.()
     } catch (error) {
@@ -44,7 +44,7 @@ export function VerificationPending({
     setIsResending(true)
 
     try {
-      await client.user.onboarding.resendVerification({})
+      await client.user.profile.verifyStudent.resendOTP({})
       toast.success('New verification code sent!')
       setOtp('')
     } catch (error) {

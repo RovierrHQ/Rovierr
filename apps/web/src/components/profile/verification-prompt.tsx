@@ -27,6 +27,7 @@ import {
   ImageIcon,
   Loader2,
   Mail,
+  Trash2,
   Upload
 } from 'lucide-react'
 import type React from 'react'
@@ -49,11 +50,74 @@ function fileToBase64(file: File): Promise<string> {
   })
 }
 
+interface IdCardItemProps {
+  card: {
+    id: string
+    imageUrl: string
+    university: string | null
+    studentId: string | null
+    isVerified: boolean
+  }
+  isSelected: boolean
+  onSelect: (id: string) => void
+  onDelete: (id: string, e: React.MouseEvent) => void
+}
+
+function IdCardItem({ card, isSelected, onSelect, onDelete }: IdCardItemProps) {
+  return (
+    <div
+      className={`flex cursor-pointer items-center justify-between rounded-lg border-2 p-3 transition-colors ${
+        isSelected
+          ? 'border-primary bg-primary/5'
+          : 'border-border hover:border-primary/50'
+      }`}
+      onClick={() => onSelect(card.id)}
+    >
+      <div className="flex items-center gap-3">
+        <img
+          alt="Student ID"
+          className="h-12 w-12 rounded border border-border object-cover"
+          src={card.imageUrl}
+        />
+        <div className="flex-1">
+          <p className="font-medium text-sm">
+            {card.university ?? 'Unknown University'}
+          </p>
+          {card.studentId && (
+            <p className="text-muted-foreground text-xs">
+              Student ID: {card.studentId}
+            </p>
+          )}
+          {card.isVerified && (
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-green-600 text-xs">
+              <CheckCircle2 className="h-3 w-3" />
+              Verified
+            </span>
+          )}
+        </div>
+      </div>
+      {!card.isVerified && (
+        <Button
+          className="flex-shrink-0"
+          onClick={(e) => onDelete(card.id, e)}
+          size="sm"
+          variant="ghost"
+        >
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
+      )}
+    </div>
+  )
+}
+
 export function VerificationPrompt() {
   const queryClient = useQueryClient()
   const [step, setStep] = useState<'upload' | 'email' | 'otp'>('upload')
   const [studentIdImage, setStudentIdImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [selectedStudentIdCardId, setSelectedStudentIdCardId] = useState<
+    string | null
+  >(null)
   const [emailLocalPart, setEmailLocalPart] = useState('')
   const [otp, setOtp] = useState('')
   const [selectedUniversityId, setSelectedUniversityId] = useState<string>('')
@@ -68,10 +132,36 @@ export function VerificationPrompt() {
     orpc.university.list.queryOptions()
   )
 
+  // Fetch verification status to restore step
+  const { data: verificationStatus } = useQuery(
+    orpc.user.profile.verifyStudent.getVerificationStatus.queryOptions()
+  )
+
+  // Fetch existing student ID cards
+  const { data: idCardsData, refetch: refetchIdCards } = useQuery(
+    orpc.user.profile.verifyStudent.listIdCards.queryOptions()
+  )
+
+  const existingIdCards = idCardsData?.idCards ?? []
+
   const universities = universitiesData?.universities ?? []
   const selectedUniversity = universities.find(
     (uni) => uni.id === selectedUniversityId
   )
+
+  // Restore step and parsed data from stored verification status
+  useEffect(() => {
+    if (verificationStatus) {
+      if (verificationStatus.verificationStep) {
+        setStep(verificationStatus.verificationStep)
+      }
+      if (verificationStatus.parsedData) {
+        setParsedData(verificationStatus.parsedData)
+      }
+      // Note: We don't restore image preview from URL as it requires fetching the image
+      // User will need to re-upload if they want to see it, but parsing result is restored
+    }
+  }, [verificationStatus])
 
   // Set default university when data loads
   useEffect(() => {
@@ -90,15 +180,33 @@ export function VerificationPrompt() {
   const uploadMutation = useMutation(
     orpc.user.profile.verifyStudent.uploadIdCard.mutationOptions({
       onSuccess: (data) => {
+        setSelectedStudentIdCardId(data.id)
         setParsedData({
           university: data.university,
           studentId: data.studentId
         })
         setStep('email')
+        refetchIdCards()
         toast.success('Student ID parsed successfully')
       },
       onError: (error: Error) => {
         toast.error(error.message || 'Failed to parse student ID')
+      }
+    })
+  )
+
+  const deleteIdCardMutation = useMutation(
+    orpc.user.profile.verifyStudent.deleteIdCard.mutationOptions({
+      onSuccess: () => {
+        refetchIdCards()
+        if (selectedStudentIdCardId) {
+          setSelectedStudentIdCardId(null)
+          setParsedData(null)
+        }
+        toast.success('Student ID card deleted')
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to delete student ID card')
       }
     })
   )
@@ -124,9 +232,11 @@ export function VerificationPrompt() {
         setStep('upload')
         setStudentIdImage(null)
         setImagePreview(null)
+        setSelectedStudentIdCardId(null)
         setEmailLocalPart('')
         setOtp('')
         setParsedData(null)
+        refetchIdCards()
       },
       onError: (error: Error) => {
         toast.error(error.message || 'Failed to verify code')
@@ -157,7 +267,52 @@ export function VerificationPrompt() {
     }
   }
 
+  const handleSelectExistingIdCard = (idCardId: string) => {
+    const selectedCard = existingIdCards.find((card) => card.id === idCardId)
+    if (selectedCard) {
+      setSelectedStudentIdCardId(idCardId)
+      setParsedData({
+        university: selectedCard.university,
+        studentId: selectedCard.studentId
+      })
+      setImagePreview(selectedCard.imageUrl)
+      setStep('email')
+    }
+  }
+
+  const handleDeleteIdCard = async (idCardId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      await deleteIdCardMutation.mutateAsync({ id: idCardId })
+    } catch {
+      // Error handled by mutation
+    }
+  }
+
   const handleContinueFromUpload = async () => {
+    if (!(studentIdImage || selectedStudentIdCardId)) {
+      toast.error(
+        'Please upload your student ID card or select an existing one'
+      )
+      return
+    }
+
+    if (selectedStudentIdCardId) {
+      // Use existing ID card
+      const selectedCard = existingIdCards.find(
+        (card) => card.id === selectedStudentIdCardId
+      )
+      if (selectedCard) {
+        setParsedData({
+          university: selectedCard.university,
+          studentId: selectedCard.studentId
+        })
+        setStep('email')
+      }
+      return
+    }
+
+    // Upload new ID card
     if (!studentIdImage) {
       toast.error('Please upload your student ID card')
       return
@@ -182,13 +337,19 @@ export function VerificationPrompt() {
       return
     }
 
+    if (!selectedStudentIdCardId) {
+      toast.error('Please select or upload a student ID card')
+      return
+    }
+
     // Construct full email with selected domain (add @ since validEmailDomains doesn't include it)
     const email = `${emailLocalPart.trim()}@${selectedDomain}`
 
     try {
       await sendOTPMutation.mutateAsync({
         email,
-        universityId: selectedUniversityId
+        universityId: selectedUniversityId,
+        studentIdCardId: selectedStudentIdCardId
       })
     } catch {
       // Error handled by mutation
@@ -248,9 +409,29 @@ export function VerificationPrompt() {
 
       {step === 'upload' && (
         <div className="space-y-4">
+          {/* Show existing ID cards if any */}
+          {existingIdCards.length > 0 && (
+            <div className="space-y-2">
+              <p className="font-medium text-sm">Existing Student ID Cards</p>
+              <div className="grid gap-2">
+                {existingIdCards.map((card) => (
+                  <IdCardItem
+                    card={card}
+                    isSelected={selectedStudentIdCardId === card.id}
+                    key={card.id}
+                    onDelete={handleDeleteIdCard}
+                    onSelect={handleSelectExistingIdCard}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <label className="font-medium text-sm" htmlFor="student-id-upload">
-              Upload Student ID Card
+              {existingIdCards.length > 0
+                ? 'Or Upload New Student ID Card'
+                : 'Upload Student ID Card'}
             </label>
             <div className="rounded-lg border-2 border-border border-dashed p-6 text-center transition-colors hover:border-primary/50">
               {imagePreview ? (
@@ -305,7 +486,7 @@ export function VerificationPrompt() {
 
           <Button
             className="w-full"
-            disabled={loading || !studentIdImage}
+            disabled={loading || !(studentIdImage || selectedStudentIdCardId)}
             onClick={handleContinueFromUpload}
             size="lg"
           >

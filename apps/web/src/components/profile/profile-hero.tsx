@@ -398,7 +398,7 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
         type="profile"
       />
       <ImageUploadDialog
-        currentImageUrl={profileDetails.bannerImage}
+        currentImageUrl={profileDetails.bannerImage ?? null}
         onOpenChange={setIsBannerDialogOpen}
         open={isBannerDialogOpen}
         type="banner"

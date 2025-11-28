@@ -1,4 +1,4 @@
-import { boolean, date, pgTable, text } from 'drizzle-orm/pg-core'
+import { boolean, date, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
 import { primaryId, timestamps } from '../helper'
 import { user } from './auth'
 
@@ -22,6 +22,16 @@ export const institution = pgTable('institution', {
   ...timestamps
 })
 
+export const studentIdCard = pgTable('student_id_card', {
+  id: primaryId,
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  imageUrl: text('image_url').notNull(), // S3 URL of uploaded ID card
+  parsingResult: jsonb('parsing_result'), // Parsed ID card data
+  ...timestamps
+})
+
 export const instituitionEnrollment = pgTable('instituition_enrollment', {
   id: primaryId,
   institutionId: text('institution_id')
@@ -40,6 +50,16 @@ export const instituitionEnrollment = pgTable('instituition_enrollment', {
     () => institution.id,
     { onDelete: 'set null' }
   ), // hostinstitution is the main instuition and only avaible if the institutionid is an exchanged institution where the student is enrolled in the exchange program. This is used to track the student's academic journey and enrollment at the host institution.
+  // Student verification fields
+  studentIdCardId: text('student_id_card_id').references(
+    () => studentIdCard.id,
+    {
+      onDelete: 'set null'
+    }
+  ), // Reference to student ID card used for verification
+  verificationStep: text('verification_step', {
+    enum: ['upload', 'email', 'otp']
+  }), // Current step in verification process
   ...timestamps
 })
 

@@ -17,7 +17,8 @@ export function FeatureGate({ children, fallback }: FeatureGateProps) {
   useEffect(() => {
     const checkVerificationStatus = async () => {
       try {
-        const status = await client.user.onboarding.getStatus()
+        const status =
+          await client.user.profile.verifyStudent.getVerificationStatus()
         setIsVerified(status.isVerified)
       } catch {
         setIsVerified(false)

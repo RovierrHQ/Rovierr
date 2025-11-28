@@ -239,6 +239,29 @@ export const profile = {
     }),
 
   verifyStudent: {
+    listIdCards: oc
+      .route({
+        method: 'GET',
+        description: 'List all student ID cards for the current user',
+        summary: 'List Student ID Cards',
+        tags: ['User']
+      })
+      .output(
+        z.object({
+          idCards: z.array(
+            z.object({
+              id: z.string(),
+              imageUrl: z.string(),
+              university: z.string().nullable(),
+              studentId: z.string().nullable(),
+              expiryDate: z.string().nullable(),
+              createdAt: z.date(),
+              isVerified: z.boolean()
+            })
+          )
+        })
+      ),
+
     uploadIdCard: oc
       .route({
         method: 'POST',
@@ -253,6 +276,7 @@ export const profile = {
       )
       .output(
         z.object({
+          id: z.string(),
           university: z.string().nullable(),
           studentId: z.string().nullable(),
           expiryDate: z.string().nullable(),
@@ -272,6 +296,41 @@ export const profile = {
         }
       }),
 
+    deleteIdCard: oc
+      .route({
+        method: 'DELETE',
+        description:
+          'Delete a student ID card (only if not associated with verified enrollment)',
+        summary: 'Delete Student ID Card',
+        tags: ['User']
+      })
+      .input(
+        z.object({
+          id: z.string().min(1, 'Student ID card ID is required')
+        })
+      )
+      .output(
+        z.object({
+          success: z.boolean()
+        })
+      )
+      .errors({
+        NOT_FOUND: {
+          data: z.object({
+            message: z.string().default('Student ID card not found')
+          })
+        },
+        FORBIDDEN: {
+          data: z.object({
+            message: z
+              .string()
+              .default(
+                'Cannot delete student ID card associated with verified enrollment'
+              )
+          })
+        }
+      }),
+
     sendVerificationOTP: oc
       .route({
         method: 'POST',
@@ -282,7 +341,11 @@ export const profile = {
       .input(
         z.object({
           email: z.email('Invalid email address'),
-          universityId: z.string().min(1, 'University ID is required')
+          universityId: z.string().min(1, 'University ID is required'),
+          studentIdCardId: z
+            .string()
+            .min(1, 'Student ID card ID is required')
+            .describe('ID of the student ID card to use for verification')
         })
       )
       .output(
@@ -364,6 +427,30 @@ export const profile = {
             message: z.string().default('Failed to send verification email')
           })
         }
+      }),
+
+    getVerificationStatus: oc
+      .route({
+        method: 'GET',
+        description: 'Get current verification status and step',
+        summary: 'Get Verification Status',
+        tags: ['User']
       })
+      .output(
+        z.object({
+          isVerified: z.boolean(),
+          hasUniversityEmail: z.boolean(),
+          emailVerified: z.boolean(),
+          studentStatusVerified: z.boolean(),
+          verificationStep: z.enum(['upload', 'email', 'otp']).nullable(),
+          hasIdCard: z.boolean(),
+          parsedData: z
+            .object({
+              university: z.string().nullable(),
+              studentId: z.string().nullable()
+            })
+            .nullable()
+        })
+      )
   }
 }

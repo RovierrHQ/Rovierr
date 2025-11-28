@@ -1,1 +1,7 @@
-export { deleteImageFromS3, uploadImageToS3 } from './client'
+export {
+  deleteImageFromS3,
+  getPresignedUrl,
+  getPresignedUrlFromFullUrl,
+  isS3Url,
+  uploadImageToS3
+} from './client'
