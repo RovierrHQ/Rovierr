@@ -1,8 +1,8 @@
 'use client'
 
-import { Calendar, Compass, Home, Network, Users } from 'lucide-react'
+import { Calendar, Compass, Home, Network, Plus, Users } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type {
   SidebarNode,
   SidebarTree
@@ -13,11 +13,25 @@ import { authClient } from '@/lib/auth-client'
 const SocietiesLayout = ({ children }: { children: ReactNode }) => {
   const { setSidebarTree } = useSpaceSidebarItems()
   const { data: organizations, isPending } = authClient.useListOrganizations()
+  const lastOrganizationsRef = useRef<string>('')
+
   useEffect(() => {
     // Don't update sidebar while data is still loading
     if (isPending) {
       return
     }
+
+    // Create a stable key from organizations to detect actual changes
+    const orgsKey = JSON.stringify(
+      organizations?.map((org) => ({ id: org.id, name: org.name })) ?? []
+    )
+
+    // Skip if organizations haven't actually changed
+    if (orgsKey === lastOrganizationsRef.current) {
+      return
+    }
+
+    lastOrganizationsRef.current = orgsKey
 
     // Map organizations from better-auth to the format expected by sidebar
     // Only show empty state if data has loaded (not undefined) and there are no organizations
@@ -90,11 +104,13 @@ const SocietiesLayout = ({ children }: { children: ReactNode }) => {
               emptyStateActions: [
                 {
                   label: 'Join an existing society',
-                  url: '/spaces/societies/discover/browse-clubs'
+                  url: '/spaces/societies/discover/browse-clubs',
+                  icon: Compass
                 },
                 {
                   label: 'Create a new society',
-                  url: '/spaces/societies/create'
+                  url: '/spaces/societies/create',
+                  icon: Plus
                 }
               ]
             }
@@ -153,10 +169,8 @@ const SocietiesLayout = ({ children }: { children: ReactNode }) => {
 
     setSidebarTree(sidebarTree)
 
-    // Cleanup: reset to null when component unmounts
-    return () => {
-      setSidebarTree(null)
-    }
+    // Don't reset sidebar tree on unmount - preserve it for navigation to other pages like /profile
+    // The sidebar tree will be updated when navigating to a different space that needs its own sidebar
   }, [setSidebarTree, organizations, isPending])
 
   return <div>{children}</div>

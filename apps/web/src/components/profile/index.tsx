@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { ProfileErrorBoundary } from '@/components/profile/error-boundary'
 import { ProfilePageSkeleton } from '@/components/profile/loading-skeleton'
-import { ProfileHeader } from '@/components/profile/profile-header'
 import { ProfileHero } from '@/components/profile/profile-hero'
 import { ProfileTabs } from '@/components/profile/profile-tabs'
 import { AboutTab } from '@/components/profile/tabs/about-tab'
@@ -65,8 +64,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <ProfileHeader />
-
       <main className="mx-auto max-w-4xl space-y-0 py-4 sm:py-6">
         {/* Hero Section - Always visible */}
         <ProfileHero isVerified={isVerified} />

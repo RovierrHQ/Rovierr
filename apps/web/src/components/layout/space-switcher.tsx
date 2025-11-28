@@ -21,8 +21,8 @@ import {
 } from '@rov/ui/components/tooltip'
 import { cn } from '@rov/ui/lib/utils'
 import { ChevronsUpDown, Info } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import type { ISpaces } from '@/types/types-space-sidebar-data'
 
@@ -32,6 +32,8 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
     spaces.find((space) => space.isActive)
   )
   const router = useRouter()
+  const pathname = usePathname()
+  const isInitialMount = useRef(true)
 
   // Cycle to next space
   const cycleToNextSpace = () => {
@@ -45,8 +47,29 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
   useHotkeys('shift+tab', cycleToNextSpace, { preventDefault: true })
 
   useEffect(() => {
-    router.push(activeSpace?.url || '/spaces/societies')
-  }, [activeSpace, router])
+    // Skip redirect on initial mount - let the user stay on their current route
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
+    }
+
+    // Don't redirect if we're on a non-space route like /profile
+    if (pathname.startsWith('/profile')) {
+      return
+    }
+
+    // Don't redirect if we're already on the active space URL or a child route
+    // This prevents redirect loops (e.g., /spaces/societies -> /spaces/societies/campus-feed)
+    if (activeSpace?.url && pathname.startsWith(activeSpace.url)) {
+      return
+    }
+
+    // Only redirect when user explicitly changes the space (via dropdown or hotkey)
+    // and we're not already on that space or a child route
+    if (activeSpace?.url) {
+      router.push(activeSpace.url)
+    }
+  }, [activeSpace, router, pathname])
 
   if (!activeSpace) {
     return null

@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@rov/ui/components/button'
 import {
   Collapsible,
   CollapsibleContent,
@@ -33,10 +32,37 @@ function SidebarNodeRenderer({ node }: { node: SidebarNode }) {
         ) : (
           <SidebarGroupLabel>{node.title}</SidebarGroupLabel>
         )}
-        <SidebarMenu className="gap-1.5">
-          {node.children?.map((child) => (
-            <SidebarNodeRenderer key={child.id} node={child} />
-          ))}
+        <SidebarMenu>
+          {node.children?.flatMap((child) => {
+            // If child is an item, render it directly as SidebarMenuItem
+            if (child.type === 'item') {
+              return (
+                <SidebarMenuItem key={child.id}>
+                  <SidebarMenuButton asChild tooltip={child.title}>
+                    <Link href={child.url || '#'}>
+                      {child.icon && <child.icon />}
+                      <span className="truncate">{child.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            }
+            // If child is an empty-state with actions, render actions as menu items
+            if (child.type === 'empty-state' && child.emptyStateActions) {
+              return child.emptyStateActions.map((action) => (
+                <SidebarMenuItem key={action.url}>
+                  <SidebarMenuButton asChild tooltip={action.label}>
+                    <Link href={action.url}>
+                      {action.icon && <action.icon />}
+                      <span className="truncate">{action.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))
+            }
+            // For other types (collapsible, empty-state without actions), use the renderer
+            return <SidebarNodeRenderer key={child.id} node={child} />
+          })}
         </SidebarMenu>
       </SidebarGroup>
     )
@@ -44,28 +70,30 @@ function SidebarNodeRenderer({ node }: { node: SidebarNode }) {
 
   if (node.type === 'empty-state') {
     return (
-      <SidebarMenuItem>
-        <div className="px-2 py-4 text-center">
-          <p className="mb-3 text-muted-foreground text-sm">
-            {node.emptyStateMessage || node.title}
-          </p>
-          {node.emptyStateActions && node.emptyStateActions.length > 0 && (
-            <div className="flex flex-col gap-2">
-              {node.emptyStateActions.map((action) => (
-                <Button
-                  asChild
-                  className="w-full"
-                  key={action.url}
-                  size="sm"
-                  variant="outline"
-                >
-                  <Link href={action.url}>{action.label}</Link>
-                </Button>
-              ))}
+      <>
+        {node.emptyStateActions && node.emptyStateActions.length > 0 ? (
+          // Render actions as sidebar menu items
+          node.emptyStateActions.map((action) => (
+            <SidebarMenuItem key={action.url}>
+              <SidebarMenuButton asChild tooltip={action.label}>
+                <Link href={action.url}>
+                  {action.icon && <action.icon />}
+                  <span className="truncate">{action.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))
+        ) : (
+          // Fallback: show message if no actions
+          <SidebarMenuItem>
+            <div className="px-2 py-4 text-center">
+              <p className="text-muted-foreground text-sm">
+                {node.emptyStateMessage || node.title}
+              </p>
             </div>
-          )}
-        </div>
-      </SidebarMenuItem>
+          </SidebarMenuItem>
+        )}
+      </>
     )
   }
 
@@ -74,11 +102,7 @@ function SidebarNodeRenderer({ node }: { node: SidebarNode }) {
       <Collapsible className="group/collapsible" defaultOpen={node.isActive}>
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton
-              asChild={!!node.url}
-              className="px-3 py-2.5"
-              tooltip={node.title}
-            >
+            <SidebarMenuButton asChild={!!node.url} tooltip={node.title}>
               {node.url ? (
                 <Link href={node.url}>
                   {node.icon && <node.icon />}
@@ -100,10 +124,10 @@ function SidebarNodeRenderer({ node }: { node: SidebarNode }) {
           </CollapsibleTrigger>
           {node.children && (
             <CollapsibleContent>
-              <SidebarMenuSub className="gap-1.5">
+              <SidebarMenuSub>
                 {node.children.map((child) => (
                   <SidebarMenuSubItem key={child.id}>
-                    <SidebarMenuSubButton asChild className="px-3 py-2">
+                    <SidebarMenuSubButton asChild>
                       <Link href={child.url || '#'}>
                         <span>{child.title}</span>
                       </Link>
@@ -120,14 +144,10 @@ function SidebarNodeRenderer({ node }: { node: SidebarNode }) {
 
   // Regular item
   return (
-    <SidebarGroup className="px-3 py-3">
-      <SidebarMenu className="gap-1.5">
+    <SidebarGroup>
+      <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild
-            className="px-3 py-2.5"
-            tooltip={node.title}
-          >
+          <SidebarMenuButton asChild tooltip={node.title}>
             <Link href={node.url || '#'}>
               {node.icon && <node.icon />}
               <span className="truncate">{node.title}</span>

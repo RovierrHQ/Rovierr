@@ -1,7 +1,14 @@
 'use client'
 
 import type * as lr from 'lucide-react'
-import { createContext, type ReactNode, useContext, useState } from 'react'
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useState
+} from 'react'
 
 export type SidebarNodeType =
   | 'group-header'
@@ -21,12 +28,17 @@ export interface SidebarNode {
   emptyStateActions?: Array<{
     label: string
     url: string
+    icon?: lr.LucideIcon
   }>
 }
 
 export interface SidebarTree {
   nodes: SidebarNode[]
 }
+
+// Store sidebar tree in a module-level variable to persist across provider instances
+// This avoids JSON serialization issues with icon functions and infinite loops
+let persistedSidebarTree: SidebarTree | null = null
 
 interface SpaceSidebarItemsContextValue {
   sidebarTree: SidebarTree | null
@@ -41,15 +53,31 @@ export function SpaceSidebarItemsProvider({
 }: {
   children: ReactNode
 }) {
-  const [sidebarTree, setSidebarTree] = useState<SidebarTree | null>(null)
+  // Initialize from persisted value - this only runs once per provider instance
+  const [sidebarTree, setSidebarTreeState] = useState<SidebarTree | null>(
+    () => persistedSidebarTree
+  )
+
+  const setSidebarTree = useCallback((tree: SidebarTree | null) => {
+    // Only update if the tree reference has actually changed
+    if (persistedSidebarTree === tree) {
+      return
+    }
+    persistedSidebarTree = tree
+    setSidebarTreeState(tree)
+  }, [])
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({
+      sidebarTree,
+      setSidebarTree
+    }),
+    [sidebarTree, setSidebarTree]
+  )
 
   return (
-    <SpaceSidebarItemsContext.Provider
-      value={{
-        sidebarTree,
-        setSidebarTree
-      }}
-    >
+    <SpaceSidebarItemsContext.Provider value={contextValue}>
       {children}
     </SpaceSidebarItemsContext.Provider>
   )
