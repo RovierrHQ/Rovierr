@@ -115,7 +115,7 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
         {profileDetails.bannerImage ? (
           <img
             alt="Profile Banner"
-            className="h-full w-full object-cover"
+            className="h-full w-full rounded-xl object-cover"
             src={profileDetails.bannerImage}
           />
         ) : (

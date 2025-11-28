@@ -63,7 +63,7 @@ export default function ProfilePage() {
   const isVerified = profileInfo?.studentStatusVerified ?? false
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pt-10 pb-20 sm:px-10">
       <main className="mx-auto max-w-4xl space-y-0 py-4 sm:py-6">
         {/* Hero Section - Always visible */}
         <ProfileHero isVerified={isVerified} />
