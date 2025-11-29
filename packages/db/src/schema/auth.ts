@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm'
-import { boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { boolean, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { timestamps } from '../helper'
 import { institution } from './institution'
 import { roadmap } from './roadmap'
@@ -137,6 +137,31 @@ export const organization = pgTable('organization', {
   description: text('description'),
   tags: text('tags').array(),
   metadata: text('metadata'),
+
+  // Social links
+  instagram: text('instagram'),
+  facebook: text('facebook'),
+  twitter: text('twitter'),
+  linkedin: text('linkedin'),
+  whatsapp: text('whatsapp'),
+  telegram: text('telegram'),
+  website: text('website'),
+
+  // Additional details
+  foundingYear: integer('founding_year'),
+  meetingSchedule: text('meeting_schedule'),
+  membershipRequirements: text('membership_requirements'),
+  goals: text('goals'),
+
+  // Branding
+  primaryColor: text('primary_color'),
+
+  // State tracking
+  onboardingCompleted: boolean('onboarding_completed').default(false),
+  profileCompletionPercentage: integer('profile_completion_percentage').default(
+    0
+  ),
+
   ...timestamps
 })
 

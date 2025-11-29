@@ -163,7 +163,7 @@ export function createAuth(config: AuthConfig) {
             input: false,
             required: false
           },
-          universityId: {
+          institutionId: {
             type: 'string',
             input: true,
             required: false
@@ -182,6 +182,82 @@ export function createAuth(config: AuthConfig) {
             type: 'string',
             input: true,
             required: false
+          },
+          // Social links
+          instagram: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          facebook: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          twitter: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          linkedin: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          whatsapp: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          telegram: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          website: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          // Additional details
+          foundingYear: {
+            type: 'number',
+            input: true,
+            required: false
+          },
+          meetingSchedule: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          membershipRequirements: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          goals: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          // Branding
+          primaryColor: {
+            type: 'string',
+            input: true,
+            required: false
+          },
+          // State tracking
+          onboardingCompleted: {
+            type: 'boolean',
+            input: false,
+            required: false,
+            defaultValue: false
+          },
+          profileCompletionPercentage: {
+            type: 'number',
+            input: false,
+            required: false,
+            defaultValue: 0
           }
         }
       }

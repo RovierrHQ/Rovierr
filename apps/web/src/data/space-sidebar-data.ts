@@ -15,11 +15,15 @@ import {
   UserRound,
   Users
 } from 'lucide-react'
-import * as types from '@/types/types-space-sidebar-data'
+import {
+  type IProjects,
+  type ISpaces,
+  SpacesNames
+} from '@/types/types-space-sidebar-data'
 
-export const spaces: types.ISpaces[] = [
+export const spaces: ISpaces[] = [
   {
-    name: types.SpacesNames.SPACES,
+    name: SpacesNames.SPACES,
     logo: GalleryVerticalEnd,
     plan: 'Enterprise',
     url: '/spaces',
@@ -71,35 +75,35 @@ export const spaces: types.ISpaces[] = [
     ]
   },
   {
-    name: types.SpacesNames.ACADEMICS,
+    name: SpacesNames.ACADEMICS,
     logo: GraduationCap,
     plan: 'Startup',
     url: '/spaces/academics',
     isActive: false
   },
   {
-    name: types.SpacesNames.SOCIAL,
+    name: SpacesNames.SOCIAL,
     logo: AudioWaveform,
     plan: 'Free',
     url: '/spaces/social',
     isActive: false
   },
   {
-    name: types.SpacesNames.PERSONAL,
+    name: SpacesNames.PERSONAL,
     logo: UserRound,
     plan: 'Free',
     url: '/spaces/personal',
     isActive: false
   },
   {
-    name: types.SpacesNames.CAREER,
+    name: SpacesNames.CAREER,
     logo: BriefcaseBusiness,
     plan: 'Free',
     url: '/spaces/career',
     isActive: false
   },
   {
-    name: types.SpacesNames.CLUBS,
+    name: SpacesNames.CLUBS,
     logo: Club,
     plan: 'Free',
     url: '/spaces/societies',
@@ -145,7 +149,7 @@ export const spaces: types.ISpaces[] = [
   }
 ]
 
-export const projects: types.IProjects[] = [
+export const projects: IProjects[] = [
   {
     name: 'Design Engineering',
     url: '#',

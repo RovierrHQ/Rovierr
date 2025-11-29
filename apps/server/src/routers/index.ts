@@ -3,6 +3,7 @@ import { calendar } from './calendar'
 import { expenses } from './expenses'
 import { realtime } from './realtime'
 import { roadmap } from './roadmap'
+import { society } from './society'
 import { studentOrganizations } from './student-organizations'
 import { tasks } from './tasks'
 import { university } from './university'
@@ -26,6 +27,9 @@ export const appRouter = o.router({
 
   // student organizations integration
   studentOrganizations,
+
+  // society integration
+  society,
 
   // expenses integration
   expenses,

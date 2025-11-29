@@ -1,0 +1,254 @@
+# Implementation Plan: Society Creation and Onboarding
+
+- [ ] 1. Better-Auth organization plugin configuration and schema extension
+  - [x] 1.1 Configure Better-Auth organization plugin with additional fields
+    - Configure organization plugin in Better-Auth server setup
+    - Add society-specific additional fields to organization schema (description, banner, universityId, organizationType, tags, social links, additional details, branding, state tracking)
+    - Configure organization plugin on client side with inferOrgAdditionalFields
+    - _Requirements: 8.1_
+  - [ ]* 1.2 Write property test for organization schema
+    - **Property 29: Society query includes all fields**
+    - **Validates: Requirements 8.2**
+  - [x] 1.3 Create Zod validation schemas for society operations
+    - Define socialLinksSchema with platform-specific validation patterns
+    - Define createSocietySchema for use with Better-Auth organization.create
+    - Define updateSocietyFieldsSchema for society-specific field updates
+    - Define societySchema for output validation
+    - _Requirements: 9.1, 9.2, 9.4_
+  - [ ]* 1.4 Write property tests for validation schemas
+    - **Property 2: Official organization requires university affiliation**
+    - **Property 3: Student society allows optional university affiliation**
+    - **Property 21-27: Social link validation**
+    - **Validates: Requirements 1.3, 1.4, 6.1-6.7**
+  - [x] 1.5 Define minimal ORPC contracts for society-specific operations
+    - Create society.getById contract (enriched with society fields)
+    - Create society.getBySlug contract (enriched with society fields)
+    - Create society.updateFields contract (society-specific fields only)
+    - Create society.uploadBanner contract (banner is society-specific)
+    - Create society.completeOnboarding contract
+    - _Requirements: 9.1, 9.2, 9.3_
+  - [ ]* 1.6 Write property test for contract validation errors
+    - **Property 31: Contract validation error messages**
+    - **Validates: Requirements 9.5**
+
+- [ ] 2. Backend services implementation
+  - [x] 2.1 Implement validation service
+    - Create validateSocialLink function for each platform
+    - Create sanitizeInput function for XSS prevention
+    - Create validateImage function for file validation (banner only, logo handled by Better-Auth)
+    - _Requirements: 6.1-6.8, 8.3_
+  - [x] 2.2 Implement society extension service
+    - Create getEnrichedSociety() method to fetch organization with society fields
+    - Create updateSocietyFields() method for society-specific field updates
+    - Create calculateCompletion() method using the formula from requirements
+    - Create markOnboardingComplete() method
+    - _Requirements: 7.5_
+  - [ ]* 2.3 Write property tests for society extension service
+    - **Property 4: Society creation round-trip consistency** (using Better-Auth organization.create)
+    - **Property 5: Creator receives president role** (Better-Auth handles this)
+    - **Property 14: Settings update persistence**
+    - **Property 28: Profile completion calculation accuracy**
+    - **Property 30: Input sanitization on update**
+    - **Validates: Requirements 1.5, 1.6, 4.5, 7.5, 8.3**
+  - [x] 2.4 Implement image service for banner uploads
+    - Create upload() method for cloud storage integration (banner only)
+    - Create delete() method for banner removal
+    - Create validate() method for file constraints checking
+    - Create optimize() method for image processing
+    - _Requirements: 5.1-5.6_
+  - [ ]* 2.5 Write property tests for image service
+    - **Property 18: Banner validation enforcement**
+    - **Property 19: Image upload persistence**
+    - **Property 20: Image removal cleanup**
+    - **Validates: Requirements 5.2, 5.3, 5.4, 5.6**
+  - [x] 2.6 Implement minimal ORPC route handlers
+    - Create GET /society/:id handler (enriched society data)
+    - Create GET /society/slug/:slug handler (enriched society data)
+    - Create PATCH /society/:id/fields handler with president permission check
+    - Create POST /society/:id/upload-banner handler
+    - Create POST /society/:id/complete-onboarding handler
+    - Add error handling and proper HTTP status codes
+    - _Requirements: 4.1-4.8_
+  - [ ]* 2.7 Write property tests for authorization
+    - **Property 12: Non-president access denial**
+    - **Property 13: Settings validation enforcement**
+    - **Property 15: Settings validation error display**
+    - **Validates: Requirements 4.2, 4.4, 4.7**
+
+- [ ] 3. Checkpoint - Ensure backend tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 4. Society creation form (frontend)
+  - [x] 4.1 Create society creation page component
+    - Create /spaces/societies/create page route
+    - Implement form using useAppForm with createSocietySchema
+    - Add basic information section (name, slug (optional), description, university, type, tags)
+    - Add social links section with all platform fields
+    - Implement conditional university requirement based on organization type
+    - Add form submission using Better-Auth authClient.organization.create() with additional fields
+    - Add redirect to onboarding on success
+    - _Requirements: 1.1-1.7_
+  - [x] 4.2 Create reusable social link input components
+    - Create SocialLinkField component with platform-specific validation
+    - Add format helpers and placeholder text for each platform
+    - Add real-time validation feedback
+    - _Requirements: 1.2, 6.1-6.8_
+  - [x] 4.3 Create tags input component
+    - Implement tag input with autocomplete
+    - Add tag creation and removal
+    - Style tags as badges
+    - _Requirements: 1.2_
+  - [ ]* 4.4 Write property test for form data collection
+    - **Property 1: Form data collection completeness**
+    - **Validates: Requirements 1.2**
+
+- [ ] 5. Onboarding wizard (frontend)
+  - [x] 5.1 Create onboarding wizard page component
+    - Create /spaces/societies/mine/[societyId]/onboarding page route
+    - Implement multi-step wizard with progress indicator
+    - Add step state management and navigation
+    - Load current society data using Better-Auth organization methods
+    - _Requirements: 2.1, 2.2_
+  - [x] 5.2 Implement Step 1: Visual Branding
+    - Create ImageUpload component for logo (using Better-Auth update) and banner (using ORPC)
+    - Add client-side file validation (size, format, dimensions)
+    - Implement color picker for primary color
+    - Add preview functionality
+    - _Requirements: 2.3, 5.1, 5.2_
+  - [x] 5.3 Implement Step 2: Contact Information
+    - Reuse SocialLinkField components from creation form
+    - Pre-populate with existing data
+    - Allow editing of all social links
+    - Save using ORPC society.updateFields
+    - _Requirements: 2.4_
+  - [x] 5.4 Implement Step 3: Additional Details
+    - Create year picker for founding year
+    - Add text field for meeting schedule
+    - Add textarea for membership requirements
+    - Add textarea for society goals
+    - Save using ORPC society.updateFields
+    - _Requirements: 2.5_
+  - [x] 5.5 Implement wizard actions and auto-save
+    - Add Skip button that advances without saving
+    - Add Next button that saves and advances
+    - Add Finish Later button that redirects to dashboard
+    - Implement auto-save on step completion using appropriate method (Better-Auth for logo, ORPC for society fields)
+    - Add loading states during save operations
+    - _Requirements: 2.6, 2.7, 2.8_
+  - [ ]* 5.6 Write property tests for onboarding flow
+    - **Property 6: Step completion persists data**
+    - **Property 7: Skip preserves existing data**
+    - **Property 8: Onboarding resume from last incomplete step**
+    - **Validates: Requirements 2.6, 2.7, 2.9**
+
+- [ ] 6. Public society profile display (frontend)
+  - [x] 6.1 Create public society profile page
+    - Create /societies/[societyId] page route
+    - Fetch society data using ORPC society.getById (enriched with society fields)
+    - Implement profile header with banner and logo
+    - Add default gradient for missing banner
+    - Add avatar with initials for missing logo
+    - _Requirements: 3.1-3.4_
+  - [x] 6.2 Implement profile content sections
+    - Create AboutSection with description, tags, university, and type badge
+    - Create SocialLinksSection with clickable icons
+    - Create GoalsSection with conditional rendering
+    - Create MeetingInfoSection with conditional rendering
+    - Create MembershipSection with conditional rendering
+    - Add JoinButton component (using Better-Auth member invitation)
+    - _Requirements: 3.5-3.8_
+  - [ ]* 6.3 Write property tests for profile display
+    - **Property 9: Profile displays all society information**
+    - **Property 10: Social links conditional rendering**
+    - **Property 11: Additional details conditional rendering**
+    - **Validates: Requirements 3.5, 3.6, 3.7, 3.8**
+
+- [ ] 7. Member society dashboard (frontend)
+  - [x] 7.1 Create member dashboard page
+    - Create /spaces/societies/mine/[societyId] page route
+    - Implement society navigation with active state highlighting
+    - Add conditional Settings link for presidents (check role using Better-Auth)
+    - Fetch society data using ORPC society.getById with member information from Better-Auth
+    - _Requirements: 3.9, 10.4, 10.5_
+  - [x] 7.2 Implement profile completion card
+    - Create ProfileCompletionCard component
+    - Display completion percentage (calculated from society fields)
+    - Show list of missing items
+    - Add click handlers to navigate to settings sections
+    - Hide card when completion reaches 100%
+    - _Requirements: 7.1-7.4_
+  - [x] 7.3 Add dashboard content sections
+    - Create placeholder for RecentActivityFeed
+    - Create placeholder for UpcomingEvents
+    - Create placeholder for MemberHighlights
+    - _Requirements: 3.9_
+
+- [ ] 8. Settings dashboard (frontend)
+  - [x] 8.1 Create settings dashboard page with authorization
+    - Create /spaces/societies/mine/[societyId]/settings page route
+    - Add president permission check using Better-Auth role verification
+    - Display access denied message for non-presidents
+    - Implement tabbed interface (General, Branding, Social Links, Details, Members)
+    - _Requirements: 4.1-4.3_
+  - [x] 8.2 Implement General settings tab
+    - Add form fields for name (Better-Auth update), description, tags, organization type
+    - Add visibility toggle (if supported by Better-Auth or custom field)
+    - Implement auto-save: name/slug via Better-Auth, other fields via ORPC society.updateFields
+    - Add toast notifications for success/error
+    - _Requirements: 4.3-4.7_
+  - [x] 8.3 Implement Branding settings tab
+    - Reuse ImageUpload components for logo (Better-Auth) and banner (ORPC)
+    - Add image removal functionality
+    - Add color picker for primary color (ORPC society.updateFields)
+    - Implement auto-save with appropriate method
+    - _Requirements: 4.3-4.7, 5.1-5.7_
+  - [x] 8.4 Implement Social Links settings tab
+    - Reuse SocialLinkField components
+    - Pre-populate with existing values
+    - Implement auto-save with validation using ORPC society.updateFields
+    - _Requirements: 4.3-4.7, 6.1-6.8_
+  - [x] 8.5 Implement Details settings tab
+    - Add year picker for founding year
+    - Add text field for meeting schedule
+    - Add textarea for membership requirements
+    - Add textarea for society goals
+    - Implement auto-save using ORPC society.updateFields
+    - _Requirements: 4.3-4.7_
+  - [x] 8.6 Implement Members settings tab
+    - Display member list using Better-Auth organization members
+    - Add invite member functionality using Better-Auth authClient.organization.inviteMember
+    - Add remove member functionality using Better-Auth authClient.organization.removeMember
+    - Add role management using Better-Auth member update
+    - Show pending invitations with cancel option
+    - _Requirements: Future enhancement, leveraging Better-Auth_
+
+- [ ] 9. Navigation and routing integration
+  - [x] 9.1 Implement post-creation redirect
+    - Add redirect to onboarding after society creation
+    - Pass society ID to onboarding route
+    - _Requirements: 1.7, 10.1_
+  - [x] 9.2 Implement post-onboarding redirect
+    - Add redirect to dashboard after onboarding completion
+    - Update onboardingCompleted flag
+    - _Requirements: 2.8, 10.2_
+  - [x] 9.3 Add settings navigation
+    - Add Settings link to society sidebar for presidents
+    - Implement active state highlighting
+    - _Requirements: 10.3, 10.4, 10.5_
+
+- [ ] 10. Image upload infrastructure
+  - [x] 10.1 Set up cloud storage integration
+    - Configure AWS S3 or compatible storage
+    - Set up bucket with proper CORS settings
+    - Configure signed URL generation
+    - Add environment variables for storage credentials
+    - _Requirements: 5.3, 5.4_
+  - [ ] 10.2 Implement image optimization pipeline
+    - Add image resizing for different display sizes
+    - Generate optimized formats (WebP)
+    - Implement responsive image loading
+    - Add caching headers
+    - _Requirements: 5.7_
+
+- [ ] 11. Final checkpoint - Integration testing
+  - Ensure all tests pass, ask the user if questions arise.

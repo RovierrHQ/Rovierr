@@ -1,24 +1,71 @@
 'use client'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
-import { Badge } from '@rov/ui/components/badge'
+import type { societySchema } from '@rov/orpc-contracts'
+import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
+import { Progress } from '@rov/ui/components/progress'
 import { Skeleton } from '@rov/ui/components/skeleton'
-import { Users } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle2,
+  Settings,
+  TrendingUp,
+  Users
+} from 'lucide-react'
+import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useMemo } from 'react'
+import type { z } from 'zod'
 import { authClient } from '@/lib/auth-client'
+import { orpc } from '@/utils/orpc'
+
+type Society = z.infer<typeof societySchema>
 
 const ClubProfilePage = () => {
   const params = useParams()
   const clubID = params?.clubID as string
 
-  const { data: organizations, isPending } = authClient.useListOrganizations()
+  const { data: organizations, isPending: orgsPending } =
+    authClient.useListOrganizations()
 
   const club = useMemo(() => {
     if (!(organizations && clubID)) return null
     return organizations.find((org) => org.id === clubID)
   }, [organizations, clubID])
+
+  // Fetch full society data with ORPC
+  const { data: society, isLoading: societyLoading } = useQuery({
+    queryKey: ['society', clubID],
+    queryFn: async () => {
+      return await orpc.society.getById.call({ id: clubID })
+    },
+    enabled: !!clubID
+  })
+
+  // Check if user has permission to manage settings using hasPermission
+  const { data: canManageSettingsData } = useQuery({
+    queryKey: ['user-permission-settings', clubID],
+    queryFn: async () => {
+      try {
+        const result = await authClient.organization.hasPermission({
+          permissions: {
+            organization: ['update']
+          },
+          organizationId: clubID
+        })
+        return result?.data?.success ?? false
+      } catch {
+        return false
+      }
+    },
+    enabled: !!clubID
+  })
+
+  const canManageSettings = canManageSettingsData === true
+
+  const isPending = orgsPending || societyLoading
 
   if (isPending) {
     return (
@@ -71,101 +118,221 @@ const ClubProfilePage = () => {
     )
   }
 
-  // Get additional fields from the organization object
-  // Note: better-auth returns basic fields, we may need to fetch full details via ORPC
-  const banner = (club as { banner?: string })?.banner
-  const logo = (club as { logo?: string })?.logo
-  const description = (club as { description?: string })?.description
-  const tags = (club as { tags?: string[] })?.tags || []
-
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="space-y-6">
-        {/* Banner */}
-        <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
-          {banner ? (
-            <img
-              alt="Society banner"
-              className="h-full w-full object-cover"
-              src={banner}
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="font-bold text-2xl">{society?.name || club?.name}</h1>
+        {canManageSettings && (
+          <Button asChild variant="outline">
+            <Link href={`/spaces/societies/mine/${clubID}/settings`}>
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </Link>
+          </Button>
+        )}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Main Content */}
+        <div className="space-y-6 lg:col-span-2">
+          {/* Profile Completion Card */}
+          {society && society.profileCompletionPercentage < 100 && (
+            <ProfileCompletionCard
+              completion={society.profileCompletionPercentage}
+              society={society}
+              societyId={clubID}
             />
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <div className="text-center text-white">
-                <Users className="mx-auto mb-2 h-12 w-12" />
-                <p className="text-sm opacity-80">No banner image</p>
-              </div>
-            </div>
           )}
+
+          {/* Recent Activity Feed - Placeholder */}
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="mb-4 font-semibold text-xl">Recent Activity</h2>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <TrendingUp className="mb-4 h-12 w-12 text-muted-foreground" />
+                <p className="mb-2 font-medium text-muted-foreground">
+                  No recent activity
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  Activity and updates will appear here
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Upcoming Events - Placeholder */}
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="mb-4 font-semibold text-xl">Upcoming Events</h2>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Calendar className="mb-4 h-12 w-12 text-muted-foreground" />
+                <p className="mb-2 font-medium text-muted-foreground">
+                  No upcoming events
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  Events will be displayed here
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Profile Header */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-6 md:flex-row">
-              <div className="-mt-16 relative">
-                <Avatar className="h-24 w-24 border-4 border-background">
-                  {logo ? (
-                    <AvatarImage alt={club.name} src={logo} />
-                  ) : (
-                    <AvatarFallback className="text-2xl">
-                      {club.name
-                        .split(' ')
-                        .map((w) => w[0])
-                        .join('')
-                        .toUpperCase()
-                        .slice(0, 2)}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Member Highlights - Placeholder */}
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="mb-4 font-semibold text-xl">Members</h2>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <Users className="mb-4 h-10 w-10 text-muted-foreground" />
+                <p className="text-muted-foreground text-sm">
+                  {society?.memberCount || 0} members
+                </p>
               </div>
-              <div className="mt-4 flex-1 space-y-4 md:mt-0">
-                <div>
-                  <h1 className="mb-2 font-bold text-3xl">{club.name}</h1>
-                  {description && (
-                    <p className="mb-3 text-muted-foreground leading-relaxed">
-                      {description}
-                    </p>
-                  )}
-                  {tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {tags.map((tag) => (
-                        <Badge key={tag} variant="secondary">
-                          {tag}
-                        </Badge>
-                      ))}
+            </CardContent>
+          </Card>
+
+          {/* Quick Stats */}
+          {society && (
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="mb-4 font-semibold text-xl">Quick Stats</h2>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground text-sm">
+                      Profile Completion
+                    </span>
+                    <span className="font-semibold">
+                      {society.profileCompletionPercentage}%
+                    </span>
+                  </div>
+                  {society.foundingYear && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground text-sm">
+                        Founded
+                      </span>
+                      <span className="font-semibold">
+                        {society.foundingYear}
+                      </span>
                     </div>
                   )}
-                </div>
-                <div className="flex items-center gap-4 text-muted-foreground text-sm">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    <span>Members</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground text-sm">
+                      Members
+                    </span>
+                    <span className="font-semibold">
+                      {society.memberCount || 0}
+                    </span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Posts Section - Placeholder */}
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="mb-4 font-semibold text-xl">Recent Posts</h2>
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Users className="mb-4 h-12 w-12 text-muted-foreground" />
-              <p className="mb-2 font-medium text-muted-foreground">
-                No posts yet
-              </p>
-              <p className="text-muted-foreground text-sm">
-                Posts and updates will appear here
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
 export default ClubProfilePage
+
+// Profile Completion Card Component
+const ProfileCompletionCard = ({
+  completion,
+  society,
+  societyId
+}: {
+  completion: number
+  society: Society
+  societyId: string
+}) => {
+  const missingItems: Array<{ label: string; section: string }> = []
+
+  // Check what's missing
+  if (!society.logo) missingItems.push({ label: 'Logo', section: 'branding' })
+  if (!society.banner)
+    missingItems.push({ label: 'Banner', section: 'branding' })
+
+  const socialLinks = [
+    society.instagram,
+    society.facebook,
+    society.twitter,
+    society.linkedin,
+    society.whatsapp,
+    society.telegram,
+    society.website
+  ].filter(Boolean)
+
+  if (socialLinks.length < 2)
+    missingItems.push({ label: 'Social Links (at least 2)', section: 'social' })
+
+  const additionalDetails = [
+    society.foundingYear,
+    society.meetingSchedule,
+    society.membershipRequirements,
+    society.goals
+  ].filter(Boolean)
+
+  if (additionalDetails.length < 2)
+    missingItems.push({
+      label: 'Additional Details (at least 2)',
+      section: 'details'
+    })
+
+  return (
+    <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950">
+      <CardContent className="p-6">
+        <div className="mb-4 flex items-start gap-3">
+          <AlertCircle className="mt-0.5 h-5 w-5 text-yellow-600 dark:text-yellow-500" />
+          <div className="flex-1">
+            <h3 className="mb-1 font-semibold text-lg">
+              Complete Your Society Profile
+            </h3>
+            <p className="text-muted-foreground text-sm">
+              A complete profile helps members find and connect with your
+              society
+            </p>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <div className="mb-2 flex items-center justify-between text-sm">
+            <span className="font-medium">{completion}% Complete</span>
+            <span className="text-muted-foreground">
+              {missingItems.length} items remaining
+            </span>
+          </div>
+          <Progress className="h-2" value={completion} />
+        </div>
+
+        {missingItems.length > 0 && (
+          <div className="space-y-2">
+            <p className="font-medium text-sm">Missing items:</p>
+            <ul className="space-y-1">
+              {missingItems.map((item) => (
+                <li
+                  className="flex items-center gap-2 text-sm"
+                  key={`${item.section}-${item.label}`}
+                >
+                  <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+                  <Link
+                    className="hover:underline"
+                    href={`/spaces/societies/mine/${societyId}/settings?tab=${item.section}`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <Button asChild className="mt-4 w-full" variant="outline">
+          <Link href={`/spaces/societies/mine/${societyId}/settings`}>
+            Complete Profile
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}

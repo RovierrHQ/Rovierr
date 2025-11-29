@@ -58,5 +58,6 @@
     "**/*.tsbuildinfo": true
   },
   "tailwindCSS.suggestions": true,
-  "tailwindCSS.experimental.configFile": "./packages/ui/src/styles/globals.css"
+  "tailwindCSS.experimental.configFile": "./packages/ui/src/styles/globals.css",
+  "typescript.autoClosingTags": false
 }
