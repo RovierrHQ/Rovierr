@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@orpc/contract": "1.10.4",
+    "@rov/db": "workspace:*",
+    "drizzle-zod": "0.8.3",
     "zod": "4.1.12"
   },
   "devDependencies": {

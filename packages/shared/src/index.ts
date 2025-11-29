@@ -5,4 +5,6 @@ export const apiStatus = (res: UseQueryResult<string, Error>) => {
   return res.data ? 'Connected' : 'Disconnected'
 }
 
+export * from './form-types'
 export * from './quiz'
+export * from './smart-field-registry'

@@ -13,8 +13,8 @@
     "check-types": "tsc -b"
   },
   "dependencies": {
-    "drizzle-orm": "0.44.5",
     "@neondatabase/serverless": "1.0.1",
+    "drizzle-orm": "0.44.5",
     "nanoid": "5.1.6",
     "ws": "8.18.3"
   },

@@ -25,6 +25,7 @@
     "@rov/db": "workspace:*",
     "@rov/orpc-contracts": "workspace:*",
     "@rov/realtime": "workspace:*",
+    "@rov/shared": "workspace:*",
     "better-auth": "1.3.34",
     "dotenv": "17.2.2",
     "drizzle-orm": "0.44.5",

@@ -1,5 +1,6 @@
 import { calendar } from './calendar'
 import { expenses } from './expenses'
+import { form } from './form'
 import { realtime } from './realtime'
 import { roadmap } from './roadmap'
 import { society, studentOrganizations } from './student-organizations'
@@ -7,6 +8,9 @@ import { tasks } from './tasks'
 import { university } from './university'
 import { user } from './user'
 
+// Export individual contracts for router implementation
+export { form } from './form'
+export * from './form/schemas'
 // Export schemas for use in forms
 export * from './student-organizations/schemas'
 
@@ -36,5 +40,8 @@ export const appContract = {
   expenses,
 
   // tasks integration
-  tasks
+  tasks,
+
+  // form integration
+  form
 }

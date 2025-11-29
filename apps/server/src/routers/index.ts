@@ -1,6 +1,7 @@
 import { o } from '../lib/orpc'
 import { calendar } from './calendar'
 import { expenses } from './expenses'
+import { form } from './form'
 import { realtime } from './realtime'
 import { roadmap } from './roadmap'
 import { society } from './society'
@@ -35,5 +36,8 @@ export const appRouter = o.router({
   expenses,
 
   // tasks integration
-  tasks
+  tasks,
+
+  // form integration
+  form
 })

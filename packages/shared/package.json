@@ -8,5 +8,8 @@
   "dependencies": {
     "@tanstack/react-query": "5.90.7",
     "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "typescript": "5.9.2"
   }
 }
