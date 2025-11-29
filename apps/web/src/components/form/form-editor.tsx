@@ -44,15 +44,27 @@ export function FormEditor({
       id: `q-${Date.now()}`,
       type,
       title: 'Untitled Question',
+      description: null,
+      formId: formData.id || '',
+      pageId: activePage,
+      order: formData.questions.filter((q) => q.pageId === activePage).length,
+      placeholder: null,
       required: false,
       options:
         type === 'multiple-choice' ||
         type === 'checkboxes' ||
         type === 'dropdown'
           ? ['Option 1']
-          : undefined,
-      pageId: activePage,
-      order: formData.questions.filter((q) => q.pageId === activePage).length,
+          : null,
+      validationRules: null,
+      sourceQuestionId: null,
+      condition: null,
+      conditionValue: null,
+      profileFieldKey: null,
+      acceptedFileTypes: null,
+      maxFileSize: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       conditionalLogicEnabled: false,
       enableAutoFill: false,
       enableBidirectionalSync: false
@@ -103,7 +115,14 @@ export function FormEditor({
     const newPage: Page = {
       id: `page-${Date.now()}`,
       title: `Page ${formData.pages.length + 1}`,
+      description: null,
+      formId: formData.id || '',
       order: formData.pages.length,
+      sourceQuestionId: null,
+      condition: null,
+      conditionValue: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       conditionalLogicEnabled: false
     }
     setFormData({
@@ -116,9 +135,6 @@ export function FormEditor({
   const deletePage = (pageId: string) => {
     if (formData.pages.length <= 1) return
     const newPages = formData.pages.filter((p) => p.id !== pageId)
-    const _questionsOnPage = formData.questions.filter(
-      (q) => q.pageId === pageId
-    )
     const updatedQuestions = formData.questions.map((q) =>
       q.pageId === pageId ? { ...q, pageId: newPages[0].id } : q
     )
@@ -173,7 +189,7 @@ export function FormEditor({
             onChange={(e) => updateFormDescription(e.target.value)}
             placeholder="Form description"
             rows={2}
-            value={formData.description}
+            value={formData.description ?? ''}
           />
         </Card>
 

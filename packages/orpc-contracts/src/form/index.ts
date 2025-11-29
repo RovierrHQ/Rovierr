@@ -1,6 +1,5 @@
 import { oc } from '@orpc/contract'
 import { z } from 'zod'
-import { fullFormSchema } from './generated-schemas'
 import {
   createFormSchema,
   createFromTemplateSchema,
@@ -9,6 +8,7 @@ import {
   entityTypeSchema,
   formIdSchema,
   formStatusSchema,
+  fullFormSchema,
   getAnalyticsSchema,
   getAutoFillDataSchema,
   listFormsSchema,

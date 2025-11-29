@@ -1,10 +1,5 @@
 'use client'
 
-import type {
-  ConditionOperator,
-  QuestionType,
-  ValidationRule
-} from '@rov/shared'
 import { Button } from '@rov/ui/components/button'
 import {
   Tabs,
@@ -20,61 +15,19 @@ import { orpc } from '@/utils/orpc'
 import { FormEditor } from './form-editor'
 import { FormPreview } from './form-preview'
 
-export interface Question {
-  id: string
-  type: QuestionType
-  title: string
-  description?: string
-  required: boolean
-  options?: string[]
-  placeholder?: string
-  pageId: string
-  order: number
-  conditionalLogicEnabled: boolean
-  sourceQuestionId?: string
-  condition?: ConditionOperator
-  conditionValue?: string
-  validationRules?: ValidationRule
-  profileFieldKey?: string
-  enableAutoFill: boolean
-  enableBidirectionalSync: boolean
-  acceptedFileTypes?: string[]
-  maxFileSize?: number
-}
+// Export types directly from the consolidated schemas
+export type {
+  FullForm as FormData,
+  FullForm
+} from '@rov/orpc-contracts/form/schemas'
 
-export interface Page {
-  id: string
-  title: string
-  description?: string
-  order: number
-  conditionalLogicEnabled: boolean
-  sourceQuestionId?: string
-  condition?: ConditionOperator
-  conditionValue?: string
-}
+// Derive types from FullForm
+import type { FullForm } from '@rov/orpc-contracts/form/schemas'
+export type Page = FullForm['pages'][number]
+export type Question = FullForm['questions'][number]
 
-export interface FormData {
-  id?: string
-  title: string
-  description?: string
-  entityType: 'society' | 'event' | 'survey'
-  entityId: string
-  status: 'draft' | 'published' | 'closed' | 'archived'
-  allowMultipleSubmissions: boolean
-  requireAuthentication: boolean
-  openDate?: string
-  closeDate?: string
-  maxResponses?: number
-  paymentEnabled: boolean
-  paymentAmount?: string
-  notificationsEnabled: boolean
-  notificationEmails?: string[]
-  confirmationMessage?: string
-  confirmationEmailEnabled: boolean
-  confirmationEmailContent?: string
-  pages: Page[]
-  questions: Question[]
-}
+// Use the API type directly
+type FormData = FullForm
 
 interface FormBuilderProps {
   formId?: string
@@ -98,23 +51,37 @@ export default function FormBuilder({
     enabled: !!formId
   })
 
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<Partial<FormData>>({
     title: 'Untitled Form',
-    description: '',
+    description: null,
     entityType,
     entityId,
     status: 'draft',
     allowMultipleSubmissions: false,
     requireAuthentication: true,
+    openDate: null,
+    closeDate: null,
+    maxResponses: null,
     paymentEnabled: false,
+    paymentAmount: null,
     notificationsEnabled: false,
+    notificationEmails: null,
+    confirmationMessage: null,
     confirmationEmailEnabled: false,
+    confirmationEmailContent: null,
     pages: [
       {
         id: 'temp-page-1',
         title: 'Page 1',
+        description: null,
         order: 0,
-        conditionalLogicEnabled: false
+        conditionalLogicEnabled: false,
+        sourceQuestionId: null,
+        condition: null,
+        conditionValue: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        formId: ''
       }
     ],
     questions: []
@@ -123,62 +90,7 @@ export default function FormBuilder({
   // Update form data when existing form is loaded
   useEffect(() => {
     if (existingForm) {
-      setFormData({
-        id: existingForm.id,
-        title: existingForm.title,
-        description: existingForm.description || '',
-        entityType: existingForm.entityType,
-        entityId: existingForm.entityId,
-        status: existingForm.status,
-        allowMultipleSubmissions: Boolean(
-          existingForm.allowMultipleSubmissions
-        ),
-        requireAuthentication: Boolean(existingForm.requireAuthentication),
-        openDate: existingForm.openDate || undefined,
-        closeDate: existingForm.closeDate || undefined,
-        maxResponses: existingForm.maxResponses || undefined,
-        paymentEnabled: Boolean(existingForm.paymentEnabled),
-        paymentAmount: existingForm.paymentAmount || undefined,
-        notificationsEnabled: Boolean(existingForm.notificationsEnabled),
-        notificationEmails: existingForm.notificationEmails || undefined,
-        confirmationMessage: existingForm.confirmationMessage || undefined,
-        confirmationEmailEnabled: Boolean(
-          existingForm.confirmationEmailEnabled
-        ),
-        confirmationEmailContent:
-          existingForm.confirmationEmailContent || undefined,
-        pages: existingForm.pages.map((p) => ({
-          id: p.id,
-          title: p.title,
-          description: p.description || undefined,
-          order: p.order,
-          conditionalLogicEnabled: Boolean(p.conditionalLogicEnabled),
-          sourceQuestionId: p.sourceQuestionId || undefined,
-          condition: (p.condition as ConditionOperator) || undefined,
-          conditionValue: p.conditionValue || undefined
-        })),
-        questions: existingForm.questions.map((q) => ({
-          id: q.id,
-          type: q.type,
-          title: q.title,
-          description: q.description || undefined,
-          required: Boolean(q.required),
-          options: q.options || undefined,
-          placeholder: q.placeholder || undefined,
-          pageId: q.pageId,
-          order: q.order,
-          conditionalLogicEnabled: Boolean(q.conditionalLogicEnabled),
-          sourceQuestionId: q.sourceQuestionId || undefined,
-          condition: (q.condition as ConditionOperator) || undefined,
-          conditionValue: q.conditionValue || undefined,
-          validationRules: q.validationRules || undefined,
-          profileFieldKey: q.profileFieldKey || undefined,
-          enableAutoFill: Boolean(q.enableAutoFill),
-          enableBidirectionalSync: Boolean(q.enableBidirectionalSync),
-          acceptedFileTypes: q.acceptedFileTypes || undefined,
-          maxFileSize: q.maxFileSize || undefined
-        }))
-      })
+      setFormData(existingForm)
     }
   }, [existingForm])
 
@@ -224,44 +136,60 @@ export default function FormBuilder({
   )
 
   const handleSave = async () => {
+    // Helper to convert null to undefined for mutations
+    const nullToUndefined = <T,>(value: T | null): T | undefined =>
+      value === null ? undefined : value
+
+    // Helper to convert string dates to Date objects
+    const stringToDate = (
+      value: string | null | undefined
+    ): Date | null | undefined => {
+      if (!value) return value === null ? null : undefined
+      return new Date(value)
+    }
+
     if (formData.id) {
       // Update existing form
       await updateFormMutation.mutateAsync({
         id: formData.id,
         title: formData.title,
-        description: formData.description,
+        description: nullToUndefined(formData.description),
         allowMultipleSubmissions: formData.allowMultipleSubmissions,
         requireAuthentication: formData.requireAuthentication,
-        openDate: formData.openDate,
-        closeDate: formData.closeDate,
-        maxResponses: formData.maxResponses,
+        openDate: stringToDate(formData.openDate),
+        closeDate: stringToDate(formData.closeDate),
+        maxResponses: nullToUndefined(formData.maxResponses),
         paymentEnabled: formData.paymentEnabled,
-        paymentAmount: formData.paymentAmount,
+        paymentAmount: nullToUndefined(formData.paymentAmount),
         notificationsEnabled: formData.notificationsEnabled,
-        notificationEmails: formData.notificationEmails,
-        confirmationMessage: formData.confirmationMessage,
+        notificationEmails: nullToUndefined(formData.notificationEmails),
+        confirmationMessage: nullToUndefined(formData.confirmationMessage),
         confirmationEmailEnabled: formData.confirmationEmailEnabled,
-        confirmationEmailContent: formData.confirmationEmailContent
+        confirmationEmailContent: nullToUndefined(
+          formData.confirmationEmailContent
+        )
       })
     } else {
       // Create new form
       await createFormMutation.mutateAsync({
-        title: formData.title,
-        description: formData.description,
-        entityType: formData.entityType,
-        entityId: formData.entityId,
+        title: formData.title || '',
+        description: nullToUndefined(formData.description),
+        entityType: formData.entityType || 'society',
+        entityId: formData.entityId || '',
         allowMultipleSubmissions: formData.allowMultipleSubmissions,
         requireAuthentication: formData.requireAuthentication,
-        openDate: formData.openDate,
-        closeDate: formData.closeDate,
-        maxResponses: formData.maxResponses,
+        openDate: stringToDate(formData.openDate),
+        closeDate: stringToDate(formData.closeDate),
+        maxResponses: nullToUndefined(formData.maxResponses),
         paymentEnabled: formData.paymentEnabled,
-        paymentAmount: formData.paymentAmount,
+        paymentAmount: nullToUndefined(formData.paymentAmount),
         notificationsEnabled: formData.notificationsEnabled,
-        notificationEmails: formData.notificationEmails,
-        confirmationMessage: formData.confirmationMessage,
+        notificationEmails: nullToUndefined(formData.notificationEmails),
+        confirmationMessage: nullToUndefined(formData.confirmationMessage),
         confirmationEmailEnabled: formData.confirmationEmailEnabled,
-        confirmationEmailContent: formData.confirmationEmailContent
+        confirmationEmailContent: nullToUndefined(
+          formData.confirmationEmailContent
+        )
       })
     }
   }
@@ -354,7 +282,7 @@ export default function FormBuilder({
 
         <TabsContent value="build">
           <FormEditor
-            formData={formData}
+            formData={formData as FormData}
             selectedQuestionId={selectedQuestionId}
             setFormData={setFormData}
             setSelectedQuestionId={setSelectedQuestionId}
@@ -362,7 +290,7 @@ export default function FormBuilder({
         </TabsContent>
 
         <TabsContent value="preview">
-          <FormPreview formData={formData} />
+          <FormPreview formData={formData as FormData} />
         </TabsContent>
       </Tabs>
     </div>

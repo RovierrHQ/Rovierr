@@ -139,7 +139,7 @@ export function PageSettings({
                       onValueChange={(value) =>
                         updateConditionalLogic({ sourceQuestionId: value })
                       }
-                      value={page.sourceQuestionId}
+                      value={page.sourceQuestionId ?? undefined}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select a question" />
@@ -168,7 +168,7 @@ export function PageSettings({
                                 | 'not_contains'
                             })
                           }
-                          value={page.condition}
+                          value={page.condition ?? undefined}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -202,7 +202,7 @@ export function PageSettings({
                             onValueChange={(value) =>
                               updateConditionalLogic({ conditionValue: value })
                             }
-                            value={page.conditionValue}
+                            value={page.conditionValue ?? undefined}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select an option" />

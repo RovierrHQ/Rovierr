@@ -52,12 +52,28 @@ export const form = {
       throw new ORPCError('NOT_FOUND', { message: 'Form not found' })
     }
 
-    // Transform Date objects to ISO strings for API response
+    // Transform Date objects to ISO strings and ensure booleans are not null
     return {
       ...formData,
       openDate: formData.openDate?.toISOString() ?? null,
       closeDate: formData.closeDate?.toISOString() ?? null,
-      publishedAt: formData.publishedAt?.toISOString() ?? null
+      publishedAt: formData.publishedAt?.toISOString() ?? null,
+      allowMultipleSubmissions: formData.allowMultipleSubmissions ?? false,
+      requireAuthentication: formData.requireAuthentication ?? true,
+      paymentEnabled: formData.paymentEnabled ?? false,
+      notificationsEnabled: formData.notificationsEnabled ?? false,
+      confirmationEmailEnabled: formData.confirmationEmailEnabled ?? false,
+      pages: formData.pages.map((page) => ({
+        ...page,
+        conditionalLogicEnabled: page.conditionalLogicEnabled ?? false
+      })),
+      questions: formData.questions.map((question) => ({
+        ...question,
+        required: question.required ?? false,
+        conditionalLogicEnabled: question.conditionalLogicEnabled ?? false,
+        enableAutoFill: question.enableAutoFill ?? false,
+        enableBidirectionalSync: question.enableBidirectionalSync ?? false
+      }))
     }
   }),
 

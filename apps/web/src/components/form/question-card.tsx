@@ -68,7 +68,7 @@ export function QuestionCard({
                 onClick={(e) => e.stopPropagation()}
                 placeholder="Question description (optional)"
                 rows={2}
-                value={question.description}
+                value={question.description ?? ''}
               />
             )}
             <QuestionPreview question={question} />

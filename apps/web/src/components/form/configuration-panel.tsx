@@ -59,54 +59,6 @@ export function ConfigurationPanel({
     onUpdate({ options: newOptions })
   }
 
-  const _toggleConditionalLogic = (enabled: boolean) => {
-    if (enabled) {
-      onUpdate({
-        conditionalLogicEnabled: true,
-        condition: 'equals'
-      })
-    } else {
-      onUpdate({
-        conditionalLogicEnabled: false,
-        sourceQuestionId: undefined,
-        condition: undefined,
-        conditionValue: undefined
-      })
-    }
-  }
-
-  const _updateConditionalLogic = (updates: {
-    sourceQuestionId?: string
-    condition?: 'equals' | 'not_equals' | 'contains' | 'not_contains'
-    conditionValue?: string
-  }) => {
-    onUpdate({
-      conditionalLogicEnabled: true,
-      ...updates
-    })
-  }
-
-  const _availableSourceQuestions = allQuestions.filter((q) => {
-    const currentIndex = allQuestions.findIndex(
-      (quest) => quest.id === question.id
-    )
-    const qIndex = allQuestions.findIndex((quest) => quest.id === q.id)
-    return (
-      qIndex < currentIndex &&
-      [
-        'multiple-choice',
-        'checkboxes',
-        'dropdown',
-        'short-text',
-        'email'
-      ].includes(q.type)
-    )
-  })
-
-  const _sourceQuestion = allQuestions.find(
-    (q) => q.id === question.sourceQuestionId
-  )
-
   const updateValidationRule = (
     updates: Partial<Question['validationRules']>
   ) => {
@@ -427,7 +379,7 @@ export function ConfigurationPanel({
                       sourceQuestionId: value
                     })
                   }
-                  value={question.sourceQuestionId}
+                  value={question.sourceQuestionId ?? undefined}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a question" />
@@ -476,7 +428,7 @@ export function ConfigurationPanel({
                             | 'not_contains'
                         })
                       }
-                      value={question.condition}
+                      value={question.condition ?? undefined}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -517,7 +469,7 @@ export function ConfigurationPanel({
                               conditionValue: value
                             })
                           }
-                          value={question.conditionValue}
+                          value={question.conditionValue ?? undefined}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select an option" />
