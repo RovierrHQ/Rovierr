@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm'
 import { boolean, date, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
 import { primaryId, timestamps } from '../helper'
 import { user } from './auth'
@@ -142,3 +143,91 @@ export const institutionalTerm = pgTable('institutional_term', {
 //     ...timestamps
 //   }
 // )
+
+/** ========================
+ *  RELATIONS
+ *  ======================== */
+
+export const institutionRelations = relations(institution, ({ many }) => ({
+  enrollments: many(instituitionEnrollment),
+  faculties: many(faculty),
+  departments: many(department),
+  terms: many(institutionalTerm),
+  curriculums: many(institutionCurriculum)
+}))
+
+export const instituitionEnrollmentRelations = relations(
+  instituitionEnrollment,
+  ({ one }) => ({
+    institution: one(institution, {
+      fields: [instituitionEnrollment.institutionId],
+      references: [institution.id]
+    }),
+    user: one(user, {
+      fields: [instituitionEnrollment.userId],
+      references: [user.id]
+    }),
+    studentIdCard: one(studentIdCard, {
+      fields: [instituitionEnrollment.studentIdCardId],
+      references: [studentIdCard.id]
+    }),
+    hostInstitution: one(institution, {
+      fields: [instituitionEnrollment.hostInstitutionId],
+      references: [institution.id]
+    })
+  })
+)
+
+export const studentIdCardRelations = relations(studentIdCard, ({ one }) => ({
+  user: one(user, {
+    fields: [studentIdCard.userId],
+    references: [user.id]
+  })
+}))
+
+export const facultyRelations = relations(faculty, ({ one, many }) => ({
+  institution: one(institution, {
+    fields: [faculty.institutionId],
+    references: [institution.id]
+  }),
+  departments: many(department)
+}))
+
+export const departmentRelations = relations(department, ({ one }) => ({
+  faculty: one(faculty, {
+    fields: [department.facultyId],
+    references: [faculty.id]
+  }),
+  institution: one(institution, {
+    fields: [department.institutionId],
+    references: [institution.id]
+  })
+}))
+
+export const institutionCurriculumRelations = relations(
+  institutionCurriculum,
+  ({ one }) => ({
+    institution: one(institution, {
+      fields: [institutionCurriculum.institutionId],
+      references: [institution.id]
+    }),
+    curriculum: one(curriculum, {
+      fields: [institutionCurriculum.curriculumId],
+      references: [curriculum.id]
+    })
+  })
+)
+
+export const curriculumRelations = relations(curriculum, ({ many }) => ({
+  institutions: many(institutionCurriculum)
+}))
+
+export const institutionalTermRelations = relations(
+  institutionalTerm,
+  ({ one }) => ({
+    institution: one(institution, {
+      fields: [institutionalTerm.institutionId],
+      references: [institution.id]
+    })
+  })
+)

@@ -11,56 +11,15 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { BookOpen, Calendar, MessageSquare, Settings } from 'lucide-react'
 import Link from 'next/link'
+import { orpc } from '@/utils/orpc'
 
 export default function AcademicDashboardPage() {
   // Fetch enrollment data
-  const { data: enrollment, isLoading } = useQuery({
-    queryKey: ['academic', 'enrollment'],
-    queryFn: () => {
-      // TODO: Replace with actual ORPC call
-      // return await orpc.academic.enrollment.getEnrollment.call()
-
-      // Temporary mock data
-      return {
-        program: {
-          id: '1',
-          name: 'B.Sc. in Computer Science',
-          code: 'BSC-CS'
-        },
-        term: {
-          id: '1',
-          termName: 'Semester 1',
-          academicYear: '2024-25'
-        },
-        courses: [
-          {
-            id: '1',
-            code: 'CS301',
-            title: 'Data Structures & Algorithms',
-            instructor: 'Prof. Johnson',
-            schedule: 'Mon, Wed 2:00 PM - 3:30 PM',
-            section: 'A'
-          },
-          {
-            id: '2',
-            code: 'CS405',
-            title: 'Machine Learning',
-            instructor: 'Prof. Chen',
-            schedule: 'Tue, Thu 10:00 AM - 11:30 AM',
-            section: 'B'
-          },
-          {
-            id: '3',
-            code: 'MATH203',
-            title: 'Calculus III',
-            instructor: 'Prof. Williams',
-            schedule: 'Mon, Wed, Fri 9:00 AM - 10:00 AM',
-            section: 'C'
-          }
-        ]
-      }
-    }
-  })
+  const { data: enrollment, isLoading } = useQuery(
+    orpc.academic.enrollment.getEnrollment.queryOptions({
+      input: {}
+    })
+  )
 
   if (isLoading) {
     return (

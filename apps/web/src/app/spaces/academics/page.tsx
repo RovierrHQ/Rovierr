@@ -4,25 +4,17 @@ import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { orpc } from '@/utils/orpc'
 
 export default function AcademicsPage() {
   const router = useRouter()
 
   // Check enrollment status
-  const { data: enrollmentStatus, isLoading } = useQuery({
-    queryKey: ['academic', 'enrollment', 'status'],
-    queryFn: () => {
-      // TODO: Replace with actual ORPC call once implemented
-      // const result = await orpc.academic.enrollment.getStatus.call()
-      // return result
-
-      // Temporary mock - will be replaced
-      return {
-        hasProgram: false,
-        hasCourses: false
-      }
-    }
-  })
+  const { data: enrollmentStatus, isLoading } = useQuery(
+    orpc.academic.enrollment.getEnrollmentStatus.queryOptions({
+      input: {}
+    })
+  )
 
   useEffect(() => {
     if (!isLoading && enrollmentStatus) {

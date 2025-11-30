@@ -20,9 +20,11 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { orpc } from '@/utils/orpc'
 
 // Enrollment schema
 const enrollmentSchema = z.object({
+  institutionEnrollmentId: z.string().min(1, 'Please select an institution'),
   programId: z.string().min(1, 'Please select a program'),
   termId: z.string().min(1, 'Please select a semester'),
   courseIds: z.array(z.string()).min(1, 'Please select at least one course')
@@ -34,30 +36,31 @@ export default function AcademicOnboardingPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [step, setStep] = useState(1)
+  const [selectedInstitutionId, setSelectedInstitutionId] = useState<
+    string | null
+  >(null)
 
-  // TODO: Get user's institution from session/profile
-  const institutionId = 'temp-institution-id'
+  // Fetch verified institution enrollments
+  const { data: verifiedInstitutions } = useQuery(
+    orpc.academic.enrollment.getVerifiedInstitutions.queryOptions({
+      input: {}
+    })
+  )
 
-  // Fetch programs
-  const { data: programs } = useQuery({
-    queryKey: ['academic', 'programs', institutionId],
-    queryFn: () => {
-      // TODO: Replace with actual ORPC call
-      // return await orpc.academic.enrollment.getPrograms.call({ institutionId })
-      return []
-    },
-    enabled: step === 1
-  })
+  // Fetch programs for selected institution
+  const { data: programs } = useQuery(
+    orpc.academic.enrollment.getPrograms.queryOptions({
+      input: { institutionId: selectedInstitutionId || '' },
+      enabled: step === 2 && !!selectedInstitutionId
+    })
+  )
 
-  // Fetch terms
+  // Fetch terms for selected institution
   const { data: terms } = useQuery({
-    queryKey: ['academic', 'terms', institutionId],
-    queryFn: () => {
-      // TODO: Replace with actual ORPC call
-      // return await orpc.academic.enrollment.getTerms.call({ institutionId })
-      return []
-    },
-    enabled: step === 2
+    ...orpc.academic.enrollment.getTerms.queryOptions({
+      input: { institutionId: selectedInstitutionId || '' }
+    }),
+    enabled: step === 3 && !!selectedInstitutionId
   })
 
   // Fetch courses (will be used when implementing course selection)
@@ -72,40 +75,82 @@ export default function AcademicOnboardingPage() {
   // })
 
   // Enrollment mutation
-  const enrollMutation = useMutation({
-    mutationFn: (data: EnrollmentInput) => {
-      // TODO: Replace with actual ORPC calls
-      // await orpc.academic.enrollment.enrollProgram.call({ programId: data.programId })
-      // await orpc.academic.enrollment.enrollCourses.call({
-      //   termId: data.termId,
-      //   courseIds: data.courseIds
-      // })
-      return Promise.resolve(data)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['academic', 'enrollment'] })
-      toast.success('Enrollment completed successfully!')
-      router.push('/spaces/academics/dashboard')
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to complete enrollment')
-    }
-  })
+  const enrollProgramMutation = useMutation(
+    orpc.academic.enrollment.enrollProgram.mutationOptions({
+      onSuccess: () => {
+        toast.success('Program enrolled successfully!')
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to enroll in program')
+      }
+    })
+  )
+
+  const enrollCoursesMutation = useMutation(
+    orpc.academic.enrollment.enrollCourses.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['academic', 'enrollment'] })
+        toast.success('Enrollment completed successfully!')
+        router.push('/spaces/academics/dashboard')
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to enroll in courses')
+      }
+    })
+  )
 
   const form = useAppForm({
     validators: { onSubmit: enrollmentSchema },
     defaultValues: {
+      institutionEnrollmentId: '',
       programId: '',
       termId: '',
       courseIds: []
     } as EnrollmentInput,
     onSubmit: async ({ value }) => {
-      await enrollMutation.mutateAsync(value)
+      // First enroll in program
+      await enrollProgramMutation.mutateAsync({
+        programId: value.programId,
+        institutionEnrollmentId: value.institutionEnrollmentId,
+        type: 'major'
+      })
+
+      // Then enroll in courses
+      await enrollCoursesMutation.mutateAsync({
+        termId: value.termId,
+        courseOfferingIds: value.courseIds
+      })
     }
   })
 
+  // Extract institutionId from selected enrollment
+  const updateSelectedInstitution = () => {
+    const institutionEnrollmentId = form.state.values.institutionEnrollmentId
+    if (institutionEnrollmentId && verifiedInstitutions?.institutions) {
+      type InstitutionEnrollment = {
+        enrollmentId: string
+        institutionId: string
+        institutionName: string
+        institutionLogo: string | null
+        studentId: string
+        email: string
+        emailVerified: boolean
+        studentStatusVerified: boolean
+      }
+      const selectedEnrollment = (
+        verifiedInstitutions.institutions as InstitutionEnrollment[]
+      ).find((inst) => inst.enrollmentId === institutionEnrollmentId)
+      if (selectedEnrollment) {
+        setSelectedInstitutionId(selectedEnrollment.institutionId)
+      }
+    }
+  }
+
   const handleNext = () => {
-    if (step < 3) {
+    if (step === 1) {
+      updateSelectedInstitution()
+    }
+    if (step < 4) {
       setStep(step + 1)
     }
   }
@@ -130,7 +175,7 @@ export default function AcademicOnboardingPage() {
 
       {/* Progress Indicator */}
       <div className="mb-8 flex items-center justify-center gap-2">
-        {[1, 2, 3].map((s) => {
+        {[1, 2, 3, 4].map((s) => {
           const isActive = s === step
           const isCompleted = s < step
 
@@ -150,7 +195,7 @@ export default function AcademicOnboardingPage() {
                   <span className="font-semibold">{s}</span>
                 )}
               </div>
-              {s < 3 && (
+              {s < 4 && (
                 <div
                   className={`h-0.5 w-16 ${isCompleted ? 'bg-primary' : 'bg-muted'}`}
                 />
@@ -163,35 +208,68 @@ export default function AcademicOnboardingPage() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {step === 1 && 'Select Your Program'}
-            {step === 2 && 'Select Your Semester'}
-            {step === 3 && 'Select Your Courses'}
+            {step === 1 && 'Select Your Institution'}
+            {step === 2 && 'Select Your Program'}
+            {step === 3 && 'Select Your Semester'}
+            {step === 4 && 'Select Your Courses'}
           </CardTitle>
           <CardDescription>
-            {step === 1 && 'Choose your major or degree program'}
-            {step === 2 && 'Select the current academic term'}
-            {step === 3 && "Pick the courses you're enrolled in this semester"}
+            {step === 1 && 'Choose from your verified institution enrollments'}
+            {step === 2 && 'Choose your major or degree program'}
+            {step === 3 && 'Select the current academic term'}
+            {step === 4 && "Pick the courses you're enrolled in this semester"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form
             onSubmit={(e) => {
               e.preventDefault()
-              if (step === 3) {
+              if (step === 4) {
                 form.handleSubmit()
               } else {
                 handleNext()
               }
             }}
           >
-            {/* Step 1: Select Program */}
+            {/* Step 1: Select Institution */}
             {step === 1 && (
+              <form.AppField
+                children={(field) => (
+                  <field.Select
+                    label="Institution"
+                    options={
+                      verifiedInstitutions?.institutions.map(
+                        (inst: {
+                          enrollmentId: string
+                          institutionName: string
+                          studentId: string
+                          email: string
+                          emailVerified: boolean
+                          studentStatusVerified: boolean
+                        }) => ({
+                          label: `${inst.institutionName} (${inst.studentId})`,
+                          value: inst.enrollmentId,
+                          disabled: !(
+                            inst.emailVerified && inst.studentStatusVerified
+                          )
+                        })
+                      ) ?? []
+                    }
+                    placeholder="Select your institution"
+                  />
+                )}
+                name="institutionEnrollmentId"
+              />
+            )}
+
+            {/* Step 2: Select Program */}
+            {step === 2 && (
               <form.AppField
                 children={(field) => (
                   <field.Select
                     label="Program"
                     options={
-                      programs?.map(
+                      programs?.programs.map(
                         (program: { name: string; id: string }) => ({
                           label: program.name,
                           value: program.id
@@ -205,14 +283,14 @@ export default function AcademicOnboardingPage() {
               />
             )}
 
-            {/* Step 2: Select Term */}
-            {step === 2 && (
+            {/* Step 3: Select Term */}
+            {step === 3 && (
               <form.AppField
                 children={(field) => (
                   <field.Select
                     label="Semester/Term"
                     options={
-                      terms?.map(
+                      terms?.terms.map(
                         (term: {
                           termName: string
                           academicYear: string
@@ -230,8 +308,8 @@ export default function AcademicOnboardingPage() {
               />
             )}
 
-            {/* Step 3: Select Courses */}
-            {step === 3 && (
+            {/* Step 4: Select Courses */}
+            {step === 4 && (
               <div className="space-y-4">
                 <p className="text-muted-foreground text-sm">
                   Select all courses you're taking this semester
@@ -255,11 +333,17 @@ export default function AcademicOnboardingPage() {
                 Back
               </Button>
               <Button
-                disabled={form.state.isSubmitting || enrollMutation.isPending}
+                disabled={
+                  form.state.isSubmitting ||
+                  enrollProgramMutation.isPending ||
+                  enrollCoursesMutation.isPending
+                }
                 type="submit"
               >
-                {step === 3 ? (
-                  form.state.isSubmitting || enrollMutation.isPending ? (
+                {step === 4 ? (
+                  form.state.isSubmitting ||
+                  enrollProgramMutation.isPending ||
+                  enrollCoursesMutation.isPending ? (
                     'Completing...'
                   ) : (
                     'Complete Enrollment'

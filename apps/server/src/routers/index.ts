@@ -1,4 +1,5 @@
 import { o } from '../lib/orpc'
+import { academic } from './academic'
 import { calendar } from './calendar'
 import { expenses } from './expenses'
 import { form } from './form'
@@ -23,6 +24,9 @@ export const appRouter = o.router({
 
   // university integration
   university,
+
+  // academic integration
+  academic,
 
   // roadmap integration
   roadmap,

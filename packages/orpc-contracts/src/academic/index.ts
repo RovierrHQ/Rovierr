@@ -3,6 +3,40 @@ import { z } from 'zod'
 
 export const academic = {
   enrollment: {
+    getVerifiedInstitutions: oc
+      .route({
+        method: 'GET',
+        description:
+          'Get verified institution enrollments for the current user',
+        summary: 'Get Verified Institutions',
+        tags: ['Academic']
+      })
+      .output(
+        z.object({
+          institutions: z.array(
+            z.object({
+              enrollmentId: z.string(),
+              institutionId: z.string(),
+              institutionName: z.string(),
+              institutionLogo: z.string().nullable(),
+              studentId: z.string(),
+              email: z.string(),
+              emailVerified: z.boolean(),
+              studentStatusVerified: z.boolean(),
+              startedOn: z.string().nullable(),
+              graduatedOn: z.string().nullable()
+            })
+          )
+        })
+      )
+      .errors({
+        UNAUTHORIZED: {
+          data: z.object({
+            message: z.string().default('User not authenticated')
+          })
+        }
+      }),
+
     getPrograms: oc
       .route({
         method: 'GET',
