@@ -1,3 +1,4 @@
+import { academic } from './academic'
 import { calendar } from './calendar'
 import { expenses } from './expenses'
 import { form } from './form'
@@ -10,6 +11,7 @@ import { university } from './university'
 import { user } from './user'
 
 // Export individual contracts for router implementation
+export { academic } from './academic'
 export { form } from './form'
 export * from './form/schemas'
 export { societyRegistration } from './society-registration'
@@ -49,5 +51,8 @@ export const appContract = {
   tasks,
 
   // form integration
-  form
+  form,
+
+  // academic integration
+  academic
 }
