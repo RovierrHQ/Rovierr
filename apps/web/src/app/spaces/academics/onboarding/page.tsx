@@ -63,17 +63,6 @@ export default function AcademicOnboardingPage() {
     enabled: step === 3 && !!selectedInstitutionId
   })
 
-  // Fetch courses (will be used when implementing course selection)
-  // const { data: courses } = useQuery({
-  //   queryKey: ['academic', 'courses'],
-  //   queryFn: () => {
-  //     // TODO: Replace with actual ORPC call based on selected program and term
-  //     // return await orpc.academic.enrollment.getCourses.call({ programId, termId })
-  //     return []
-  //   },
-  //   enabled: step === 3
-  // })
-
   // Enrollment mutation
   const enrollProgramMutation = useMutation(
     orpc.academic.enrollment.enrollProgram.mutationOptions({
@@ -135,6 +124,20 @@ export default function AcademicOnboardingPage() {
       }
     }
   }, [form.state.values.institutionEnrollmentId, verifiedInstitutions])
+
+  // Fetch courses for selected program and term
+  const { data: courses } = useQuery(
+    orpc.academic.enrollment.getCourses.queryOptions({
+      input: {
+        programId: form.state.values.programId || '',
+        termId: form.state.values.termId || ''
+      },
+      enabled:
+        step === 4 &&
+        !!form.state.values.programId &&
+        !!form.state.values.termId
+    })
+  )
 
   const handleNext = () => {
     if (step < 4) {
@@ -307,10 +310,66 @@ export default function AcademicOnboardingPage() {
                 <p className="text-muted-foreground text-sm">
                   Select all courses you're taking this semester
                 </p>
-                {/* TODO: Implement multi-select for courses */}
-                <div className="rounded-lg border p-4 text-center text-muted-foreground">
-                  Course selection will be implemented with ORPC integration
-                </div>
+                {courses && courses.courses.length > 0 ? (
+                  <div className="max-h-96 space-y-2 overflow-y-auto rounded-lg border p-4">
+                    {courses.courses.map(
+                      (course: {
+                        id: string
+                        code: string | null
+                        title: string
+                        instructor: string | null
+                        section: string | null
+                        schedule: string | null
+                      }) => (
+                        <label
+                          className="flex cursor-pointer items-start gap-3 rounded-md p-3 hover:bg-accent"
+                          key={course.id}
+                        >
+                          <input
+                            checked={form.state.values.courseIds.includes(
+                              course.id
+                            )}
+                            className="mt-1"
+                            onChange={(e) => {
+                              const currentIds = form.state.values.courseIds
+                              if (e.target.checked) {
+                                form.setFieldValue('courseIds', [
+                                  ...currentIds,
+                                  course.id
+                                ])
+                              } else {
+                                form.setFieldValue(
+                                  'courseIds',
+                                  currentIds.filter((id) => id !== course.id)
+                                )
+                              }
+                            }}
+                            type="checkbox"
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium">
+                              {course.code ? `${course.code} - ` : ''}
+                              {course.title}
+                            </div>
+                            {(course.instructor ||
+                              course.section ||
+                              course.schedule) && (
+                              <div className="text-muted-foreground text-sm">
+                                {course.section && `Section ${course.section}`}
+                                {course.instructor && ` • ${course.instructor}`}
+                                {course.schedule && ` • ${course.schedule}`}
+                              </div>
+                            )}
+                          </div>
+                        </label>
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <div className="rounded-lg border p-4 text-center text-muted-foreground">
+                    No courses available for this term
+                  </div>
+                )}
               </div>
             )}
 

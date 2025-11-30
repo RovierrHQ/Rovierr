@@ -97,7 +97,7 @@ export const institutionalTermSeed: SeedModule = {
 
     // Resolve institution IDs from slugs
     const { institution } = await import('@rov/db/schema')
-    const { eq } = await import('drizzle-orm')
+    const { eq, and } = await import('drizzle-orm')
 
     for (const term of data) {
       if (term.institutionSlug) {
@@ -118,13 +118,40 @@ export const institutionalTermSeed: SeedModule = {
     let skipped = 0
     const errors: SeedResult['errors'] = []
 
+    // Set total for progress tracking
+    if (options.progress) {
+      options.progress.setTotal(validRecords.length)
+    }
+
     // Insert records
     for (const term of validRecords) {
       try {
+        // Check if term already exists (by institutionId, termName, and academicYear)
+        const existingTerm = await db.query.institutionalTerm.findFirst({
+          where: and(
+            eq(institutionalTerm.institutionId, term.institutionId),
+            eq(institutionalTerm.termName, term.termName),
+            eq(institutionalTerm.academicYear, term.academicYear)
+          )
+        })
+
+        if (existingTerm) {
+          skipped++
+          if (options.progress) {
+            options.progress.increment(
+              `${inserted}/${validRecords.length} (${skipped} skipped)`
+            )
+          }
+          continue
+        }
+
         // Remove institutionSlug before inserting
         const { institutionSlug, ...termData } = term
         await db.insert(institutionalTerm).values(termData)
         inserted++
+        if (options.progress) {
+          options.progress.increment(`${inserted}/${validRecords.length}`)
+        }
       } catch (err) {
         skipped++
         errors.push({
@@ -133,6 +160,10 @@ export const institutionalTermSeed: SeedModule = {
           phase: 'execution'
         })
       }
+    }
+
+    if (options.progress) {
+      options.progress.complete()
     }
 
     return {

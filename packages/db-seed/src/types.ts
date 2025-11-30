@@ -1,5 +1,12 @@
 import type { DB } from '@rov/db'
 
+export interface ProgressTracker {
+  updateProgress: (current: number, total: number, message?: string) => void
+  setTotal: (total: number) => void
+  increment: (message?: string) => void
+  complete: () => void
+}
+
 export interface SeedOptions {
   only?: string[] // Seed only specified tables
   exclude?: string[] // Exclude specified tables
@@ -9,6 +16,7 @@ export interface SeedOptions {
   noTransaction?: boolean // Disable transaction wrapping
   force?: boolean // Skip confirmations
   useScraper?: boolean // Use web scraper if available
+  progress?: ProgressTracker // Progress tracking callback
 }
 
 export interface SeedResult {

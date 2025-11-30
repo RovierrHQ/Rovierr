@@ -133,6 +133,11 @@ export const institutionSeed: SeedModule = {
     let skipped = 0
     const errors: SeedResult['errors'] = []
 
+    // Set total for progress tracking
+    if (options.progress) {
+      options.progress.setTotal(validRecords.length)
+    }
+
     // Insert records
     for (const inst of validRecords) {
       try {
@@ -153,6 +158,9 @@ export const institutionSeed: SeedModule = {
             }
           })
         inserted++
+        if (options.progress) {
+          options.progress.increment(`${inserted}/${validRecords.length}`)
+        }
       } catch (err) {
         skipped++
         errors.push({
@@ -161,6 +169,10 @@ export const institutionSeed: SeedModule = {
           phase: 'execution'
         })
       }
+    }
+
+    if (options.progress) {
+      options.progress.complete()
     }
 
     return {

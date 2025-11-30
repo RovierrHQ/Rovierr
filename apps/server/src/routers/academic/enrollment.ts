@@ -82,13 +82,33 @@ export const enrollment = {
     }
   ),
 
-  getCourses: protectedProcedure.academic.enrollment.getCourses.handler(() => {
-    // TODO: Fetch courses from database
-    // For now, return empty array until course schema is implemented
-    return {
-      courses: []
+  getCourses: protectedProcedure.academic.enrollment.getCourses.handler(
+    async ({ input }) => {
+      const { termId } = input
+
+      // Fetch course offerings for the program and term
+      const offerings = await db.query.courseOffering.findMany({
+        where: (offering, { eq }) => eq(offering.termId, termId),
+        with: {
+          course: true
+        }
+      })
+
+      return {
+        courses: offerings.map((offering) => ({
+          id: offering.id,
+          courseId: offering.course.id,
+          code: offering.course.code,
+          title: offering.course.title,
+          description: offering.course.description,
+          instructor: offering.instructor,
+          section: offering.section,
+          schedule: offering.schedule,
+          credits: offering.course.defaultCredits
+        }))
+      }
     }
-  }),
+  ),
 
   enrollProgram: protectedProcedure.academic.enrollment.enrollProgram.handler(
     () => {

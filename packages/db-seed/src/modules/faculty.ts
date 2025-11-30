@@ -101,6 +101,11 @@ export const facultySeed: SeedModule = {
     let skipped = 0
     const errors: SeedResult['errors'] = []
 
+    // Set total for progress tracking
+    if (options.progress) {
+      options.progress.setTotal(validRecords.length)
+    }
+
     // Insert records
     for (const fac of validRecords) {
       try {
@@ -126,6 +131,10 @@ export const facultySeed: SeedModule = {
           await db.insert(faculty).values(fac)
           inserted++
         }
+
+        if (options.progress) {
+          options.progress.increment(`${inserted}/${validRecords.length}`)
+        }
       } catch (err) {
         skipped++
         errors.push({
@@ -134,6 +143,10 @@ export const facultySeed: SeedModule = {
           phase: 'execution'
         })
       }
+    }
+
+    if (options.progress) {
+      options.progress.complete()
     }
 
     return {

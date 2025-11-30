@@ -76,3 +76,58 @@ export const courseEnrollment = pgTable('course_enrollment', {
   status: text('status').notNull().default('in_progress'), // 'in_progress' | 'completed' | 'withdrawn'
   ...timestamps
 })
+
+/** ========================
+ *  RELATIONS
+ *  ======================== */
+import { relations } from 'drizzle-orm'
+
+export const courseRelations = relations(course, ({ one, many }) => ({
+  institution: one(institution, {
+    fields: [course.institutionId],
+    references: [institution.id]
+  }),
+  department: one(department, {
+    fields: [course.departmentId],
+    references: [department.id]
+  }),
+  createdByUser: one(user, {
+    fields: [course.createdBy],
+    references: [user.id]
+  }),
+  offerings: many(courseOffering),
+  enrollments: many(courseEnrollment)
+}))
+
+export const courseOfferingRelations = relations(
+  courseOffering,
+  ({ one, many }) => ({
+    course: one(course, {
+      fields: [courseOffering.courseId],
+      references: [course.id]
+    }),
+    term: one(institutionalTerm, {
+      fields: [courseOffering.termId],
+      references: [institutionalTerm.id]
+    }),
+    enrollments: many(courseEnrollment)
+  })
+)
+
+export const courseEnrollmentRelations = relations(
+  courseEnrollment,
+  ({ one }) => ({
+    term: one(institutionalTerm, {
+      fields: [courseEnrollment.termId],
+      references: [institutionalTerm.id]
+    }),
+    course: one(course, {
+      fields: [courseEnrollment.courseId],
+      references: [course.id]
+    }),
+    courseOffering: one(courseOffering, {
+      fields: [courseEnrollment.courseOfferingId],
+      references: [courseOffering.id]
+    })
+  })
+)

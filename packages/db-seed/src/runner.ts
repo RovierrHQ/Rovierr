@@ -3,6 +3,7 @@ import type { DB } from '@rov/db'
 import { SeedError } from './errors'
 import type { SeedModule, SeedOptions, SeedResult, SeedSummary } from './types'
 import { getLogger } from './utils/logger'
+import { createProgressTracker } from './utils/progress'
 import { executeWithTransactionControl } from './utils/transaction'
 
 export class SeedRunner {
@@ -37,9 +38,14 @@ export class SeedRunner {
         this.db,
         useTransaction,
         async (db) => {
-          for (const module of modules) {
+          for (let i = 0; i < modules.length; i++) {
+            const module = modules[i]
+            if (!module) continue
+
             try {
-              this.logger.debug(`Processing module: ${module.name}`)
+              this.logger.debug(
+                `Processing module: ${module.name} (${i + 1}/${modules.length})`
+              )
 
               // Clear table if requested
               if (options.clear && module.clear && !options.dryRun) {
@@ -47,8 +53,19 @@ export class SeedRunner {
                 await module.clear(db)
               }
 
+              // Create progress tracker for this module
+              const progressTracker = createProgressTracker(module.name)
+              const optionsWithProgress = {
+                ...options,
+                progress: progressTracker
+              }
+
               // Run seed
-              const result = await this.runSingle(module, options, db)
+              const result = await this.runSingle(
+                module,
+                optionsWithProgress,
+                db
+              )
               results.push(result)
 
               if (result.errors.length === 0) {
