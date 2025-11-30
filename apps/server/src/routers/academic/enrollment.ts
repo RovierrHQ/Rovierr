@@ -3,7 +3,8 @@ import {
   courseEnrollment as courseEnrollmentTable,
   courseOffering as courseOfferingTable,
   course as courseTable,
-  programEnrollment as programEnrollmentTable
+  programEnrollment as programEnrollmentTable,
+  institutionalTermEnrollment as termEnrollmentTable
 } from '@rov/db'
 import { and, eq, ilike, isNull, or } from 'drizzle-orm'
 import { db } from '@/db'
@@ -175,7 +176,8 @@ export const enrollment = {
   ),
 
   enrollCourses: protectedProcedure.academic.enrollment.enrollCourses.handler(
-    async ({ input }) => {
+    async ({ input, context }) => {
+      const userId = context.session.user.id
       const { termId, courseOfferingIds } = input
 
       // Verify the term exists
@@ -186,6 +188,34 @@ export const enrollment = {
       if (!term) {
         throw new ORPCError('INVALID_TERM', {
           message: 'Invalid term'
+        })
+      }
+
+      // Get user's active program enrollment
+      const programEnrollment = await db.query.programEnrollment.findFirst({
+        where: (record) =>
+          and(eq(record.userId, userId), isNull(record.graduatedOn)),
+        orderBy: (record, { desc }) => [desc(record.createdAt)]
+      })
+
+      if (!programEnrollment) {
+        throw new ORPCError('NOT_ENROLLED', {
+          message: 'User not enrolled in any program'
+        })
+      }
+
+      // Create or update term enrollment
+      const existingTermEnrollment =
+        await db.query.institutionalTermEnrollment.findFirst({
+          where: (record) =>
+            and(eq(record.userId, userId), eq(record.status, 'active'))
+        })
+
+      if (!existingTermEnrollment) {
+        await db.insert(termEnrollmentTable).values({
+          userId,
+          termId,
+          status: 'active'
         })
       }
 
@@ -318,22 +348,26 @@ export const enrollment = {
         })
       }
 
-      // Get the most recent institutional term
-      const latestTerm = await db.query.institutionalTerm.findFirst({
-        where: (term) =>
-          eq(term.institutionId, programEnrollment.program.institutionId),
-        orderBy: (term, { desc }) => [desc(term.startDate)]
-      })
+      // Get user's active term enrollment
+      const termEnrollment =
+        await db.query.institutionalTermEnrollment.findFirst({
+          where: (record) =>
+            and(eq(record.userId, userId), eq(record.status, 'active')),
+          with: {
+            term: true
+          },
+          orderBy: (record, { desc }) => [desc(record.createdAt)]
+        })
 
-      if (!latestTerm) {
+      if (!termEnrollment) {
         throw new ORPCError('NOT_FOUND', {
-          message: 'No term found for institution'
+          message: 'No active term enrollment found'
         })
       }
 
       // Get enrolled courses for the current term
       const enrolledCourses = await db.query.courseEnrollment.findMany({
-        where: (record) => eq(record.termId, latestTerm.id),
+        where: (record) => eq(record.termId, termEnrollment.termId),
         with: {
           course: true,
           courseOffering: true
@@ -347,9 +381,9 @@ export const enrollment = {
           code: programEnrollment.program.code
         },
         term: {
-          id: latestTerm.id,
-          termName: latestTerm.termName,
-          academicYear: latestTerm.academicYear
+          id: termEnrollment.term.id,
+          termName: termEnrollment.term.termName,
+          academicYear: termEnrollment.term.academicYear
         },
         courses: enrolledCourses.map((record) => ({
           id: record.id,

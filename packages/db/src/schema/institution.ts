@@ -127,22 +127,28 @@ export const institutionalTerm = pgTable('institutional_term', {
   ...timestamps
 })
 
-//? info: we can add this later if needed. but not now.
-// export const institutionalTermEnrollment = pgTable(
-//   'institutional_term_enrollment',
-//   {
-//     id: primaryId,
-//     termId: text('term_id')
-//       .notNull()
-//       .references(() => institutionalTerm.id, { onDelete: 'cascade' }),
-//     userId: text('user_id')
-//       .notNull()
-//       .references(() => user.id, { onDelete: 'cascade' }),
-//     grade: text('grade'), // e.g., 'A', 'A-', 'B+'
-//     gradePoints: text('grade_points'), // e.g., '4.0', '3.7'
-//     ...timestamps
-//   }
-// )
+/** ========================
+ *  INSTITUTIONAL TERM ENROLLMENT
+ *  Tracks which term a user is currently enrolled in
+ *  ======================== */
+export const institutionalTermEnrollment = pgTable(
+  'institutional_term_enrollment',
+  {
+    id: primaryId,
+    termId: text('term_id')
+      .notNull()
+      .references(() => institutionalTerm.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    status: text('status', {
+      enum: ['active', 'completed', 'withdrawn']
+    })
+      .notNull()
+      .default('active'),
+    ...timestamps
+  }
+)
 
 /** ========================
  *  RELATIONS
@@ -224,10 +230,25 @@ export const curriculumRelations = relations(curriculum, ({ many }) => ({
 
 export const institutionalTermRelations = relations(
   institutionalTerm,
-  ({ one }) => ({
+  ({ one, many }) => ({
     institution: one(institution, {
       fields: [institutionalTerm.institutionId],
       references: [institution.id]
+    }),
+    enrollments: many(institutionalTermEnrollment)
+  })
+)
+
+export const institutionalTermEnrollmentRelations = relations(
+  institutionalTermEnrollment,
+  ({ one }) => ({
+    term: one(institutionalTerm, {
+      fields: [institutionalTermEnrollment.termId],
+      references: [institutionalTerm.id]
+    }),
+    user: one(user, {
+      fields: [institutionalTermEnrollment.userId],
+      references: [user.id]
     })
   })
 )
