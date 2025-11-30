@@ -1,18 +1,23 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
+import { useQuery } from '@tanstack/react-query'
 import { MessageSquare } from 'lucide-react'
-import { useState } from 'react'
+import { use, useState } from 'react'
+import { CreateThreadDialog } from '@/components/discussions/create-thread-dialog'
 import { DiscussionFilters } from '@/components/discussions/discussion-filters'
 import { DiscussionList } from '@/components/discussions/discussion-list'
 import { DiscussionStats } from '@/components/discussions/discussion-stats'
-import {
-  mockDiscussions,
-  mockReplies
-} from '@/components/discussions/mock-data'
 import { ThreadView } from '@/components/discussions/thread-view'
+import type { Discussion, Reply } from '@/components/discussions/types'
+import { orpc } from '@/utils/orpc'
 
-export default function DiscussionsPage() {
+interface PageProps {
+  params: Promise<{ courseId: string }>
+}
+
+export default function DiscussionsPage({ params }: PageProps) {
+  const { courseId } = use(params)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFilter, setSelectedFilter] = useState<
     'all' | 'pinned' | 'resolved' | 'unresolved'
@@ -20,27 +25,124 @@ export default function DiscussionsPage() {
   const [selectedDiscussion, setSelectedDiscussion] = useState<string | null>(
     null
   )
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
-  const filteredDiscussions = mockDiscussions.filter((discussion) => {
-    const matchesSearch =
-      discussion.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      discussion.content.toLowerCase().includes(searchQuery.toLowerCase())
+  // Fetch discussions from the backend
+  const { data: threadsData, isLoading } = useQuery(
+    orpc.discussion.thread.list.queryOptions({
+      input: {
+        contextType: 'course',
+        contextId: courseId,
+        search: searchQuery || undefined,
+        sortBy: 'recent',
+        limit: 50,
+        offset: 0
+      }
+    })
+  )
 
+  // Fetch selected thread details with replies
+  const { data: selectedThreadData } = useQuery({
+    ...orpc.discussion.thread.get.queryOptions({
+      input: { id: selectedDiscussion || '' }
+    }),
+    enabled: !!selectedDiscussion
+  })
+
+  // Map backend data to frontend types
+  const discussions: Discussion[] =
+    threadsData?.threads.map((thread) => ({
+      id: thread.id,
+      title: thread.title,
+      content: thread.content,
+      author: {
+        name: thread.author.isAnonymous
+          ? 'Anonymous'
+          : thread.author.name || 'Unknown',
+        avatar: thread.author.isAnonymous ? null : thread.author.image,
+        role: 'Student' // TODO: Get actual role from user data
+      },
+      isPinned: thread.isPinned,
+      isResolved: false, // TODO: Implement resolved status
+      replies: thread.replyCount,
+      upvotes: thread.votes.upvotes - thread.votes.downvotes,
+      createdAt: new Date(thread.createdAt).toLocaleString(),
+      tags: thread.tags || [],
+      userVote: thread.votes.userVote
+    })) || []
+
+  // Filter discussions based on selected filter
+  const filteredDiscussions = discussions.filter((discussion) => {
     const matchesFilter =
       selectedFilter === 'all' ||
       (selectedFilter === 'pinned' && discussion.isPinned) ||
       (selectedFilter === 'resolved' && discussion.isResolved) ||
       (selectedFilter === 'unresolved' && !discussion.isResolved)
 
-    return matchesSearch && matchesFilter
+    return matchesFilter
   })
 
-  const currentDiscussion = mockDiscussions.find(
-    (d) => d.id === selectedDiscussion
-  )
-  const currentReplies = selectedDiscussion
-    ? mockReplies[selectedDiscussion] || []
+  const currentDiscussion = selectedThreadData
+    ? {
+        id: selectedThreadData.id,
+        title: selectedThreadData.title,
+        content: selectedThreadData.content,
+        author: {
+          name: selectedThreadData.author.isAnonymous
+            ? 'Anonymous'
+            : selectedThreadData.author.name || 'Unknown',
+          avatar: selectedThreadData.author.isAnonymous
+            ? null
+            : selectedThreadData.author.image,
+          role: 'Student'
+        },
+        isPinned: selectedThreadData.isPinned,
+        isResolved: false,
+        replies: selectedThreadData.replyCount,
+        upvotes:
+          selectedThreadData.votes.upvotes - selectedThreadData.votes.downvotes,
+        createdAt: new Date(selectedThreadData.createdAt).toLocaleString(),
+        tags: selectedThreadData.tags || []
+      }
+    : undefined
+
+  // Map replies from backend data
+  const mapReplyToFrontend = (reply: {
+    id: string
+    content: string
+    author: { name: string | null; image: string | null; isAnonymous: boolean }
+    votes: { upvotes: number; downvotes: number }
+    createdAt: string
+    isEndorsed: boolean
+  }): Reply => ({
+    id: reply.id,
+    content: reply.content,
+    author: {
+      name: reply.author.isAnonymous
+        ? 'Anonymous'
+        : reply.author.name || 'Unknown',
+      avatar: reply.author.isAnonymous ? null : reply.author.image,
+      role: reply.isEndorsed ? 'Instructor' : 'Student'
+    },
+    upvotes: reply.votes.upvotes - reply.votes.downvotes,
+    createdAt: new Date(reply.createdAt).toLocaleString(),
+    isAnswer: reply.isEndorsed
+  })
+
+  const currentReplies: Reply[] = selectedThreadData?.replies
+    ? selectedThreadData.replies.map(mapReplyToFrontend)
     : []
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[calc(100vh-12rem)] items-center justify-center">
+        <div className="text-center">
+          <MessageSquare className="mx-auto mb-4 h-12 w-12 animate-pulse text-muted-foreground" />
+          <p className="text-muted-foreground">Loading discussions...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-[calc(100vh-12rem)] gap-4">
@@ -58,7 +160,7 @@ export default function DiscussionsPage() {
               </p>
             </div>
             {!selectedDiscussion && (
-              <Button size="lg">
+              <Button onClick={() => setCreateDialogOpen(true)} size="lg">
                 <MessageSquare className="mr-2 h-4 w-4" />
                 New Discussion
               </Button>
@@ -77,10 +179,10 @@ export default function DiscussionsPage() {
         {!selectedDiscussion && (
           <DiscussionStats
             activeToday={
-              mockDiscussions.filter((d) => d.createdAt.includes('hour')).length
+              discussions.filter((d) => d.createdAt.includes('hour')).length
             }
-            totalDiscussions={mockDiscussions.length}
-            userContributions={8}
+            totalDiscussions={threadsData?.total || 0}
+            userContributions={8} // TODO: Get actual user contributions
           />
         )}
 
@@ -107,6 +209,14 @@ export default function DiscussionsPage() {
           replies={currentReplies}
         />
       )}
+
+      {/* Create Thread Dialog */}
+      <CreateThreadDialog
+        contextId={courseId}
+        contextType="course"
+        onOpenChange={setCreateDialogOpen}
+        open={createDialogOpen}
+      />
     </div>
   )
 }

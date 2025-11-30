@@ -55,35 +55,35 @@
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 3. Set up database schema and permissions for discussions
-- [ ] 3.1 Create discussion schema file
+- [x] 3.1 Create discussion schema file
   - Create `packages/db/src/schema/discussion.ts` with thread, threadReply, threadVote, and threadFollow tables
   - Add proper foreign key relationships and constraints
   - Include timestamps and indexes
   - _Requirements: 1.1, 1.3, 2.1, 2.2, 3.1, 6.1_
 
-- [ ] 3.2 Update database schema exports
+- [x] 3.2 Update database schema exports
   - Export new tables from `packages/db/src/schema/index.ts`
   - Update database type exports
   - _Requirements: 1.1_
 
-- [ ] 3.3 Add discussion permissions to auth
+- [x] 3.3 Add discussion permissions to auth
   - Update `packages/auth/src/permissions.ts` to include `discussion: ['create', 'moderate']`
   - Update permission types
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 3.4 Run database migrations
+- [x] 3.4 Run database migrations
   - Generate migration files with `drizzle-kit generate`
   - Apply migrations with `drizzle-kit push`
   - Verify schema in database
   - _Requirements: 1.1_
 
 - [ ] 4. Create ORPC contracts for discussion system
-- [ ] 4.1 Create generated schemas
+- [x] 4.1 Create generated schemas
   - Create `packages/orpc-contracts/src/discussion/generated-schemas.ts`
   - Generate insert, select, and update schemas for thread, threadReply, threadVote, threadFollow
   - _Requirements: 1.1, 2.1, 3.1, 6.1_
 
-- [ ] 4.2 Create API schemas
+- [x] 4.2 Create API schemas
   - Create `packages/orpc-contracts/src/discussion/schemas.ts`
   - Define createThreadSchema, updateThreadSchema, listThreadsSchema
   - Define createReplySchema, updateReplySchema, endorseReplySchema
@@ -92,7 +92,7 @@
   - Include composite schemas for fullThreadSchema with nested replies
   - _Requirements: 1.1, 1.2, 2.1, 2.2, 3.1, 4.2, 6.1, 6.2_
 
-- [ ] 4.3 Create ORPC contract definitions
+- [x] 4.3 Create ORPC contract definitions
   - Create `packages/orpc-contracts/src/discussion/index.ts`
   - Define thread routes (create, list, get, update, delete, pin, lock)
   - Define reply routes (create, update, delete, endorse)
@@ -101,12 +101,12 @@
   - Add proper error definitions for each route
   - _Requirements: 1.1, 1.4, 2.1, 2.5, 3.1, 4.1, 4.2, 4.3, 6.1, 6.2, 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 4.4 Export discussion contracts
+- [x] 4.4 Export discussion contracts
   - Update `packages/orpc-contracts/src/index.ts` to export discussion contracts
   - _Requirements: 1.1_
 
 - [ ] 5. Implement thread service
-- [ ] 5.1 Create thread service file
+- [x] 5.1 Create thread service file
   - Create `apps/server/src/services/discussion/thread.service.ts`
   - Implement createThread with context validation
   - Implement listThreads with filtering and pagination
@@ -130,7 +130,7 @@
   - **Validates: Requirements 8.1**
 
 - [ ] 6. Implement reply service
-- [ ] 6.1 Create reply service file
+- [x] 6.1 Create reply service file
   - Create `apps/server/src/services/discussion/reply.service.ts`
   - Implement createReply with thread validation and hierarchy support
   - Implement updateReply with ownership validation
@@ -155,7 +155,7 @@
   - **Validates: Requirements 4.2**
 
 - [ ] 7. Implement vote service
-- [ ] 7.1 Create vote service file
+- [x] 7.1 Create vote service file
   - Create `apps/server/src/services/discussion/vote.service.ts`
   - Implement vote with duplicate prevention
   - Implement unvote
@@ -176,7 +176,7 @@
   - **Validates: Requirements 8.4**
 
 - [ ] 8. Implement follow service
-- [ ] 8.1 Create follow service file
+- [x] 8.1 Create follow service file
   - Create `apps/server/src/services/discussion/follow.service.ts`
   - Implement followThread
   - Implement unfollowThread
@@ -197,8 +197,8 @@
   - **Property 23: Follow Status Accuracy**
   - **Validates: Requirements 8.5**
 
-- [ ] 9. Implement notification service
-- [ ] 9.1 Create notification service file
+- [ ]* 9. Implement notification service
+- [ ]* 9.1 Create notification service file
   - Create `apps/server/src/services/discussion/notification.service.ts`
   - Implement notifyThreadReply to notify thread author and followers
   - Implement notifyReplyEndorsed to notify reply author
@@ -240,33 +240,33 @@
   - **Validates: Requirements 4.4**
 
 - [ ] 11. Create API routes
-- [ ] 11.1 Create thread routes
+- [x] 11.1 Create thread routes
   - Create `apps/server/src/routes/discussion/threads.ts`
   - Wire up thread service to ORPC routes
   - Add authentication middleware
   - Add access control checks
   - _Requirements: 1.1, 1.4, 4.5, 7.1, 7.2, 7.3, 7.4, 7.5, 8.1_
 
-- [ ] 11.2 Create reply routes
+- [x] 11.2 Create reply routes
   - Create `apps/server/src/routes/discussion/replies.ts`
   - Wire up reply service to ORPC routes
   - Add authentication middleware
   - Add access control checks
   - _Requirements: 2.1, 2.5, 4.2, 4.3_
 
-- [ ] 11.3 Create vote routes
+- [x] 11.3 Create vote routes
   - Create `apps/server/src/routes/discussion/votes.ts`
   - Wire up vote service to ORPC routes
   - Add authentication middleware
   - _Requirements: 3.1, 3.5_
 
-- [ ] 11.4 Create follow routes
+- [x] 11.4 Create follow routes
   - Create `apps/server/src/routes/discussion/follows.ts`
   - Wire up follow service to ORPC routes
   - Add authentication middleware
   - _Requirements: 6.1, 6.2, 6.5_
 
-- [ ] 11.5 Register discussion routes
+- [x] 11.5 Register discussion routes
   - Update `apps/server/src/routes/index.ts` to include discussion routes
   - _Requirements: 1.1_
 

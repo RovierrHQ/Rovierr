@@ -1,5 +1,6 @@
 import { academic } from './academic'
 import { calendar } from './calendar'
+import { discussion } from './discussion'
 import { expenses } from './expenses'
 import { form } from './form'
 import { realtime } from './realtime'
@@ -12,6 +13,8 @@ import { user } from './user'
 
 // Export individual contracts for router implementation
 export { academic } from './academic'
+export { discussion } from './discussion'
+export * from './discussion/schemas'
 export { form } from './form'
 export * from './form/schemas'
 export { societyRegistration } from './society-registration'
@@ -54,5 +57,8 @@ export const appContract = {
   form,
 
   // academic integration
-  academic
+  academic,
+
+  // discussion integration
+  discussion
 }

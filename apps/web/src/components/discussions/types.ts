@@ -13,6 +13,7 @@ export interface Discussion {
   upvotes: number
   createdAt: string
   tags: string[]
+  userVote?: 'up' | 'down' | null
 }
 
 export interface Reply {

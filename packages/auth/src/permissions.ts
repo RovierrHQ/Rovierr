@@ -9,7 +9,8 @@ export const statement = {
   member: ['create', 'update', 'delete'],
   invitation: ['create', 'cancel'],
   team: ['create', 'update', 'delete'],
-  ac: ['create', 'read', 'update', 'delete']
+  ac: ['create', 'read', 'update', 'delete'],
+  discussion: ['create', 'moderate']
   // more permission as we build feature
   // like: task: ["create", "update", "delete"],
   // like: event: ["create", "update", "delete"],
@@ -35,7 +36,8 @@ export const defaultPresident = ac.newRole({
   member: ['create', 'update', 'delete'],
   invitation: ['create', 'cancel'],
   team: ['create', 'update', 'delete'],
-  ac: ['create', 'read', 'update', 'delete']
+  ac: ['create', 'read', 'update', 'delete'],
+  discussion: ['create', 'moderate']
 })
 
 export const defaultVicePresident = ac.newRole({
@@ -43,7 +45,8 @@ export const defaultVicePresident = ac.newRole({
   invitation: ['create', 'cancel'],
   member: ['create', 'update', 'delete'],
   team: ['create', 'update', 'delete'],
-  ac: ['create', 'read', 'update', 'delete']
+  ac: ['create', 'read', 'update', 'delete'],
+  discussion: ['create', 'moderate']
 })
 
 export const defaultMember = ac.newRole({
@@ -51,7 +54,8 @@ export const defaultMember = ac.newRole({
   member: [],
   invitation: [],
   team: [],
-  ac: ['read']
+  ac: ['read'],
+  discussion: ['create']
 })
 
 // Export the statement type for use in other files

@@ -38,6 +38,7 @@ export function DiscussionList({
           isSelected={selectedDiscussionId === discussion.id}
           key={discussion.id}
           onClick={() => onSelectDiscussion(discussion.id)}
+          userVote={discussion.userVote}
         />
       ))}
     </div>

@@ -3,8 +3,11 @@ import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Separator } from '@rov/ui/components/separator'
 import { Textarea } from '@rov/ui/components/textarea'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowUp, Check, MessageSquare, Pin, Send, X } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
+import { orpc } from '@/utils/orpc'
 import { ReplyCard } from './reply-card'
 import type { Discussion, Reply } from './types'
 
@@ -16,11 +19,33 @@ interface ThreadViewProps {
 
 export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
   const [replyText, setReplyText] = useState('')
+  const queryClient = useQueryClient()
 
-  const handleSendReply = () => {
+  const replyMutation = useMutation(
+    orpc.discussion.reply.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['discussion', 'thread', 'get']
+        })
+        queryClient.invalidateQueries({
+          queryKey: ['discussion', 'thread', 'list']
+        })
+        toast.success('Reply posted successfully')
+        setReplyText('')
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to post reply')
+      }
+    })
+  )
+
+  const handleSubmit = () => {
     if (replyText.trim()) {
-      // In real app, send to backend
-      setReplyText('')
+      replyMutation.mutate({
+        threadId: discussion.id,
+        content: replyText,
+        isAnonymous: false
+      })
     }
   }
 
@@ -126,7 +151,7 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
               onChange={(e) => setReplyText(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                  handleSendReply()
+                  handleSubmit()
                 }
               }}
               placeholder="Write your reply..."
@@ -137,12 +162,12 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
                 Press ⌘+Enter to send
               </p>
               <Button
-                disabled={!replyText.trim()}
-                onClick={handleSendReply}
+                disabled={!replyText.trim() || replyMutation.isPending}
+                onClick={handleSubmit}
                 size="sm"
               >
                 <Send className="mr-2 h-3 w-3" />
-                Send Reply
+                {replyMutation.isPending ? 'Sending...' : 'Send Reply'}
               </Button>
             </div>
           </div>

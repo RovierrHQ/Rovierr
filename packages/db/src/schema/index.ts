@@ -2,6 +2,7 @@
 export * from './achievement'
 export * from './auth'
 export * from './course'
+export * from './discussion'
 export * from './expenses'
 export * from './form'
 export * from './institution'

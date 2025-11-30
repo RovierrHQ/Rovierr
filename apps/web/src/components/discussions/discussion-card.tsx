@@ -3,20 +3,62 @@ import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent, CardHeader } from '@rov/ui/components/card'
 import { Separator } from '@rov/ui/components/separator'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowUp, Check, MessageSquare, Pin } from 'lucide-react'
+import { toast } from 'sonner'
+import { orpc } from '@/utils/orpc'
 import type { Discussion } from './types'
 
 interface DiscussionCardProps {
   discussion: Discussion
   isSelected?: boolean
   onClick: () => void
+  userVote?: 'up' | 'down' | null
 }
 
 export function DiscussionCard({
   discussion,
   isSelected,
-  onClick
+  onClick,
+  userVote
 }: DiscussionCardProps) {
+  const queryClient = useQueryClient()
+
+  const voteMutation = useMutation(
+    orpc.discussion.vote.vote.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['discussion', 'thread', 'list']
+        })
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to vote')
+      }
+    })
+  )
+
+  const unvoteMutation = useMutation(
+    orpc.discussion.vote.unvote.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['discussion', 'thread', 'list']
+        })
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to remove vote')
+      }
+    })
+  )
+
+  const handleVote = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (userVote === 'up') {
+      unvoteMutation.mutate({ threadId: discussion.id })
+    } else {
+      voteMutation.mutate({ threadId: discussion.id, voteType: 'up' })
+    }
+  }
+
   return (
     <Card
       className={`cursor-pointer transition-all ${
@@ -55,9 +97,10 @@ export function DiscussionCard({
 
           <div className="flex flex-col items-center gap-1">
             <Button
-              onClick={(e) => e.stopPropagation()}
+              disabled={voteMutation.isPending || unvoteMutation.isPending}
+              onClick={handleVote}
               size="sm"
-              variant="ghost"
+              variant={userVote === 'up' ? 'default' : 'ghost'}
             >
               <ArrowUp className="h-4 w-4" />
             </Button>

@@ -3,6 +3,7 @@
 import { createFormHook } from '@tanstack/react-form'
 import { fieldContext, formContext } from './context'
 import Calendar from './fields/calendar'
+import Checkbox from './fields/checkbox'
 import OTP from './fields/input-otp'
 import MultiSelect from './fields/multiselect'
 import RadioGroup from './fields/radio'
@@ -24,6 +25,7 @@ export const { useAppForm, withFieldGroup, withForm } = createFormHook({
     Slider,
     Select,
     Switch,
+    Checkbox,
     RadioGroup,
     TextWithUnit,
     MultiSelect,
