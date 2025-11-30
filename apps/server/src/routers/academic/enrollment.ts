@@ -39,11 +39,23 @@ export const enrollment = {
     ),
 
   getPrograms: protectedProcedure.academic.enrollment.getPrograms.handler(
-    () => {
-      // TODO: Fetch programs from database
-      // For now, return empty array until program schema is implemented
+    async ({ input }) => {
+      const { institutionId } = input
+
+      // Fetch programs for the institution
+      const programs = await db.query.program.findMany({
+        where: (program, { eq }) => eq(program.institutionId, institutionId),
+        orderBy: (program, { asc }) => [asc(program.name)]
+      })
+
       return {
-        programs: []
+        programs: programs.map((program) => ({
+          id: program.id,
+          code: program.code,
+          name: program.name,
+          description: program.description,
+          degreeLevel: program.degreeLevel
+        }))
       }
     }
   ),

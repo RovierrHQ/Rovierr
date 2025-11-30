@@ -17,7 +17,7 @@ import {
   GraduationCap
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { orpc } from '@/utils/orpc'
@@ -51,7 +51,7 @@ export default function AcademicOnboardingPage() {
   const { data: programs } = useQuery(
     orpc.academic.enrollment.getPrograms.queryOptions({
       input: { institutionId: selectedInstitutionId || '' },
-      enabled: step === 2 && !!selectedInstitutionId
+      enabled: !!selectedInstitutionId
     })
   )
 
@@ -123,33 +123,20 @@ export default function AcademicOnboardingPage() {
     }
   })
 
-  // Extract institutionId from selected enrollment
-  const updateSelectedInstitution = () => {
+  // Auto-update selectedInstitutionId when form value changes
+  useEffect(() => {
     const institutionEnrollmentId = form.state.values.institutionEnrollmentId
     if (institutionEnrollmentId && verifiedInstitutions?.institutions) {
-      type InstitutionEnrollment = {
-        enrollmentId: string
-        institutionId: string
-        institutionName: string
-        institutionLogo: string | null
-        studentId: string
-        email: string
-        emailVerified: boolean
-        studentStatusVerified: boolean
-      }
-      const selectedEnrollment = (
-        verifiedInstitutions.institutions as InstitutionEnrollment[]
-      ).find((inst) => inst.enrollmentId === institutionEnrollmentId)
+      const selectedEnrollment = verifiedInstitutions.institutions.find(
+        (inst) => inst.enrollmentId === institutionEnrollmentId
+      )
       if (selectedEnrollment) {
         setSelectedInstitutionId(selectedEnrollment.institutionId)
       }
     }
-  }
+  }, [form.state.values.institutionEnrollmentId, verifiedInstitutions])
 
   const handleNext = () => {
-    if (step === 1) {
-      updateSelectedInstitution()
-    }
     if (step < 4) {
       setStep(step + 1)
     }
@@ -270,8 +257,14 @@ export default function AcademicOnboardingPage() {
                     label="Program"
                     options={
                       programs?.programs.map(
-                        (program: { name: string; id: string }) => ({
-                          label: program.name,
+                        (program: {
+                          name: string
+                          id: string
+                          code: string | null
+                        }) => ({
+                          label: program.code
+                            ? `${program.code} - ${program.name}`
+                            : program.name,
                           value: program.id
                         })
                       ) ?? []

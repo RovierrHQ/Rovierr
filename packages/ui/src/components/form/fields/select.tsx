@@ -85,7 +85,7 @@ function Select({ label, placeholder, options, ...props }: Props) {
               {selectedOption && getLabel(selectedOption)}
             </SelectValue>
           </SelectTrigger>
-          <SelectContent position="item-aligned">
+          <SelectContent position="popper" side="bottom">
             {options.map((option) => {
               const icon = getIcon(option)
               return (
