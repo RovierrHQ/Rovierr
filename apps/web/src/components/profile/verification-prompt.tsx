@@ -225,9 +225,19 @@ export function VerificationPrompt() {
 
   const verifyOTPMutation = useMutation(
     orpc.user.profile.verifyStudent.verifyOTP.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['user', 'profile'] })
+      onSuccess: async () => {
+        // Invalidate and refetch all relevant queries
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
+          queryClient.invalidateQueries({
+            queryKey: ['better-auth', 'session']
+          }),
+          queryClient.refetchQueries({ queryKey: ['better-auth', 'session'] }),
+          queryClient.refetchQueries({ queryKey: ['user', 'profile'] })
+        ])
+
         toast.success('Student status verified successfully!')
+
         // Reset form
         setStep('upload')
         setStudentIdImage(null)
@@ -622,7 +632,7 @@ export function VerificationPrompt() {
             </AlertDescription>
           </Alert>
 
-          <div className="space-y-2">
+          <div className="flex flex-col items-center justify-center gap-2">
             <label className="font-medium text-sm" htmlFor="otp-input">
               Enter Verification Code
             </label>
@@ -639,40 +649,40 @@ export function VerificationPrompt() {
                 ))}
               </InputOTPGroup>
             </InputOTP>
-          </div>
 
-          <div className="flex gap-2">
-            <Button
-              className="flex-1"
-              onClick={() => setStep('email')}
-              variant="outline"
-            >
-              Change Email
-            </Button>
-            <Button
-              className="flex-1"
-              disabled={loading || otp.length !== 6}
-              onClick={handleVerifyOTP}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Verifying...
-                </>
-              ) : (
-                'Verify'
-              )}
-            </Button>
-          </div>
+            <div className="flex gap-2">
+              <Button
+                className="flex-1"
+                onClick={() => setStep('email')}
+                variant="outline"
+              >
+                Change Email
+              </Button>
+              <Button
+                className="flex-1"
+                disabled={loading || otp.length !== 6}
+                onClick={handleVerifyOTP}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  'Verify'
+                )}
+              </Button>
+            </div>
 
-          <button
-            className="w-full text-center text-primary text-sm hover:underline"
-            disabled={loading}
-            onClick={handleResendOTP}
-            type="button"
-          >
-            Didn't receive the code? Resend
-          </button>
+            <button
+              className="w-full text-center text-primary text-sm hover:underline"
+              disabled={loading}
+              onClick={handleResendOTP}
+              type="button"
+            >
+              Didn't receive the code? Resend
+            </button>
+          </div>
         </div>
       )}
     </Card>

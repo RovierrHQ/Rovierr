@@ -22,6 +22,10 @@ function Layout({ children }: LayoutProps<'/spaces'>) {
   if (!session?.user) {
     redirect('/login')
   }
+
+  if (!session.user.isVerified) {
+    redirect('/profile')
+  }
   return (
     <SpacesLayout>
       {children}

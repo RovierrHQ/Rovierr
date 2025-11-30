@@ -285,7 +285,7 @@ export function createAuth(config: AuthConfig) {
         ...user,
         isVerified: Boolean(userVerified?.isVerified)
       }
-    }
+    } as unknown as Session
   })
 
   type AuthPlugins = [
@@ -373,6 +373,34 @@ export function createAuth(config: AuthConfig) {
 
 // Export types
 export type Auth = ReturnType<typeof createAuth>
+export type Session = {
+  session: {
+    id: string
+    userId: string
+    expiresAt: Date
+    ipAddress: string
+    userAgent: string
+    createdAt: Date
+    updatedAt: Date
+    activeOrganizationId: string | null
+    activeTeamId: string | null
+  }
+  user: {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image: string
+    createdAt: Date
+    updatedAt: Date
+    twoFactorEnabled: boolean
+    phoneNumber: string | null
+    phoneNumberVerified: boolean
+    username: string | null
+    displayUsername: string | null
+    isVerified: boolean
+  }
+}
 
 // Re-export common types that clients might need
 export type { DB, user as User } from '@rov/db'

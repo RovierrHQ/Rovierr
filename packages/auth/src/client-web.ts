@@ -4,6 +4,7 @@
  */
 
 import {
+  customSessionClient,
   emailOTPClient,
   inferOrgAdditionalFields,
   oneTapClient,
@@ -66,7 +67,8 @@ export function createWebAuthClient(config: WebAuthClientConfig) {
       }),
       phoneNumberClient(),
       twoFactorClient(),
-      usernameClient()
+      usernameClient(),
+      customSessionClient<Auth>()
     ]
   })
 }
