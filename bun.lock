@@ -225,6 +225,7 @@
         "cheerio": "1.1.2",
         "commander": "14.0.2",
         "csv-parse": "6.1.0",
+        "drizzle-orm": "0.44.5",
         "nanoid": "^5.1.6",
         "ora": "9.0.0",
         "p-limit": "7.2.0",
