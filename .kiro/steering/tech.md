@@ -21,7 +21,7 @@
   * `better-auth` with Google Sign-In
 * **Build & DevOps:**
 
-  * PNPM + Turborepo for monorepo management
+  * bun + Turborepo for monorepo management
   * Docker Compose for service orchestration
   * Biome for linting & formatting
 * **Documentation:**
@@ -42,7 +42,7 @@
 **Preferred Tooling**
 
 * Editor: VS Code + Kiro IDE for spec-driven development
-* Package manager: `pnpm`
+* Package manager: `bun`
 * Database migrations: `drizzle-kit`
 * Environment management: `.env` + `dotenvx`
 * TypeScript config inheritance via `@rov/typescript-config`

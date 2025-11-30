@@ -541,8 +541,8 @@ tags: z.array(z.string())
 When database schema changes:
 
 1. Update `packages/db/src/schema/{domain}.ts`
-2. Run migrations: `pnpm db:push`
-3. Regenerate if using a script: `pnpm db:generate`
+2. Run migrations: `bun db:push`
+3. Regenerate if using a script: `bun db:generate`
 4. Review `packages/orpc-contracts/src/{domain}/schemas.ts`
 5. Update custom validations if needed
 
@@ -654,7 +654,7 @@ When creating a new domain:
 - [ ] Create `index.ts` with ORPC contract definitions
 - [ ] Export from `packages/orpc-contracts/src/index.ts`
 - [ ] Update imports in application code
-- [ ] Run type checks: `pnpm typecheck`
+- [ ] Run type checks: `bun typecheck`
 - [ ] Test API contracts
 
 ## Examples

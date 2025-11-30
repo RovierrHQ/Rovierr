@@ -21,7 +21,7 @@
 ├── biome.json                 # Unified lint/format config
 ├── tailwind.config.js         # Shared Tailwind setup
 ├── tsconfig.json              # Root TypeScript setup
-└── pnpm-workspace.yaml        # Workspace configuration
+└── bun-workspace.yaml        # Workspace configuration
 ```
 
 **Organizational Conventions**

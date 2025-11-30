@@ -10,7 +10,7 @@ This service uses separate Dockerfiles for development and production environmen
 
 ## Development
 
-When running `pnpm dev` or `bun dev`, Turborepo uses `docker-compose.yml` which:
+When running `bun dev`, Turborepo uses `docker-compose.yml` which:
 - Uses `Dockerfile.dev`
 - Mounts source code as a volume for hot reloading
 - Includes dev dependencies
@@ -80,7 +80,7 @@ FROM base as prod
 
 ```bash
 # Development (via Turborepo)
-pnpm dev
+bun dev
 
 # Manual dev build
 docker build -f Dockerfile.dev -t id-parser:dev .

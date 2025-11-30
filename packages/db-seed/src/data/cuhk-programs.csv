@@ -1,0 +1,85 @@
+institutionSlug,code,name,description,degreeLevel,isVerified
+cuhk,ANTHN,Anthropology,"Undergraduate program in Anthropology",undergraduate,true
+cuhk,BMBLN,Bimodal Bilingual Studies,"Undergraduate program in Bimodal Bilingual Studies",undergraduate,true
+cuhk,CHLLN,Chinese Language and Literature,"Undergraduate program in Chinese Language and Literature",undergraduate,true
+cuhk,CHESB,Chinese Studies,"Undergraduate program in Chinese Studies",undergraduate,true
+cuhk,ENGEN,English,"Undergraduate program in English",undergraduate,true
+cuhk,FAASN,Fine Arts,"Undergraduate program in Fine Arts",undergraduate,true
+cuhk,HISTN,History,"Undergraduate program in History",undergraduate,true
+cuhk,JASP N,Japanese Studies,"Undergraduate program in Japanese Studies",undergraduate,true
+cuhk,LINGN,Linguistics,"Undergraduate program in Linguistics",undergraduate,true
+cuhk,MUSCN,Music,"Undergraduate program in Music",undergraduate,true
+cuhk,PHILN,Philosophy,"Undergraduate program in Philosophy",undergraduate,true
+cuhk,HISTN-PUH,Public History,"Undergraduate program in Public History",undergraduate,true
+cuhk,PUHSN,Public Humanities,"Undergraduate program in Public Humanities",undergraduate,true
+cuhk,RELSN,Religious Studies,"Undergraduate program in Religious Studies",undergraduate,true
+cuhk,THEON,Theology,"Undergraduate program in Theology",undergraduate,true
+cuhk,TRANN,Translation,"Undergraduate program in Translation",undergraduate,true
+cuhk,BAJDN,BBA(IBBA)-JD Double Degree Programme,"Undergraduate double degree program in Business Administration and Juris Doctor",undergraduate,true
+cuhk,BEHMN,Biotechnology Entrepreneurship and Healthcare Management,"Undergraduate program in Biotechnology, Entrepreneurship and Healthcare Management",undergraduate,true
+cuhk,IBBAC-GBS,Global Business Studies,"Undergraduate program in Global Business Studies",undergraduate,true
+cuhk,GLEFN,Global Economics and Finance,"Undergraduate program in Global Economics and Finance",undergraduate,true
+cuhk,HTMGB,Hospitality and Real Estate,"Undergraduate program in Hospitality and Real Estate",undergraduate,true
+cuhk,IFAAB,Insurance Financial and Actuarial Analysis,"Undergraduate program in Insurance, Financial and Actuarial Analysis",undergraduate,true
+cuhk,IBBAC,Integrated Bachelor of Business Administration Programme,"Undergraduate Integrated BBA program",undergraduate,true
+cuhk,INDAN,Interdisciplinary Data Analytics & X Double Major Programme,"Undergraduate double major program in Interdisciplinary Data Analytics",undergraduate,true
+cuhk,PACCN,Professional Accountancy,"Undergraduate program in Professional Accountancy",undergraduate,true
+cuhk,QFINN,Quantitative Finance,"Undergraduate program in Quantitative Finance",undergraduate,true
+cuhk,QFRMN,Quantitative Finance and Risk Management Science,"Undergraduate program in Quantitative Finance and Risk Management Science",undergraduate,true
+cuhk,CLEDN,Chinese Language Studies (BA) and Chinese Language Education (BEd),"Undergraduate double degree program in Chinese Language Studies and Chinese Language Education",undergraduate,true
+cuhk,BECEN,Early Childhood Education,"Undergraduate program in Early Childhood Education",undergraduate,true
+cuhk,CHEDN,Early Childhood Education (BA),"Undergraduate BA program in Early Childhood Education",undergraduate,true
+cuhk,ELEDN,English Studies (BA) and English Language Education (BEd),"Undergraduate double degree program in English Studies and English Language Education",undergraduate,true
+cuhk,ESHEN,Exercise Science and Health Education,"Undergraduate program in Exercise Science and Health Education",undergraduate,true
+cuhk,HMSHN,Human Movement Science and Health Studies,"Undergraduate program in Human Movement Science and Health Studies",undergraduate,true
+cuhk,LDTEN,Learning Design and Technology,"Undergraduate program in Learning Design and Technology",undergraduate,true
+cuhk,BMEDN,Mathematics and Mathematics Education,"Undergraduate program in Mathematics and Mathematics Education",undergraduate,true
+cuhk,PESHN,Physical Education Exercise Science and Health,"Undergraduate program in Physical Education, Exercise Science and Health",undergraduate,true
+cuhk,ASEIN,Aerospace Science and Earth Informatics & X Double Major Programme,"Undergraduate double major program in Aerospace Science and Earth Informatics",undergraduate,true
+cuhk,AISTN,Artificial Intelligence: Systems and Technologies,"Undergraduate program in Artificial Intelligence: Systems and Technologies",undergraduate,true
+cuhk,BMEGN,Biomedical Engineering,"Undergraduate program in Biomedical Engineering",undergraduate,true
+cuhk,CDASN,Computational Data Science,"Undergraduate program in Computational Data Science",undergraduate,true
+cuhk,CENGN,Computer Engineering,"Undergraduate program in Computer Engineering",undergraduate,true
+cuhk,CSCIN,Computer Science,"Undergraduate program in Computer Science",undergraduate,true
+cuhk,BCSEN,Computer Science and Engineering,"Undergraduate program in Computer Science and Engineering",undergraduate,true
+cuhk,ELEGN,Electronic Engineering,"Undergraduate program in Electronic Engineering",undergraduate,true
+cuhk,EEENN,Energy and Environmental Engineering,"Undergraduate program in Energy and Environmental Engineering",undergraduate,true
+cuhk,FTECN,Financial Technology,"Undergraduate program in Financial Technology",undergraduate,true
+cuhk,IERGN,Information Engineering,"Undergraduate program in Information Engineering",undergraduate,true
+cuhk,MASEN,Materials Science and Engineering,"Undergraduate program in Materials Science and Engineering",undergraduate,true
+cuhk,MIEGN,Mathematics and Information Engineering,"Undergraduate program in Mathematics and Information Engineering",undergraduate,true
+cuhk,MAEGN,Mechanical and Automation Engineering,"Undergraduate program in Mechanical and Automation Engineering",undergraduate,true
+cuhk,SEEMN,Systems Engineering and Engineering Management,"Undergraduate program in Systems Engineering and Engineering Management",undergraduate,true
+cuhk,DIPLN,Diplomacy and International Studies,"Undergraduate program in Diplomacy and International Studies",undergraduate,true
+cuhk,LAWSN,Laws,"Undergraduate program in Laws",undergraduate,true
+cuhk,MEDUN,Bachelor of Medicine and Bachelor of Surgery (MBChB),"Undergraduate program in Medicine and Surgery",undergraduate,true
+cuhk,MEDUN-GPS,Bachelor of Medicine and Bachelor of Surgery – Global Physician-Leadership Stream (MBChB-GPS),"Undergraduate program in Medicine and Surgery with Global Physician-Leadership Stream",undergraduate,true
+cuhk,BMSCN,Biomedical Sciences,"Undergraduate program in Biomedical Sciences",undergraduate,true
+cuhk,BCMEN,Chinese Medicine,"Undergraduate program in Chinese Medicine",undergraduate,true
+cuhk,CHPRN,Community Health Practice,"Undergraduate program in Community Health Practice",undergraduate,true
+cuhk,BSCGB,Gerontology,"Undergraduate program in Gerontology",undergraduate,true
+cuhk,NURSN,Nursing,"Undergraduate program in Nursing",undergraduate,true
+cuhk,PHARN,Pharmacy,"Undergraduate program in Pharmacy",undergraduate,true
+cuhk,PHPCH,Public Health,"Undergraduate program in Public Health",undergraduate,true
+cuhk,EESCN,Earth and Environmental Sciences,"Undergraduate program in Earth and Environmental Sciences",undergraduate,true
+cuhk,MATHN-ERM,Enrichment Mathematics,"Undergraduate program in Enrichment Mathematics",undergraduate,true
+cuhk,PHYSN-ERP,Enrichment Stream in Theoretical Physics,"Undergraduate program in Enrichment Stream in Theoretical Physics",undergraduate,true
+cuhk,NSCIN,Natural Sciences,"Undergraduate program in Natural Sciences",undergraduate,true
+cuhk,RMSCN,Risk Management Science,"Undergraduate program in Risk Management Science",undergraduate,true
+cuhk,BSCIN,Science,"Undergraduate program in Science",undergraduate,true
+cuhk,ARCHN,Architectural Studies,"Undergraduate program in Architectural Studies",undergraduate,true
+cuhk,DSPSN,Data Science and Policy Studies,"Undergraduate program in Data Science and Policy Studies",undergraduate,true
+cuhk,ECONN,Economics,"Undergraduate program in Economics",undergraduate,true
+cuhk,ECOTU,Economics (CUHK-Tsinghua University Dual Undergraduate Degree Programme),"Undergraduate dual degree program in Economics with Tsinghua University",undergraduate,true
+cuhk,GDRSN,Gender Studies,"Undergraduate program in Gender Studies",undergraduate,true
+cuhk,GRMDN,Geography and Resource Management,"Undergraduate program in Geography and Resource Management",undergraduate,true
+cuhk,GCOMN,Global Communication,"Undergraduate program in Global Communication",undergraduate,true
+cuhk,GLSDN,Global Studies,"Undergraduate program in Global Studies",undergraduate,true
+cuhk,GPADN,Government and Public Administration,"Undergraduate program in Government and Public Administration",undergraduate,true
+cuhk,COMMN,Journalism and Communication,"Undergraduate program in Journalism and Communication",undergraduate,true
+cuhk,PSYCN,Psychology,"Undergraduate program in Psychology",undergraduate,true
+cuhk,BSSCN,Social Science (Broad-based),"Undergraduate broad-based program in Social Science",undergraduate,true
+cuhk,SOWKN,Social Work,"Undergraduate program in Social Work",undergraduate,true
+cuhk,SOCIN-SSD,Society and Sustainable Development,"Undergraduate program in Society and Sustainable Development",undergraduate,true
+cuhk,SOCIN,Sociology,"Undergraduate program in Sociology",undergraduate,true
+cuhk,URSPN,Urban Studies,"Undergraduate program in Urban Studies",undergraduate,true
