@@ -91,6 +91,12 @@ const AcademicsLayout = ({ children }: { children: ReactNode }) => {
             url: `/spaces/academics/courses/${course.id}/assignments`
           },
           {
+            id: `course-${course.id}-discussions`,
+            title: 'Discussions',
+            type: 'item',
+            url: `/spaces/academics/courses/${course.id}/discussions`
+          },
+          {
             id: `course-${course.id}-grades`,
             title: 'Grades',
             type: 'item',
