@@ -33,6 +33,7 @@ import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
 import { ImageUploadDialog } from './image-upload-dialog'
+import { ProfileHeroSkeleton } from './loading-skeleton'
 
 interface ProfileHeroProps {
   isVerified: boolean
@@ -40,7 +41,7 @@ interface ProfileHeroProps {
 
 export function ProfileHero({ isVerified }: ProfileHeroProps) {
   const { data: session } = authClient.useSession()
-  const { data: profileDetails } = useQuery(
+  const { data: profileDetails, isLoading } = useQuery(
     orpc.user.profile.details.queryOptions()
   )
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -50,8 +51,8 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
 
   const user = session?.user
 
-  if (!(user && profileDetails)) {
-    return null
+  if (isLoading || !(user && profileDetails)) {
+    return <ProfileHeroSkeleton />
   }
 
   // Get initials for avatar fallback
