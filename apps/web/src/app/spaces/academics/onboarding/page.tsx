@@ -8,8 +8,10 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
+import { Checkbox } from '@rov/ui/components/checkbox'
 import { useAppForm } from '@rov/ui/components/form/index'
 import { Input } from '@rov/ui/components/input'
+import { useStore } from '@tanstack/react-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft,
@@ -165,6 +167,11 @@ export default function AcademicOnboardingPage() {
       setStep(step - 1)
     }
   }
+
+  const selectedCourses = useStore(
+    form.store,
+    (state) => state.values.courseIds
+  )
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -378,35 +385,36 @@ export default function AcademicOnboardingPage() {
                           {courses.courses.map((course) => (
                             <label
                               className="flex cursor-pointer items-start gap-3 rounded-md p-3 hover:bg-accent"
+                              htmlFor={course.id}
                               key={course.id}
                             >
-                              <input
+                              <Checkbox
                                 checked={form.state.values.courseIds.includes(
                                   course.id
                                 )}
                                 className="mt-1"
-                                onChange={() => {
-                                  const currentIds = form.state.values.courseIds
+                                id={course.id}
+                                onCheckedChange={() => {
                                   const isCurrentlySelected =
-                                    currentIds.includes(course.id)
+                                    selectedCourses.includes(course.id)
 
                                   if (isCurrentlySelected) {
                                     // Remove the ID
-                                    form.setFieldValue(
-                                      'courseIds',
-                                      currentIds.filter(
-                                        (id) => id !== course.id
-                                      )
+                                    const newIds = selectedCourses.filter(
+                                      (id) => id !== course.id
                                     )
+
+                                    form.setFieldValue('courseIds', newIds)
                                   } else {
                                     // Add the ID
-                                    form.setFieldValue('courseIds', [
-                                      ...currentIds,
+                                    const newIds = [
+                                      ...selectedCourses,
                                       course.id
-                                    ])
+                                    ]
+
+                                    form.setFieldValue('courseIds', newIds)
                                   }
                                 }}
-                                type="checkbox"
                               />
                               <div className="flex-1">
                                 <div className="font-medium">
