@@ -1,12 +1,13 @@
 'use client'
 
-import { redirect } from 'next/navigation'
+import { redirect, usePathname } from 'next/navigation'
 import SpacesLayout from '@/components/layout/spaces-layout'
 import RoadmapFloatButton from '@/components/roadmap/roadmap-float-button'
 import { authClient } from '@/lib/auth-client'
 
 function Layout({ children }: LayoutProps<'/spaces'>) {
   const { data: session, isPending } = authClient.useSession()
+  const pathname = usePathname()
 
   if (isPending) {
     return (
@@ -27,7 +28,7 @@ function Layout({ children }: LayoutProps<'/spaces'>) {
     redirect('/profile')
   }
   return (
-    <SpacesLayout>
+    <SpacesLayout showHeader={!pathname?.startsWith('/spaces/academics')}>
       {children}
       <RoadmapFloatButton />
     </SpacesLayout>

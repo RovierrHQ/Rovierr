@@ -185,41 +185,6 @@ export function OverviewTab() {
           )}
         </CardContent>
       </Card>
-
-      {/* Quick Links */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-2">
-            <Link href="/profile?tab=about">
-              <Button className="w-full justify-start" variant="outline">
-                <Users className="mr-2 h-4 w-4" />
-                Edit Profile
-              </Button>
-            </Link>
-            <Link href="/profile?tab=clubs">
-              <Button className="w-full justify-start" variant="outline">
-                <Users className="mr-2 h-4 w-4" />
-                Browse Clubs
-              </Button>
-            </Link>
-            <Link href="/profile?tab=academics">
-              <Button className="w-full justify-start" variant="outline">
-                <BookOpen className="mr-2 h-4 w-4" />
-                Academic Info
-              </Button>
-            </Link>
-            <Link href="/profile?tab=settings">
-              <Button className="w-full justify-start" variant="outline">
-                <Activity className="mr-2 h-4 w-4" />
-                Settings
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
