@@ -5,6 +5,7 @@ import { form } from './form'
 import { realtime } from './realtime'
 import { roadmap } from './roadmap'
 import { society } from './society'
+import { societyRegistration } from './society-registration'
 import { studentOrganizations } from './student-organizations'
 import { tasks } from './tasks'
 import { university } from './university'
@@ -31,6 +32,9 @@ export const appRouter = o.router({
 
   // society integration
   society,
+
+  // society registration integration
+  societyRegistration,
 
   // expenses integration
   expenses,

@@ -2,6 +2,11 @@ import { UseSend } from 'usesend-js'
 import { env } from '@/lib/env'
 import { logger } from '@/lib/logger'
 import { generateInvitationEmail } from './templates/invitation'
+import {
+  generateConfirmationEmail,
+  generateRejectionEmail,
+  generateWelcomeEmail
+} from './templates/join-request'
 import { generateOTPEmail } from './templates/otp'
 
 const usesend = new UseSend(env.USESEND_API_KEY, 'https://usesend.rovierr.com')
@@ -157,5 +162,119 @@ export async function sendInvitationEmail({
       'Failed to send invitation email'
     )
     throw new Error('Email delivery failed')
+  }
+}
+
+/**
+ * Send welcome email to approved member
+ */
+export async function sendWelcomeEmail({
+  to,
+  userName,
+  societyName,
+  societyLink
+}: {
+  to: string
+  userName: string
+  societyName: string
+  societyLink: string
+}) {
+  const { subject, html, text } = generateWelcomeEmail({
+    userName,
+    societyName,
+    societyLink
+  })
+
+  try {
+    await usesend.emails.send({
+      from: 'Rovierr <noreply@clubs.rovierr.com>',
+      to,
+      subject,
+      html,
+      text
+    })
+  } catch (error) {
+    logger.error({ error, to, societyName }, 'Failed to send welcome email')
+    // Don't throw - email failure shouldn't block approval
+  }
+}
+
+/**
+ * Send rejection notification email
+ */
+export async function sendRejectionEmail({
+  to,
+  userName,
+  societyName,
+  reason
+}: {
+  to: string
+  userName: string
+  societyName: string
+  reason?: string
+}) {
+  const { subject, html, text } = generateRejectionEmail({
+    userName,
+    societyName,
+    reason
+  })
+
+  try {
+    await usesend.emails.send({
+      from: 'Rovierr <noreply@clubs.rovierr.com>',
+      to,
+      subject,
+      html,
+      text
+    })
+  } catch (error) {
+    logger.error({ error, to, societyName }, 'Failed to send rejection email')
+    // Don't throw - email failure shouldn't block rejection
+  }
+}
+
+/**
+ * Send confirmation email after application submission
+ */
+export async function sendApplicationConfirmationEmail({
+  to,
+  userName,
+  societyName,
+  requiresPayment,
+  paymentAmount,
+  paymentInstructions,
+  isAutoApproval
+}: {
+  to: string
+  userName: string
+  societyName: string
+  requiresPayment: boolean
+  paymentAmount?: string
+  paymentInstructions?: string
+  isAutoApproval: boolean
+}) {
+  const { subject, html, text } = generateConfirmationEmail({
+    userName,
+    societyName,
+    requiresPayment,
+    paymentAmount,
+    paymentInstructions,
+    isAutoApproval
+  })
+
+  try {
+    await usesend.emails.send({
+      from: 'Rovierr <noreply@clubs.rovierr.com>',
+      to,
+      subject,
+      html,
+      text
+    })
+  } catch (error) {
+    logger.error(
+      { error, to, societyName },
+      'Failed to send confirmation email'
+    )
+    // Don't throw - email failure shouldn't block submission
   }
 }

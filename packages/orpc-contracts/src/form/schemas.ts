@@ -492,3 +492,47 @@ export type SubmitResponseInput = z.infer<typeof submitResponseSchema>
 export type SaveProgressInput = z.infer<typeof saveProgressSchema>
 export type SaveAsTemplateInput = z.infer<typeof saveAsTemplateSchema>
 export type CreateFromTemplateInput = z.infer<typeof createFromTemplateSchema>
+
+// ============================================================================
+// Bulk Save Schema
+// ============================================================================
+
+/**
+ * Schema for bulk saving form with all pages and questions in one call
+ * This is more efficient than making multiple API calls
+ */
+export const bulkSaveFormSchema = z.object({
+  formId: z.string().min(1, 'Form ID is required'),
+  // Form metadata updates
+  formUpdates: updateFormSchema.omit({ id: true }).partial().optional(),
+  // Pages to create, update, or delete
+  pages: z
+    .object({
+      create: z
+        .array(
+          createPageSchema.omit({ formId: true }).extend({
+            id: z.string().optional() // Temporary ID for mapping
+          })
+        )
+        .optional(),
+      update: z.array(updatePageSchema).optional(),
+      delete: z.array(z.string()).optional()
+    })
+    .optional(),
+  // Questions to create, update, or delete
+  questions: z
+    .object({
+      create: z
+        .array(
+          createQuestionSchema.omit({ formId: true }).extend({
+            id: z.string().optional() // Temporary ID for mapping
+          })
+        )
+        .optional(),
+      update: z.array(updateQuestionSchema).optional(),
+      delete: z.array(z.string()).optional()
+    })
+    .optional()
+})
+
+export type BulkSaveFormInput = z.infer<typeof bulkSaveFormSchema>

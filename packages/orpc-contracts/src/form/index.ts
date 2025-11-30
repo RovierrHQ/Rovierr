@@ -1,6 +1,7 @@
 import { oc } from '@orpc/contract'
 import { z } from 'zod'
 import {
+  bulkSaveFormSchema,
   createFormSchema,
   createFromTemplateSchema,
   createPageSchema,
@@ -290,6 +291,36 @@ export const form = {
       NOT_FOUND: {
         data: z.object({
           message: z.string().default('Form not found')
+        })
+      }
+    }),
+
+  bulkSave: oc
+    .route({
+      method: 'POST',
+      description:
+        'Bulk save form with all pages and questions in one transaction',
+      summary: 'Bulk Save Form',
+      tags: ['Form']
+    })
+    .input(bulkSaveFormSchema)
+    .output(fullFormSchema)
+    .errors({
+      UNAUTHORIZED: {
+        data: z.object({
+          message: z.string().default('User not authenticated')
+        })
+      },
+      NOT_FOUND: {
+        data: z.object({
+          message: z.string().default('Form not found')
+        })
+      },
+      FORBIDDEN: {
+        data: z.object({
+          message: z
+            .string()
+            .default('You do not have permission to edit this form')
         })
       }
     }),

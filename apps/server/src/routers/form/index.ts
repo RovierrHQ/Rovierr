@@ -201,6 +201,57 @@ export const form = {
     }
   ),
 
+  bulkSave: protectedProcedure.form.bulkSave.handler(
+    async ({ input, context }) => {
+      try {
+        const result = await formService.bulkSaveForm(
+          context.session.user.id,
+          input
+        )
+
+        if (!result) {
+          throw new ORPCError('NOT_FOUND', { message: 'Form not found' })
+        }
+
+        // Transform Date objects to ISO strings
+        return {
+          ...result,
+          openDate: result.openDate?.toISOString() ?? null,
+          closeDate: result.closeDate?.toISOString() ?? null,
+          publishedAt: result.publishedAt?.toISOString() ?? null,
+          allowMultipleSubmissions: result.allowMultipleSubmissions ?? false,
+          requireAuthentication: result.requireAuthentication ?? true,
+          paymentEnabled: result.paymentEnabled ?? false,
+          notificationsEnabled: result.notificationsEnabled ?? false,
+          confirmationEmailEnabled: result.confirmationEmailEnabled ?? false,
+          pages: result.pages.map((page) => ({
+            ...page,
+            conditionalLogicEnabled: page.conditionalLogicEnabled ?? false
+          })),
+          questions: result.questions.map((question) => ({
+            ...question,
+            required: question.required ?? false,
+            conditionalLogicEnabled: question.conditionalLogicEnabled ?? false,
+            enableAutoFill: question.enableAutoFill ?? false,
+            enableBidirectionalSync: question.enableBidirectionalSync ?? false
+          }))
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'Form not found') {
+            throw new ORPCError('NOT_FOUND', { message: 'Form not found' })
+          }
+          if (error.message === 'Unauthorized') {
+            throw new ORPCError('FORBIDDEN', {
+              message: 'You do not have permission to edit this form'
+            })
+          }
+        }
+        throw error
+      }
+    }
+  ),
+
   // ============================================================================
   // Page Management
   // ============================================================================

@@ -1,0 +1,14 @@
+{
+  "name": "Type Check on Save",
+  "description": "Runs bun check and bun check-types whenever TypeScript or TSX files are modified",
+  "trigger": {
+    "type": "file_saved",
+    "filePattern": "**/*.{ts,tsx}"
+  },
+  "action": {
+    "type": "shell_command",
+    "command": "bun check && bun check-types",
+    "workingDirectory": "."
+  },
+  "enabled": true
+}

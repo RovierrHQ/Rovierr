@@ -11,6 +11,7 @@ import {
   forms
 } from '@rov/db'
 import type {
+  BulkSaveFormInput,
   CreateFormInput,
   CreatePageInput,
   CreateQuestionInput,
@@ -472,6 +473,113 @@ export class FormService {
       .where(eq(forms.id, formId))
 
     return { success: true }
+  }
+
+  /**
+   * Bulk save form with all pages and questions in one transaction
+   * This is much more efficient than making multiple API calls
+   */
+  async bulkSaveForm(userId: string, input: BulkSaveFormInput) {
+    // Verify ownership
+    const form = await this.getFormById(input.formId)
+    if (!form) {
+      throw new Error('Form not found')
+    }
+    if (form.createdBy !== userId) {
+      throw new Error('Unauthorized')
+    }
+
+    // Use a transaction to ensure all operations succeed or fail together
+    return await this.db.transaction(async (tx) => {
+      // 1. Update form metadata if provided
+      if (input.formUpdates) {
+        await tx
+          .update(forms)
+          .set({
+            ...input.formUpdates,
+            openDate: input.formUpdates.openDate
+              ? new Date(input.formUpdates.openDate)
+              : undefined,
+            closeDate: input.formUpdates.closeDate
+              ? new Date(input.formUpdates.closeDate)
+              : undefined
+          })
+          .where(eq(forms.id, input.formId))
+      }
+
+      // 2. Delete pages
+      if (input.pages?.delete && input.pages.delete.length > 0) {
+        for (const pageId of input.pages.delete) {
+          // biome-ignore lint/nursery/noAwaitInLoop: Sequential deletes required in transaction
+          await tx.delete(formPages).where(eq(formPages.id, pageId))
+        }
+      }
+
+      // 3. Delete questions
+      if (input.questions?.delete && input.questions.delete.length > 0) {
+        for (const questionId of input.questions.delete) {
+          // biome-ignore lint/nursery/noAwaitInLoop: Sequential deletes required in transaction
+          await tx.delete(formQuestions).where(eq(formQuestions.id, questionId))
+        }
+      }
+
+      // 4. Create new pages
+      const pageIdMapping = new Map<string, string>()
+      if (input.pages?.create && input.pages.create.length > 0) {
+        for (const page of input.pages.create) {
+          // biome-ignore lint/nursery/noAwaitInLoop: Sequential creates required to maintain order and get IDs for mapping
+          const [newPage] = await tx
+            .insert(formPages)
+            .values({
+              formId: input.formId,
+              ...page
+            })
+            .returning()
+          // Store mapping if the page had a temporary ID
+          if (page.id) {
+            pageIdMapping.set(page.id, newPage.id)
+          }
+        }
+      }
+
+      // 5. Update existing pages
+      if (input.pages?.update && input.pages.update.length > 0) {
+        for (const page of input.pages.update) {
+          // biome-ignore lint/nursery/noAwaitInLoop: Sequential updates required in transaction
+          await tx.update(formPages).set(page).where(eq(formPages.id, page.id))
+        }
+      }
+
+      // 6. Create new questions (with mapped page IDs)
+      if (input.questions?.create && input.questions.create.length > 0) {
+        for (const question of input.questions.create) {
+          // Map temporary page ID to real page ID if needed
+          const realPageId =
+            pageIdMapping.get(question.pageId) || question.pageId
+
+          // biome-ignore lint/nursery/noAwaitInLoop: Sequential creates required to maintain order and use mapped page IDs
+          await tx.insert(formQuestions).values({
+            formId: input.formId,
+            ...question,
+            pageId: realPageId
+          })
+        }
+      }
+
+      // 7. Update existing questions
+      if (input.questions?.update && input.questions.update.length > 0) {
+        for (const question of input.questions.update) {
+          // biome-ignore lint/nursery/noAwaitInLoop: Sequential updates required in transaction
+          await tx
+            .update(formQuestions)
+            .set(question)
+            .where(eq(formQuestions.id, question.id))
+        }
+      }
+
+      // Return the complete updated form
+      return await this.getFormById(input.formId)
+    })
   }
 
   // ============================================================================
