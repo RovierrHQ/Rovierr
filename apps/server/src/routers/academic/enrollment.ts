@@ -1,7 +1,11 @@
+import { ORPCError } from '@orpc/server'
 import {
   courseEnrollment as courseEnrollmentTable,
+  courseOffering as courseOfferingTable,
+  course as courseTable,
   programEnrollment as programEnrollmentTable
 } from '@rov/db'
+import { and, eq, ilike, isNull, or } from 'drizzle-orm'
 import { db } from '@/db'
 import { protectedProcedure } from '@/lib/orpc'
 
@@ -13,7 +17,7 @@ export const enrollment = {
 
         // Fetch verified institution enrollments
         const enrollments = await db.query.instituitionEnrollment.findMany({
-          where: (enrollmentRecord, { eq, and }) =>
+          where: (enrollmentRecord) =>
             and(
               eq(enrollmentRecord.userId, userId),
               eq(enrollmentRecord.emailVerified, true),
@@ -48,7 +52,7 @@ export const enrollment = {
 
       // Fetch programs for the institution
       const programs = await db.query.program.findMany({
-        where: (program, { eq }) => eq(program.institutionId, institutionId),
+        where: (program) => eq(program.institutionId, institutionId),
         orderBy: (program, { asc }) => [asc(program.name)]
       })
 
@@ -70,7 +74,7 @@ export const enrollment = {
 
       // Fetch institutional terms
       const terms = await db.query.institutionalTerm.findMany({
-        where: (term, { eq }) => eq(term.institutionId, institutionId),
+        where: (term) => eq(term.institutionId, institutionId),
         orderBy: (term, { desc }) => [desc(term.startDate)]
       })
 
@@ -88,28 +92,48 @@ export const enrollment = {
 
   getCourses: protectedProcedure.academic.enrollment.getCourses.handler(
     async ({ input }) => {
-      const { termId } = input
+      const { termId, search } = input
 
-      // Fetch course offerings for the program and term
-      const offerings = await db.query.courseOffering.findMany({
-        where: (offering, { eq }) => eq(offering.termId, termId),
-        with: {
-          course: true
+      // If no search query or less than 4 characters, return empty array
+      if (!search || search.trim().length < 4) {
+        return {
+          courses: []
         }
-      })
+      }
+
+      const searchPattern = `%${search}%`
+
+      // Fetch course offerings with SQL filtering using joins
+      const offerings = await db
+        .select({
+          id: courseOfferingTable.id,
+          courseId: courseTable.id,
+          code: courseTable.code,
+          title: courseTable.title,
+          description: courseTable.description,
+          instructor: courseOfferingTable.instructor,
+          section: courseOfferingTable.section,
+          schedule: courseOfferingTable.schedule,
+          credits: courseTable.defaultCredits
+        })
+        .from(courseOfferingTable)
+        .innerJoin(
+          courseTable,
+          eq(courseTable.id, courseOfferingTable.courseId)
+        )
+        .where(
+          and(
+            eq(courseOfferingTable.termId, termId),
+            or(
+              ilike(courseTable.code, searchPattern),
+              ilike(courseTable.title, searchPattern)
+            )
+          )
+        )
+        .limit(50)
 
       return {
-        courses: offerings.map((offering) => ({
-          id: offering.id,
-          courseId: offering.course.id,
-          code: offering.course.code,
-          title: offering.course.title,
-          description: offering.course.description,
-          instructor: offering.instructor,
-          section: offering.section,
-          schedule: offering.schedule,
-          credits: offering.course.defaultCredits
-        }))
+        courses: offerings
       }
     }
   ),
@@ -121,12 +145,14 @@ export const enrollment = {
 
       // Check if already enrolled in this program
       const existingEnrollment = await db.query.programEnrollment.findFirst({
-        where: (record, { eq, and }) =>
+        where: (record) =>
           and(eq(record.userId, userId), eq(record.programId, programId))
       })
 
       if (existingEnrollment) {
-        throw new Error('ALREADY_ENROLLED')
+        throw new ORPCError('ALREADY_ENROLLED', {
+          message: 'Already enrolled in this program'
+        })
       }
 
       // Create program enrollment
@@ -154,11 +180,13 @@ export const enrollment = {
 
       // Verify the term exists
       const term = await db.query.institutionalTerm.findFirst({
-        where: (t, { eq }) => eq(t.id, termId)
+        where: (t) => eq(t.id, termId)
       })
 
       if (!term) {
-        throw new Error('INVALID_TERM')
+        throw new ORPCError('INVALID_TERM', {
+          message: 'Invalid term'
+        })
       }
 
       // Get course offerings
@@ -198,7 +226,7 @@ export const enrollment = {
 
         // Get the user's active program enrollment
         const programEnrollment = await db.query.programEnrollment.findFirst({
-          where: (record, { eq, and, isNull }) =>
+          where: (record) =>
             and(eq(record.userId, userId), isNull(record.graduatedOn)),
           with: {
             program: true
@@ -218,7 +246,7 @@ export const enrollment = {
 
         // Get the most recent institutional term for the institution
         const latestTerm = await db.query.institutionalTerm.findFirst({
-          where: (term, { eq }) =>
+          where: (term) =>
             eq(term.institutionId, programEnrollment.program.institutionId),
           orderBy: (term, { desc }) => [desc(term.startDate)]
         })
@@ -239,7 +267,7 @@ export const enrollment = {
 
         // Get enrolled courses for the current term
         const enrolledCourses = await db.query.courseEnrollment.findMany({
-          where: (record, { eq }) => eq(record.termId, latestTerm.id),
+          where: (record) => eq(record.termId, latestTerm.id),
           with: {
             course: true
           }
@@ -276,7 +304,7 @@ export const enrollment = {
 
       // Get the user's active program enrollment
       const programEnrollment = await db.query.programEnrollment.findFirst({
-        where: (record, { eq, and, isNull }) =>
+        where: (record) =>
           and(eq(record.userId, userId), isNull(record.graduatedOn)),
         with: {
           program: true
@@ -285,23 +313,27 @@ export const enrollment = {
       })
 
       if (!programEnrollment) {
-        throw new Error('NOT_ENROLLED')
+        throw new ORPCError('NOT_ENROLLED', {
+          message: 'User not enrolled in any program'
+        })
       }
 
       // Get the most recent institutional term
       const latestTerm = await db.query.institutionalTerm.findFirst({
-        where: (term, { eq }) =>
+        where: (term) =>
           eq(term.institutionId, programEnrollment.program.institutionId),
         orderBy: (term, { desc }) => [desc(term.startDate)]
       })
 
       if (!latestTerm) {
-        throw new Error('NO_TERM_FOUND')
+        throw new ORPCError('NOT_FOUND', {
+          message: 'No term found for institution'
+        })
       }
 
       // Get enrolled courses for the current term
       const enrolledCourses = await db.query.courseEnrollment.findMany({
-        where: (record, { eq }) => eq(record.termId, latestTerm.id),
+        where: (record) => eq(record.termId, latestTerm.id),
         with: {
           course: true,
           courseOffering: true

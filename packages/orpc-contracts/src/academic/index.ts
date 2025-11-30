@@ -107,8 +107,8 @@ export const academic = {
       })
       .input(
         z.object({
-          programId: z.string(),
-          termId: z.string()
+          termId: z.string(),
+          search: z.string().optional()
         })
       )
       .output(

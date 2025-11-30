@@ -9,12 +9,14 @@ import {
   CardTitle
 } from '@rov/ui/components/card'
 import { useAppForm } from '@rov/ui/components/form/index'
+import { Input } from '@rov/ui/components/input'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  GraduationCap
+  GraduationCap,
+  Search
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -39,6 +41,8 @@ export default function AcademicOnboardingPage() {
   const [selectedInstitutionId, setSelectedInstitutionId] = useState<
     string | null
   >(null)
+  const [courseSearch, setCourseSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
 
   // Fetch verified institution enrollments
   const { data: verifiedInstitutions } = useQuery(
@@ -125,17 +129,24 @@ export default function AcademicOnboardingPage() {
     }
   }, [form.state.values.institutionEnrollmentId, verifiedInstitutions])
 
-  // Fetch courses for selected program and term
-  const { data: courses } = useQuery(
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(courseSearch)
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [courseSearch])
+
+  // Fetch courses for selected term with search
+  const { data: courses, isLoading: isLoadingCourses } = useQuery(
     orpc.academic.enrollment.getCourses.queryOptions({
       input: {
-        programId: form.state.values.programId || '',
-        termId: form.state.values.termId || ''
+        termId: form.state.values.termId || '',
+        search: debouncedSearch
       },
       enabled:
-        step === 4 &&
-        !!form.state.values.programId &&
-        !!form.state.values.termId
+        step === 4 && !!form.state.values.termId && debouncedSearch.length >= 4
     })
   )
 
@@ -307,67 +318,134 @@ export default function AcademicOnboardingPage() {
             {/* Step 4: Select Courses */}
             {step === 4 && (
               <div className="space-y-4">
-                <p className="text-muted-foreground text-sm">
-                  Select all courses you're taking this semester
-                </p>
-                {courses && courses.courses.length > 0 ? (
-                  <div className="max-h-96 space-y-2 overflow-y-auto rounded-lg border p-4">
-                    {courses.courses.map(
-                      (course: {
-                        id: string
-                        code: string | null
-                        title: string
-                        instructor: string | null
-                        section: string | null
-                        schedule: string | null
-                      }) => (
-                        <label
-                          className="flex cursor-pointer items-start gap-3 rounded-md p-3 hover:bg-accent"
-                          key={course.id}
-                        >
-                          <input
-                            checked={form.state.values.courseIds.includes(
-                              course.id
-                            )}
-                            className="mt-1"
-                            onChange={(e) => {
-                              const currentIds = form.state.values.courseIds
-                              if (e.target.checked) {
-                                form.setFieldValue('courseIds', [
-                                  ...currentIds,
-                                  course.id
-                                ])
-                              } else {
-                                form.setFieldValue(
-                                  'courseIds',
-                                  currentIds.filter((id) => id !== course.id)
-                                )
-                              }
-                            }}
-                            type="checkbox"
-                          />
-                          <div className="flex-1">
-                            <div className="font-medium">
-                              {course.code ? `${course.code} - ` : ''}
-                              {course.title}
-                            </div>
-                            {(course.instructor ||
-                              course.section ||
-                              course.schedule) && (
-                              <div className="text-muted-foreground text-sm">
-                                {course.section && `Section ${course.section}`}
-                                {course.instructor && ` • ${course.instructor}`}
-                                {course.schedule && ` • ${course.schedule}`}
-                              </div>
-                            )}
-                          </div>
-                        </label>
-                      )
-                    )}
+                <div className="space-y-2">
+                  <label
+                    className="font-medium text-sm"
+                    htmlFor="course-search-input"
+                  >
+                    Search Courses
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute top-3 left-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      className="pl-9"
+                      id="course-search-input"
+                      onChange={(e) => setCourseSearch(e.target.value)}
+                      placeholder="Type at least 4 characters to search..."
+                      value={courseSearch}
+                    />
                   </div>
-                ) : (
-                  <div className="rounded-lg border p-4 text-center text-muted-foreground">
-                    No courses available for this term
+                  <p className="text-muted-foreground text-xs">
+                    Search by course code or title (minimum 4 characters)
+                  </p>
+                </div>
+
+                {(() => {
+                  if (courseSearch.length < 4) {
+                    return (
+                      <div className="rounded-lg border border-dashed p-8 text-center">
+                        <Search className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+                        <p className="text-muted-foreground">
+                          Start typing to search for courses
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          Enter at least 4 characters to see results
+                        </p>
+                      </div>
+                    )
+                  }
+
+                  if (isLoadingCourses) {
+                    return (
+                      <div className="rounded-lg border p-8 text-center text-muted-foreground">
+                        Searching courses...
+                      </div>
+                    )
+                  }
+
+                  if (courses && courses.courses.length > 0) {
+                    return (
+                      <div className="space-y-2">
+                        <p className="text-muted-foreground text-sm">
+                          Found {courses.courses.length} course(s). Select the
+                          ones you're taking:
+                        </p>
+                        <div className="max-h-96 space-y-2 overflow-y-auto rounded-lg border p-4">
+                          {courses.courses.map(
+                            (course: {
+                              id: string
+                              code: string | null
+                              title: string
+                              instructor: string | null
+                              section: string | null
+                              schedule: string | null
+                            }) => (
+                              <label
+                                className="flex cursor-pointer items-start gap-3 rounded-md p-3 hover:bg-accent"
+                                key={course.id}
+                              >
+                                <input
+                                  checked={form.state.values.courseIds.includes(
+                                    course.id
+                                  )}
+                                  className="mt-1"
+                                  onChange={(e) => {
+                                    const currentIds =
+                                      form.state.values.courseIds
+                                    if (e.target.checked) {
+                                      form.setFieldValue('courseIds', [
+                                        ...currentIds,
+                                        course.id
+                                      ])
+                                    } else {
+                                      form.setFieldValue(
+                                        'courseIds',
+                                        currentIds.filter(
+                                          (id) => id !== course.id
+                                        )
+                                      )
+                                    }
+                                  }}
+                                  type="checkbox"
+                                />
+                                <div className="flex-1">
+                                  <div className="font-medium">
+                                    {course.code ? `${course.code} - ` : ''}
+                                    {course.title}
+                                  </div>
+                                  {(course.instructor ||
+                                    course.section ||
+                                    course.schedule) && (
+                                    <div className="text-muted-foreground text-sm">
+                                      {course.section &&
+                                        `Section ${course.section}`}
+                                      {course.instructor &&
+                                        ` • ${course.instructor}`}
+                                      {course.schedule &&
+                                        ` • ${course.schedule}`}
+                                    </div>
+                                  )}
+                                </div>
+                              </label>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <div className="rounded-lg border p-4 text-center text-muted-foreground">
+                      No courses found matching "{courseSearch}"
+                    </div>
+                  )
+                })()}
+
+                {form.state.values.courseIds.length > 0 && (
+                  <div className="rounded-lg bg-muted p-3">
+                    <p className="font-medium text-sm">
+                      {form.state.values.courseIds.length} course(s) selected
+                    </p>
                   </div>
                 )}
               </div>
