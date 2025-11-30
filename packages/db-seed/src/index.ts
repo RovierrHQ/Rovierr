@@ -66,7 +66,15 @@ async function main() {
 
     // Build execution order
     logger.debug('Building execution order...')
-    const orderedModules = registry.buildExecutionOrder(modulesToRun)
+    if (options.skipDependencyCheck) {
+      logger.warn(
+        '⚠️  Skipping dependency checks - modules will run in specified order'
+      )
+    }
+    const orderedModules = registry.buildExecutionOrder(
+      modulesToRun,
+      options.skipDependencyCheck
+    )
 
     logger.info(
       `Will seed ${orderedModules.length} modules: ${orderedModules.map((m) => m.name).join(', ')}`

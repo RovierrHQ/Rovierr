@@ -24,6 +24,10 @@ export class CLIParser {
       .option('--no-transaction', 'Execute seeds without transaction wrapping')
       .option('--force', 'Skip confirmation prompts')
       .option('--use-scraper', 'Use web scraper if available')
+      .option(
+        '--skip-deps',
+        'Skip dependency validation and run modules in specified order'
+      )
   }
 
   parse(args: string[]): SeedOptions {
@@ -38,7 +42,8 @@ export class CLIParser {
       verbose: options.verbose,
       noTransaction: !options.transaction,
       force: options.force,
-      useScraper: options.useScraper
+      useScraper: options.useScraper,
+      skipDependencyCheck: options.skipDeps
     }
   }
 

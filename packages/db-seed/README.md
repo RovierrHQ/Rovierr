@@ -53,6 +53,27 @@ DATABASE_URL=postgresql://user:pass@host:5432/db
 | `--no-transaction` | Disable transaction wrapping | `--no-transaction` |
 | `--force` | Skip confirmation prompts | `--force` |
 | `--use-scraper` | Use web scraper if available | `--use-scraper` |
+| `--skip-deps` | Skip dependency validation and ordering | `--skip-deps --only course-offering` |
+
+### Skipping Dependencies
+
+Use `--skip-deps` when you want to seed specific modules without their dependencies. This is useful when:
+
+- You've already seeded large dependency tables (e.g., 6000+ courses)
+- You're testing or mocking data for specific modules
+- You want to re-run a single module without re-seeding everything
+
+**Example:**
+
+```bash
+# Seed course offerings without re-seeding courses and institutional terms
+bun run seed --only course-offering --skip-deps
+
+# Seed multiple modules in exact order specified, bypassing dependency checks
+bun run seed --only institutional-term course-offering --skip-deps
+```
+
+**⚠️ Warning:** Using `--skip-deps` assumes all required data already exists in the database. If dependencies are missing, the seed will fail with foreign key constraint errors.
 
 ## Project Structure
 

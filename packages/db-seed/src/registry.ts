@@ -104,7 +104,18 @@ export class SeedRegistry {
   /**
    * Build execution order based on dependencies
    */
-  buildExecutionOrder(moduleNames?: string[]): SeedModule[] {
+  buildExecutionOrder(
+    moduleNames?: string[],
+    skipDependencyCheck = false
+  ): SeedModule[] {
+    // If skipping dependency checks, return modules in the order they were requested
+    if (skipDependencyCheck) {
+      const targetNames = moduleNames || this.getModuleNames()
+      return targetNames
+        .map((name) => this.modules.get(name))
+        .filter((m): m is SeedModule => m !== undefined)
+    }
+
     const resolver = new DependencyResolver(this.getModules())
 
     // Validate dependencies

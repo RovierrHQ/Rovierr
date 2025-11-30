@@ -17,6 +17,7 @@ export interface SeedOptions {
   force?: boolean // Skip confirmations
   useScraper?: boolean // Use web scraper if available
   progress?: ProgressTracker // Progress tracking callback
+  skipDependencyCheck?: boolean // Skip dependency validation and ordering
 }
 
 export interface SeedResult {
