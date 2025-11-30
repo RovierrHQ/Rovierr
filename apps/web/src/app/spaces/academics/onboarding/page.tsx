@@ -83,8 +83,20 @@ export default function AcademicOnboardingPage() {
 
   const enrollCoursesMutation = useMutation(
     orpc.academic.enrollment.enrollCourses.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['academic', 'enrollment'] })
+      onSuccess: async () => {
+        // Invalidate enrollment queries to refresh sidebar and dashboard
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: orpc.academic.enrollment.getEnrollmentStatus.queryOptions(
+              { input: {} }
+            ).queryKey
+          }),
+          queryClient.invalidateQueries({
+            queryKey: orpc.academic.enrollment.getEnrollment.queryOptions({
+              input: {}
+            }).queryKey
+          })
+        ])
         toast.success('Enrollment completed successfully!')
         router.push('/spaces/academics/dashboard')
       },

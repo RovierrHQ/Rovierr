@@ -27,11 +27,11 @@ import { orpc } from '@/utils/orpc'
 const AcademicsLayout = ({ children }: { children: ReactNode }) => {
   const { setSidebarTree } = useSpaceSidebarItems()
 
-  const { data: enrollmentStatus, isLoading } = useQuery(
-    orpc.academic.enrollment.getEnrollmentStatus.queryOptions({ input: {} })
+  const { data: enrollment, isLoading } = useQuery(
+    orpc.academic.enrollment.getEnrollment.queryOptions({ input: {} })
   )
 
-  const enrolledCourses = enrollmentStatus?.courses ?? []
+  const enrolledCourses = enrollment?.courses ?? []
   const lastCoursesRef = useRef<string>('')
 
   useEffect(() => {

@@ -274,14 +274,18 @@ export const enrollment = {
           }
         }
 
-        // Get the most recent institutional term for the institution
-        const latestTerm = await db.query.institutionalTerm.findFirst({
-          where: (term) =>
-            eq(term.institutionId, programEnrollment.program.institutionId),
-          orderBy: (term, { desc }) => [desc(term.startDate)]
-        })
+        // Get user's active term enrollment
+        const termEnrollment =
+          await db.query.institutionalTermEnrollment.findFirst({
+            where: (record) =>
+              and(eq(record.userId, userId), eq(record.status, 'active')),
+            with: {
+              term: true
+            },
+            orderBy: (record, { desc }) => [desc(record.createdAt)]
+          })
 
-        if (!latestTerm) {
+        if (!termEnrollment) {
           return {
             hasProgram: true,
             hasCourses: false,
@@ -297,7 +301,7 @@ export const enrollment = {
 
         // Get enrolled courses for the current term
         const enrolledCourses = await db.query.courseEnrollment.findMany({
-          where: (record) => eq(record.termId, latestTerm.id),
+          where: (record) => eq(record.termId, termEnrollment.termId),
           with: {
             course: true
           }
@@ -312,9 +316,9 @@ export const enrollment = {
             code: programEnrollment.program.code
           },
           term: {
-            id: latestTerm.id,
-            termName: latestTerm.termName,
-            academicYear: latestTerm.academicYear
+            id: termEnrollment.term.id,
+            termName: termEnrollment.term.termName,
+            academicYear: termEnrollment.term.academicYear
           },
           courses: enrolledCourses.map((record) => ({
             id: record.id,
