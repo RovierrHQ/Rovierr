@@ -29,7 +29,7 @@ bun run seed:dev
 # Clear and reseed
 bun run seed --clear --only institution
 
-# Dry run (no database changes)
+# Dry run (processes data but doesn't insert to database)
 bun run seed --dry-run --verbose
 ```
 
@@ -48,7 +48,7 @@ DATABASE_URL=postgresql://user:pass@host:5432/db
 | `--only <tables...>` | Seed only specified tables | `--only institution faculty` |
 | `--exclude <tables...>` | Exclude specified tables | `--exclude expenses` |
 | `--clear` | Truncate tables before seeding | `--clear` |
-| `--dry-run` | Simulate without database changes | `--dry-run` |
+| `--dry-run` | Process data and show counts without inserting to database | `--dry-run` |
 | `--verbose` | Detailed logging | `--verbose` |
 | `--no-transaction` | Disable transaction wrapping | `--no-transaction` |
 | `--force` | Skip confirmation prompts | `--force` |
@@ -99,34 +99,65 @@ seed/
 
 ## Creating a Seed Module
 
+### Module Structure
+
+Each seed module should have:
+1. **prepareData()** - Optional method that loads and processes data (returns data, no DB operations)
+2. **seed()** - Required method that calls prepareData() and performs DB operations
+3. **clear()** - Optional method to clear the table
+
+**Key principle:** `seed()` should call `prepareData()` to avoid duplicating data loading logic.
+
 ### Basic Template
 
 Create a new file in `modules/` directory:
 
 ```typescript
-import type { SeedModule, SeedOptions, SeedResult } from '../types'
-import type { NeonDatabase } from '@neondatabase/serverless'
-import { yourTable } from '../../schema/your-table'
+import type { DB } from '@rov/db'
+import type { SeedModule, SeedOptions, SeedResult, PrepareDataResult } from '../types'
+import { yourTable } from '@rov/db/schema'
 
-export const yourSeed: SeedModule = {
+interface YourRecord {
+  id: string
+  name: string
+  // ... other fields
+}
+
+export const yourSeed: SeedModule<{ records: YourRecord[] }> = {
   name: 'your-table-name',
   dependencies: [], // List parent tables if any
 
-  async seed(
-    db: NeonDatabase<any>,
-    options: SeedOptions
-  ): Promise<SeedResult> {
+  // Required: For dry-run support - loads and processes data
+  async prepareData(db: DB, options: SeedOptions) {
+    // Load your data from CSV, API, etc.
+    const data = await loadYourData()
+
+    // Validate and filter records
+    const validRecords = data.filter(validateRecord)
+
+    return {
+      data: { records: validRecords }, // Named entity with array
+      invalidCount: data.length - validRecords.length
+    }
+  },
+
+  async seed(db: DB, options: SeedOptions): Promise<SeedResult> {
     const startTime = Date.now()
 
-    // Load your data
-    const data = loadYourData()
+    // Get prepared data (reuses prepareData logic)
+    const { data, invalidCount = 0 } = await yourSeed.prepareData(db, options)
+    const validRecords = data.records
 
     let inserted = 0
     let skipped = 0
-    const errors: any[] = []
+    const errors: SeedResult['errors'] = []
+
+    if (options.progress) {
+      options.progress.setTotal(validRecords.length)
+    }
 
     // Insert records
-    for (const record of data) {
+    for (const record of validRecords) {
       try {
         await db.insert(yourTable).values(record)
         inserted++

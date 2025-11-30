@@ -8,8 +8,14 @@ import {
   institutionalTerm
 } from '@rov/db/schema'
 import { file, Glob } from 'bun'
+import { and, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import type { SeedModule, SeedOptions, SeedResult } from '../types'
+import type {
+  PrepareDataResult,
+  SeedModule,
+  SeedOptions,
+  SeedResult
+} from '../types'
 
 interface CourseJSON {
   code: string
@@ -63,12 +69,18 @@ interface CourseOfferingRecord {
   schedule: string | null
 }
 
+interface CourseOfferingWithHelpers extends CourseOfferingRecord {
+  termName?: string
+  academicYear?: string
+}
+
 /**
  * Load all course JSON files from the courses directory
  */
-async function loadCoursesFromJSON(
-  institutionId: string
-): Promise<{ courses: CourseRecord[]; offerings: CourseOfferingRecord[] }> {
+async function loadCoursesFromJSON(institutionId: string): Promise<{
+  courses: CourseRecord[]
+  offerings: CourseOfferingWithHelpers[]
+}> {
   const coursesPath = `${import.meta.dir}/../data/courses`
 
   // Use Bun's Glob to find all JSON files
@@ -125,19 +137,16 @@ async function loadCoursesFromJSON(
                 })
                 .join(' / ')
 
-              const offeringRecord: CourseOfferingRecord = {
+              const offeringRecord: CourseOfferingWithHelpers = {
                 id: nanoid(),
                 courseId,
                 termId: '', // Will be resolved later
-                section: sectionCode,
+                section: sectionCode || null,
                 instructor: sectionData.instructors[0] || null,
                 capacity: null,
                 schedule: scheduleStr || null,
-                termName, // Helper field for resolution
+                termName: termName, // Helper field for resolution
                 academicYear: '' // Helper field for resolution
-              } as CourseOfferingRecord & {
-                termName: string
-                academicYear: string
               }
 
               // Parse term name to extract academic year
@@ -174,9 +183,34 @@ async function loadCoursesFromJSON(
 /**
  * CUHK Courses JSON seed module
  */
-export const cuhkCoursesJsonSeed: SeedModule = {
+export const cuhkCoursesJsonSeed: SeedModule<{
+  courses: CourseRecord[]
+  offerings: CourseOfferingWithHelpers[]
+}> = {
   name: 'cuhk-courses',
   dependencies: ['institution', 'institutional-term'],
+
+  async prepareData(db: DB, options: SeedOptions) {
+    // Get CUHK institution ID
+    const cuhkInstitution = await db.query.institution.findFirst({
+      where: eq(institution.slug, 'cuhk')
+    })
+
+    if (!cuhkInstitution) {
+      return {
+        data: { courses: [], offerings: [] },
+        invalidCount: 0
+      }
+    }
+
+    // Load courses and offerings from JSON
+    const { courses, offerings } = await loadCoursesFromJSON(cuhkInstitution.id)
+
+    return {
+      data: { courses, offerings },
+      invalidCount: 0
+    }
+  },
 
   async seed(db: DB, options: SeedOptions): Promise<SeedResult> {
     const startTime = Date.now()
@@ -205,8 +239,9 @@ export const cuhkCoursesJsonSeed: SeedModule = {
       }
     }
 
-    // Load courses and offerings from JSON
-    const { courses, offerings } = await loadCoursesFromJSON(cuhkInstitution.id)
+    // Get prepared data
+    const { data } = await this.prepareData(db, options)
+    const { courses, offerings } = data
 
     let coursesInserted = 0
     let coursesSkipped = 0
@@ -242,9 +277,8 @@ export const cuhkCoursesJsonSeed: SeedModule = {
     // Resolve term IDs and insert offerings
     for (const offering of offerings) {
       try {
-        const offeringWithHelpers = offering as any
-        const termName = offeringWithHelpers.termName
-        const academicYear = offeringWithHelpers.academicYear
+        const termName = offering.termName
+        const academicYear = offering.academicYear
 
         if (termName && academicYear) {
           const term = await db.query.institutionalTerm.findFirst({
@@ -264,6 +298,7 @@ export const cuhkCoursesJsonSeed: SeedModule = {
               academicYear: __,
               ...offeringData
             } = offering as any
+
             await db.insert(courseOffering).values(offeringData)
             offeringsInserted++
             if (options.progress) {

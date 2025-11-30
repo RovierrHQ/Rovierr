@@ -53,10 +53,31 @@ export interface ValidationResult {
   errors: string[]
 }
 
-export interface SeedModule {
+/**
+ * Data preparation result - returns processed data ready for insertion
+ * Generic T should be a record of entity names to their data arrays
+ * Example: { courses: CourseRecord[], offerings: OfferingRecord[] }
+ */
+export interface PrepareDataResult<T extends Record<string, unknown[]>> {
+  data: T
+  invalidCount?: number
+}
+
+/**
+ * Data preparation function - loads and processes data (no DB operations)
+ */
+export type PrepareDataFunction<T extends Record<string, unknown[]>> = (
+  db: DB,
+  options: SeedOptions
+) => Promise<PrepareDataResult<T>>
+
+export interface SeedModule<
+  T extends Record<string, unknown[]> = Record<string, unknown[]>
+> {
   name: string // Table/module name
   dependencies?: string[] // Required parent seeds
-  seed: SeedFunction // Seeding function
+  seed: SeedFunction // Seeding function (does DB operations)
+  prepareData: PrepareDataFunction<T> // Required: Data preparation (used by seed and dry-run)
   clear?: ClearFunction // Optional cleanup function
   validate?: ValidationFunction // Optional validation
 }

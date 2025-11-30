@@ -70,13 +70,17 @@ export class SeedRunner {
 
               if (result.errors.length === 0) {
                 successfulSeeds.push(module.name)
+                const action = options.dryRun
+                  ? 'would insert'
+                  : 'records inserted'
                 this.logger.success(
-                  `${module.name}: ${result.recordsInserted} records inserted`
+                  `${module.name}: ${result.recordsInserted} ${action}`
                 )
               } else {
                 failedSeeds.push(module.name)
+                const action = options.dryRun ? 'would insert' : 'inserted'
                 this.logger.warn(
-                  `${module.name}: ${result.recordsInserted} inserted, ${result.errors.length} errors`
+                  `${module.name}: ${result.recordsInserted} ${action}, ${result.errors.length} errors`
                 )
               }
             } catch (error) {
@@ -125,19 +129,37 @@ export class SeedRunner {
     db?: DB
   ): Promise<SeedResult> {
     const database = db || this.db
-
-    if (options.dryRun) {
-      this.logger.debug(`[DRY RUN] Would seed: ${module.name}`)
-      return {
-        tableName: module.name,
-        recordsInserted: 0,
-        recordsSkipped: 0,
-        errors: [],
-        duration: 0
-      }
-    }
+    const startTime = Date.now()
 
     try {
+      // Dry-run mode: use prepareData
+      if (options.dryRun) {
+        const prepared = await module.prepareData(database, options)
+
+        // Calculate total records across all entities
+        const totalRecords = Object.values(prepared.data).reduce(
+          (sum, records) => sum + records.length,
+          0
+        )
+
+        // Build detailed message showing each entity
+        const entityCounts = Object.entries(prepared.data)
+          .map(([entity, records]) => `${entity}: ${records.length}`)
+          .join(', ')
+
+        this.logger.debug(
+          `[DRY RUN] Would insert ${totalRecords} records into ${module.name} (${entityCounts})`
+        )
+        return {
+          tableName: module.name,
+          recordsInserted: totalRecords,
+          recordsSkipped: prepared.invalidCount || 0,
+          errors: [],
+          duration: Date.now() - startTime
+        }
+      }
+
+      // Normal mode: run seed function
       const result = await module.seed(database, options)
       return result
     } catch (error) {
@@ -160,10 +182,13 @@ export class SeedRunner {
     this.logger.info('='.repeat(50))
 
     if (options.dryRun) {
-      this.logger.warn('DRY RUN - No changes were made')
+      this.logger.warn('DRY RUN - No changes were made to the database')
     }
 
-    this.logger.info(`Total records: ${summary.totalRecords}`)
+    const recordLabel = options.dryRun
+      ? `Total records (would be inserted): ${summary.totalRecords}`
+      : `Total records: ${summary.totalRecords}`
+    this.logger.info(recordLabel)
     this.logger.info(`Duration: ${summary.duration}ms`)
     this.logger.info(`Successful: ${summary.successfulSeeds.length} modules`)
 

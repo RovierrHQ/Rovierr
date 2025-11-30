@@ -4,7 +4,12 @@ import { institution } from '@rov/db/schema'
 import { file } from 'bun'
 import { parse } from 'csv-parse/sync'
 import { nanoid } from 'nanoid'
-import type { SeedModule, SeedOptions, SeedResult } from '../types'
+import type {
+  PrepareDataResult,
+  SeedModule,
+  SeedOptions,
+  SeedResult
+} from '../types'
 
 interface InstitutionCSVRow {
   name: string
@@ -90,12 +95,13 @@ function validateInstitution(record: InstitutionRecord): boolean {
 /**
  * Institution seed module
  */
-export const institutionSeed: SeedModule = {
+export const institutionSeed: SeedModule<{
+  institutions: InstitutionRecord[]
+}> = {
   name: 'institution',
-  dependencies: [], // No dependencies
+  dependencies: [],
 
-  async seed(db: DB, options: SeedOptions): Promise<SeedResult> {
-    const startTime = Date.now()
+  async prepareData(db: DB, options: SeedOptions) {
     let data: InstitutionRecord[] = []
 
     // Load from CSV
@@ -103,7 +109,7 @@ export const institutionSeed: SeedModule = {
       const csvData = await loadInstitutionsFromCSV()
       data = [...data, ...csvData]
     } catch {
-      // Failed to load CSV, continue with empty data
+      // Failed to load CSV
     }
 
     // Load from scraper if enabled
@@ -112,7 +118,7 @@ export const institutionSeed: SeedModule = {
         const scrapedData = await loadInstitutionsFromScraper()
         data = [...data, ...scrapedData]
       } catch {
-        // Failed to load from scraper, continue with CSV data
+        // Failed to load from scraper
       }
     }
 
@@ -123,17 +129,27 @@ export const institutionSeed: SeedModule = {
 
     // Validate records
     const validRecords = uniqueData.filter(validateInstitution)
-    const invalidCount = uniqueData.length - validRecords.length
 
-    if (invalidCount > 0) {
-      // Skip invalid records
+    return {
+      data: { institutions: validRecords },
+      invalidCount: uniqueData.length - validRecords.length
     }
+  },
+
+  async seed(db: DB, options: SeedOptions): Promise<SeedResult> {
+    const startTime = Date.now()
+
+    // Get prepared data
+    const { data, invalidCount = 0 } = await institutionSeed.prepareData(
+      db,
+      options
+    )
+    const validRecords = data.institutions
 
     let inserted = 0
     let skipped = 0
     const errors: SeedResult['errors'] = []
 
-    // Set total for progress tracking
     if (options.progress) {
       options.progress.setTotal(validRecords.length)
     }

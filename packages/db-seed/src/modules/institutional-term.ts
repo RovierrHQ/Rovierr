@@ -4,7 +4,12 @@ import { institutionalTerm } from '@rov/db/schema'
 import { file } from 'bun'
 import { parse } from 'csv-parse/sync'
 import { nanoid } from 'nanoid'
-import type { SeedModule, SeedOptions, SeedResult } from '../types'
+import type {
+  PrepareDataResult,
+  SeedModule,
+  SeedOptions,
+  SeedResult
+} from '../types'
 
 interface InstitutionalTermCSVRow {
   institution_slug: string
@@ -66,40 +71,21 @@ function validateTerm(record: InstitutionalTermRecord): boolean {
 /**
  * Institutional Term seed module
  */
-export const institutionalTermSeed: SeedModule = {
+export const institutionalTermSeed: SeedModule<{
+  terms: InstitutionalTermRecord[]
+}> = {
   name: 'institutional-term',
-  dependencies: ['institution'], // Depends on institutions being seeded first
+  dependencies: ['institution'],
 
-  async seed(db: DB, options: SeedOptions): Promise<SeedResult> {
-    const startTime = Date.now()
-    let data: InstitutionalTermRecord[] = []
-
+  async prepareData(db: DB, options: SeedOptions) {
     // Load from CSV
-    try {
-      const csvData = await loadTermsFromCSV()
-      data = [...data, ...csvData]
-    } catch (err) {
-      // Failed to load CSV
-      return {
-        tableName: 'institutional_term',
-        recordsInserted: 0,
-        recordsSkipped: 0,
-        errors: [
-          {
-            record: null,
-            error: err as Error,
-            phase: 'validation'
-          }
-        ],
-        duration: Date.now() - startTime
-      }
-    }
+    const csvData = await loadTermsFromCSV()
 
     // Resolve institution IDs from slugs
     const { institution } = await import('@rov/db/schema')
-    const { eq, and } = await import('drizzle-orm')
+    const { eq } = await import('drizzle-orm')
 
-    for (const term of data) {
+    for (const term of csvData) {
       if (term.institutionSlug) {
         const inst = await db.query.institution.findFirst({
           where: eq(institution.slug, term.institutionSlug)
@@ -111,14 +97,30 @@ export const institutionalTermSeed: SeedModule = {
     }
 
     // Validate records
-    const validRecords = data.filter(validateTerm)
-    const invalidCount = data.length - validRecords.length
+    const validRecords = csvData.filter(validateTerm)
+
+    return {
+      data: { terms: validRecords },
+      invalidCount: csvData.length - validRecords.length
+    }
+  },
+
+  async seed(db: DB, options: SeedOptions): Promise<SeedResult> {
+    const startTime = Date.now()
+
+    // Get prepared data
+    const { data, invalidCount = 0 } = await institutionalTermSeed.prepareData(
+      db,
+      options
+    )
+    const validRecords = data.terms
+
+    const { and, eq } = await import('drizzle-orm')
 
     let inserted = 0
     let skipped = 0
     const errors: SeedResult['errors'] = []
 
-    // Set total for progress tracking
     if (options.progress) {
       options.progress.setTotal(validRecords.length)
     }
@@ -126,7 +128,7 @@ export const institutionalTermSeed: SeedModule = {
     // Insert records
     for (const term of validRecords) {
       try {
-        // Check if term already exists (by institutionId, termName, and academicYear)
+        // Check if term already exists
         const existingTerm = await db.query.institutionalTerm.findFirst({
           where: and(
             eq(institutionalTerm.institutionId, term.institutionId),
@@ -149,6 +151,7 @@ export const institutionalTermSeed: SeedModule = {
         const { institutionSlug, ...termData } = term
         await db.insert(institutionalTerm).values(termData)
         inserted++
+
         if (options.progress) {
           options.progress.increment(`${inserted}/${validRecords.length}`)
         }

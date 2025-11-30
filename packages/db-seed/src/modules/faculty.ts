@@ -5,7 +5,12 @@ import { file } from 'bun'
 import { parse } from 'csv-parse/sync'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import type { SeedModule, SeedOptions, SeedResult } from '../types'
+import type {
+  PrepareDataResult,
+  SeedModule,
+  SeedOptions,
+  SeedResult
+} from '../types'
 
 interface FacultyCSVRow {
   institutionSlug: string
@@ -73,12 +78,11 @@ function validateFaculty(record: FacultyRecord): boolean {
 /**
  * Faculty seed module
  */
-export const facultySeed: SeedModule = {
+export const facultySeed: SeedModule<{ faculties: FacultyRecord[] }> = {
   name: 'faculty',
-  dependencies: ['institution'], // Depends on institution being seeded first
+  dependencies: ['institution'],
 
-  async seed(db: DB, options: SeedOptions): Promise<SeedResult> {
-    const startTime = Date.now()
+  async prepareData(db: DB, options: SeedOptions) {
     let data: FacultyRecord[] = []
 
     // Load from CSV
@@ -91,11 +95,22 @@ export const facultySeed: SeedModule = {
 
     // Validate records
     const validRecords = data.filter(validateFaculty)
-    const invalidCount = data.length - validRecords.length
 
-    if (invalidCount > 0) {
-      console.warn(`Skipped ${invalidCount} invalid faculty records`)
+    return {
+      data: { faculties: validRecords },
+      invalidCount: data.length - validRecords.length
     }
+  },
+
+  async seed(db: DB, options: SeedOptions): Promise<SeedResult> {
+    const startTime = Date.now()
+
+    // Get prepared data
+    const { data, invalidCount = 0 } = await facultySeed.prepareData(
+      db,
+      options
+    )
+    const validRecords = data.faculties
 
     let inserted = 0
     let skipped = 0

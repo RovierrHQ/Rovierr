@@ -94,12 +94,11 @@ function validateProgram(record: ProgramRecord): boolean {
 /**
  * Program seed module
  */
-export const programSeed: SeedModule = {
+export const programSeed: SeedModule<{ programs: ProgramRecord[] }> = {
   name: 'program',
   dependencies: ['institution'],
 
-  async seed(db: DB, options: SeedOptions): Promise<SeedResult> {
-    const startTime = Date.now()
+  async prepareData(db: DB, options: SeedOptions) {
     let data: ProgramRecord[] = []
 
     // Load from CSV
@@ -112,11 +111,22 @@ export const programSeed: SeedModule = {
 
     // Validate records
     const validRecords = data.filter(validateProgram)
-    const invalidCount = data.length - validRecords.length
 
-    if (invalidCount > 0) {
-      console.warn(`Skipped ${invalidCount} invalid program records`)
+    return {
+      data: { programs: validRecords },
+      invalidCount: data.length - validRecords.length
     }
+  },
+
+  async seed(db: DB, options: SeedOptions): Promise<SeedResult> {
+    const startTime = Date.now()
+
+    // Get prepared data
+    const { data, invalidCount = 0 } = await programSeed.prepareData(
+      db,
+      options
+    )
+    const validRecords = data.programs
 
     let inserted = 0
     let skipped = 0
