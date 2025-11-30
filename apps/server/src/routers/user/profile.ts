@@ -272,6 +272,21 @@ export const profile = {
         })
       }
 
+      // Generate presigned URLs for S3 images if they exist
+      const imageUrl =
+        updatedUser.image && isS3Url(updatedUser.image)
+          ? await getPresignedUrlFromFullUrl(updatedUser.image).catch(
+              () => updatedUser.image
+            )
+          : updatedUser.image
+
+      const bannerImageUrl =
+        updatedUser.bannerImage && isS3Url(updatedUser.bannerImage)
+          ? await getPresignedUrlFromFullUrl(updatedUser.bannerImage).catch(
+              () => updatedUser.bannerImage
+            )
+          : updatedUser.bannerImage
+
       return {
         success: true,
         user: {
@@ -281,6 +296,8 @@ export const profile = {
           bio: updatedUser.bio,
           summary: updatedUser.summary,
           website: updatedUser.website,
+          image: imageUrl,
+          bannerImage: bannerImageUrl,
           socialLinks: {
             whatsapp: updatedUser.whatsapp,
             telegram: updatedUser.telegram,

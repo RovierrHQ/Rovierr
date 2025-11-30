@@ -2,7 +2,7 @@ import type * as lr from 'lucide-react'
 
 export const SpacesNames = {
   SPACES: 'Spaces',
-  CLUBS: 'Clubs',
+  CLUBS: 'Societies',
   ACADEMICS: 'Academics',
   SOCIAL: 'Social',
   PERSONAL: 'Personal',

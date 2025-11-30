@@ -1,7 +1,6 @@
 import {
   AudioWaveform,
   BriefcaseBusiness,
-  Club,
   Compass,
   Frame,
   GraduationCap,
@@ -18,20 +17,6 @@ import {
 
 export const spaces: ISpaces[] = [
   {
-    name: SpacesNames.ACADEMICS,
-    logo: GraduationCap,
-    plan: 'Startup',
-    url: '/spaces/academics',
-    isActive: true
-  },
-  {
-    name: SpacesNames.SOCIAL,
-    logo: AudioWaveform,
-    plan: 'Free',
-    url: '/spaces/social',
-    isActive: false
-  },
-  {
     name: SpacesNames.PERSONAL,
     logo: UserRound,
     plan: 'Free',
@@ -39,15 +24,16 @@ export const spaces: ISpaces[] = [
     isActive: false
   },
   {
-    name: SpacesNames.CAREER,
-    logo: BriefcaseBusiness,
-    plan: 'Free',
-    url: '/spaces/career',
-    isActive: false
+    name: SpacesNames.ACADEMICS,
+    logo: GraduationCap,
+    plan: 'Startup',
+    url: '/spaces/academics',
+    isActive: true
   },
+
   {
     name: SpacesNames.CLUBS,
-    logo: Club,
+    logo: Users,
     plan: 'Free',
     url: '/spaces/societies',
     isActive: true,
@@ -89,6 +75,20 @@ export const spaces: ISpaces[] = [
         ]
       }
     ]
+  },
+  {
+    name: SpacesNames.CAREER,
+    logo: BriefcaseBusiness,
+    plan: 'Free',
+    url: '/spaces/career',
+    isActive: false
+  },
+  {
+    name: SpacesNames.SOCIAL,
+    logo: AudioWaveform,
+    plan: 'Free',
+    url: '/spaces/social',
+    isActive: false
   }
 ]
 

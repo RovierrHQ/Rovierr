@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { ImageUploadDialog as SharedImageUploadDialog } from '@/components/shared/image-upload-dialog'
+import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
 
 interface ImageUploadDialogProps {
@@ -22,8 +23,15 @@ export function ImageUploadDialog({
 
   const updateMutation = useMutation(
     orpc.user.profile.update.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['user', 'profile'] })
+      onSuccess: async () => {
+        // Invalidate profile queries
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
+          queryClient.invalidateQueries({
+            queryKey: orpc.user.profile.details.queryOptions().queryKey
+          }),
+          authClient.getSession({ query: { disableCookieCache: true } })
+        ])
         toast.success(
           `${type === 'profile' ? 'Profile picture' : 'Banner'} updated successfully`
         )
