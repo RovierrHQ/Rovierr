@@ -153,6 +153,10 @@ export default function AcademicOnboardingPage() {
   const handleNext = () => {
     if (step < 4) {
       setStep(step + 1)
+      // Clear course selection when entering step 4
+      if (step === 3) {
+        form.setFieldValue('courseIds', [])
+      }
     }
   }
 
@@ -371,64 +375,58 @@ export default function AcademicOnboardingPage() {
                           ones you're taking:
                         </p>
                         <div className="max-h-96 space-y-2 overflow-y-auto rounded-lg border p-4">
-                          {courses.courses.map(
-                            (course: {
-                              id: string
-                              code: string | null
-                              title: string
-                              instructor: string | null
-                              section: string | null
-                              schedule: string | null
-                            }) => (
-                              <label
-                                className="flex cursor-pointer items-start gap-3 rounded-md p-3 hover:bg-accent"
-                                key={course.id}
-                              >
-                                <input
-                                  checked={form.state.values.courseIds.includes(
-                                    course.id
-                                  )}
-                                  className="mt-1"
-                                  onChange={(e) => {
-                                    const currentIds =
-                                      form.state.values.courseIds
-                                    if (e.target.checked) {
-                                      form.setFieldValue('courseIds', [
-                                        ...currentIds,
-                                        course.id
-                                      ])
-                                    } else {
-                                      form.setFieldValue(
-                                        'courseIds',
-                                        currentIds.filter(
-                                          (id) => id !== course.id
-                                        )
+                          {courses.courses.map((course) => (
+                            <label
+                              className="flex cursor-pointer items-start gap-3 rounded-md p-3 hover:bg-accent"
+                              key={course.id}
+                            >
+                              <input
+                                checked={form.state.values.courseIds.includes(
+                                  course.id
+                                )}
+                                className="mt-1"
+                                onChange={() => {
+                                  const currentIds = form.state.values.courseIds
+                                  const isCurrentlySelected =
+                                    currentIds.includes(course.id)
+
+                                  if (isCurrentlySelected) {
+                                    // Remove the ID
+                                    form.setFieldValue(
+                                      'courseIds',
+                                      currentIds.filter(
+                                        (id) => id !== course.id
                                       )
-                                    }
-                                  }}
-                                  type="checkbox"
-                                />
-                                <div className="flex-1">
-                                  <div className="font-medium">
-                                    {course.code ? `${course.code} - ` : ''}
-                                    {course.title}
-                                  </div>
-                                  {(course.instructor ||
-                                    course.section ||
-                                    course.schedule) && (
-                                    <div className="text-muted-foreground text-sm">
-                                      {course.section &&
-                                        `Section ${course.section}`}
-                                      {course.instructor &&
-                                        ` • ${course.instructor}`}
-                                      {course.schedule &&
-                                        ` • ${course.schedule}`}
-                                    </div>
-                                  )}
+                                    )
+                                  } else {
+                                    // Add the ID
+                                    form.setFieldValue('courseIds', [
+                                      ...currentIds,
+                                      course.id
+                                    ])
+                                  }
+                                }}
+                                type="checkbox"
+                              />
+                              <div className="flex-1">
+                                <div className="font-medium">
+                                  {course.code ? `${course.code} - ` : ''}
+                                  {course.title}
                                 </div>
-                              </label>
-                            )
-                          )}
+                                {(course.instructor ||
+                                  course.section ||
+                                  course.schedule) && (
+                                  <div className="text-muted-foreground text-sm">
+                                    {course.section &&
+                                      `Section ${course.section}`}
+                                    {course.instructor &&
+                                      ` • ${course.instructor}`}
+                                    {course.schedule && ` • ${course.schedule}`}
+                                  </div>
+                                )}
+                              </div>
+                            </label>
+                          ))}
                         </div>
                       </div>
                     )
