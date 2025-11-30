@@ -34,6 +34,7 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
   const router = useRouter()
   const pathname = usePathname()
   const isInitialMount = useRef(true)
+  const userChangedSpace = useRef(false)
 
   // Cycle to next space
   const cycleToNextSpace = () => {
@@ -41,35 +42,56 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
       (space) => space.name === activeSpace?.name
     )
     const nextIndex = (currentIndex + 1) % spaces.length
+    userChangedSpace.current = true
     setActiveSpace(spaces[nextIndex])
   }
 
   useHotkeys('shift+tab', cycleToNextSpace, { preventDefault: true })
 
+  // Sync activeSpace with current route when route changes (but don't redirect)
   useEffect(() => {
-    // Skip redirect on initial mount - let the user stay on their current route
     if (isInitialMount.current) {
       isInitialMount.current = false
+      // Set active space based on current route
+      const currentSpace = spaces.find((space) =>
+        pathname.startsWith(space.url)
+      )
+      if (currentSpace && currentSpace.name !== activeSpace?.name) {
+        setActiveSpace(currentSpace)
+      }
       return
     }
 
-    // Don't redirect if we're on a non-space route like /profile
-    if (pathname.startsWith('/profile')) {
+    // If user didn't explicitly change space, sync with route
+    if (!userChangedSpace.current) {
+      const currentSpace = spaces.find((space) =>
+        pathname.startsWith(space.url)
+      )
+      if (currentSpace && currentSpace.name !== activeSpace?.name) {
+        setActiveSpace(currentSpace)
+      }
       return
     }
+
+    // User explicitly changed space - reset flag and navigate
+    userChangedSpace.current = false
 
     // Don't redirect if we're already on the active space URL or a child route
-    // This prevents redirect loops (e.g., /spaces/societies -> /spaces/societies/campus-feed)
     if (activeSpace?.url && pathname.startsWith(activeSpace.url)) {
       return
     }
 
-    // Only redirect when user explicitly changes the space (via dropdown or hotkey)
-    // and we're not already on that space or a child route
+    // Navigate to the new space
     if (activeSpace?.url) {
       router.push(activeSpace.url)
     }
-  }, [activeSpace, router, pathname])
+  }, [activeSpace, router, pathname, spaces])
+
+  // Handle explicit space change from dropdown
+  const handleSpaceChange = (space: ISpaces) => {
+    userChangedSpace.current = true
+    setActiveSpace(space)
+  }
 
   if (!activeSpace) {
     return null
@@ -116,24 +138,22 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
                 </TooltipContent>
               </Tooltip>
             </DropdownMenuLabel>
-            {spaces
-              .filter((space) => space.isActive)
-              .map((space) => (
-                <DropdownMenuItem
-                  className={cn(
-                    'gap-2 p-2',
-                    activeSpace.url === space.url && 'border-2 border-dashed'
-                  )}
-                  key={space.name}
-                  onClick={() => setActiveSpace(space)}
-                >
-                  <div className="flex size-6 items-center justify-center rounded-md border">
-                    <space.logo className="size-3.5 shrink-0" />
-                  </div>
-                  {space.name}
-                  {/* <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut> */}
-                </DropdownMenuItem>
-              ))}
+            {spaces.map((space) => (
+              <DropdownMenuItem
+                className={cn(
+                  'gap-2 p-2',
+                  activeSpace.url === space.url && 'border-2 border-dashed'
+                )}
+                key={space.name}
+                onClick={() => handleSpaceChange(space)}
+              >
+                <div className="flex size-6 items-center justify-center rounded-md border">
+                  <space.logo className="size-3.5 shrink-0" />
+                </div>
+                {space.name}
+                {/* <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut> */}
+              </DropdownMenuItem>
+            ))}
             {/* <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 p-2">
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">

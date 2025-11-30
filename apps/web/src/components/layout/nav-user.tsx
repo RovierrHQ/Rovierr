@@ -16,6 +16,7 @@ import {
   SidebarMenuItem,
   useSidebar
 } from '@rov/ui/components/sidebar'
+import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -102,6 +103,15 @@ export function NavUser() {
                 <Bell />
                 Notifications
               </DropdownMenuItem> */}
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <div className="flex w-full items-center justify-between">
+                  <span>Theme</span>
+                  <AnimatedThemeToggler />
+                </div>
+              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => authClient.signOut()}>
