@@ -10,6 +10,7 @@ import type {
   SeedOptions,
   SeedResult
 } from '../types'
+import { chunk, DEFAULT_BATCH_SIZE } from '../utils/batch'
 
 interface InstitutionalTermCSVRow {
   institution_slug: string
@@ -125,44 +126,68 @@ export const institutionalTermSeed: SeedModule<{
       options.progress.setTotal(validRecords.length)
     }
 
-    // Insert records
+    // Pre-load existing terms for conflict detection
+    const existingTerms = await db.select().from(institutionalTerm)
+    const existingSet = new Set<string>()
+    for (const existing of existingTerms) {
+      const key = `${existing.institutionId}|${existing.termName}|${existing.academicYear}`
+      existingSet.add(key)
+    }
+
+    // Filter out records that already exist
+    const toInsert: InstitutionalTermRecord[] = []
     for (const term of validRecords) {
-      try {
-        // Check if term already exists
-        const existingTerm = await db.query.institutionalTerm.findFirst({
-          where: and(
-            eq(institutionalTerm.institutionId, term.institutionId),
-            eq(institutionalTerm.termName, term.termName),
-            eq(institutionalTerm.academicYear, term.academicYear)
-          )
-        })
-
-        if (existingTerm) {
-          skipped++
-          if (options.progress) {
-            options.progress.increment(
-              `${inserted}/${validRecords.length} (${skipped} skipped)`
-            )
-          }
-          continue
-        }
-
+      const key = `${term.institutionId}|${term.termName}|${term.academicYear}`
+      if (existingSet.has(key)) {
+        skipped++
+      } else {
         // Remove institutionSlug before inserting
         const { institutionSlug, ...termData } = term
-        await db.insert(institutionalTerm).values(termData)
-        inserted++
-
-        if (options.progress) {
-          options.progress.increment(`${inserted}/${validRecords.length}`)
-        }
-      } catch (err) {
-        skipped++
-        errors.push({
-          record: term,
-          error: err as Error,
-          phase: 'execution'
-        })
+        toInsert.push(termData as InstitutionalTermRecord)
       }
+    }
+
+    // Batch insert new records
+    if (toInsert.length > 0) {
+      const insertBatches = chunk(toInsert, DEFAULT_BATCH_SIZE)
+      for (const batch of insertBatches) {
+        try {
+          await db.insert(institutionalTerm).values(batch)
+          inserted += batch.length
+          if (options.progress) {
+            options.progress.increment(
+              `${inserted}/${validRecords.length} (${skipped} skipped)`,
+              batch.length
+            )
+          }
+        } catch (err) {
+          // If batch fails, try individual inserts
+          for (const term of batch) {
+            try {
+              await db.insert(institutionalTerm).values(term)
+              inserted++
+              if (options.progress) {
+                options.progress.increment(
+                  `${inserted}/${validRecords.length} (${skipped} skipped)`
+                )
+              }
+            } catch (individualErr) {
+              skipped++
+              errors.push({
+                record: term,
+                error: individualErr as Error,
+                phase: 'execution'
+              })
+            }
+          }
+        }
+      }
+    } else if (options.progress && skipped > 0) {
+      // If all records were skipped, still update progress
+      options.progress.increment(
+        `${inserted}/${validRecords.length} (${skipped} skipped)`,
+        skipped
+      )
     }
 
     if (options.progress) {

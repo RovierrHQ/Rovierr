@@ -178,7 +178,10 @@ export const institutionSeed: SeedModule<{
           })
         inserted += batch.length
         if (options.progress) {
-          options.progress.increment(`${inserted}/${validRecords.length}`)
+          options.progress.increment(
+            `${inserted}/${validRecords.length}`,
+            batch.length
+          )
         }
       } catch (err) {
         // If batch fails, try individual inserts
@@ -201,6 +204,9 @@ export const institutionSeed: SeedModule<{
                 }
               })
             inserted++
+            if (options.progress) {
+              options.progress.increment(`${inserted}/${validRecords.length}`)
+            }
           } catch (individualErr) {
             skipped++
             errors.push({
@@ -209,9 +215,6 @@ export const institutionSeed: SeedModule<{
               phase: 'execution'
             })
           }
-        }
-        if (options.progress) {
-          options.progress.increment(`${inserted}/${validRecords.length}`)
         }
       }
     }

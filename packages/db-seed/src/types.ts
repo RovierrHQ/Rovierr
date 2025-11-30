@@ -3,7 +3,7 @@ import type { DB } from '@rov/db'
 export interface ProgressTracker {
   updateProgress: (current: number, total: number, message?: string) => void
   setTotal: (total: number) => void
-  increment: (message?: string) => void
+  increment: (message?: string, count?: number) => void
   complete: () => void
 }
 

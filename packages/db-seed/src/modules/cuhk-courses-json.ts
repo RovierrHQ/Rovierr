@@ -263,7 +263,8 @@ export const cuhkCoursesJsonSeed: SeedModule<{
         coursesInserted += batch.length
         if (options.progress) {
           options.progress.increment(
-            `Courses: ${coursesInserted}/${courses.length}`
+            `Courses: ${coursesInserted}/${courses.length}`,
+            batch.length
           )
         }
       } catch (err) {
@@ -272,6 +273,11 @@ export const cuhkCoursesJsonSeed: SeedModule<{
           try {
             await db.insert(course).values(courseRecord)
             coursesInserted++
+            if (options.progress) {
+              options.progress.increment(
+                `Courses: ${coursesInserted}/${courses.length}`
+              )
+            }
           } catch (individualErr) {
             coursesSkipped++
             errors.push({
@@ -281,59 +287,81 @@ export const cuhkCoursesJsonSeed: SeedModule<{
             })
           }
         }
-        if (options.progress) {
-          options.progress.increment(
-            `Courses: ${coursesInserted}/${courses.length}`
-          )
-        }
       }
     }
 
-    // Resolve term IDs and insert offerings
+    // Pre-load all terms for CUHK into a Map for fast lookup
+    const allTerms = await db.query.institutionalTerm.findMany({
+      where: eq(institutionalTerm.institutionId, cuhkInstitution.id)
+    })
+
+    const termMap = new Map<string, string>()
+    for (const term of allTerms) {
+      const key = `${term.academicYear}|${term.termName}`
+      termMap.set(key, term.id)
+    }
+
+    // Resolve term IDs for all offerings in memory
+    const validOfferings: CourseOfferingRecord[] = []
     for (const offering of offerings) {
+      const termName = offering.termName
+      const academicYear = offering.academicYear
+
+      if (termName && academicYear) {
+        const key = `${academicYear}|${termName}`
+        const termId = termMap.get(key)
+
+        if (termId) {
+          offering.termId = termId
+
+          // Remove helper fields
+          const {
+            termName: _,
+            academicYear: __,
+            ...offeringData
+          } = offering as any
+
+          validOfferings.push(offeringData)
+        } else {
+          offeringsSkipped++
+        }
+      } else {
+        offeringsSkipped++
+      }
+    }
+
+    // Insert offerings in batches
+    const offeringBatches = chunk(validOfferings, DEFAULT_BATCH_SIZE)
+    for (const batch of offeringBatches) {
       try {
-        const termName = offering.termName
-        const academicYear = offering.academicYear
-
-        if (termName && academicYear) {
-          const term = await db.query.institutionalTerm.findFirst({
-            where: and(
-              eq(institutionalTerm.termName, termName),
-              eq(institutionalTerm.academicYear, academicYear),
-              eq(institutionalTerm.institutionId, cuhkInstitution.id)
-            )
-          })
-
-          if (term) {
-            offering.termId = term.id
-
-            // Remove helper fields
-            const {
-              termName: _,
-              academicYear: __,
-              ...offeringData
-            } = offering as any
-
-            await db.insert(courseOffering).values(offeringData)
+        await db.insert(courseOffering).values(batch)
+        offeringsInserted += batch.length
+        if (options.progress) {
+          options.progress.increment(
+            `Offerings: ${offeringsInserted}/${offerings.length}`,
+            batch.length
+          )
+        }
+      } catch (err) {
+        // If batch fails, try individual inserts
+        for (const offeringRecord of batch) {
+          try {
+            await db.insert(courseOffering).values(offeringRecord)
             offeringsInserted++
             if (options.progress) {
               options.progress.increment(
                 `Offerings: ${offeringsInserted}/${offerings.length}`
               )
             }
-          } else {
+          } catch (individualErr) {
             offeringsSkipped++
+            errors.push({
+              record: offeringRecord,
+              error: individualErr as Error,
+              phase: 'execution'
+            })
           }
-        } else {
-          offeringsSkipped++
         }
-      } catch (err) {
-        offeringsSkipped++
-        errors.push({
-          record: offering,
-          error: err as Error,
-          phase: 'execution'
-        })
       }
     }
 

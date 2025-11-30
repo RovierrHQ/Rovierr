@@ -24,8 +24,8 @@ export class ConsoleProgressTracker implements ProgressTracker {
     this.render(message)
   }
 
-  increment(message?: string): void {
-    this.current++
+  increment(message?: string, count: number = 1): void {
+    this.current += count
     this.render(message)
   }
 

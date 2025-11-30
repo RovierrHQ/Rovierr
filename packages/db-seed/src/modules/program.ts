@@ -5,6 +5,7 @@ import { file } from 'bun'
 import { parse } from 'csv-parse/sync'
 import { nanoid } from 'nanoid'
 import type { SeedModule, SeedOptions, SeedResult } from '../types'
+import { chunk, DEFAULT_BATCH_SIZE } from '../utils/batch'
 
 interface ProgramCSVRow {
   institutionSlug: string
@@ -137,41 +138,79 @@ export const programSeed: SeedModule<{ programs: ProgramRecord[] }> = {
       options.progress.setTotal(validRecords.length)
     }
 
-    // Insert records
-    for (const prog of validRecords) {
+    // Insert records in batches
+    const batches = chunk(validRecords, DEFAULT_BATCH_SIZE)
+    for (const batch of batches) {
       try {
+        // Batch insert with conflict handling
         await db
           .insert(program)
-          .values({
-            id: prog.id,
-            institutionId: prog.institutionId,
-            code: prog.code,
-            name: prog.name,
-            description: prog.description,
-            degreeLevel: prog.degreeLevel,
-            isVerified: prog.isVerified
-          })
-          .onConflictDoUpdate({
-            target: [program.institutionId, program.code],
-            set: {
+          .values(
+            batch.map((prog) => ({
+              id: prog.id,
+              institutionId: prog.institutionId,
+              code: prog.code,
               name: prog.name,
               description: prog.description,
               degreeLevel: prog.degreeLevel,
               isVerified: prog.isVerified
+            }))
+          )
+          .onConflictDoUpdate({
+            target: [program.institutionId, program.code],
+            set: {
+              name: program.name,
+              description: program.description,
+              degreeLevel: program.degreeLevel,
+              isVerified: program.isVerified
             }
           })
 
-        inserted++
+        inserted += batch.length
         if (options.progress) {
-          options.progress.increment(`${inserted}/${validRecords.length}`)
+          options.progress.increment(
+            `${inserted}/${validRecords.length}`,
+            batch.length
+          )
         }
       } catch (err) {
-        skipped++
-        errors.push({
-          record: prog,
-          error: err as Error,
-          phase: 'execution'
-        })
+        // If batch fails, try individual inserts
+        for (const prog of batch) {
+          try {
+            await db
+              .insert(program)
+              .values({
+                id: prog.id,
+                institutionId: prog.institutionId,
+                code: prog.code,
+                name: prog.name,
+                description: prog.description,
+                degreeLevel: prog.degreeLevel,
+                isVerified: prog.isVerified
+              })
+              .onConflictDoUpdate({
+                target: [program.institutionId, program.code],
+                set: {
+                  name: prog.name,
+                  description: prog.description,
+                  degreeLevel: prog.degreeLevel,
+                  isVerified: prog.isVerified
+                }
+              })
+
+            inserted++
+            if (options.progress) {
+              options.progress.increment(`${inserted}/${validRecords.length}`)
+            }
+          } catch (individualErr) {
+            skipped++
+            errors.push({
+              record: prog,
+              error: individualErr as Error,
+              phase: 'execution'
+            })
+          }
+        }
       }
     }
 

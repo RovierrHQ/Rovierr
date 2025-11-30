@@ -11,6 +11,7 @@ import type {
   SeedOptions,
   SeedResult
 } from '../types'
+import { chunk, DEFAULT_BATCH_SIZE } from '../utils/batch'
 
 interface FacultyCSVRow {
   institutionSlug: string
@@ -121,42 +122,90 @@ export const facultySeed: SeedModule<{ faculties: FacultyRecord[] }> = {
       options.progress.setTotal(validRecords.length)
     }
 
-    // Insert records
+    // Pre-load existing faculties for conflict detection
+    const existingFaculties = await db.select().from(faculty)
+    const existingMap = new Map<string, (typeof existingFaculties)[0]>()
+    for (const existing of existingFaculties) {
+      const key = `${existing.institutionId}|${existing.name}`
+      existingMap.set(key, existing)
+    }
+
+    // Separate records into inserts and updates
+    const toInsert: FacultyRecord[] = []
+    const toUpdate: Array<{ id: string; data: FacultyRecord }> = []
+
     for (const fac of validRecords) {
-      try {
-        // Check if faculty already exists
-        const existing = await db
-          .select()
-          .from(faculty)
-          .where(eq(faculty.institutionId, fac.institutionId))
-          .then((results) => results.find((f) => f.name === fac.name))
+      const key = `${fac.institutionId}|${fac.name}`
+      const existing = existingMap.get(key)
 
-        if (existing) {
-          // Update existing faculty
-          await db
-            .update(faculty)
-            .set({
-              description: fac.description,
-              website: fac.website
+      if (existing) {
+        toUpdate.push({ id: existing.id, data: fac })
+      } else {
+        toInsert.push(fac)
+      }
+    }
+
+    // Batch insert new records
+    if (toInsert.length > 0) {
+      const insertBatches = chunk(toInsert, DEFAULT_BATCH_SIZE)
+      for (const batch of insertBatches) {
+        try {
+          await db.insert(faculty).values(batch)
+          inserted += batch.length
+          if (options.progress) {
+            options.progress.increment(
+              `${inserted}/${validRecords.length}`,
+              batch.length
+            )
+          }
+        } catch (err) {
+          // If batch fails, try individual inserts
+          for (const fac of batch) {
+            try {
+              await db.insert(faculty).values(fac)
+              inserted++
+              if (options.progress) {
+                options.progress.increment(`${inserted}/${validRecords.length}`)
+              }
+            } catch (individualErr) {
+              skipped++
+              errors.push({
+                record: fac,
+                error: individualErr as Error,
+                phase: 'execution'
+              })
+            }
+          }
+        }
+      }
+    }
+
+    // Batch update existing records
+    if (toUpdate.length > 0) {
+      const updateBatches = chunk(toUpdate, DEFAULT_BATCH_SIZE)
+      for (const batch of updateBatches) {
+        for (const { id, data } of batch) {
+          try {
+            await db
+              .update(faculty)
+              .set({
+                description: data.description,
+                website: data.website
+              })
+              .where(eq(faculty.id, id))
+            inserted++
+            if (options.progress) {
+              options.progress.increment(`${inserted}/${validRecords.length}`)
+            }
+          } catch (err) {
+            skipped++
+            errors.push({
+              record: data,
+              error: err as Error,
+              phase: 'execution'
             })
-            .where(eq(faculty.id, existing.id))
-          inserted++
-        } else {
-          // Insert new faculty
-          await db.insert(faculty).values(fac)
-          inserted++
+          }
         }
-
-        if (options.progress) {
-          options.progress.increment(`${inserted}/${validRecords.length}`)
-        }
-      } catch (err) {
-        skipped++
-        errors.push({
-          record: fac,
-          error: err as Error,
-          phase: 'execution'
-        })
       }
     }
 
