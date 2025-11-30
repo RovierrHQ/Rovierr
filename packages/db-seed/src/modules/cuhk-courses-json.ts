@@ -16,6 +16,7 @@ import type {
   SeedOptions,
   SeedResult
 } from '../types'
+import { chunk, DEFAULT_BATCH_SIZE } from '../utils/batch'
 
 interface CourseJSON {
   code: string
@@ -254,23 +255,37 @@ export const cuhkCoursesJsonSeed: SeedModule<{
       options.progress.setTotal(totalItems)
     }
 
-    // Insert courses
-    for (const courseRecord of courses) {
+    // Insert courses in batches
+    const courseBatches = chunk(courses, DEFAULT_BATCH_SIZE)
+    for (const batch of courseBatches) {
       try {
-        await db.insert(course).values(courseRecord)
-        coursesInserted++
+        await db.insert(course).values(batch)
+        coursesInserted += batch.length
         if (options.progress) {
           options.progress.increment(
             `Courses: ${coursesInserted}/${courses.length}`
           )
         }
       } catch (err) {
-        coursesSkipped++
-        errors.push({
-          record: courseRecord,
-          error: err as Error,
-          phase: 'execution'
-        })
+        // If batch fails, try individual inserts
+        for (const courseRecord of batch) {
+          try {
+            await db.insert(course).values(courseRecord)
+            coursesInserted++
+          } catch (individualErr) {
+            coursesSkipped++
+            errors.push({
+              record: courseRecord,
+              error: individualErr as Error,
+              phase: 'execution'
+            })
+          }
+        }
+        if (options.progress) {
+          options.progress.increment(
+            `Courses: ${coursesInserted}/${courses.length}`
+          )
+        }
       }
     }
 

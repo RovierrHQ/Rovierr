@@ -116,6 +116,7 @@ Create a new file in `modules/` directory:
 import type { DB } from '@rov/db'
 import type { SeedModule, SeedOptions, SeedResult, PrepareDataResult } from '../types'
 import { yourTable } from '@rov/db/schema'
+import { DEFAULT_BATCH_SIZE, chunk } from '../utils/batch'
 
 interface YourRecord {
   id: string
@@ -156,14 +157,31 @@ export const yourSeed: SeedModule<{ records: YourRecord[] }> = {
       options.progress.setTotal(validRecords.length)
     }
 
-    // Insert records
-    for (const record of validRecords) {
+    // Insert records in batches (efficient for large datasets)
+    const batches = chunk(validRecords, DEFAULT_BATCH_SIZE)
+
+    for (const batch of batches) {
       try {
-        await db.insert(yourTable).values(record)
-        inserted++
-      } catch (error) {
-        skipped++
-        errors.push({ record, error })
+        await db.insert(yourTable).values(batch)
+        inserted += batch.length
+        if (options.progress) {
+          options.progress.increment(`${inserted}/${validRecords.length}`)
+        }
+      } catch (err) {
+        // If batch fails, try individual inserts
+        for (const record of batch) {
+          try {
+            await db.insert(yourTable).values(record)
+            inserted++
+          } catch (individualErr) {
+            skipped++
+            errors.push({
+              record,
+              error: individualErr as Error,
+              phase: 'execution'
+            })
+          }
+        }
       }
     }
 

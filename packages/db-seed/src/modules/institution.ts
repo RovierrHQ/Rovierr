@@ -10,6 +10,7 @@ import type {
   SeedOptions,
   SeedResult
 } from '../types'
+import { chunk, DEFAULT_BATCH_SIZE } from '../utils/batch'
 
 interface InstitutionCSVRow {
   name: string
@@ -154,36 +155,64 @@ export const institutionSeed: SeedModule<{
       options.progress.setTotal(validRecords.length)
     }
 
-    // Insert records
-    for (const inst of validRecords) {
+    // Insert records in batches
+    const batches = chunk(validRecords, DEFAULT_BATCH_SIZE)
+
+    for (const batch of batches) {
       try {
         await db
           .insert(institution)
-          .values(inst)
+          .values(batch)
           .onConflictDoUpdate({
             target: institution.slug,
             set: {
-              name: inst.name,
-              type: inst.type,
-              country: inst.country,
-              city: inst.city,
-              address: inst.address,
-              website: inst.website,
-              validEmailDomains: inst.validEmailDomains,
-              logo: inst.logo
+              name: institution.name,
+              type: institution.type,
+              country: institution.country,
+              city: institution.city,
+              address: institution.address,
+              website: institution.website,
+              validEmailDomains: institution.validEmailDomains,
+              logo: institution.logo
             }
           })
-        inserted++
+        inserted += batch.length
         if (options.progress) {
           options.progress.increment(`${inserted}/${validRecords.length}`)
         }
       } catch (err) {
-        skipped++
-        errors.push({
-          record: inst,
-          error: err as Error,
-          phase: 'execution'
-        })
+        // If batch fails, try individual inserts
+        for (const inst of batch) {
+          try {
+            await db
+              .insert(institution)
+              .values(inst)
+              .onConflictDoUpdate({
+                target: institution.slug,
+                set: {
+                  name: inst.name,
+                  type: inst.type,
+                  country: inst.country,
+                  city: inst.city,
+                  address: inst.address,
+                  website: inst.website,
+                  validEmailDomains: inst.validEmailDomains,
+                  logo: inst.logo
+                }
+              })
+            inserted++
+          } catch (individualErr) {
+            skipped++
+            errors.push({
+              record: inst,
+              error: individualErr as Error,
+              phase: 'execution'
+            })
+          }
+        }
+        if (options.progress) {
+          options.progress.increment(`${inserted}/${validRecords.length}`)
+        }
       }
     }
 
