@@ -41,7 +41,9 @@ export function CreateThreadDialog({
     orpc.discussion.thread.create.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'list']
+          queryKey: orpc.discussion.thread.list.queryKey({
+            input: { contextType, contextId }
+          })
         })
         toast.success('Discussion created successfully')
         onOpenChange(false)

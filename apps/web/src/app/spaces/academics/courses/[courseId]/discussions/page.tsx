@@ -145,7 +145,7 @@ export default function DiscussionsPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] gap-4">
+    <div className="flex h-[calc(100vh-12rem)] gap-4 p-10">
       {/* Left Panel - Discussions List */}
       <div
         className={`flex flex-col ${selectedDiscussion ? 'w-1/2' : 'w-full'} transition-all`}

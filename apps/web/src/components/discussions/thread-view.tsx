@@ -25,10 +25,12 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
     orpc.discussion.reply.create.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'get']
+          queryKey: orpc.discussion.thread.get.queryKey({
+            input: { id: discussion.id }
+          })
         })
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'list']
+          queryKey: [['discussion', 'thread', 'list']]
         })
         toast.success('Reply posted successfully')
         setReplyText('')
