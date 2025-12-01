@@ -5,7 +5,7 @@ import { ReplyService } from '@/services/discussion/reply.service'
 import { ThreadService } from '@/services/discussion/thread.service'
 
 const replyService = new ReplyService(db)
-const threadService = new ThreadService(db, replyService)
+const threadService = new ThreadService(db)
 
 export const threads = {
   // ============================================================================

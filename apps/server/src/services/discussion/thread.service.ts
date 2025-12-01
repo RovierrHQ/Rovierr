@@ -22,11 +22,9 @@ import { and, count, desc, eq, ilike, or, sql } from 'drizzle-orm'
 
 export class ThreadService {
   private db: DB
-  private replyService?: any
 
-  constructor(db: DB, replyService?: any) {
+  constructor(db: DB) {
     this.db = db
-    this.replyService = replyService
   }
 
   // ============================================================================
