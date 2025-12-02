@@ -310,100 +310,112 @@ const ClubProfilePage = () => {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Main Content */}
           <div className="space-y-6 lg:col-span-2">
-            {/* Profile Completion Card */}
-            {society && society.profileCompletionPercentage < 100 && (
-              <ProfileCompletionCard
-                completion={society.profileCompletionPercentage}
-                society={society}
-                societyId={clubID}
-              />
-            )}
+            {/* Profile Completion Card - Only show for admins */}
+            {canManageSettings &&
+              society &&
+              society.profileCompletionPercentage < 100 && (
+                <ProfileCompletionCard
+                  completion={society.profileCompletionPercentage}
+                  society={society}
+                  societyId={clubID}
+                />
+              )}
 
-            {/* Recent Activity Feed - Placeholder */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="mb-4 font-semibold text-xl">Recent Activity</h2>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <TrendingUp className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <p className="mb-2 font-medium text-muted-foreground">
-                    No recent activity
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    Activity and updates will appear here
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Upcoming Events - Placeholder */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="mb-4 font-semibold text-xl">Upcoming Events</h2>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Calendar className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <p className="mb-2 font-medium text-muted-foreground">
-                    No upcoming events
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    Events will be displayed here
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Member Highlights - Placeholder */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="mb-4 font-semibold text-xl">Members</h2>
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Users className="mb-4 h-10 w-10 text-muted-foreground" />
-                  <p className="text-muted-foreground text-sm">
-                    {society?.memberCount || 0} members
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Stats */}
-            {society && (
+            {/* Recent Activity Feed - Only show for admins */}
+            {canManageSettings && (
               <Card>
                 <CardContent className="p-6">
-                  <h2 className="mb-4 font-semibold text-xl">Quick Stats</h2>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground text-sm">
-                        Profile Completion
-                      </span>
-                      <span className="font-semibold">
-                        {society.profileCompletionPercentage}%
-                      </span>
-                    </div>
-                    {society.foundingYear && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground text-sm">
-                          Founded
-                        </span>
-                        <span className="font-semibold">
-                          {society.foundingYear}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground text-sm">
-                        Members
-                      </span>
-                      <span className="font-semibold">
-                        {society.memberCount || 0}
-                      </span>
-                    </div>
+                  <h2 className="mb-4 font-semibold text-xl">
+                    Recent Activity
+                  </h2>
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <TrendingUp className="mb-4 h-12 w-12 text-muted-foreground" />
+                    <p className="mb-2 font-medium text-muted-foreground">
+                      No recent activity
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      Activity and updates will appear here
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Upcoming Events - Only show for admins */}
+            {canManageSettings && (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="mb-4 font-semibold text-xl">
+                    Upcoming Events
+                  </h2>
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Calendar className="mb-4 h-12 w-12 text-muted-foreground" />
+                    <p className="mb-2 font-medium text-muted-foreground">
+                      No upcoming events
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      Events will be displayed here
+                    </p>
                   </div>
                 </CardContent>
               </Card>
             )}
           </div>
+
+          {/* Sidebar */}
+          {canManageSettings && (
+            <div className="space-y-6">
+              {/* Member Highlights - Only show for admins */}
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="mb-4 font-semibold text-xl">Members</h2>
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Users className="mb-4 h-10 w-10 text-muted-foreground" />
+                    <p className="text-muted-foreground text-sm">
+                      {society?.memberCount || 0} members
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Stats - Only show for admins */}
+              {society && (
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="mb-4 font-semibold text-xl">Quick Stats</h2>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground text-sm">
+                          Profile Completion
+                        </span>
+                        <span className="font-semibold">
+                          {society.profileCompletionPercentage}%
+                        </span>
+                      </div>
+                      {society.foundingYear && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground text-sm">
+                            Founded
+                          </span>
+                          <span className="font-semibold">
+                            {society.foundingYear}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground text-sm">
+                          Members
+                        </span>
+                        <span className="font-semibold">
+                          {society.memberCount || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

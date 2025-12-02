@@ -93,23 +93,41 @@ export function MemberList({ organizationId }: MemberListProps) {
     }
   })
 
-  // Check if user can manage members using hasPermission (checks actual user permissions)
-  const { data: canManageMembers = false } = useQuery({
-    queryKey: ['user-permission-manage', organizationId],
+  // Check if user has organization update permission (for showing admin UI elements)
+  const { data: hasOrgUpdatePermission = false } = useQuery({
+    queryKey: ['user-permission-settings', organizationId],
     queryFn: async () => {
       try {
         const result = await authClient.organization.hasPermission({
           permissions: {
-            member: ['delete', 'update']
+            organization: ['update']
           },
           organizationId
         })
-        return result ?? false
+        return result?.data?.success ?? false
       } catch {
         return false
       }
     }
   })
+
+  // // Check if user can manage members using hasPermission (checks actual user permissions)
+  // const { data: canManageMembers = false } = useQuery({
+  //   queryKey: ['user-permission-manage', organizationId],
+  //   queryFn: async () => {
+  //     try {
+  //       const result = await authClient.organization.hasPermission({
+  //         permissions: {
+  //           member: ['delete', 'update']
+  //         },
+  //         organizationId
+  //       })
+  //       return result ?? false
+  //     } catch {
+  //       return false
+  //     }
+  //   }
+  // })
 
   const { data: canInviteMembers = false } = useQuery({
     queryKey: ['user-permission-invite', organizationId],
@@ -195,9 +213,11 @@ export function MemberList({ organizationId }: MemberListProps) {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Members ({totalMembers})</CardTitle>
-            <CardDescription>
-              Manage organization members and their roles
-            </CardDescription>
+            {hasOrgUpdatePermission && (
+              <CardDescription>
+                Manage organization members and their roles
+              </CardDescription>
+            )}
           </div>
           {canInviteMembers && (
             <InviteMemberDialog organizationId={organizationId} />
@@ -251,7 +271,7 @@ export function MemberList({ organizationId }: MemberListProps) {
                     <th className="p-4 text-left font-medium text-sm">
                       Joined
                     </th>
-                    {canManageMembers && (
+                    {hasOrgUpdatePermission && (
                       <th className="p-4 text-right font-medium text-sm">
                         Actions
                       </th>
@@ -312,7 +332,7 @@ export function MemberList({ organizationId }: MemberListProps) {
                             ? format(new Date(member.createdAt), 'MMM d, yyyy')
                             : 'N/A'}
                         </td>
-                        {canManageMembers && (
+                        {hasOrgUpdatePermission && (
                           <td className="p-4">
                             <div className="flex justify-end">
                               <DropdownMenu>
