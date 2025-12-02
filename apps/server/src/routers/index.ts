@@ -8,6 +8,7 @@ import { form } from './form'
 import { realtime } from './realtime'
 import { roadmap } from './roadmap'
 import { society } from './society'
+import { societyEmail } from './society-email'
 import { societyRegistration } from './society-registration'
 import { studentOrganizations } from './student-organizations'
 import { tasks } from './tasks'
@@ -41,6 +42,9 @@ export const appRouter = o.router({
 
   // society registration integration
   societyRegistration,
+
+  // society email integration
+  societyEmail,
 
   // expenses integration
   expenses,
