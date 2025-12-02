@@ -50,11 +50,11 @@ export function ReplyCard({ reply }: ReplyCardProps) {
           <ArrowUp className="mr-1 h-3 w-3" />
           {reply.upvotes}
         </Button>
-        {!reply.isAnswer && (
+        {/* {!reply.isAnswer && (
           <Button size="sm" variant="ghost">
             Mark as Answer
           </Button>
-        )}
+        )} */}
       </div>
     </div>
   )
