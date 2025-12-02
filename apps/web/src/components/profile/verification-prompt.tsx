@@ -33,6 +33,7 @@ import {
 import type React from 'react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
 
 function fileToBase64(file: File): Promise<string> {
@@ -232,8 +233,7 @@ export function VerificationPrompt() {
           queryClient.invalidateQueries({
             queryKey: ['better-auth', 'session']
           }),
-          queryClient.refetchQueries({ queryKey: ['better-auth', 'session'] }),
-          queryClient.refetchQueries({ queryKey: ['user', 'profile'] })
+          await authClient.getSession({ query: { disableCookieCache: true } })
         ])
 
         toast.success('Student status verified successfully!')

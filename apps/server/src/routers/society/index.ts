@@ -4,30 +4,43 @@ import {
   type organization as organizationTable
 } from '@rov/db'
 import type { InferSelectModel } from 'drizzle-orm'
-import { and, eq, sql } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { db } from '@/db'
+import { auth } from '@/lib/auth'
 import { protectedProcedure } from '@/lib/orpc'
+import {
+  deleteImageFromS3,
+  getPresignedUrlFromFullUrl,
+  isS3Url,
+  uploadImageToS3
+} from '@/services/s3'
 import { SocietyService } from '@/services/society'
 
 const societyService = new SocietyService(db)
 
 type Society = InferSelectModel<typeof organizationTable>
 
+// Regex for base64 image data URL prefix
+const BASE64_IMAGE_REGEX = /^data:image\/\w+;base64,/
+
 /**
  * Check if user is president of a society
  */
 async function isPresident(
-  userId: string,
-  societyId: string
+  societyId: string,
+  headers: Headers
 ): Promise<boolean> {
-  const membership = await db.query.member.findFirst({
-    where: and(
-      eq(memberTable.organizationId, societyId),
-      eq(memberTable.userId, userId)
-    )
+  const membership = await auth.api.hasPermission({
+    headers,
+    body: {
+      permissions: {
+        organization: ['update']
+      },
+      organizationId: societyId
+    }
   })
 
-  return membership?.role === 'owner' // better-auth uses 'owner' for the creator/president
+  return membership?.success ?? false
 }
 
 /**
@@ -54,14 +67,25 @@ async function transformSociety(soc: Society) {
     }
   }
 
+  // Generate presigned URLs for S3 images
+  const logoUrl =
+    soc.logo && isS3Url(soc.logo)
+      ? await getPresignedUrlFromFullUrl(soc.logo).catch(() => soc.logo)
+      : soc.logo
+
+  const bannerUrl =
+    soc.banner && isS3Url(soc.banner)
+      ? await getPresignedUrlFromFullUrl(soc.banner).catch(() => soc.banner)
+      : soc.banner
+
   return {
     id: soc.id,
     name: soc.name,
     slug: soc.slug,
-    logo: soc.logo,
+    logo: logoUrl,
     metadata,
     description: soc.description,
-    banner: soc.banner,
+    banner: bannerUrl,
     institutionId: soc.institutionId,
     type: soc.type,
     visibility: soc.visibility,
@@ -120,7 +144,6 @@ export const society = {
    */
   updateFields: protectedProcedure.society.updateFields.handler(
     async ({ input, context }) => {
-      const userId = context.session.user.id
       const { organizationId, data } = input
 
       try {
@@ -133,15 +156,85 @@ export const society = {
         }
 
         // Check if user is president
-        const hasPermission = await isPresident(userId, organizationId)
+        const hasPermission = await isPresident(organizationId, context.headers)
         if (!hasPermission) {
           throw new ORPCError('FORBIDDEN', {
             message: 'You do not have permission to update this society'
           })
         }
 
+        // Process logo and banner images if they're base64 data URLs
+        const processedData = { ...data }
+
+        // Process logo image
+        if (data.logo !== undefined) {
+          if (data.logo === '' || data.logo === null) {
+            // Delete existing logo from S3 if removing
+            if (
+              existing.logo &&
+              BASE64_IMAGE_REGEX.test(existing.logo) === false &&
+              isS3Url(existing.logo)
+            ) {
+              await deleteImageFromS3(existing.logo)
+            }
+            processedData.logo = ''
+          } else if (BASE64_IMAGE_REGEX.test(data.logo)) {
+            // Upload new logo to S3
+            // Delete old logo if it exists and is an S3 URL
+            if (
+              existing.logo &&
+              BASE64_IMAGE_REGEX.test(existing.logo) === false &&
+              isS3Url(existing.logo)
+            ) {
+              await deleteImageFromS3(existing.logo)
+            }
+            const s3Url = await uploadImageToS3(
+              data.logo,
+              'profile-pictures',
+              organizationId
+            )
+            processedData.logo = s3Url
+          }
+          // If it's already a URL, use as-is
+        }
+
+        // Process banner image
+        if (data.banner !== undefined) {
+          if (data.banner === '' || data.banner === null) {
+            // Delete existing banner from S3 if removing
+            if (
+              existing.banner &&
+              BASE64_IMAGE_REGEX.test(existing.banner) === false &&
+              isS3Url(existing.banner)
+            ) {
+              await deleteImageFromS3(existing.banner)
+            }
+            processedData.banner = ''
+          } else if (BASE64_IMAGE_REGEX.test(data.banner)) {
+            // Upload new banner to S3
+            // Delete old banner if it exists and is an S3 URL
+            if (
+              existing.banner &&
+              BASE64_IMAGE_REGEX.test(existing.banner) === false &&
+              isS3Url(existing.banner)
+            ) {
+              await deleteImageFromS3(existing.banner)
+            }
+            const s3Url = await uploadImageToS3(
+              data.banner,
+              'banners',
+              organizationId
+            )
+            processedData.banner = s3Url
+          }
+          // If it's already a URL, use as-is
+        }
+
         // Update society fields
-        const soc = await societyService.updateFields(organizationId, data)
+        const soc = await societyService.updateFields(
+          organizationId,
+          processedData
+        )
 
         return await transformSociety(soc)
       } catch (error) {
@@ -163,12 +256,11 @@ export const society = {
    */
   uploadBanner: protectedProcedure.society.uploadBanner.handler(
     async ({ input, context }) => {
-      const userId = context.session.user.id
       const { organizationId } = input
 
       try {
         // Check if user is president
-        const hasPermission = await isPresident(userId, organizationId)
+        const hasPermission = await isPresident(organizationId, context.headers)
         if (!hasPermission) {
           throw new ORPCError('FORBIDDEN', {
             message:
@@ -200,7 +292,6 @@ export const society = {
    */
   completeOnboarding: protectedProcedure.society.completeOnboarding.handler(
     async ({ input, context }) => {
-      const userId = context.session.user.id
       const { organizationId } = input
 
       try {
@@ -213,7 +304,7 @@ export const society = {
         }
 
         // Check if user is president
-        const hasPermission = await isPresident(userId, organizationId)
+        const hasPermission = await isPresident(organizationId, context.headers)
         if (!hasPermission) {
           throw new ORPCError('FORBIDDEN', {
             message: 'You do not have permission to update this society'

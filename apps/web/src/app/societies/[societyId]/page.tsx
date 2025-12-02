@@ -36,12 +36,9 @@ const SocietyProfilePage = () => {
   const params = useParams()
   const societyId = params.societyId as string
 
-  const { data: society, isLoading } = useQuery({
-    queryKey: ['society', societyId],
-    queryFn: async () => {
-      return await orpc.society.getById.call({ id: societyId })
-    }
-  })
+  const { data: society, isLoading } = useQuery(
+    orpc.society.getById.queryOptions({ input: { id: societyId } })
+  )
 
   if (isLoading) {
     return (

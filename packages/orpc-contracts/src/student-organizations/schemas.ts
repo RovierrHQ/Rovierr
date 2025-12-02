@@ -85,14 +85,15 @@ export const createSocietySchema = z
     }
   )
 
-// Update society-specific fields schema (excludes core org fields like name/slug/logo)
-// These fields are updated via ORPC, not Better-Auth
+// Update society-specific fields schema (excludes core org fields like name/slug)
+// Logo and banner can be updated via ORPC
 export const updateSocietyFieldsSchema = z.object({
   description: z.string().min(1).max(1000).optional(),
   institutionId: z.string().optional(),
   type: z.enum(['student', 'university']).optional(),
   visibility: z.enum(['public', 'campus_only', 'private']).optional(),
   tags: z.array(z.string()).optional(),
+  logo: z.string().url().optional(),
   banner: z.string().url().optional(),
 
   // Social links

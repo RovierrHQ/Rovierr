@@ -51,6 +51,10 @@ export class SocietyService {
       updateData.institutionId = input.institutionId
     }
 
+    if (input.logo !== undefined) {
+      updateData.logo = input.logo
+    }
+
     if (input.banner !== undefined) {
       updateData.banner = input.banner
     }
