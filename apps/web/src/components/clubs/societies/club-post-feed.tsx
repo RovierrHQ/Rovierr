@@ -136,7 +136,14 @@ const ClubPostFeed = () => {
     <div className="flex gap-4">
       <div className={`space-y-4 ${selectedPostId ? 'w-1/2' : 'w-full'}`}>
         {posts.map((post) => (
-          <Card className="isolate p-6" key={post.id}>
+          <Card
+            className={`isolate p-6 transition-all ${
+              selectedPostId === post.id
+                ? 'border-primary shadow-lg ring-2 ring-primary/20'
+                : ''
+            }`}
+            key={post.id}
+          >
             <div className="flex items-start gap-4">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={post.author.avatar || undefined} />

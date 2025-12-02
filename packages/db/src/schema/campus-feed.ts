@@ -73,13 +73,47 @@ export const postComments = pgTable('post_comments', {
   ...timestamps
 })
 
-export const postCommentsRelations = relations(postComments, ({ one }) => ({
-  post: one(posts, {
-    fields: [postComments.postId],
-    references: [posts.id]
+export const postCommentsRelations = relations(
+  postComments,
+  ({ one, many }) => ({
+    post: one(posts, {
+      fields: [postComments.postId],
+      references: [posts.id]
+    }),
+    user: one(user, {
+      fields: [postComments.userId],
+      references: [user.id]
+    }),
+    likes: many(commentLikes)
+  })
+)
+
+export const commentLikes = pgTable(
+  'comment_likes',
+  {
+    id: primaryId,
+    commentId: text('comment_id')
+      .notNull()
+      .references(() => postComments.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamps.createdAt
+  },
+  (table) => ({
+    uniqueCommentUser: uniqueIndex(
+      'comment_likes_comment_id_user_id_unique'
+    ).on(table.commentId, table.userId)
+  })
+)
+
+export const commentLikesRelations = relations(commentLikes, ({ one }) => ({
+  comment: one(postComments, {
+    fields: [commentLikes.commentId],
+    references: [postComments.id]
   }),
   user: one(user, {
-    fields: [postComments.userId],
+    fields: [commentLikes.userId],
     references: [user.id]
   })
 }))

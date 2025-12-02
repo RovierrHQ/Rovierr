@@ -46,12 +46,31 @@ export const interactions = {
   ),
 
   getComments: protectedProcedure.campusFeed.getComments.handler(
-    async ({ input }) => {
+    async ({ input, context }) => {
+      const userId = context.session.user.id
       return await interactionService.getComments(
         input.postId,
+        userId,
         input.limit,
         input.offset
       )
+    }
+  ),
+
+  likeComment: protectedProcedure.campusFeed.likeComment.handler(
+    async ({ input, context }) => {
+      try {
+        const userId = context.session.user.id
+        return await interactionService.toggleCommentLike(
+          input.commentId,
+          userId
+        )
+      } catch (error) {
+        if (error instanceof Error && error.message === 'Comment not found') {
+          throw new ORPCError('NOT_FOUND', { message: 'Comment not found' })
+        }
+        throw error
+      }
     }
   ),
 

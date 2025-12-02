@@ -171,7 +171,7 @@
   - Clear form after successful submission
   - _Requirements: 1.1, 1.2, 1.3, 8.1, 8.2_
 
-- [ ] 9.2 Add event post creation option
+- [x] 9.2 Add event post creation option
   - Add toggle for event post type
   - Show event detail fields when toggled
   - Validate event fields before submission

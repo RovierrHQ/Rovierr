@@ -3,7 +3,14 @@
  * Handles likes, comments, and shares for campus feed posts
  */
 
-import { type DB, postComments, postLikes, postShares, user } from '@rov/db'
+import {
+  commentLikes,
+  type DB,
+  postComments,
+  postLikes,
+  postShares,
+  user
+} from '@rov/db'
 import type { CommentWithAuthor, CreateCommentInput } from '@rov/orpc-contracts'
 import { and, count, desc, eq } from 'drizzle-orm'
 import { getPresignedUrlFromFullUrl, isS3Url } from '@/services/s3'
@@ -78,7 +85,56 @@ export class InteractionService {
       })
       .returning()
 
-    return this.getCommentWithAuthor(newComment.id)
+    return this.getCommentWithAuthor(newComment.id, userId)
+  }
+
+  /**
+   * Toggle like on a comment (like if not liked, unlike if already liked)
+   */
+  async toggleCommentLike(
+    commentId: string,
+    userId: string
+  ): Promise<{ liked: boolean; likeCount: number }> {
+    // Check if user already liked the comment
+    const [existingLike] = await this.db
+      .select()
+      .from(commentLikes)
+      .where(
+        and(
+          eq(commentLikes.commentId, commentId),
+          eq(commentLikes.userId, userId)
+        )
+      )
+      .limit(1)
+
+    if (existingLike) {
+      // Unlike: remove the like
+      await this.db
+        .delete(commentLikes)
+        .where(
+          and(
+            eq(commentLikes.commentId, commentId),
+            eq(commentLikes.userId, userId)
+          )
+        )
+    } else {
+      // Like: add the like
+      await this.db.insert(commentLikes).values({
+        commentId,
+        userId
+      })
+    }
+
+    // Get updated like count
+    const [likeCountResult] = await this.db
+      .select({ count: count() })
+      .from(commentLikes)
+      .where(eq(commentLikes.commentId, commentId))
+
+    return {
+      liked: !existingLike,
+      likeCount: likeCountResult?.count || 0
+    }
   }
 
   /**
@@ -86,6 +142,7 @@ export class InteractionService {
    */
   async getComments(
     postId: string,
+    userId: string,
     limit = 20,
     offset = 0
   ): Promise<{
@@ -109,7 +166,9 @@ export class InteractionService {
 
     // Get full details for each comment
     const commentsWithAuthor = await Promise.all(
-      commentsToReturn.map((comment) => this.getCommentWithAuthor(comment.id))
+      commentsToReturn.map((comment) =>
+        this.getCommentWithAuthor(comment.id, userId)
+      )
     )
 
     // Get total count
@@ -129,7 +188,8 @@ export class InteractionService {
    * Get a comment with author information
    */
   private async getCommentWithAuthor(
-    commentId: string
+    commentId: string,
+    currentUserId: string
   ): Promise<CommentWithAuthor> {
     const [comment] = await this.db
       .select({
@@ -152,6 +212,24 @@ export class InteractionService {
       throw new Error('Comment not found')
     }
 
+    // Get like count
+    const [likeCountResult] = await this.db
+      .select({ count: count() })
+      .from(commentLikes)
+      .where(eq(commentLikes.commentId, commentId))
+
+    // Check if current user liked this comment
+    const [userLike] = await this.db
+      .select()
+      .from(commentLikes)
+      .where(
+        and(
+          eq(commentLikes.commentId, commentId),
+          eq(commentLikes.userId, currentUserId)
+        )
+      )
+      .limit(1)
+
     // Convert S3 avatar URL to presigned URL
     const authorAvatar =
       comment.authorAvatar && isS3Url(comment.authorAvatar)
@@ -172,7 +250,9 @@ export class InteractionService {
         name: comment.authorName,
         avatar: authorAvatar,
         role: 'Student' // TODO: Fetch actual role from user profile
-      }
+      },
+      likeCount: likeCountResult?.count || 0,
+      isLikedByCurrentUser: !!userLike
     }
   }
 

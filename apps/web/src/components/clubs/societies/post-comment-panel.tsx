@@ -6,7 +6,7 @@ import { Separator } from '@rov/ui/components/separator'
 import { Textarea } from '@rov/ui/components/textarea'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Loader2, Send, X } from 'lucide-react'
+import { Heart, Loader2, Send, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
@@ -45,6 +45,19 @@ export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
       },
       onError: (error: Error) => {
         toast.error(error.message || 'Failed to post comment')
+      }
+    })
+  )
+
+  const likeCommentMutation = useMutation(
+    orpc.campusFeed.likeComment.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['campus-feed', 'comments', postId]
+        })
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to like comment')
       }
     })
   )
@@ -124,6 +137,22 @@ export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
                       // biome-ignore lint/security/noDangerouslySetInnerHtml: expected
                       dangerouslySetInnerHTML={{ __html: comment.content }}
                     />
+                    <div className="mt-2 flex items-center gap-2">
+                      <Button
+                        className="flex items-center gap-2 transition-colors hover:text-foreground"
+                        disabled={likeCommentMutation.isPending}
+                        onClick={() =>
+                          likeCommentMutation.mutate({ commentId: comment.id })
+                        }
+                        size="sm"
+                        variant="secondary"
+                      >
+                        <Heart
+                          className={`h-4 w-4 ${comment.isLikedByCurrentUser ? 'fill-red-500 text-red-500' : ''}`}
+                        />
+                        <span className="text-sm">{comment.likeCount}</span>
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>

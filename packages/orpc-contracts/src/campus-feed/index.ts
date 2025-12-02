@@ -180,6 +180,33 @@ export const campusFeed = {
     .input(getCommentsSchema)
     .output(paginatedCommentsSchema),
 
+  likeComment: oc
+    .route({
+      method: 'POST',
+      description: 'Like or unlike a comment',
+      summary: 'Toggle Comment Like',
+      tags: ['Campus Feed']
+    })
+    .input(z.object({ commentId: z.string() }))
+    .output(
+      z.object({
+        liked: z.boolean(),
+        likeCount: z.number()
+      })
+    )
+    .errors({
+      UNAUTHORIZED: {
+        data: z.object({
+          message: z.string().default('User not authenticated')
+        })
+      },
+      NOT_FOUND: {
+        data: z.object({
+          message: z.string().default('Comment not found')
+        })
+      }
+    }),
+
   share: oc
     .route({
       method: 'POST',

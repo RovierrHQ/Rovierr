@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
+import { Calendar as CalendarComponent } from '@rov/ui/components/calendar'
 import { Card } from '@rov/ui/components/card'
 import {
   Dialog,
@@ -9,9 +10,22 @@ import {
   DialogHeader,
   DialogTitle
 } from '@rov/ui/components/dialog'
+import { Input } from '@rov/ui/components/input'
+import { Label } from '@rov/ui/components/label'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@rov/ui/components/popover'
+import { Switch } from '@rov/ui/components/switch'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Image as ImageIcon, MapPin, Video as VideoIcon } from 'lucide-react'
+import {
+  Calendar,
+  Image as ImageIcon,
+  MapPin,
+  Video as VideoIcon
+} from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
@@ -28,21 +42,46 @@ export const ClubPostPromptCard = () => {
     null
   )
   const [isUploading, setIsUploading] = useState(false)
+  const [isEventPost, setIsEventPost] = useState(false)
+  const [eventDate, setEventDate] = useState<Date | undefined>(undefined)
+  const [eventTime, setEventTime] = useState('')
+  const [eventLocation, setEventLocation] = useState('')
   const queryClient = useQueryClient()
   const { data: session } = authClient.useSession()
+
+  const resetForm = () => {
+    setPostContent('')
+    setSelectedImagePreview(null)
+    setSelectedImageS3Url(null)
+    setIsEventPost(false)
+    setEventDate(undefined)
+    setEventTime('')
+    setEventLocation('')
+    setPostDialogOpen(false)
+  }
 
   const createPostMutation = useMutation(
     orpc.campusFeed.create.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
         toast.success('Post created successfully!')
-        setPostContent('')
-        setSelectedImagePreview(null)
-        setSelectedImageS3Url(null)
-        setPostDialogOpen(false)
+        resetForm()
       },
       onError: (error: Error) => {
         toast.error(error.message || 'Failed to create post')
+      }
+    })
+  )
+
+  const createEventMutation = useMutation(
+    orpc.campusFeed.createEvent.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
+        toast.success('Event post created successfully!')
+        resetForm()
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to create event post')
       }
     })
   )
@@ -104,12 +143,30 @@ export const ClubPostPromptCard = () => {
       return
     }
 
-    createPostMutation.mutate({
-      content: postContent,
-      imageUrl: selectedImageS3Url || undefined, // Use S3 key URL for storage
-      type: 'post',
-      visibility: 'public'
-    })
+    if (isEventPost) {
+      // Validate event fields
+      if (!(eventDate && eventTime && eventLocation)) {
+        toast.error('Please fill in all event details')
+        return
+      }
+
+      createEventMutation.mutate({
+        content: postContent,
+        imageUrl: selectedImageS3Url || undefined,
+        type: 'event',
+        visibility: 'public',
+        eventDate: eventDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
+        eventTime,
+        location: eventLocation
+      })
+    } else {
+      createPostMutation.mutate({
+        content: postContent,
+        imageUrl: selectedImageS3Url || undefined,
+        type: 'post',
+        visibility: 'public'
+      })
+    }
   }
 
   return (
@@ -159,9 +216,76 @@ export const ClubPostPromptCard = () => {
                 <div className="text-muted-foreground text-xs">Student</div>
               </div>
             </div>
+
+            {/* Event Toggle */}
+            <div className="flex items-center justify-between rounded-lg border border-border bg-muted/50 p-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <Label className="cursor-pointer" htmlFor="event-toggle">
+                  Create Event Post
+                </Label>
+              </div>
+              <Switch
+                checked={isEventPost}
+                id="event-toggle"
+                onCheckedChange={setIsEventPost}
+              />
+            </div>
+
+            {/* Event Fields */}
+            {isEventPost && (
+              <div className="space-y-3 rounded-lg border border-border bg-accent/50 p-4">
+                <div className="space-y-2">
+                  <Label>Event Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        className="w-full justify-start text-left font-normal"
+                        variant="outline"
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {eventDate
+                          ? eventDate.toLocaleDateString()
+                          : 'Pick a date'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-auto p-0">
+                      <CalendarComponent
+                        mode="single"
+                        onSelect={setEventDate}
+                        selected={eventDate}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="event-time">Event Time</Label>
+                  <Input
+                    id="event-time"
+                    onChange={(e) => setEventTime(e.target.value)}
+                    type="time"
+                    value={eventTime}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="event-location">Location</Label>
+                  <Input
+                    id="event-location"
+                    onChange={(e) => setEventLocation(e.target.value)}
+                    placeholder="Enter event location"
+                    value={eventLocation}
+                  />
+                </div>
+              </div>
+            )}
+
             <RichTextEditor
               content={postContent}
-              disabled={createPostMutation.isPending || isUploading}
+              disabled={
+                createPostMutation.isPending ||
+                createEventMutation.isPending ||
+                isUploading
+              }
               onChange={setPostContent}
               placeholder="What's on your mind?"
             />
@@ -221,14 +345,19 @@ export const ClubPostPromptCard = () => {
               disabled={
                 !postContent.replace(/<[^>]*>/g, '').trim() ||
                 createPostMutation.isPending ||
+                createEventMutation.isPending ||
                 isUploading
               }
               onClick={handlePost}
             >
               {(() => {
                 if (isUploading) return 'Uploading...'
-                if (createPostMutation.isPending) return 'Posting...'
-                return 'Post'
+                if (
+                  createPostMutation.isPending ||
+                  createEventMutation.isPending
+                )
+                  return 'Posting...'
+                return isEventPost ? 'Create Event' : 'Post'
               })()}
             </Button>
           </div>

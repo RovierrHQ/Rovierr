@@ -115,9 +115,9 @@ export const getCommentsSchema = z.object({
 // ============================================================================
 
 /**
- * Author information schema
+ * Author information schema for campus feed posts
  */
-export const authorSchema = z.object({
+export const campusFeedAuthorSchema = z.object({
   id: z.string(),
   name: z.string(),
   avatar: z.string().nullable(),
@@ -151,7 +151,7 @@ export const postWithDetailsSchema = selectPostSchema
   .extend({
     createdAt: z.string(),
     updatedAt: z.string(),
-    author: authorSchema,
+    author: campusFeedAuthorSchema,
     likeCount: z.number(),
     commentCount: z.number(),
     shareCount: z.number(),
@@ -172,7 +172,9 @@ export const commentWithAuthorSchema = selectPostCommentSchema
   .extend({
     createdAt: z.string(),
     updatedAt: z.string(),
-    author: authorSchema
+    author: campusFeedAuthorSchema,
+    likeCount: z.number(),
+    isLikedByCurrentUser: z.boolean()
   })
 
 /**
@@ -205,5 +207,5 @@ export type ListPostsQuery = z.infer<typeof listPostsSchema>
 export type GetCommentsQuery = z.infer<typeof getCommentsSchema>
 export type PostWithDetails = z.infer<typeof postWithDetailsSchema>
 export type CommentWithAuthor = z.infer<typeof commentWithAuthorSchema>
-export type Author = z.infer<typeof authorSchema>
+export type CampusFeedAuthor = z.infer<typeof campusFeedAuthorSchema>
 export type EventDetails = z.infer<typeof eventDetailsSchema>

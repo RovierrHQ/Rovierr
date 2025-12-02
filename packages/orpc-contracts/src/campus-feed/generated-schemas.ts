@@ -8,6 +8,7 @@
  */
 
 import {
+  commentLikes,
   eventPosts,
   eventRsvps,
   postComments,
@@ -62,3 +63,10 @@ export const updateEventPostSchema = createUpdateSchema(eventPosts)
 export const insertEventRsvpSchema = createInsertSchema(eventRsvps)
 export const selectEventRsvpSchema = createSelectSchema(eventRsvps)
 export const updateEventRsvpSchema = createUpdateSchema(eventRsvps)
+
+// ============================================================================
+// Comment Likes Schemas
+// ============================================================================
+export const insertCommentLikeSchema = createInsertSchema(commentLikes)
+export const selectCommentLikeSchema = createSelectSchema(commentLikes)
+export const updateCommentLikeSchema = createUpdateSchema(commentLikes)
