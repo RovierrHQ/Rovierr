@@ -70,7 +70,9 @@ export default function DiscussionsPage({ params }: PageProps) {
       upvotes: thread.votes.upvotes - thread.votes.downvotes,
       createdAt: new Date(thread.createdAt).toLocaleString(),
       tags: thread.tags || [],
-      userVote: thread.votes.userVote
+      userVote: thread.votes.userVote,
+      contextType: 'course' as const,
+      contextId: discussionContextId
     })) || []
 
   // Filter discussions based on selected filter
@@ -104,7 +106,10 @@ export default function DiscussionsPage({ params }: PageProps) {
         upvotes:
           selectedThreadData.votes.upvotes - selectedThreadData.votes.downvotes,
         createdAt: new Date(selectedThreadData.createdAt).toLocaleString(),
-        tags: selectedThreadData.tags || []
+        tags: selectedThreadData.tags || [],
+        userVote: selectedThreadData.votes.userVote,
+        contextType: 'course' as const,
+        contextId: discussionContextId
       }
     : undefined
 
@@ -113,7 +118,11 @@ export default function DiscussionsPage({ params }: PageProps) {
     id: string
     content: string
     author: { name: string | null; image: string | null; isAnonymous: boolean }
-    votes: { upvotes: number; downvotes: number }
+    votes: {
+      upvotes: number
+      downvotes: number
+      userVote: 'up' | 'down' | null
+    }
     createdAt: string
     isEndorsed: boolean
   }): Reply => ({
@@ -128,7 +137,8 @@ export default function DiscussionsPage({ params }: PageProps) {
     },
     upvotes: reply.votes.upvotes - reply.votes.downvotes,
     createdAt: new Date(reply.createdAt).toLocaleString(),
-    isAnswer: reply.isEndorsed
+    isAnswer: reply.isEndorsed,
+    userVote: reply.votes.userVote
   })
 
   const currentReplies: Reply[] = selectedThreadData?.replies

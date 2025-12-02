@@ -4,7 +4,15 @@ import { Button } from '@rov/ui/components/button'
 import { Separator } from '@rov/ui/components/separator'
 import { Textarea } from '@rov/ui/components/textarea'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowUp, Check, MessageSquare, Pin, Send, X } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  MessageSquare,
+  Pin,
+  Send,
+  X
+} from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
@@ -30,7 +38,12 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
           })
         })
         queryClient.invalidateQueries({
-          queryKey: [['discussion', 'thread', 'list']]
+          queryKey: orpc.discussion.thread.list.queryKey({
+            input: {
+              contextType: discussion.contextType,
+              contextId: discussion.contextId
+            }
+          })
         })
         toast.success('Reply posted successfully')
         setReplyText('')
@@ -40,6 +53,63 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
       }
     })
   )
+
+  const voteMutation = useMutation(
+    orpc.discussion.vote.vote.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: orpc.discussion.thread.get.queryKey({
+            input: { id: discussion.id }
+          })
+        })
+        queryClient.invalidateQueries({
+          queryKey: orpc.discussion.thread.list.queryKey({
+            input: {
+              contextType: discussion.contextType,
+              contextId: discussion.contextId
+            }
+          })
+        })
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to vote')
+      }
+    })
+  )
+
+  const unvoteMutation = useMutation(
+    orpc.discussion.vote.unvote.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: orpc.discussion.thread.get.queryKey({
+            input: { id: discussion.id }
+          })
+        })
+        queryClient.invalidateQueries({
+          queryKey: [['discussion', 'thread', 'list']]
+        })
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to remove vote')
+      }
+    })
+  )
+
+  const handleUpvote = () => {
+    if (discussion.userVote === 'up') {
+      unvoteMutation.mutate({ threadId: discussion.id })
+    } else {
+      voteMutation.mutate({ threadId: discussion.id, voteType: 'up' })
+    }
+  }
+
+  const handleDownvote = () => {
+    if (discussion.userVote === 'down') {
+      unvoteMutation.mutate({ threadId: discussion.id })
+    } else {
+      voteMutation.mutate({ threadId: discussion.id, voteType: 'down' })
+    }
+  }
 
   const handleSubmit = () => {
     if (replyText.trim()) {
@@ -113,10 +183,27 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
             </div>
 
             <div className="flex items-center gap-4">
-              <Button size="sm" variant="ghost">
-                <ArrowUp className="mr-1 h-3 w-3" />
-                {discussion.upvotes}
-              </Button>
+              <div className="flex flex-col items-center gap-1">
+                <Button
+                  disabled={voteMutation.isPending || unvoteMutation.isPending}
+                  onClick={handleUpvote}
+                  size="sm"
+                  variant={discussion.userVote === 'up' ? 'default' : 'ghost'}
+                >
+                  <ArrowUp className="h-3 w-3" />
+                </Button>
+                <span className="font-semibold text-xs">
+                  {discussion.upvotes}
+                </span>
+                <Button
+                  disabled={voteMutation.isPending || unvoteMutation.isPending}
+                  onClick={handleDownvote}
+                  size="sm"
+                  variant={discussion.userVote === 'down' ? 'default' : 'ghost'}
+                >
+                  <ArrowDown className="h-3 w-3" />
+                </Button>
+              </div>
               <Button size="sm" variant="ghost">
                 <MessageSquare className="mr-1 h-3 w-3" />
                 Reply

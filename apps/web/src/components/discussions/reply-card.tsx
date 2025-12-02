@@ -1,7 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
-import { ArrowUp, Check } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { ArrowDown, ArrowUp, Check } from 'lucide-react'
+import { toast } from 'sonner'
+import { orpc } from '@/utils/orpc'
 import type { Reply } from './types'
 
 interface ReplyCardProps {
@@ -9,6 +12,52 @@ interface ReplyCardProps {
 }
 
 export function ReplyCard({ reply }: ReplyCardProps) {
+  const queryClient = useQueryClient()
+
+  const voteMutation = useMutation(
+    orpc.discussion.vote.vote.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['discussion', 'thread', 'get']
+        })
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to vote')
+      }
+    })
+  )
+
+  const unvoteMutation = useMutation(
+    orpc.discussion.vote.unvote.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['discussion', 'thread', 'get']
+        })
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to remove vote')
+      }
+    })
+  )
+
+  const handleUpvote = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (reply.userVote === 'up') {
+      unvoteMutation.mutate({ replyId: reply.id })
+    } else {
+      voteMutation.mutate({ replyId: reply.id, voteType: 'up' })
+    }
+  }
+
+  const handleDownvote = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (reply.userVote === 'down') {
+      unvoteMutation.mutate({ replyId: reply.id })
+    } else {
+      voteMutation.mutate({ replyId: reply.id, voteType: 'down' })
+    }
+  }
+
   return (
     <div
       className={`rounded-lg border p-4 ${
@@ -45,16 +94,24 @@ export function ReplyCard({ reply }: ReplyCardProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Button size="sm" variant="ghost">
+      <div className="flex items-center gap-2">
+        <Button
+          disabled={voteMutation.isPending || unvoteMutation.isPending}
+          onClick={handleUpvote}
+          size="sm"
+          variant={reply.userVote === 'up' ? 'default' : 'ghost'}
+        >
           <ArrowUp className="mr-1 h-3 w-3" />
           {reply.upvotes}
         </Button>
-        {/* {!reply.isAnswer && (
-          <Button size="sm" variant="ghost">
-            Mark as Answer
-          </Button>
-        )} */}
+        <Button
+          disabled={voteMutation.isPending || unvoteMutation.isPending}
+          onClick={handleDownvote}
+          size="sm"
+          variant={reply.userVote === 'down' ? 'default' : 'ghost'}
+        >
+          <ArrowDown className="h-3 w-3" />
+        </Button>
       </div>
     </div>
   )

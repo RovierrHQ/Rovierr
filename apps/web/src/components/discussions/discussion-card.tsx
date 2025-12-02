@@ -4,7 +4,7 @@ import { Button } from '@rov/ui/components/button'
 import { Card, CardContent, CardHeader } from '@rov/ui/components/card'
 import { Separator } from '@rov/ui/components/separator'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowUp, Check, MessageSquare, Pin } from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, MessageSquare, Pin } from 'lucide-react'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 import type { Discussion } from './types'
@@ -28,7 +28,12 @@ export function DiscussionCard({
     orpc.discussion.vote.vote.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'list']
+          queryKey: orpc.discussion.thread.list.queryKey({
+            input: {
+              contextType: discussion.contextType,
+              contextId: discussion.contextId
+            }
+          })
         })
       },
       onError: (error: Error) => {
@@ -50,12 +55,21 @@ export function DiscussionCard({
     })
   )
 
-  const handleVote = (e: React.MouseEvent) => {
+  const handleUpvote = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (userVote === 'up') {
       unvoteMutation.mutate({ threadId: discussion.id })
     } else {
       voteMutation.mutate({ threadId: discussion.id, voteType: 'up' })
+    }
+  }
+
+  const handleDownvote = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (userVote === 'down') {
+      unvoteMutation.mutate({ threadId: discussion.id })
+    } else {
+      voteMutation.mutate({ threadId: discussion.id, voteType: 'down' })
     }
   }
 
@@ -98,13 +112,21 @@ export function DiscussionCard({
           <div className="flex flex-col items-center gap-1">
             <Button
               disabled={voteMutation.isPending || unvoteMutation.isPending}
-              onClick={handleVote}
+              onClick={handleUpvote}
               size="sm"
               variant={userVote === 'up' ? 'default' : 'ghost'}
             >
               <ArrowUp className="h-4 w-4" />
             </Button>
             <span className="font-semibold text-sm">{discussion.upvotes}</span>
+            <Button
+              disabled={voteMutation.isPending || unvoteMutation.isPending}
+              onClick={handleDownvote}
+              size="sm"
+              variant={userVote === 'down' ? 'default' : 'ghost'}
+            >
+              <ArrowDown className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </CardHeader>

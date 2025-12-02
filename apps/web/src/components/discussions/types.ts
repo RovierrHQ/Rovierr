@@ -14,6 +14,8 @@ export interface Discussion {
   createdAt: string
   tags: string[]
   userVote?: 'up' | 'down' | null
+  contextType: 'course' | 'society' | 'event' | 'project'
+  contextId: string
 }
 
 export interface Reply {
@@ -27,4 +29,5 @@ export interface Reply {
   upvotes: number
   createdAt: string
   isAnswer?: boolean
+  userVote?: 'up' | 'down' | null
 }
