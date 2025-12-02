@@ -1,5 +1,6 @@
 import { academic } from './academic'
 import { calendar } from './calendar'
+import { campusFeed } from './campus-feed'
 import { discussion } from './discussion'
 import { expenses } from './expenses'
 import { form } from './form'
@@ -13,6 +14,8 @@ import { user } from './user'
 
 // Export individual contracts for router implementation
 export { academic } from './academic'
+export { campusFeed } from './campus-feed'
+export * from './campus-feed/schemas'
 export { discussion } from './discussion'
 export * from './discussion/schemas'
 export { form } from './form'
@@ -60,5 +63,8 @@ export const appContract = {
   academic,
 
   // discussion integration
-  discussion
+  discussion,
+
+  // campus feed integration
+  campusFeed
 }

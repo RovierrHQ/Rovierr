@@ -29,7 +29,7 @@ const S3_URL_PATTERN = /https:\/\/[^/]+\/(.+)$/
  */
 export async function uploadImageToS3(
   base64Image: string,
-  folder: 'profile-pictures' | 'banners' | 'id-cards',
+  folder: 'profile-pictures' | 'banners' | 'id-cards' | 'campus-feed',
   userId: string
 ): Promise<string> {
   try {

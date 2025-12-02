@@ -1,6 +1,7 @@
 import { o } from '../lib/orpc'
 import { academic } from './academic'
 import { calendar } from './calendar'
+import { campusFeed } from './campus-feed'
 import { discussion } from './discussion'
 import { expenses } from './expenses'
 import { form } from './form'
@@ -51,5 +52,8 @@ export const appRouter = o.router({
   form,
 
   // discussion integration
-  discussion
+  discussion,
+
+  // campus feed integration
+  campusFeed
 })
