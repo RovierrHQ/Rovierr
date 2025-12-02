@@ -11,7 +11,8 @@ import {
 import { and, desc, eq, inArray, or, type SQL, sql } from 'drizzle-orm'
 import { db } from '@/db'
 import { protectedProcedure } from '@/lib/orpc'
-import realtime from '@/lib/realtime'
+
+// import realtime from '@/lib/realtime'
 
 // Helper function to check if user can access a task
 async function canAccessTask(
@@ -89,73 +90,85 @@ async function logActivity(
 }
 
 // Helper function to publish real-time update
-async function publishUpdate(
-  taskId: string,
-  contextType: string,
-  contextId: string,
-  event: {
-    type: string
-    taskId: string
-    data?: unknown
-  }
-) {
-  // Publish to task-specific channel
-  await realtime.publish(`task:${taskId}`, event)
-
-  // Publish to user feed if personal
-  if (contextType === 'personal') {
-    await realtime.publish(`tasks:user:${contextId}`, event)
-  }
-
-  // Publish to club feed if club
-  if (contextType === 'club') {
-    await realtime.publish(`tasks:club:${contextId}`, event)
-  }
-}
+// async function publishUpdate(
+//   taskId: string,
+//   contextType: string,
+//   contextId: string,
+//   event: {
+//     type: string
+//     taskId: string
+//     data?: unknown
+//   }
+// ) {
+//   // Publish to task-specific channel
+//   await realtime.publish(`task:${taskId}`, event)
+//
+//   // Publish to user feed if personal
+//   if (contextType === 'personal') {
+//     await realtime.publish(`tasks:user:${contextId}`, event)
+//   }
+//
+//   // Publish to club feed if club
+//   if (contextType === 'club') {
+//     await realtime.publish(`tasks:club:${contextId}`, event)
+//   }
+// }
 
 export const tasks = {
   createTask: protectedProcedure.tasks.createTask.handler(
     async ({ input, context }) => {
-      const userId = context.session.user.id
+      try {
+        console.log('[createTask] Starting task creation', { input })
+        const userId = context.session.user.id
+        console.log('[createTask] User ID:', userId)
 
-      // Validate context
-      if (input.contextType === 'personal') {
-        // For personal tasks, contextId must be the user's ID
-        if (input.contextId !== userId) {
-          throw new ORPCError('INVALID_CONTEXT', {
-            message: 'Personal task context must match user ID'
-          })
-        }
-      } else if (input.contextType === 'club') {
-        // Verify club exists and user is a member
-        const club = await db.query.organization.findFirst({
-          where: eq(organizationTable.id, input.contextId)
-        })
-
-        if (!club) {
-          throw new ORPCError('INVALID_CONTEXT', {
-            message: 'Club not found'
-          })
-        }
-
-        const membership = await db.query.member.findFirst({
-          where: and(
-            eq(memberTable.organizationId, input.contextId),
-            eq(memberTable.userId, userId)
+        // Validate context
+        if (input.contextType === 'personal') {
+          console.log('[createTask] Personal task validation')
+          // For personal tasks, contextId must be the user's ID
+          if (input.contextId !== userId) {
+            console.log('[createTask] ERROR: Personal task context mismatch')
+            throw new ORPCError('INVALID_CONTEXT', {
+              message: 'Personal task context must match user ID'
+            })
+          }
+        } else if (input.contextType === 'club') {
+          console.log(
+            '[createTask] Club task validation, clubId:',
+            input.contextId
           )
-        })
-
-        if (!membership) {
-          throw new ORPCError('UNAUTHORIZED', {
-            message: 'You must be a member of the club to create tasks'
+          // Verify club exists and user is a member
+          const club = await db.query.organization.findFirst({
+            where: eq(organizationTable.id, input.contextId)
           })
-        }
-      }
+          console.log('[createTask] Club found:', !!club)
 
-      // Create task
-      const [task] = await db
-        .insert(tasksTable)
-        .values({
+          if (!club) {
+            console.log('[createTask] ERROR: Club not found')
+            throw new ORPCError('INVALID_CONTEXT', {
+              message: 'Club not found'
+            })
+          }
+
+          const membership = await db.query.member.findFirst({
+            where: and(
+              eq(memberTable.organizationId, input.contextId),
+              eq(memberTable.userId, userId)
+            )
+          })
+          console.log('[createTask] Membership found:', !!membership)
+
+          if (!membership) {
+            console.log('[createTask] ERROR: User not a member')
+            throw new ORPCError('UNAUTHORIZED', {
+              message: 'You must be a member of the club to create tasks'
+            })
+          }
+        }
+
+        // Create task
+        console.log('[createTask] Inserting task into database')
+        const taskValues = {
           title: input.title,
           description: input.description || null,
           contextType: input.contextType,
@@ -167,91 +180,152 @@ export const tasks = {
           dueAt: input.dueAt || null,
           startAt: input.startAt || null,
           isAllDay: input.isAllDay
-        })
-        .returning()
+        }
+        console.log('[createTask] Task values:', taskValues)
 
-      if (!task) {
-        throw new ORPCError('INTERNAL_SERVER_ERROR', {
-          message: 'Failed to create task'
-        })
-      }
+        const [task] = await db
+          .insert(tasksTable)
+          .values(taskValues)
+          .returning()
+        console.log('[createTask] Task created:', task?.id)
 
-      // Auto-assign creator for personal tasks
-      if (input.contextType === 'personal') {
-        await db.insert(taskAssigneesTable).values({
-          taskId: task.id,
-          userId,
-          role: 'owner'
-        })
-      }
-
-      // Assign additional users if provided
-      if (input.assigneeIds && input.assigneeIds.length > 0) {
-        // Verify all assignees exist
-        const assignees = await db.query.user.findMany({
-          where: inArray(userTable.id, input.assigneeIds)
-        })
-
-        if (assignees.length !== input.assigneeIds.length) {
-          throw new ORPCError('INVALID_ASSIGNEES', {
-            message: 'One or more assignees not found'
+        if (!task) {
+          console.log('[createTask] ERROR: Task creation returned null')
+          throw new ORPCError('INTERNAL_SERVER_ERROR', {
+            message: 'Failed to create task'
           })
         }
 
-        // For club tasks, verify assignees are club members
-        if (input.contextType === 'club') {
-          const memberships = await db.query.member.findMany({
-            where: and(
-              eq(memberTable.organizationId, input.contextId),
-              inArray(memberTable.userId, input.assigneeIds)
-            )
+        // Auto-assign creator for personal tasks
+        if (input.contextType === 'personal') {
+          console.log('[createTask] Auto-assigning creator for personal task')
+          await db.insert(taskAssigneesTable).values({
+            taskId: task.id,
+            userId,
+            role: 'owner'
           })
+          console.log('[createTask] Creator assigned')
+        }
 
-          if (memberships.length !== input.assigneeIds.length) {
+        // Assign additional users if provided
+        if (input.assigneeIds && input.assigneeIds.length > 0) {
+          console.log('[createTask] Assigning users:', input.assigneeIds)
+          // Verify all assignees exist
+          const assignees = await db.query.user.findMany({
+            where: inArray(userTable.id, input.assigneeIds)
+          })
+          console.log(
+            '[createTask] Found assignees:',
+            assignees.length,
+            'of',
+            input.assigneeIds.length
+          )
+
+          if (assignees.length !== input.assigneeIds.length) {
+            console.log('[createTask] ERROR: Some assignees not found')
             throw new ORPCError('INVALID_ASSIGNEES', {
-              message: 'All assignees must be club members'
+              message: 'One or more assignees not found'
             })
           }
+
+          // For club tasks, verify assignees are club members
+          if (input.contextType === 'club') {
+            console.log('[createTask] Verifying assignees are club members')
+            const memberships = await db.query.member.findMany({
+              where: and(
+                eq(memberTable.organizationId, input.contextId),
+                inArray(memberTable.userId, input.assigneeIds)
+              )
+            })
+            console.log(
+              '[createTask] Found memberships:',
+              memberships.length,
+              'of',
+              input.assigneeIds.length
+            )
+
+            if (memberships.length !== input.assigneeIds.length) {
+              console.log(
+                '[createTask] ERROR: Not all assignees are club members'
+              )
+              throw new ORPCError('INVALID_ASSIGNEES', {
+                message: 'All assignees must be club members'
+              })
+            }
+          }
+
+          console.log('[createTask] Inserting assignees')
+          await db.insert(taskAssigneesTable).values(
+            input.assigneeIds.map((assigneeId) => ({
+              taskId: task.id,
+              userId: assigneeId
+            }))
+          )
+          console.log('[createTask] Assignees inserted')
         }
 
-        await db.insert(taskAssigneesTable).values(
-          input.assigneeIds.map((assigneeId) => ({
-            taskId: task.id,
-            userId: assigneeId
-          }))
-        )
-      }
-
-      // Log activity
-      await logActivity(task.id, userId, 'created', {
-        title: task.title
-      })
-
-      // Fetch full task with relations
-      const fullTask = await db.query.tasks.findFirst({
-        where: eq(tasksTable.id, task.id),
-        with: {
-          assignees: true,
-          comments: true
+        // Log activity
+        console.log('[createTask] Logging activity')
+        try {
+          await logActivity(task.id, userId, 'created', {
+            title: task.title
+          })
+          console.log('[createTask] Activity logged')
+        } catch (error) {
+          console.error('[createTask] ERROR logging activity:', error)
+          // Continue even if activity logging fails
         }
-      })
 
-      if (!fullTask) {
-        throw new ORPCError('INTERNAL_SERVER_ERROR', {
-          message: 'Failed to fetch created task'
+        // Fetch full task with relations
+        console.log('[createTask] Fetching full task with relations')
+        const fullTask = await db.query.tasks.findFirst({
+          where: eq(tasksTable.id, task.id),
+          with: {
+            assignees: true,
+            comments: true
+          }
         })
-      }
+        console.log('[createTask] Full task fetched:', !!fullTask)
 
-      // Publish real-time update
-      await publishUpdate(task.id, task.contextType, task.contextId, {
-        type: 'task_created',
-        taskId: task.id,
-        data: fullTask
-      })
+        if (!fullTask) {
+          console.log('[createTask] ERROR: Failed to fetch created task')
+          throw new ORPCError('INTERNAL_SERVER_ERROR', {
+            message: 'Failed to fetch created task'
+          })
+        }
 
-      return {
-        ...fullTask,
-        contextType: fullTask.contextType as 'personal' | 'club'
+        // Publish real-time update
+        // await publishUpdate(task.id, task.contextType, task.contextId, {
+        //   type: 'task_created',
+        //   taskId: task.id,
+        //   data: fullTask
+        // })
+
+        console.log('[createTask] Task creation successful, returning task')
+        const result = {
+          ...fullTask,
+          contextType: fullTask.contextType as 'personal' | 'club'
+        }
+        console.log('[createTask] Returning result:', {
+          id: result.id,
+          title: result.title
+        })
+        return result
+      } catch (error) {
+        console.error('[createTask] UNHANDLED ERROR:', error)
+        console.error(
+          '[createTask] Error stack:',
+          error instanceof Error ? error.stack : 'No stack'
+        )
+        console.error(
+          '[createTask] Error name:',
+          error instanceof Error ? error.name : 'Unknown'
+        )
+        console.error(
+          '[createTask] Error message:',
+          error instanceof Error ? error.message : String(error)
+        )
+        throw error
       }
     }
   ),
@@ -352,11 +426,11 @@ export const tasks = {
       }
 
       // Publish real-time update
-      await publishUpdate(task.id, task.contextType, task.contextId, {
-        type: 'task_updated',
-        taskId: task.id,
-        data: fullTask
-      })
+      // await publishUpdate(task.id, task.contextType, task.contextId, {
+      //   type: 'task_updated',
+      //   taskId: task.id,
+      //   data: fullTask
+      // })
 
       return {
         ...fullTask,
@@ -489,11 +563,11 @@ export const tasks = {
       }
 
       // Publish real-time update
-      await publishUpdate(task.id, task.contextType, task.contextId, {
-        type: 'task_assignees_changed',
-        taskId: task.id,
-        data: fullTask
-      })
+      // await publishUpdate(task.id, task.contextType, task.contextId, {
+      //   type: 'task_assignees_changed',
+      //   taskId: task.id,
+      //   data: fullTask
+      // })
 
       return {
         ...fullTask,
@@ -771,11 +845,11 @@ export const tasks = {
       })
 
       // Publish real-time update
-      await publishUpdate(task.id, task.contextType, task.contextId, {
-        type: 'task_comment_added',
-        taskId: task.id,
-        data: comment
-      })
+      // await publishUpdate(task.id, task.contextType, task.contextId, {
+      //   type: 'task_comment_added',
+      //   taskId: task.id,
+      //   data: comment
+      // })
 
       return comment
     }
@@ -879,10 +953,10 @@ export const tasks = {
       await db.delete(tasksTable).where(eq(tasksTable.id, input.taskId))
 
       // Publish real-time update
-      await publishUpdate(task.id, task.contextType, task.contextId, {
-        type: 'task_deleted',
-        taskId: task.id
-      })
+      // await publishUpdate(task.id, task.contextType, task.contextId, {
+      //   type: 'task_deleted',
+      //   taskId: task.id
+      // })
 
       return {
         success: true
