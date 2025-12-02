@@ -2,6 +2,7 @@
 
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
+import { useQuery } from '@tanstack/react-query'
 import {
   AlertCircle,
   Award,
@@ -9,213 +10,97 @@ import {
   Briefcase,
   CheckCircle2,
   Clock,
-  ExternalLink,
   FileText,
   Plus,
   Target,
   TrendingUp,
   Users
 } from 'lucide-react'
+import { orpc } from '@/utils/orpc'
 
 export default function CareerPage() {
+  // Fetch statistics
+  const { data: statistics } = useQuery(
+    orpc.career.applications.statistics.queryOptions({
+      input: {}
+    })
+  )
+
   return (
     <main className="flex-1 px-6 py-8">
       <div className="mb-8">
-        <h2 className="mb-2 font-bold text-3xl text-foreground">Career</h2>
-        <p className="text-muted-foreground">
-          Track your professional growth and opportunities
-        </p>
-      </div>
+        <div className="mb-6">
+          <h2 className="mb-2 font-bold text-3xl text-foreground">
+            Career Space
+          </h2>
+          <p className="text-muted-foreground">
+            Your central hub for career development and job search
+          </p>
+        </div>
 
-      {/* Quick Stats */}
-      <div className="mb-8 grid gap-6 md:grid-cols-4">
-        <Card className="border-border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Applications</p>
-              <p className="mt-1 font-bold text-3xl text-foreground">15</p>
-            </div>
-            <Briefcase className="h-8 w-8 text-chart-1" />
-          </div>
-        </Card>
+        {/* Statistics Dashboard */}
+        {statistics && (
+          <div className="mb-6 grid gap-4 md:grid-cols-4">
+            <Card className="border-border bg-card p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm">
+                    Total Applications
+                  </p>
+                  <p className="mt-1 font-bold text-2xl text-foreground">
+                    {statistics.total}
+                  </p>
+                </div>
+                <Briefcase className="h-8 w-8 text-chart-1" />
+              </div>
+            </Card>
 
-        <Card className="border-border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Interviews</p>
-              <p className="mt-1 font-bold text-3xl text-foreground">4</p>
-            </div>
-            <Users className="h-8 w-8 text-chart-2" />
-          </div>
-        </Card>
+            <Card className="border-border bg-card p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm">
+                    Upcoming Interviews
+                  </p>
+                  <p className="mt-1 font-bold text-2xl text-foreground">
+                    {statistics.upcomingInterviews}
+                  </p>
+                </div>
+                <Clock className="h-8 w-8 text-chart-2" />
+              </div>
+            </Card>
 
-        <Card className="border-border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Skills Learning</p>
-              <p className="mt-1 font-bold text-3xl text-foreground">8</p>
-            </div>
-            <TrendingUp className="h-8 w-8 text-chart-3" />
-          </div>
-        </Card>
+            <Card className="border-border bg-card p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm">
+                    Pending Responses
+                  </p>
+                  <p className="mt-1 font-bold text-2xl text-foreground">
+                    {statistics.pendingResponses}
+                  </p>
+                </div>
+                <FileText className="h-8 w-8 text-chart-3" />
+              </div>
+            </Card>
 
-        <Card className="border-border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Network</p>
-              <p className="mt-1 font-bold text-3xl text-foreground">32</p>
-            </div>
-            <Users className="h-8 w-8 text-chart-4" />
+            <Card className="border-border bg-card p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm">Offers</p>
+                  <p className="mt-1 font-bold text-2xl text-foreground">
+                    {statistics.byStatus.offer_received || 0}
+                  </p>
+                </div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/10">
+                  <span className="font-bold text-green-500 text-lg">✓</span>
+                </div>
+              </div>
+            </Card>
           </div>
-        </Card>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Job Applications */}
-        <Card
-          className="border-border bg-card p-6 lg:col-span-2"
-          id="applications"
-        >
-          <div className="mb-6 flex items-center justify-between">
-            <h3 className="font-semibold text-foreground text-lg">
-              Job Applications
-            </h3>
-            <Button className="gap-2" size="sm">
-              <Plus className="h-4 w-4" />
-              Add Application
-            </Button>
-          </div>
-          <div className="space-y-4">
-            <div className="rounded-lg border border-border bg-card/50 p-4">
-              <div className="mb-3 flex items-start justify-between">
-                <div className="flex-1">
-                  <h4 className="font-semibold text-foreground">
-                    Software Engineer Intern
-                  </h4>
-                  <p className="text-muted-foreground text-sm">
-                    Google • Mountain View, CA
-                  </p>
-                </div>
-                <span className="rounded-full bg-chart-2/10 px-3 py-1 font-medium text-chart-2 text-xs">
-                  Interview
-                </span>
-              </div>
-              <div className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
-                <Clock className="h-4 w-4" />
-                <span>Interview scheduled: March 20, 2:00 PM</span>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="gap-2 bg-transparent"
-                  size="sm"
-                  variant="outline"
-                >
-                  <FileText className="h-3 w-3" />
-                  View Details
-                </Button>
-                <Button
-                  className="gap-2 bg-transparent"
-                  size="sm"
-                  variant="outline"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Company Site
-                </Button>
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-border bg-card/50 p-4">
-              <div className="mb-3 flex items-start justify-between">
-                <div className="flex-1">
-                  <h4 className="font-semibold text-foreground">
-                    Frontend Developer
-                  </h4>
-                  <p className="text-muted-foreground text-sm">
-                    Meta • Menlo Park, CA
-                  </p>
-                </div>
-                <span className="rounded-full bg-chart-1/10 px-3 py-1 font-medium text-chart-1 text-xs">
-                  Applied
-                </span>
-              </div>
-              <div className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
-                <Clock className="h-4 w-4" />
-                <span>Applied 3 days ago</span>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="gap-2 bg-transparent"
-                  size="sm"
-                  variant="outline"
-                >
-                  <FileText className="h-3 w-3" />
-                  View Details
-                </Button>
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-border bg-card/50 p-4">
-              <div className="mb-3 flex items-start justify-between">
-                <div className="flex-1">
-                  <h4 className="font-semibold text-foreground">
-                    ML Engineer Intern
-                  </h4>
-                  <p className="text-muted-foreground text-sm">
-                    OpenAI • San Francisco, CA
-                  </p>
-                </div>
-                <span className="rounded-full bg-chart-2/10 px-3 py-1 font-medium text-chart-2 text-xs">
-                  Interview
-                </span>
-              </div>
-              <div className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
-                <Clock className="h-4 w-4" />
-                <span>Interview scheduled: March 25, 10:00 AM</span>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="gap-2 bg-transparent"
-                  size="sm"
-                  variant="outline"
-                >
-                  <FileText className="h-3 w-3" />
-                  View Details
-                </Button>
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-border bg-card/50 p-4">
-              <div className="mb-3 flex items-start justify-between">
-                <div className="flex-1">
-                  <h4 className="font-semibold text-foreground">
-                    Full Stack Developer
-                  </h4>
-                  <p className="text-muted-foreground text-sm">
-                    Stripe • San Francisco, CA
-                  </p>
-                </div>
-                <span className="rounded-full bg-chart-1/10 px-3 py-1 font-medium text-chart-1 text-xs">
-                  Applied
-                </span>
-              </div>
-              <div className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
-                <Clock className="h-4 w-4" />
-                <span>Applied 1 week ago</span>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="gap-2 bg-transparent"
-                  size="sm"
-                  variant="outline"
-                >
-                  <FileText className="h-3 w-3" />
-                  View Details
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Card>
-
         {/* Career Goals */}
         <Card className="border-border bg-card p-6" id="goals">
           <div className="mb-6 flex items-center justify-between">

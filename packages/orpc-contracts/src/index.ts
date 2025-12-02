@@ -1,6 +1,7 @@
 import { academic } from './academic'
 import { calendar } from './calendar'
 import { campusFeed } from './campus-feed'
+import { career } from './career'
 import { discussion } from './discussion'
 import { expenses } from './expenses'
 import { form } from './form'
@@ -17,6 +18,8 @@ import { user } from './user'
 export { academic } from './academic'
 export { campusFeed } from './campus-feed'
 export * from './campus-feed/schemas'
+export { career } from './career'
+export * from './career/schemas'
 export { discussion } from './discussion'
 export * from './discussion/schemas'
 export { form } from './form'
@@ -72,5 +75,8 @@ export const appContract = {
   discussion,
 
   // campus feed integration
-  campusFeed
+  campusFeed,
+
+  // career integration
+  career
 }

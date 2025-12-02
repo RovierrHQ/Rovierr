@@ -2,6 +2,7 @@
 export * from './achievement'
 export * from './auth'
 export * from './campus-feed'
+export * from './career'
 export * from './course'
 export * from './discussion'
 export * from './expenses'
