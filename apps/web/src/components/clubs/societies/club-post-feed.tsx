@@ -3,6 +3,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@rov/ui/components/dropdown-menu'
 
 import {
   useInfiniteQuery,
@@ -11,12 +17,16 @@ import {
 } from '@tanstack/react-query'
 import {
   Calendar,
+  Check,
+  ChevronDown,
   Clock,
   Heart,
   Loader2,
   MapPin,
   MessageCircle,
-  Share2
+  Share2,
+  Star,
+  X
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -60,6 +70,18 @@ const ClubPostFeed = () => {
     })
   )
 
+  const rsvpMutation = useMutation(
+    orpc.campusFeed.rsvp.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
+        toast.success('RSVP updated successfully')
+      },
+      onError: (err: Error) => {
+        toast.error(err.message || 'Failed to update RSVP')
+      }
+    })
+  )
+
   // Infinite scroll observer
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -85,6 +107,28 @@ const ClubPostFeed = () => {
 
   const handleLike = (postId: string) => {
     likeMutation.mutate({ postId })
+  }
+
+  const handleRSVP = (
+    eventPostId: string,
+    status: 'going' | 'interested' | 'not_going'
+  ) => {
+    rsvpMutation.mutate({ eventPostId, status })
+  }
+
+  const getRSVPButtonContent = (
+    currentUserRSVP?: 'going' | 'interested' | 'not_going'
+  ) => {
+    switch (currentUserRSVP) {
+      case 'going':
+        return { icon: Check, text: 'Going', variant: 'default' as const }
+      case 'interested':
+        return { icon: Star, text: 'Interested', variant: 'default' as const }
+      case 'not_going':
+        return { icon: X, text: 'Not Going', variant: 'secondary' as const }
+      default:
+        return { icon: Calendar, text: 'RSVP', variant: 'default' as const }
+    }
   }
 
   const formatTimestamp = (timestamp: string) => {
@@ -218,10 +262,61 @@ const ClubPostFeed = () => {
                     <Share2 className="h-4 w-4" />
                     <span className="text-sm">Share</span>
                   </Button>
-                  {post.type === 'event' && (
-                    <Button className="ml-auto" size="sm">
-                      RSVP ({post.rsvpCount || 0})
-                    </Button>
+                  {post.type === 'event' && post.eventDetails?.id && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          className="ml-auto gap-2"
+                          disabled={rsvpMutation.isPending}
+                          size="sm"
+                          variant={
+                            getRSVPButtonContent(post.currentUserRSVP).variant
+                          }
+                        >
+                          {(() => {
+                            const { icon: Icon, text } = getRSVPButtonContent(
+                              post.currentUserRSVP
+                            )
+                            return (
+                              <>
+                                <Icon className="h-4 w-4" />
+                                {text} ({post.rsvpCount || 0})
+                                <ChevronDown className="h-3 w-3" />
+                              </>
+                            )
+                          })()}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() =>
+                            post.eventDetails?.id &&
+                            handleRSVP(post.eventDetails.id, 'going')
+                          }
+                        >
+                          <Check className="mr-2 h-4 w-4" />
+                          Going
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            post.eventDetails?.id &&
+                            handleRSVP(post.eventDetails.id, 'interested')
+                          }
+                        >
+                          <Star className="mr-2 h-4 w-4" />
+                          Interested
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            post.eventDetails?.id &&
+                            handleRSVP(post.eventDetails.id, 'not_going')
+                          }
+                        >
+                          <X className="mr-2 h-4 w-4" />
+                          Not Going
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </div>
               </div>

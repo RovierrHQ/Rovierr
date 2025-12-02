@@ -129,12 +129,12 @@ export const campusFeedAuthorSchema = z.object({
  */
 export const eventDetailsSchema = selectEventPostSchema
   .omit({
-    id: true,
     postId: true,
     createdAt: true,
     updatedAt: true
   })
   .extend({
+    id: z.string(), // Event post ID for RSVP
     eventDate: z.string(),
     eventTime: z.string(),
     location: z.string()

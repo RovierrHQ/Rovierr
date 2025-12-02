@@ -148,7 +148,7 @@ export class PostService {
 
     // Get event details if it's an event post
     let eventDetails:
-      | { eventDate: string; eventTime: string; location: string }
+      | { id: string; eventDate: string; eventTime: string; location: string }
       | undefined
     let rsvpCount: number | undefined
     let currentUserRSVP: 'going' | 'interested' | 'not_going' | undefined
@@ -161,6 +161,7 @@ export class PostService {
 
       if (event) {
         eventDetails = {
+          id: event.id,
           eventDate: event.eventDate,
           eventTime: event.eventTime,
           location: event.location
