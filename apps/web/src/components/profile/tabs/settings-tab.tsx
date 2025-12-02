@@ -13,7 +13,6 @@ import {
   TabsList,
   TabsTrigger
 } from '@rov/ui/components/tabs'
-import { ProfileSettings } from './settings/profile-settings'
 import { SecuritySettings } from './settings/security-settings'
 import { VerificationSettings } from './settings/verification-settings'
 
@@ -28,16 +27,11 @@ export function SettingsTab() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs className="w-full" defaultValue="profile">
+          <Tabs className="w-full" defaultValue="security">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="security">Security</TabsTrigger>
               <TabsTrigger value="verification">Verification</TabsTrigger>
             </TabsList>
-
-            <TabsContent className="space-y-4" value="profile">
-              <ProfileSettings />
-            </TabsContent>
 
             <TabsContent className="space-y-4" value="security">
               <SecuritySettings />

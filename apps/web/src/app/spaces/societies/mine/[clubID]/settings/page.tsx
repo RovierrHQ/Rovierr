@@ -17,6 +17,8 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { QRCodeDisplay } from '@/components/registration/qr-code-display'
+import { RegistrationSettingsForm } from '@/components/registration/registration-settings-form'
 import { ImageUploadDialog } from '@/components/shared/image-upload-dialog'
 import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
@@ -117,7 +119,7 @@ const SocietySettingsPage = () => {
           <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="social">Social Links</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="registration">Registration</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">
@@ -136,8 +138,8 @@ const SocietySettingsPage = () => {
           <DetailsTab society={society} societyId={societyId} />
         </TabsContent>
 
-        <TabsContent value="members">
-          <MembersTab society={society} societyId={societyId} />
+        <TabsContent value="registration">
+          <RegistrationTab society={society} societyId={societyId} />
         </TabsContent>
       </Tabs>
     </div>
@@ -692,23 +694,107 @@ const DetailsTab = ({
   )
 }
 
-// Members Tab
-const MembersTab = ({
-  society: _society,
-  societyId: _societyId
+// Registration Tab
+const RegistrationTab = ({
+  society,
+  societyId
 }: {
   society: Society
   societyId: string
 }) => {
+  // Fetch registration settings
+  const { data: settings, isLoading: isSettingsLoading } = useQuery({
+    ...orpc.societyRegistration.settings.get.queryOptions({
+      input: { societyId }
+    }),
+    enabled: !!societyId
+  })
+
+  if (isSettingsLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
   return (
-    <Card className="p-6">
-      <div className="text-center">
-        <h3 className="mb-2 font-semibold text-lg">Member Management</h3>
-        <p className="text-muted-foreground text-sm">
-          Member management features coming soon
+    <div className="space-y-6">
+      <div>
+        <h2 className="mb-2 font-bold text-xl">Registration Settings</h2>
+        <p className="mb-6 text-muted-foreground">
+          Manage member registration for your society
         </p>
       </div>
-    </Card>
+
+      {/* Registration Settings Form */}
+      <RegistrationSettingsForm settings={settings} societyId={societyId} />
+
+      {/* Capacity Information */}
+      {settings?.society && (
+        <Card className="p-6">
+          <h2 className="mb-4 font-semibold text-lg">Capacity Status</h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <p className="text-muted-foreground text-sm">Current Members</p>
+              <p className="font-bold text-2xl">
+                {settings.society.memberCount}
+              </p>
+            </div>
+            {settings.maxCapacity && (
+              <>
+                <div>
+                  <p className="text-muted-foreground text-sm">Max Capacity</p>
+                  <p className="font-bold text-2xl">{settings.maxCapacity}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-sm">
+                    Remaining Slots
+                  </p>
+                  <p
+                    className={`font-bold text-2xl ${(() => {
+                      const remaining =
+                        settings.maxCapacity - settings.society.memberCount
+                      if (remaining <= 0) return 'text-destructive'
+                      if (remaining <= 5) return 'text-orange-600'
+                      return 'text-green-600'
+                    })()}`}
+                  >
+                    {Math.max(
+                      0,
+                      settings.maxCapacity - settings.society.memberCount
+                    )}
+                  </p>
+                </div>
+              </>
+            )}
+            {!settings.maxCapacity && (
+              <div className="sm:col-span-2">
+                <p className="text-muted-foreground text-sm">
+                  No capacity limit set
+                </p>
+              </div>
+            )}
+          </div>
+          {settings.maxCapacity &&
+            settings.society.memberCount >= settings.maxCapacity && (
+              <div className="mt-4 rounded-lg border-2 border-destructive bg-destructive/10 p-4">
+                <p className="font-medium text-destructive text-sm">
+                  ⚠️ Registration is automatically closed - capacity reached
+                </p>
+                <p className="mt-1 text-muted-foreground text-sm">
+                  Registration will automatically reopen when a member leaves
+                </p>
+              </div>
+            )}
+        </Card>
+      )}
+
+      {/* QR Code Section */}
+      {society.slug && settings && (
+        <QRCodeDisplay societyId={societyId} societySlug={society.slug} />
+      )}
+    </div>
   )
 }
 
