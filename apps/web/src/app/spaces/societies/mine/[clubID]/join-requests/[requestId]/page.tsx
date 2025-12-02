@@ -281,16 +281,17 @@ const JoinRequestDetailPage = () => {
         <Card className="p-6">
           <h2 className="mb-4 font-semibold text-lg">Application Responses</h2>
           <div className="space-y-4">
-            {Object.entries(request.formResponse.answers).map(
-              ([key, value]) => (
-                <div key={key}>
-                  <p className="mb-1 font-medium capitalize">
-                    {key.replace(/([A-Z])/g, ' $1').trim()}
-                  </p>
-                  <p className="text-muted-foreground">{String(value)}</p>
-                </div>
-              )
-            )}
+            {request.formResponse &&
+              Object.entries(request.formResponse.answers).map(
+                ([key, value]) => (
+                  <div key={key}>
+                    <p className="mb-1 font-medium capitalize">
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    </p>
+                    <p className="text-muted-foreground">{String(value)}</p>
+                  </div>
+                )
+              )}
           </div>
         </Card>
 

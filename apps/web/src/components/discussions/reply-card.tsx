@@ -18,7 +18,9 @@ export function ReplyCard({ reply }: ReplyCardProps) {
     orpc.discussion.vote.vote.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'get']
+          queryKey: orpc.discussion.thread.get.queryKey({
+            input: { id: reply.threadId }
+          })
         })
       },
       onError: (error: Error) => {
@@ -31,7 +33,9 @@ export function ReplyCard({ reply }: ReplyCardProps) {
     orpc.discussion.vote.unvote.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'get']
+          queryKey: orpc.discussion.thread.get.queryKey({
+            input: { id: reply.threadId }
+          })
         })
       },
       onError: (error: Error) => {

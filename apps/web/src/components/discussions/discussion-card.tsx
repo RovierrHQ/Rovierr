@@ -46,7 +46,12 @@ export function DiscussionCard({
     orpc.discussion.vote.unvote.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'list']
+          queryKey: orpc.discussion.thread.list.queryKey({
+            input: {
+              contextType: discussion.contextType,
+              contextId: discussion.contextId
+            }
+          })
         })
       },
       onError: (error: Error) => {

@@ -43,12 +43,12 @@ export default function SocietyDiscussionsPage({ params }: PageProps) {
   )
 
   // Fetch selected thread details with replies
-  const { data: selectedThreadData } = useQuery({
-    ...orpc.discussion.thread.get.queryOptions({
-      input: { id: selectedDiscussion || '' }
-    }),
-    enabled: !!selectedDiscussion
-  })
+  const { data: selectedThreadData } = useQuery(
+    orpc.discussion.thread.get.queryOptions({
+      input: { id: selectedDiscussion || '' },
+      enabled: !!selectedDiscussion
+    })
+  )
 
   // Map backend data to frontend types
   const discussions: Discussion[] =
@@ -115,6 +115,7 @@ export default function SocietyDiscussionsPage({ params }: PageProps) {
   // Map replies from backend data
   const mapReplyToFrontend = (reply: {
     id: string
+    threadId: string
     content: string
     author: { name: string | null; image: string | null; isAnonymous: boolean }
     votes: {
@@ -126,6 +127,7 @@ export default function SocietyDiscussionsPage({ params }: PageProps) {
     isEndorsed: boolean
   }): Reply => ({
     id: reply.id,
+    threadId: reply.threadId,
     content: reply.content,
     author: {
       name: reply.author.isAnonymous

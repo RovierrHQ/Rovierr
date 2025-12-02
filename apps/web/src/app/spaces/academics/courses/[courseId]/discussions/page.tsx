@@ -116,6 +116,7 @@ export default function DiscussionsPage({ params }: PageProps) {
   // Map replies from backend data
   const mapReplyToFrontend = (reply: {
     id: string
+    threadId: string
     content: string
     author: { name: string | null; image: string | null; isAnonymous: boolean }
     votes: {
@@ -127,6 +128,7 @@ export default function DiscussionsPage({ params }: PageProps) {
     isEndorsed: boolean
   }): Reply => ({
     id: reply.id,
+    threadId: reply.threadId,
     content: reply.content,
     author: {
       name: reply.author.isAnonymous

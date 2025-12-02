@@ -19,6 +19,7 @@ export interface Discussion {
 }
 
 export interface Reply {
+  threadId: string
   id: string
   content: string
   author: {

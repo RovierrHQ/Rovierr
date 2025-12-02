@@ -4,6 +4,7 @@ export const mockReplies: Record<string, Reply[]> = {
   '1': [
     {
       id: 'r1-1',
+      threadId: '1',
       content:
         'I had the same question! After working through it, I realized you need to identify the overlapping subproblems first. Try drawing out the recursion tree - that helped me see the pattern.',
       author: {
@@ -16,6 +17,7 @@ export const mockReplies: Record<string, Reply[]> = {
     },
     {
       id: 'r1-2',
+      threadId: '1',
       content:
         'The key insight is that each subproblem can be defined by a smaller input size. For problem 3 specifically:\n\n1. Define your state (what parameters change)\n2. Write the recurrence relation\n3. Identify base cases\n4. Add memoization\n\nLet me know if you want me to walk through an example!',
       author: {
@@ -29,6 +31,7 @@ export const mockReplies: Record<string, Reply[]> = {
     },
     {
       id: 'r1-3',
+      threadId: '1',
       content:
         'Thanks @Prof. Anderson! That makes much more sense now. I was trying to solve it bottom-up first which was confusing me.',
       author: {
@@ -43,6 +46,7 @@ export const mockReplies: Record<string, Reply[]> = {
   '2': [
     {
       id: 'r2-1',
+      threadId: '2',
       content:
         'These notes are amazing! Thank you so much for sharing. The examples really help clarify the concepts.',
       author: {
@@ -55,6 +59,7 @@ export const mockReplies: Record<string, Reply[]> = {
     },
     {
       id: 'r2-2',
+      threadId: '2',
       content:
         'Could you also share your notes from Lecture 7? I missed that class and would really appreciate it!',
       author: {
@@ -69,6 +74,7 @@ export const mockReplies: Record<string, Reply[]> = {
   '3': [
     {
       id: 'r3-1',
+      threadId: '3',
       content: "I'm interested! What time were you thinking?",
       author: {
         name: 'Michael Wong',
@@ -80,6 +86,7 @@ export const mockReplies: Record<string, Reply[]> = {
     },
     {
       id: 'r3-2',
+      threadId: '3',
       content:
         "Count me in! I'm free Saturday afternoon. Should we create a group chat?",
       author: {
@@ -97,6 +104,8 @@ export const mockDiscussions: Discussion[] = [
   {
     id: '1',
     title: 'Question about Assignment 2 - Dynamic Programming approach',
+    contextType: 'course',
+    contextId: '1',
     content:
       "I'm having trouble understanding the optimal substructure for problem 3. Can someone explain how to break it down into smaller subproblems?",
     author: {
@@ -114,6 +123,8 @@ export const mockDiscussions: Discussion[] = [
   {
     id: '2',
     title: 'Lecture 8 Notes - Greedy Algorithms',
+    contextType: 'course',
+    contextId: '1',
     content:
       "I took detailed notes from today's lecture on greedy algorithms. Sharing them here for anyone who missed class or wants a reference.",
     author: {
@@ -131,6 +142,8 @@ export const mockDiscussions: Discussion[] = [
   {
     id: '3',
     title: 'Study group for midterm - Anyone interested?',
+    contextType: 'course',
+    contextId: '1',
     content:
       "Looking to form a study group for the upcoming midterm. Planning to meet this weekend at the library. DM me if you're interested!",
     author: {
@@ -148,6 +161,8 @@ export const mockDiscussions: Discussion[] = [
   {
     id: '4',
     title: 'Clarification on graph traversal complexity',
+    contextType: 'course',
+    contextId: '1',
     content:
       "In the lecture, we discussed BFS and DFS having O(V+E) complexity. Can someone explain why it's not O(V*E)?",
     author: {
@@ -165,6 +180,8 @@ export const mockDiscussions: Discussion[] = [
   {
     id: '5',
     title: 'Recommended resources for graph algorithms?',
+    contextType: 'course',
+    contextId: '1',
     content:
       "I'm finding the graph algorithms section challenging. Does anyone have good YouTube channels or websites that explain these concepts well?",
     author: {
@@ -182,6 +199,8 @@ export const mockDiscussions: Discussion[] = [
   {
     id: '6',
     title: 'Office hours schedule change',
+    contextType: 'course',
+    contextId: '1',
     content:
       'Due to a conference, office hours this Thursday will be moved to Friday 2-4 PM. Please plan accordingly.',
     author: {
