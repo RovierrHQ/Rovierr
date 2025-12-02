@@ -20,6 +20,7 @@ import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { EmailComposer } from '@/components/societies/email-composer'
+import { EmailDetailsModal } from '@/components/societies/email-details-modal'
 import { EmailHistory } from '@/components/societies/email-history'
 import { EmailPreviewModal } from '@/components/societies/email-preview-modal'
 import { orpc } from '@/utils/orpc'
@@ -34,6 +35,8 @@ export default function EmailPage() {
     null
   )
   const [showPreview, setShowPreview] = useState(false)
+  const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null)
+  const [showDetails, setShowDetails] = useState(false)
 
   // Get organization details
   const { data: organization } = useQuery(
@@ -47,10 +50,20 @@ export default function EmailPage() {
   const { data: emailHistory, isLoading: isLoadingHistory } = useQuery(
     orpc.societyEmail.list.queryOptions({
       input: {
-        organizationId: clubID
+        organizationId: clubID,
+        limit: 50,
+        offset: currentPage * 50
       }
     })
   )
+
+  // Get email details when selected
+  const { data: emailDetails, isLoading: isLoadingDetails } = useQuery({
+    ...orpc.societyEmail.get.queryOptions({
+      input: { emailId: selectedEmailId || '' }
+    }),
+    enabled: !!selectedEmailId && showDetails
+  })
 
   // Send email mutation
   const sendMutation = useMutation(
@@ -59,8 +72,11 @@ export default function EmailPage() {
         toast.success(
           `Email sent successfully to ${data.recipientCount} members!`
         )
+        // Invalidate all email list queries to refresh the history
         queryClient.invalidateQueries({
-          queryKey: ['societyEmail', 'list', clubID]
+          predicate: (query) =>
+            query.queryKey[0] === 'orpc' &&
+            query.queryKey[1] === 'societyEmail.list'
         })
       },
       onError: (error: Error) => {
@@ -100,9 +116,14 @@ export default function EmailPage() {
     })
   }
 
-  const handleViewDetails = (_emailId: string) => {
-    // TODO: Implement email details modal
-    toast.info('Email details view coming soon')
+  const handleViewDetails = (emailId: string) => {
+    setSelectedEmailId(emailId)
+    setShowDetails(true)
+  }
+
+  const handleCloseDetails = () => {
+    setShowDetails(false)
+    setSelectedEmailId(null)
   }
 
   if (!organization) {
@@ -191,6 +212,14 @@ export default function EmailPage() {
           subject={previewData.previewSubject}
         />
       )}
+
+      {/* Email Details Modal */}
+      <EmailDetailsModal
+        email={emailDetails || null}
+        isLoading={isLoadingDetails}
+        onClose={handleCloseDetails}
+        open={showDetails}
+      />
     </div>
   )
 }
