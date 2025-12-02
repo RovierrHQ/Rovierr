@@ -1,5 +1,6 @@
 'use client'
 
+import { Alert, AlertDescription } from '@rov/ui/components/alert'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import {
@@ -14,6 +15,7 @@ import {
   Clock,
   CreditCard,
   DollarSign,
+  Info,
   LayoutDashboard,
   Receipt
 } from 'lucide-react'
@@ -34,6 +36,15 @@ export default function HomePage() {
       <Header />
 
       <main className="flex-1 overflow-y-auto p-6">
+        <Alert className="mb-6">
+          <Info className="size-4" />
+          <AlertDescription>
+            <strong>Demonstration purposes only.</strong> This feature is not
+            connected to any backend database. All data shown is for demo
+            purposes only.
+          </AlertDescription>
+        </Alert>
+
         <Tabs className="w-full" onValueChange={setActiveTab} value={activeTab}>
           <TabsList className="mb-6 h-12">
             <TabsTrigger className="gap-2 px-6" value="dashboard">
