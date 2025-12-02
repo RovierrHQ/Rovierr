@@ -18,6 +18,9 @@ const organizationSchema = z.object({
   tags: z.array(z.string()).nullable(),
   type: z.enum(['student', 'university']),
   visibility: z.enum(['public', 'campus_only', 'private']),
+  institutionId: z.string().nullable(),
+  institutionName: z.string().nullable(),
+  isVerified: z.boolean(),
   memberCount: z.number()
 })
 

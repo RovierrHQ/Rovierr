@@ -4,7 +4,7 @@ import {
   member as memberTable,
   organization as organizationTable
 } from '@rov/db'
-import { and, desc, eq, or, sql } from 'drizzle-orm'
+import { and, count, desc, eq, inArray, or, sql } from 'drizzle-orm'
 import { db } from '@/db'
 import { publicProcedure } from '@/lib/orpc'
 
@@ -57,7 +57,7 @@ export const studentOrganizations = {
 
           const total = Number(countResult?.count ?? 0)
 
-          // Get organizations with member counts
+          // Get organizations with institution info and verification status
           const organizations = await db
             .select({
               id: organizationTable.id,
@@ -67,17 +67,48 @@ export const studentOrganizations = {
               tags: organizationTable.tags,
               type: organizationTable.type,
               visibility: organizationTable.visibility,
-              memberCount: sql<number>`(
-              SELECT COUNT(*)::int
-              FROM ${memberTable}
-              WHERE ${memberTable.organizationId} = ${organizationTable.id}
-            )`
+              institutionId: organizationTable.institutionId,
+              isVerified: organizationTable.isVerified
             })
             .from(organizationTable)
             .where(visibilityConditions)
             .orderBy(desc(organizationTable.createdAt))
             .limit(limit)
             .offset(offset)
+
+          // Get member counts for all organizations in a batch
+          const organizationIds = organizations.map((org) => org.id)
+          const memberCountResults =
+            organizationIds.length > 0
+              ? await db
+                  .select({
+                    organizationId: memberTable.organizationId,
+                    count: count()
+                  })
+                  .from(memberTable)
+                  .where(inArray(memberTable.organizationId, organizationIds))
+                  .groupBy(memberTable.organizationId)
+              : []
+
+          const memberCountMap = new Map(
+            memberCountResults.map((mc) => [mc.organizationId, mc.count])
+          )
+
+          // Get institution names for organizations that have institutionId
+          const institutionIds = organizations
+            .map((org) => org.institutionId)
+            .filter((id): id is string => id !== null)
+          const institutions =
+            institutionIds.length > 0
+              ? await db.query.institution.findMany({
+                  where: (inst) => inArray(inst.id, institutionIds),
+                  columns: { id: true, name: true }
+                })
+              : []
+
+          const institutionMap = new Map(
+            institutions.map((inst) => [inst.id, inst.name])
+          )
 
           return {
             data: organizations.map((org) => ({
@@ -91,7 +122,12 @@ export const studentOrganizations = {
                 | 'public'
                 | 'campus_only'
                 | 'private',
-              memberCount: Number(org.memberCount ?? 0)
+              institutionId: org.institutionId,
+              institutionName: org.institutionId
+                ? (institutionMap.get(org.institutionId) ?? null)
+                : null,
+              isVerified: org.isVerified ?? false,
+              memberCount: memberCountMap.get(org.id) ?? 0
             })),
             meta: {
               page,
