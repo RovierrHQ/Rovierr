@@ -169,7 +169,10 @@ export const createJoinRequestSchema = insertJoinRequestSchema
   .extend({
     societyId: z.string().min(1, 'Society ID is required'),
     userId: z.string().min(1, 'User ID is required'),
-    formResponseId: z.string().min(1, 'Form response ID is required').optional(),
+    formResponseId: z
+      .string()
+      .min(1, 'Form response ID is required')
+      .optional(),
     paymentAmount: z.string().optional()
   })
 

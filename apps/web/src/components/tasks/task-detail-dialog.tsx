@@ -1,8 +1,8 @@
 'use client'
 
+import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
-import { Card, CardContent } from '@rov/ui/components/card'
 import {
   Dialog,
   DialogContent,
@@ -22,10 +22,10 @@ import {
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
-import { MessageSquare, X } from 'lucide-react'
+import { MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
-import type { Task } from './types'
+import type { Task, TaskAssignee, TaskComment } from './types'
 import { getPriorityColor } from './utils'
 
 interface TaskDetailDialogProps {
@@ -119,19 +119,12 @@ export function TaskDetailDialog({
         {!isLoading && taskDetails && (
           <>
             <DialogHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <DialogTitle className="mb-2 text-2xl">
-                    {taskDetails.title}
-                  </DialogTitle>
-                  <DialogDescription>
-                    {taskDetails.description || 'No description'}
-                  </DialogDescription>
-                </div>
-                <Button onClick={onClose} size="icon" variant="ghost">
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+              <DialogTitle className="mb-2 text-2xl">
+                {taskDetails.title}
+              </DialogTitle>
+              <DialogDescription>
+                {taskDetails.description || 'No description'}
+              </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-6">
@@ -195,11 +188,35 @@ export function TaskDetailDialog({
                 <div className="space-y-2">
                   <Label>Assignees</Label>
                   <div className="flex flex-wrap gap-2">
-                    {taskDetails.assignees.map((assignee) => (
-                      <Badge key={assignee.id} variant="secondary">
-                        {assignee.userId}
-                      </Badge>
-                    ))}
+                    {taskDetails.assignees.map((assignee) => {
+                      const user = (assignee as TaskAssignee).user
+                      const userName =
+                        user?.name || user?.email || 'Unknown User'
+                      const userImage = user?.image || null
+
+                      return (
+                        <div
+                          className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-1.5"
+                          key={assignee.id}
+                        >
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage
+                              alt={userName}
+                              src={userImage || undefined}
+                            />
+                            <AvatarFallback className="text-xs">
+                              {userName
+                                .split(' ')
+                                .map((n: string) => n[0])
+                                .join('')
+                                .toUpperCase()
+                                .slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm">{userName}</span>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               )}
@@ -207,26 +224,49 @@ export function TaskDetailDialog({
               {/* Comments */}
               <div className="space-y-4">
                 <Label>Comments</Label>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {taskDetails.comments && taskDetails.comments.length > 0 ? (
-                    taskDetails.comments.map((comment) => (
-                      <Card key={comment.id}>
-                        <CardContent className="p-4">
-                          <div className="mb-2 flex items-center justify-between">
-                            <span className="text-muted-foreground text-sm">
-                              {comment.userId}
-                            </span>
-                            <span className="text-muted-foreground text-xs">
-                              {format(
-                                new Date(comment.createdAt),
-                                'MMM d, yyyy h:mm a'
-                              )}
-                            </span>
+                    taskDetails.comments.map((comment) => {
+                      const user = (comment as TaskComment).user
+                      const userName =
+                        user?.name || user?.email || 'Unknown User'
+                      const userImage = user?.image || null
+
+                      return (
+                        <div className="space-y-2" key={comment.id}>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage
+                                alt={userName}
+                                src={userImage || undefined}
+                              />
+                              <AvatarFallback>
+                                {userName
+                                  .split(' ')
+                                  .map((n: string) => n[0])
+                                  .join('')
+                                  .toUpperCase()
+                                  .slice(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm">
+                                  {userName}
+                                </span>
+                                <span className="text-muted-foreground text-xs">
+                                  {format(
+                                    new Date(comment.createdAt),
+                                    'MMM d, yyyy h:mm a'
+                                  )}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm">{comment.message}</p>
-                        </CardContent>
-                      </Card>
-                    ))
+                          <p className="pl-10 text-sm">{comment.message}</p>
+                        </div>
+                      )
+                    })
                   ) : (
                     <p className="text-muted-foreground text-sm">
                       No comments yet

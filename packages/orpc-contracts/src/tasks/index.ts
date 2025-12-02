@@ -2,12 +2,20 @@ import { oc } from '@orpc/contract'
 import { z } from 'zod'
 
 // Common schemas
+const userSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
+  image: z.string().nullable().optional()
+})
+
 const taskAssigneeSchema = z.object({
   id: z.string(),
   taskId: z.string(),
   userId: z.string(),
   role: z.string().nullable(),
-  assignedAt: z.string()
+  assignedAt: z.string(),
+  user: userSchema.nullable().optional()
 })
 
 const taskActivityLogSchema = z.object({
@@ -25,7 +33,8 @@ const taskCommentSchema = z.object({
   userId: z.string(),
   message: z.string(),
   createdAt: z.string(),
-  updatedAt: z.string()
+  updatedAt: z.string(),
+  user: userSchema.nullable().optional()
 })
 
 const taskSchema = z.object({

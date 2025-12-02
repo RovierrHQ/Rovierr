@@ -83,8 +83,10 @@ export const joinRequests = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
-    formResponseId: text('form_response_id')
-      .references(() => formResponses.id, { onDelete: 'cascade' }),
+    formResponseId: text('form_response_id').references(
+      () => formResponses.id,
+      { onDelete: 'cascade' }
+    ),
 
     // Status
     status: text('status', {

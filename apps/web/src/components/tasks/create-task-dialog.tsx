@@ -21,7 +21,7 @@ import {
 } from '@rov/ui/components/select'
 import { Textarea } from '@rov/ui/components/textarea'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
@@ -41,6 +41,7 @@ export function CreateTaskDialog({
   onOpenChange,
   onSuccess
 }: CreateTaskDialogProps) {
+  const formRef = useRef<HTMLFormElement>(null)
   const [isAllDay, setIsAllDay] = useState(false)
   const [priority, setPriority] = useState<TaskPriority>('medium')
   const [selectedAssignees, setSelectedAssignees] = useState<Set<string>>(
@@ -95,7 +96,8 @@ export function CreateTaskDialog({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const formData = new FormData(e.currentTarget)
+    const form = e.currentTarget
+    const formData = new FormData(form)
     const title = formData.get('title') as string
     const description = (formData.get('description') as string) || undefined
     const dueAt = formData.get('dueAt') as string
@@ -106,21 +108,27 @@ export function CreateTaskDialog({
       return
     }
 
-    await createTaskMutation.mutateAsync({
-      title,
-      description,
-      contextType: 'club',
-      contextId: organizationId,
-      priority,
-      visibility: 'club',
-      dueAt: dueAt || undefined,
-      startAt: startAt || undefined,
-      isAllDay,
-      assigneeIds:
-        selectedAssignees.size > 0 ? Array.from(selectedAssignees) : undefined
-    })
-
-    e.currentTarget.reset()
+    try {
+      await createTaskMutation.mutateAsync({
+        title,
+        description,
+        contextType: 'club',
+        contextId: organizationId,
+        priority,
+        visibility: 'club',
+        dueAt: dueAt || undefined,
+        startAt: startAt || undefined,
+        isAllDay,
+        assigneeIds:
+          selectedAssignees.size > 0 ? Array.from(selectedAssignees) : undefined
+      })
+      // Reset form if it still exists (before dialog closes)
+      if (form) {
+        form.reset()
+      }
+    } catch {
+      // Error is handled by mutation onError callback
+    }
   }
 
   return (
@@ -130,7 +138,7 @@ export function CreateTaskDialog({
           <DialogTitle>Create New Task</DialogTitle>
           <DialogDescription>Add a new task for the club</DialogDescription>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit} ref={formRef}>
           <div className="space-y-2">
             <Label htmlFor="create-title">Title *</Label>
             <Input
