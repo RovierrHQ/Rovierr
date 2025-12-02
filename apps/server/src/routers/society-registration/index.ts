@@ -37,9 +37,7 @@ async function hasOrganizationUpdatePermission(
     body: {
       permissions: {
         organization: ['update']
-      }
-    },
-    query: {
+      },
       organizationId
     }
   })
@@ -256,6 +254,51 @@ export const societyRegistration = {
       }
     ),
 
+    simpleRequestToJoin:
+      protectedProcedure.societyRegistration.joinRequest.simpleRequestToJoin.handler(
+        async ({ input, context }) => {
+          const userId = context.session.user.id
+
+          // Check if already a member
+          const existingMember = await db.query.member.findFirst({
+            where: and(
+              eq(memberTable.organizationId, input.societyId),
+              eq(memberTable.userId, userId)
+            )
+          })
+          if (existingMember) {
+            throw new ORPCError('ALREADY_MEMBER', {
+              message: 'You are already a member of this society'
+            })
+          }
+
+          try {
+            const request = await joinRequestService.createJoinRequest({
+              societyId: input.societyId,
+              userId,
+              formResponseId: undefined,
+              paymentAmount: undefined
+            })
+
+            return {
+              id: request.id,
+              status: request.status,
+              requiresPayment: request.paymentStatus !== 'not_required'
+            }
+          } catch (error) {
+            if (
+              error instanceof Error &&
+              error.message.includes('pending join request')
+            ) {
+              throw new ORPCError('DUPLICATE_REQUEST', {
+                message: 'You already have a pending join request'
+              })
+            }
+            throw error
+          }
+        }
+      ),
+
     list: protectedProcedure.societyRegistration.joinRequest.list.handler(
       async ({ input, context }) => {
         // Check permission
@@ -325,16 +368,12 @@ export const societyRegistration = {
           })
         }
 
-        // Get form response
-        const formResponse = await db.query.formResponses.findFirst({
-          where: eq(formResponses.id, request.formResponseId)
-        })
-
-        if (!formResponse) {
-          throw new ORPCError('NOT_FOUND', {
-            message: 'Form response not found'
-          })
-        }
+        // Get form response if it exists
+        const formResponse = request.formResponseId
+          ? await db.query.formResponses.findFirst({
+              where: eq(formResponses.id, request.formResponseId)
+            })
+          : null
 
         return {
           ...request,
@@ -350,10 +389,12 @@ export const societyRegistration = {
             image: applicantUser.image || null,
             phoneNumber: applicantUser.phoneNumber || null
           },
-          formResponse: {
-            id: formResponse.id,
-            answers: formResponse.answers as Record<string, unknown>
-          },
+          formResponse: formResponse
+            ? {
+                id: formResponse.id,
+                answers: formResponse.answers as Record<string, unknown>
+              }
+            : null,
           reviewer: null,
           paymentVerifier: null
         }

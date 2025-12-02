@@ -85,7 +85,7 @@ export class JoinRequestService {
       .values({
         societyId: input.societyId,
         userId: input.userId,
-        formResponseId: input.formResponseId,
+        formResponseId: input.formResponseId ?? null,
         status: initialStatus,
         paymentStatus,
         paymentAmount: input.paymentAmount ?? null
@@ -138,11 +138,15 @@ export class JoinRequestService {
       conditions.push(lte(joinRequestsTable.submittedAt, input.dateTo))
     }
 
+    // Build where clause - handle single condition case
+    const whereClause =
+      conditions.length === 1 ? conditions[0] : and(...conditions)
+
     // Get total count
     const totalResult = await this.db
       .select({ count: count() })
       .from(joinRequestsTable)
-      .where(and(...conditions))
+      .where(whereClause)
 
     const total = totalResult[0]?.count || 0
 
@@ -157,7 +161,7 @@ export class JoinRequestService {
       })
       .from(joinRequestsTable)
       .innerJoin(userTable, eq(joinRequestsTable.userId, userTable.id))
-      .where(and(...conditions))
+      .where(whereClause)
       .orderBy(desc(joinRequestsTable.submittedAt))
       .limit(input.limit)
       .offset(input.offset)
@@ -222,7 +226,7 @@ export class JoinRequestService {
     await this.db
       .update(formResponsesTable)
       .set({ status: 'approved' })
-      .where(eq(formResponsesTable.id, request.formResponseId))
+      .where(eq(formResponsesTable.id, request.formResponseId ?? ''))
 
     // Send welcome email
     try {
@@ -284,7 +288,7 @@ export class JoinRequestService {
     await this.db
       .update(formResponsesTable)
       .set({ status: 'rejected' })
-      .where(eq(formResponsesTable.id, request.formResponseId))
+      .where(eq(formResponsesTable.id, request.formResponseId ?? ''))
 
     // Send rejection email
     try {

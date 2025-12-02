@@ -84,7 +84,6 @@ export const joinRequests = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     formResponseId: text('form_response_id')
-      .notNull()
       .references(() => formResponses.id, { onDelete: 'cascade' }),
 
     // Status
@@ -147,7 +146,8 @@ export const joinRequestsRelations = relations(joinRequests, ({ one }) => ({
   }),
   formResponse: one(formResponses, {
     fields: [joinRequests.formResponseId],
-    references: [formResponses.id]
+    references: [formResponses.id],
+    relationName: 'joinRequestFormResponse'
   }),
   paymentVerifier: one(user, {
     fields: [joinRequests.paymentVerifiedBy],

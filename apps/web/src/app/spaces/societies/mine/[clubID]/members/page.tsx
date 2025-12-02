@@ -8,9 +8,10 @@ import {
   TabsList,
   TabsTrigger
 } from '@rov/ui/components/tabs'
-import { Shield, UserPlus, Users } from 'lucide-react'
+import { ClipboardList, Shield, UserPlus, Users } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useMemo } from 'react'
+import { JoinRequests } from '@/components/clubs/members/join-requests'
 import { MemberList } from '@/components/clubs/members/member-list'
 import { PendingInvitations } from '@/components/clubs/members/pending-invitations'
 import { RoleManagement } from '@/components/clubs/members/role-management'
@@ -79,6 +80,10 @@ const MembersPage = () => {
             <UserPlus className="mr-2 h-4 w-4" />
             Invitations
           </TabsTrigger>
+          <TabsTrigger value="join-requests">
+            <ClipboardList className="mr-2 h-4 w-4" />
+            Join Requests
+          </TabsTrigger>
           <TabsTrigger value="roles">
             <Shield className="mr-2 h-4 w-4" />
             Roles & Permissions
@@ -91,6 +96,10 @@ const MembersPage = () => {
 
         <TabsContent className="mt-6" value="invitations">
           <PendingInvitations organizationId={clubID} />
+        </TabsContent>
+
+        <TabsContent className="mt-6" value="join-requests">
+          <JoinRequests organizationId={clubID} />
         </TabsContent>
 
         <TabsContent className="mt-6" value="roles">

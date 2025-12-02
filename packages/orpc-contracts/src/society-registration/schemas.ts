@@ -169,9 +169,16 @@ export const createJoinRequestSchema = insertJoinRequestSchema
   .extend({
     societyId: z.string().min(1, 'Society ID is required'),
     userId: z.string().min(1, 'User ID is required'),
-    formResponseId: z.string().min(1, 'Form response ID is required'),
+    formResponseId: z.string().min(1, 'Form response ID is required').optional(),
     paymentAmount: z.string().optional()
   })
+
+/**
+ * Schema for simple join request (no form required)
+ */
+export const simpleRequestToJoinSchema = z.object({
+  societyId: z.string().min(1, 'Society ID is required')
+})
 
 /**
  * Schema for listing join requests with filters
@@ -272,10 +279,12 @@ export const fullJoinRequestSchema = selectJoinRequestSchema
       image: z.string().nullable(),
       phoneNumber: z.string().nullable()
     }),
-    formResponse: z.object({
-      id: z.string(),
-      answers: z.record(z.string(), z.unknown())
-    }),
+    formResponse: z
+      .object({
+        id: z.string(),
+        answers: z.record(z.string(), z.unknown())
+      })
+      .nullable(),
     reviewer: z
       .object({
         id: z.string(),

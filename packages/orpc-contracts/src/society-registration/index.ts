@@ -22,6 +22,7 @@ import {
   listJoinRequestsSchema,
   markPaymentNotVerifiedSchema,
   rejectJoinRequestSchema,
+  simpleRequestToJoinSchema,
   updateRegistrationSettingsSchema,
   uploadPaymentProofSchema,
   verifyPaymentSchema
@@ -161,6 +162,44 @@ export const societyRegistration = {
         REGISTRATION_FULL: {
           data: z.object({
             message: z.string().default('Registration has reached capacity')
+          })
+        },
+        ALREADY_MEMBER: {
+          data: z.object({
+            message: z
+              .string()
+              .default('You are already a member of this society')
+          })
+        },
+        DUPLICATE_REQUEST: {
+          data: z.object({
+            message: z
+              .string()
+              .default('You already have a pending join request')
+          })
+        }
+      }),
+
+    simpleRequestToJoin: oc
+      .route({
+        method: 'POST',
+        description:
+          'Create a simple join request without forms (always enabled)',
+        summary: 'Simple Request to Join',
+        tags: ['Society Registration']
+      })
+      .input(simpleRequestToJoinSchema)
+      .output(
+        z.object({
+          id: z.string(),
+          status: joinRequestStatusSchema,
+          requiresPayment: z.boolean()
+        })
+      )
+      .errors({
+        UNAUTHORIZED: {
+          data: z.object({
+            message: z.string().default('User not authenticated')
           })
         },
         ALREADY_MEMBER: {
