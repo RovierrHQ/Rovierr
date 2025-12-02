@@ -48,7 +48,12 @@ export function NavUser() {
                   alt={data?.user?.name}
                   src={data?.user?.image || ''}
                 />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {data?.user?.name
+                    ?.split(' ')
+                    .map((name) => name[0])
+                    .join('')}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{data?.user?.name}</span>
@@ -70,7 +75,12 @@ export function NavUser() {
                     alt={data?.user?.name}
                     src={data?.user?.image || ''}
                   />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {data?.user?.name
+                      ?.split(' ')
+                      .map((name) => name[0])
+                      .join('')}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">

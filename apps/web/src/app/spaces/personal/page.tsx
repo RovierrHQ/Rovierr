@@ -1,4 +1,5 @@
 'use client'
+import { Alert, AlertDescription } from '@rov/ui/components/alert'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import {
@@ -11,6 +12,7 @@ import {
   DollarSign,
   Heart,
   Home,
+  Info,
   PiggyBank,
   Plus,
   TrendingUp
@@ -19,6 +21,17 @@ import {
 export default function PersonalPage() {
   return (
     <main className="flex-1 px-6 py-8">
+      <Alert className="mb-6">
+        <Info className="size-4" />
+        <AlertDescription>
+          <strong>Demonstration purposes only.</strong> This feature is not
+          connected to any backend database. The Personal Space will help you
+          manage your finances and budget, track your health and workout goals,
+          monitor your daily habits, and organize your personal life. All data
+          shown is for demo purposes only.
+        </AlertDescription>
+      </Alert>
+
       <div className="mb-8">
         <h2 className="mb-2 font-bold text-3xl text-foreground">Personal</h2>
         <p className="text-muted-foreground">
