@@ -1,5 +1,6 @@
 import { ORPCError } from '@orpc/server'
 import {
+  institution as institutionTable,
   member as memberTable,
   type organization as organizationTable
 } from '@rov/db'
@@ -54,6 +55,16 @@ async function transformSociety(soc: Society) {
     .from(memberTable)
     .where(eq(memberTable.organizationId, soc.id))
 
+  // Get institution name if institutionId exists
+  let institutionName: string | null = null
+  if (soc.institutionId) {
+    const institution = await db.query.institution.findFirst({
+      where: eq(institutionTable.id, soc.institutionId),
+      columns: { name: true }
+    })
+    institutionName = institution?.name ?? null
+  }
+
   // Parse metadata if it's a string
   let metadata: Record<string, unknown> | null = null
   if (soc.metadata) {
@@ -87,6 +98,7 @@ async function transformSociety(soc: Society) {
     description: soc.description,
     banner: bannerUrl,
     institutionId: soc.institutionId,
+    institutionName,
     type: soc.type,
     visibility: soc.visibility,
     isVerified: soc.isVerified ?? false,

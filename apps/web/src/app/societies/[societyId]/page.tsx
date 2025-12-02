@@ -179,14 +179,14 @@ const SocietyProfilePage = () => {
 
                 {/* Location & Website */}
                 <div className="flex flex-col gap-2 text-muted-foreground text-xs sm:flex-row sm:flex-wrap sm:gap-4 sm:text-sm">
-                  {society.institutionId && (
+                  {society.institutionName && (
                     <div className="flex items-center justify-center gap-1 md:justify-start">
                       <MapPin className="h-4 w-4 flex-shrink-0" />
                       <Link
                         className="transition-colors hover:text-primary"
                         href={`/universities/${society.institutionId}`}
                       >
-                        University Affiliation
+                        {society.institutionName}
                       </Link>
                     </div>
                   )}
@@ -271,14 +271,14 @@ const AboutSection = ({ society }: { society: Society }) => {
         )}
 
         {/* University Affiliation */}
-        {society.institutionId && (
+        {society.institutionName && (
           <div className="mt-4 text-sm">
             <span className="text-muted-foreground">Affiliated with: </span>
             <Link
               className="font-medium hover:underline"
               href={`/universities/${society.institutionId}`}
             >
-              University
+              {society.institutionName}
             </Link>
           </div>
         )}

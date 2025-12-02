@@ -159,6 +159,7 @@ export const societySchema = z.object({
   description: z.string().nullable(),
   banner: z.string().nullable(),
   institutionId: z.string().nullable(),
+  institutionName: z.string().nullable(),
   type: z.enum(['student', 'university']),
   visibility: z.enum(['public', 'campus_only', 'private']),
   isVerified: z.boolean(),
