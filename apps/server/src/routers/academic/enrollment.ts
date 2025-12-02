@@ -293,7 +293,7 @@ export const enrollment = {
             program: {
               id: programEnrollment.program.id,
               name: programEnrollment.program.name,
-              code: programEnrollment.program.code
+              code: programEnrollment.program.code ?? null
             },
             term: null,
             courses: []
@@ -327,6 +327,7 @@ export const enrollment = {
           },
           courses: enrolledCourses.map((record) => ({
             id: record.id,
+            courseId: record.courseId ?? null,
             code: record.course?.code ?? null,
             title: record.course?.title ?? '',
             instructor: null,
@@ -403,14 +404,19 @@ export const enrollment = {
           termName: termEnrollment.term.termName,
           academicYear: termEnrollment.term.academicYear
         },
-        courses: enrolledCourses.map((record) => ({
-          id: record.id,
-          code: record.course?.code ?? null,
-          title: record.course?.title ?? '',
-          instructor: record.courseOffering?.instructor ?? null,
-          section: record.courseOffering?.section ?? null,
-          schedule: record.courseOffering?.schedule ?? null
-        }))
+        courses: enrolledCourses.map((record) => {
+          // Ensure courseId is included - use direct field access
+          const courseId = record.courseId ?? null
+          return {
+            id: record.id,
+            courseId,
+            code: record.course?.code ?? null,
+            title: record.course?.title ?? '',
+            instructor: record.courseOffering?.instructor ?? null,
+            section: record.courseOffering?.section ?? null,
+            schedule: record.courseOffering?.schedule ?? null
+          }
+        })
       }
     }
   )

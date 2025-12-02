@@ -227,6 +227,7 @@ export const academic = {
           courses: z.array(
             z.object({
               id: z.string(),
+              courseId: z.string().nullable(),
               code: z.string().nullable(),
               title: z.string(),
               instructor: z.string().nullable(),
@@ -261,6 +262,7 @@ export const academic = {
           courses: z.array(
             z.object({
               id: z.string(),
+              courseId: z.string().nullable(),
               code: z.string().nullable(),
               title: z.string(),
               instructor: z.string().nullable(),

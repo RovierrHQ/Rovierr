@@ -53,57 +53,44 @@ const AcademicsLayout = ({ children }: { children: ReactNode }) => {
     lastCoursesRef.current = coursesKey
 
     // Group courses by course code (to handle multiple sections like LEC, TUT, LAB)
-    const courseMap = new Map<string, (typeof enrolledCourses)[0]>()
+    const courseMap = new Map<string, (typeof enrolledCourses)[0][]>()
 
     for (const course of enrolledCourses) {
       const key = course.code || course.title
       if (!courseMap.has(key)) {
-        courseMap.set(key, course)
+        courseMap.set(key, [])
       }
+      courseMap.get(key)?.push(course)
     }
 
     // Build course nodes with sub-items (using unique courses only)
-    const courseNodes: SidebarNode[] = Array.from(courseMap.values()).map(
-      (course) => ({
-        id: `course-${course.id}`,
-        title: course.code || course.title,
-        type: 'collapsible',
-        url: `/spaces/academics/courses/${course.id}`,
-        icon: BookOpen,
-        isActive: false,
-        children: [
-          {
-            id: `course-${course.id}-overview`,
-            title: 'Overview',
-            type: 'item',
-            url: `/spaces/academics/courses/${course.id}/overview`
-          },
-          {
-            id: `course-${course.id}-materials`,
-            title: 'Materials',
-            type: 'item',
-            url: `/spaces/academics/courses/${course.id}/materials`
-          },
-          {
-            id: `course-${course.id}-assignments`,
-            title: 'Assignments',
-            type: 'item',
-            url: `/spaces/academics/courses/${course.id}/assignments`
-          },
-          {
-            id: `course-${course.id}-discussions`,
-            title: 'Discussions',
-            type: 'item',
-            url: `/spaces/academics/courses/${course.id}/discussions`
-          },
-          {
-            id: `course-${course.id}-grades`,
-            title: 'Grades',
-            type: 'item',
-            url: `/spaces/academics/courses/${course.id}/grades`
-          }
-        ]
-      })
+    const courseNodes: SidebarNode[] = Array.from(courseMap.entries()).map(
+      ([code, courses]) => {
+        // Sort by ID and get the first one for discussion context
+        const sortedCourses = [...courses].sort((a, b) =>
+          a.id.localeCompare(b.id)
+        )
+        const mainCourse = sortedCourses[0]
+        // Concatenate course ID + term ID for discussion context
+        const discussionContextId = `${mainCourse.courseId ?? ''}-${enrollment?.term.id ?? ''}`
+
+        return {
+          id: `course-${mainCourse.id}`,
+          title: code,
+          type: 'collapsible',
+          url: `/spaces/academics/courses/${mainCourse.id}`,
+          icon: BookOpen,
+          isActive: false,
+          children: [
+            {
+              id: `course-${mainCourse.id}-discussions`,
+              title: 'Discussions',
+              type: 'item',
+              url: `/spaces/academics/courses/${discussionContextId}/discussions`
+            }
+          ]
+        }
+      }
     )
 
     // Build My Courses group children - either courses or empty state
@@ -177,7 +164,7 @@ const AcademicsLayout = ({ children }: { children: ReactNode }) => {
     }
 
     setSidebarTree(sidebarTree)
-  }, [setSidebarTree, enrolledCourses, isLoading])
+  }, [setSidebarTree, enrolledCourses, isLoading, enrollment?.term.id])
 
   return (
     <>

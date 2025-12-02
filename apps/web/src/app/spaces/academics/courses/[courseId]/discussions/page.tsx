@@ -18,6 +18,8 @@ interface PageProps {
 
 export default function DiscussionsPage({ params }: PageProps) {
   const { courseId } = use(params)
+  // courseId is already in format "courseId-termId" from the route
+  const discussionContextId = courseId
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFilter, setSelectedFilter] = useState<
     'all' | 'pinned' | 'resolved' | 'unresolved'
@@ -32,7 +34,7 @@ export default function DiscussionsPage({ params }: PageProps) {
     orpc.discussion.thread.list.queryOptions({
       input: {
         contextType: 'course',
-        contextId: courseId,
+        contextId: discussionContextId,
         search: searchQuery || undefined,
         sortBy: 'recent',
         limit: 50,
@@ -212,7 +214,7 @@ export default function DiscussionsPage({ params }: PageProps) {
 
       {/* Create Thread Dialog */}
       <CreateThreadDialog
-        contextId={courseId}
+        contextId={discussionContextId}
         contextType="course"
         onOpenChange={setCreateDialogOpen}
         open={createDialogOpen}

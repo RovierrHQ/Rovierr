@@ -61,38 +61,70 @@ export default function AcademicDashboardPage() {
 
       {/* Course Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {enrollment?.courses.map((course) => (
-          <Card className="transition-shadow hover:shadow-lg" key={course.id}>
-            <CardHeader>
-              <div className="mb-2 flex items-start justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <BookOpen className="h-6 w-6 text-primary" />
-                </div>
-                <span className="rounded-full bg-muted px-2 py-1 font-mono text-xs">
-                  {course.code}
-                </span>
-              </div>
-              <CardTitle className="text-lg">{course.title}</CardTitle>
-              <CardDescription>
-                {course.instructor} • Section {course.section}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4 flex items-center gap-2 text-muted-foreground text-sm">
-                <Calendar className="h-4 w-4" />
-                <span>{course.schedule}</span>
-              </div>
-              <Button asChild className="w-full" variant="outline">
-                <Link
-                  href={`/spaces/academics/courses/${course.id}/discussions`}
-                >
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Discussions
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+        {(() => {
+          if (!enrollment) {
+            return null
+          }
+
+          // Group courses by course code (like in sidebar)
+          const courseMap = new Map<string, (typeof enrollment.courses)[0][]>()
+
+          for (const course of enrollment.courses ?? []) {
+            const key = course.code || course.title
+            if (!courseMap.has(key)) {
+              courseMap.set(key, [])
+            }
+            courseMap.get(key)?.push(course)
+          }
+
+          // Build course cards - one per course code group
+          return Array.from(courseMap.entries()).map(([code, courses]) => {
+            // Sort by ID and get the first one for discussion context
+            const sortedCourses = [...courses].sort((a, b) =>
+              a.id.localeCompare(b.id)
+            )
+            const mainCourse = sortedCourses[0]
+            // Concatenate course ID + term ID for discussion context
+            const discussionContextId = `${mainCourse.courseId ?? ''}-${enrollment.term.id}`
+
+            return (
+              <Card className="transition-shadow hover:shadow-lg" key={code}>
+                <CardHeader>
+                  <div className="mb-2 flex items-start justify-between">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                      <BookOpen className="h-6 w-6 text-primary" />
+                    </div>
+                    <span className="rounded-full bg-muted px-2 py-1 font-mono text-xs">
+                      {code}
+                    </span>
+                  </div>
+                  <CardTitle className="text-lg">{mainCourse.title}</CardTitle>
+                  <CardDescription>
+                    {sortedCourses.length > 1
+                      ? `${sortedCourses.length} sections`
+                      : `${mainCourse.instructor} • Section ${mainCourse.section}`}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {sortedCourses.length === 1 && (
+                    <div className="mb-4 flex items-center gap-2 text-muted-foreground text-sm">
+                      <Calendar className="h-4 w-4" />
+                      <span>{mainCourse.schedule}</span>
+                    </div>
+                  )}
+                  <Button asChild className="w-full" variant="outline">
+                    <Link
+                      href={`/spaces/academics/courses/${discussionContextId}/discussions`}
+                    >
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Discussions
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )
+          })
+        })()}
       </div>
 
       {/* Empty State */}

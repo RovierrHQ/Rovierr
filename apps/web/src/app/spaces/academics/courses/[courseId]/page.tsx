@@ -186,7 +186,7 @@ export default function CoursePage({
                   variant="outline"
                 >
                   <Link
-                    href={`/spaces/academics/courses/${courseId}/discussions`}
+                    href={`/spaces/academics/courses/${mainCourse.courseId ?? ''}-${enrollment?.term.id ?? ''}/discussions`}
                   >
                     <MessageSquare className="mr-2 h-4 w-4" />
                     Join Discussions
