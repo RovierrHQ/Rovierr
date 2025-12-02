@@ -11,9 +11,12 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { BookOpen, Calendar, MessageSquare, Settings } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
+import { AddCoursesDialog } from '@/components/academic/add-courses-dialog'
 import { orpc } from '@/utils/orpc'
 
 export default function AcademicDashboardPage() {
+  const [addCoursesOpen, setAddCoursesOpen] = useState(false)
   // Fetch enrollment data
   const { data: enrollment, isLoading } = useQuery(
     orpc.academic.enrollment.getEnrollment.queryOptions({
@@ -38,7 +41,7 @@ export default function AcademicDashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto p-10">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
@@ -102,12 +105,15 @@ export default function AcademicDashboardPage() {
               You haven't enrolled in any courses yet. Add courses to get
               started.
             </p>
-            <Button asChild>
-              <Link href="/spaces/academics/onboarding">Add Courses</Link>
-            </Button>
+            <Button onClick={() => setAddCoursesOpen(true)}>Add Courses</Button>
           </CardContent>
         </Card>
       )}
+
+      <AddCoursesDialog
+        onOpenChange={setAddCoursesOpen}
+        open={addCoursesOpen}
+      />
     </div>
   )
 }

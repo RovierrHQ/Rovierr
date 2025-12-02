@@ -233,6 +233,7 @@ export const enrollment = {
         .insert(courseEnrollmentTable)
         .values(
           offerings.map((offering) => ({
+            userId,
             termId,
             courseId: offering.courseId,
             courseOfferingId: offering.id,
@@ -301,7 +302,11 @@ export const enrollment = {
 
         // Get enrolled courses for the current term
         const enrolledCourses = await db.query.courseEnrollment.findMany({
-          where: (record) => eq(record.termId, termEnrollment.termId),
+          where: (record) =>
+            and(
+              eq(record.userId, userId),
+              eq(record.termId, termEnrollment.termId)
+            ),
           with: {
             course: true
           }
@@ -341,7 +346,11 @@ export const enrollment = {
         where: (record) =>
           and(eq(record.userId, userId), isNull(record.graduatedOn)),
         with: {
-          program: true
+          program: {
+            with: {
+              institution: true
+            }
+          }
         },
         orderBy: (record, { desc }) => [desc(record.createdAt)]
       })
@@ -371,7 +380,11 @@ export const enrollment = {
 
       // Get enrolled courses for the current term
       const enrolledCourses = await db.query.courseEnrollment.findMany({
-        where: (record) => eq(record.termId, termEnrollment.termId),
+        where: (record) =>
+          and(
+            eq(record.userId, userId),
+            eq(record.termId, termEnrollment.termId)
+          ),
         with: {
           course: true,
           courseOffering: true
@@ -382,7 +395,8 @@ export const enrollment = {
         program: {
           id: programEnrollment.program.id,
           name: programEnrollment.program.name,
-          code: programEnrollment.program.code
+          code: programEnrollment.program.code,
+          institutionId: programEnrollment.program.institutionId
         },
         term: {
           id: termEnrollment.term.id,

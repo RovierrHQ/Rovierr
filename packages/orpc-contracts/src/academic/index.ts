@@ -250,7 +250,8 @@ export const academic = {
           program: z.object({
             id: z.string(),
             name: z.string(),
-            code: z.string().nullable()
+            code: z.string().nullable(),
+            institutionId: z.string()
           }),
           term: z.object({
             id: z.string(),

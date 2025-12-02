@@ -9,7 +9,7 @@ import type {
   EndorseReplyInput,
   UpdateReplyInput
 } from '@rov/orpc-contracts'
-import { eq, sql } from 'drizzle-orm'
+import { asc, eq, sql } from 'drizzle-orm'
 
 export class ReplyService {
   private db: DB
@@ -238,6 +238,7 @@ export class ReplyService {
       .from(threadReply)
       .leftJoin(user, eq(threadReply.authorId, user.id))
       .where(eq(threadReply.threadId, threadId))
+      .orderBy(asc(threadReply.createdAt))
 
     // Build nested structure
     type ReplyWithChildren = Awaited<ReturnType<typeof this.getReplyById>> & {
@@ -281,14 +282,13 @@ export class ReplyService {
       }
     }
 
-    // Sort: endorsed first, then by votes
+    // Sort: endorsed first, then by time (oldest first)
     const sortReplies = (replyList: ReplyWithChildren[]): void => {
       replyList.sort((a, b) => {
         if (a.isEndorsed && !b.isEndorsed) return -1
         if (!a.isEndorsed && b.isEndorsed) return 1
-        const aScore = a.votes.upvotes - a.votes.downvotes
-        const bScore = b.votes.upvotes - b.votes.downvotes
-        return bScore - aScore
+        // Sort by createdAt (oldest first)
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       })
       for (const reply of replyList) {
         if (reply.childReplies.length > 0) {

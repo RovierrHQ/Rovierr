@@ -60,6 +60,9 @@ export const courseOffering = pgTable('course_offering', {
  *  ======================== */
 export const courseEnrollment = pgTable('course_enrollment', {
   id: primaryId,
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
   termId: text('term_id')
     .notNull()
     .references(() => institutionalTerm.id, { onDelete: 'cascade' }),
@@ -117,6 +120,10 @@ export const courseOfferingRelations = relations(
 export const courseEnrollmentRelations = relations(
   courseEnrollment,
   ({ one }) => ({
+    user: one(user, {
+      fields: [courseEnrollment.userId],
+      references: [user.id]
+    }),
     term: one(institutionalTerm, {
       fields: [courseEnrollment.termId],
       references: [institutionalTerm.id]

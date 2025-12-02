@@ -26,7 +26,7 @@ export const ClubPostPromptCard = () => {
   return (
     <>
       <Card
-        className="mb-6 cursor-pointer p-4 transition-colors hover:bg-accent/50"
+        className="isolate mb-6 cursor-pointer p-4 transition-colors hover:bg-accent/50"
         onClick={() => setPostDialogOpen(true)}
       >
         <div className="flex items-center gap-3">

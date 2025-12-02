@@ -17,7 +17,7 @@ const ClubPostFeed = () => {
     <div>
       <div className="space-y-4">
         {mockPosts.map((post) => (
-          <Card className="p-6" key={post.id}>
+          <Card className="isolate p-6" key={post.id}>
             <div className="flex items-start gap-4">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={`/clubs${post.author.avatar}`} />

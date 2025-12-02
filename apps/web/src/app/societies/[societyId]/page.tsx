@@ -1,16 +1,25 @@
 'use client'
 
 import type { societySchema } from '@rov/orpc-contracts'
+import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
-import { Card } from '@rov/ui/components/card'
+import { Card, CardContent } from '@rov/ui/components/card'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@rov/ui/components/tooltip'
 import { useQuery } from '@tanstack/react-query'
 import {
+  CheckCircle2,
   Facebook,
   Globe,
   Instagram,
   Linkedin,
   Loader2,
+  MapPin,
   MessageCircle,
   Send,
   Twitter,
@@ -36,7 +45,7 @@ const SocietyProfilePage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
@@ -44,7 +53,7 @@ const SocietyProfilePage = () => {
 
   if (!society) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
           <h1 className="mb-2 font-semibold text-2xl">Society Not Found</h1>
           <p className="text-muted-foreground">
@@ -56,12 +65,167 @@ const SocietyProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Profile Header */}
-      <ProfileHeader society={society} />
+    <div className="mx-auto min-h-screen max-w-5xl">
+      <div className="-mx-4 -mt-6 relative overflow-x-hidden">
+        {/* Banner */}
+        <div className="relative h-64 w-full overflow-hidden">
+          {society.banner ? (
+            <img
+              alt="Society Banner"
+              className="h-full w-full object-cover"
+              src={society.banner}
+            />
+          ) : (
+            <div className="absolute inset-0 h-full w-full bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-600" />
+          )}
+          <div className="absolute right-0 bottom-0 left-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent" />
+        </div>
 
-      {/* Content */}
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Content */}
+        <div className="-mt-20 relative px-4 sm:px-6">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-6">
+              {/* Avatar */}
+              <div className="group relative flex-shrink-0">
+                <div className="absolute inset-0 animate-pulse rounded-full bg-primary opacity-60 blur-md" />
+                <Avatar className="relative h-28 w-28 border-4 border-primary shadow-2xl ring-2 ring-background sm:h-40 sm:w-40">
+                  <AvatarImage alt={society.name} src={society.logo ?? ''} />
+                  <AvatarFallback className="bg-primary/10 text-3xl text-primary sm:text-4xl">
+                    {society.name
+                      .split(' ')
+                      .map((w) => w[0])
+                      .join('')
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 space-y-3 pt-0 text-center sm:space-y-4 sm:pt-6 sm:text-left">
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                    <h1 className="text-balance font-bold text-2xl text-foreground tracking-tight sm:text-3xl">
+                      {society.name}
+                    </h1>
+
+                    {society.isVerified ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-emerald-500 transition-colors hover:bg-emerald-500/15">
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              <span className="font-medium text-xs">
+                                Verified
+                              </span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs" side="bottom">
+                            <p className="text-sm">
+                              This organization has been verified and is an
+                              official society.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : null}
+
+                    <Badge
+                      variant={
+                        society.type === 'university' ? 'default' : 'secondary'
+                      }
+                    >
+                      {society.type === 'university'
+                        ? 'Official Organization'
+                        : 'Student Society'}
+                    </Badge>
+                  </div>
+
+                  {society.description && (
+                    <p className="mx-auto line-clamp-2 max-w-lg text-pretty text-muted-foreground text-sm leading-relaxed sm:mx-0">
+                      {society.description}
+                    </p>
+                  )}
+                </div>
+
+                {/* Badges */}
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                  {society.tags &&
+                    society.tags.length > 0 &&
+                    society.tags.slice(0, 3).map((tag) => (
+                      <Badge
+                        className="border border-border/50 bg-secondary/50 text-foreground"
+                        key={tag}
+                        variant="secondary"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  {society.memberCount !== undefined && (
+                    <Badge
+                      className="border border-border/50 bg-secondary/50 text-foreground"
+                      variant="secondary"
+                    >
+                      {society.memberCount}{' '}
+                      {society.memberCount === 1 ? 'Member' : 'Members'}
+                    </Badge>
+                  )}
+                  {society.foundingYear && (
+                    <Badge
+                      className="border border-border/50 bg-secondary/50 text-foreground"
+                      variant="secondary"
+                    >
+                      Founded {society.foundingYear}
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Location & Website */}
+                <div className="flex flex-col gap-2 text-muted-foreground text-xs sm:flex-row sm:flex-wrap sm:gap-4 sm:text-sm">
+                  {society.institutionId && (
+                    <div className="flex items-center justify-center gap-1 md:justify-start">
+                      <MapPin className="h-4 w-4 flex-shrink-0" />
+                      <Link
+                        className="transition-colors hover:text-primary"
+                        href={`/universities/${society.institutionId}`}
+                      >
+                        University Affiliation
+                      </Link>
+                    </div>
+                  )}
+
+                  {society.website && (
+                    <Link
+                      className="flex items-center justify-center gap-1 transition-colors hover:text-primary md:justify-start"
+                      href={society.website}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <Globe className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">Website</span>
+                    </Link>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                  <Button size="sm">
+                    <Users className="mr-2 h-4 w-4" />
+                    Join Society
+                  </Button>
+                  <Button size="sm" variant="outline">
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Contact
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Sections */}
+      <div className="mt-8 px-4 sm:px-6">
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Main Content */}
           <div className="space-y-6 lg:col-span-2">
@@ -88,111 +252,40 @@ const SocietyProfilePage = () => {
   )
 }
 
-// Profile Header Component
-const ProfileHeader = ({ society }: { society: Society }) => {
-  // Default gradient for missing banner
-  const defaultGradient = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-
-  return (
-    <div className="relative">
-      {/* Banner */}
-      <div
-        className="h-48 w-full sm:h-64"
-        style={{
-          background: society.banner
-            ? `url(${society.banner}) center/cover`
-            : defaultGradient
-        }}
-      />
-
-      {/* Content */}
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="-mt-16 sm:-mt-20 relative">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            {/* Logo */}
-            <div className="flex items-end gap-4">
-              {society.logo ? (
-                <img
-                  alt={`${society.name} logo`}
-                  className="h-24 w-24 rounded-lg border-4 border-background bg-background object-cover sm:h-32 sm:w-32"
-                  src={society.logo}
-                />
-              ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-lg border-4 border-background bg-primary font-bold text-2xl text-primary-foreground sm:h-32 sm:w-32">
-                  {society.name
-                    .split(' ')
-                    .map((word: string) => word[0])
-                    .join('')
-                    .toUpperCase()
-                    .slice(0, 2)}
-                </div>
-              )}
-
-              <div className="pb-2">
-                <h1 className="font-bold text-2xl sm:text-3xl">
-                  {society.name}
-                </h1>
-                <div className="mt-1 flex items-center gap-2">
-                  <Badge
-                    variant={
-                      society.type === 'university' ? 'default' : 'secondary'
-                    }
-                  >
-                    {society.type === 'university'
-                      ? 'Official Organization'
-                      : 'Student Society'}
-                  </Badge>
-                  {society.isVerified && (
-                    <Badge variant="outline">Verified</Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Join Button */}
-            <div className="pb-2">
-              <Button size="lg">
-                <Users className="mr-2 h-4 w-4" />
-                Join Society
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // About Section
 const AboutSection = ({ society }: { society: Society }) => {
   return (
-    <Card className="p-6">
-      <h2 className="mb-4 font-semibold text-xl">About</h2>
-      <p className="text-muted-foreground">{society.description}</p>
+    <Card>
+      <CardContent className="p-6">
+        <h2 className="mb-4 font-semibold text-xl">About</h2>
+        <p className="whitespace-pre-wrap text-muted-foreground">
+          {society.description}
+        </p>
 
-      {/* Tags */}
-      {society.tags && society.tags.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {society.tags.map((tag: string) => (
-            <Badge key={tag} variant="secondary">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-      )}
+        {/* Tags */}
+        {society.tags && society.tags.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {society.tags.map((tag: string) => (
+              <Badge key={tag} variant="secondary">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
 
-      {/* University Affiliation */}
-      {society.institutionId && (
-        <div className="mt-4 text-sm">
-          <span className="text-muted-foreground">Affiliated with: </span>
-          <Link
-            className="font-medium hover:underline"
-            href={`/universities/${society.institutionId}`}
-          >
-            University
-          </Link>
-        </div>
-      )}
+        {/* University Affiliation */}
+        {society.institutionId && (
+          <div className="mt-4 text-sm">
+            <span className="text-muted-foreground">Affiliated with: </span>
+            <Link
+              className="font-medium hover:underline"
+              href={`/universities/${society.institutionId}`}
+            >
+              University
+            </Link>
+          </div>
+        )}
+      </CardContent>
     </Card>
   )
 }
@@ -204,7 +297,10 @@ const SocialLinksSection = ({ society }: { society: Society }) => {
     if (instagram.startsWith('@')) {
       return `https://instagram.com/${instagram.slice(1)}`
     }
-    return instagram
+    if (instagram.startsWith('http')) {
+      return instagram
+    }
+    return `https://instagram.com/${instagram}`
   }
 
   const getTwitterUrl = (twitter: string | null) => {
@@ -212,7 +308,10 @@ const SocialLinksSection = ({ society }: { society: Society }) => {
     if (twitter.startsWith('@')) {
       return `https://twitter.com/${twitter.slice(1)}`
     }
-    return twitter
+    if (twitter.startsWith('http')) {
+      return twitter
+    }
+    return `https://twitter.com/${twitter}`
   }
 
   const socialLinks = [
@@ -258,22 +357,24 @@ const SocialLinksSection = ({ society }: { society: Society }) => {
   }
 
   return (
-    <Card className="p-6">
-      <h2 className="mb-4 font-semibold text-xl">Connect With Us</h2>
-      <div className="space-y-2">
-        {socialLinks.map((link) => (
-          <a
-            className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent"
-            href={link.url || '#'}
-            key={link.name}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <link.icon className="h-5 w-5 text-muted-foreground" />
-            <span className="font-medium text-sm">{link.name}</span>
-          </a>
-        ))}
-      </div>
+    <Card>
+      <CardContent className="p-6">
+        <h2 className="mb-4 font-semibold text-xl">Connect With Us</h2>
+        <div className="space-y-2">
+          {socialLinks.map((link) => (
+            <a
+              className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent"
+              href={link.url || '#'}
+              key={link.name}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <link.icon className="h-5 w-5 text-muted-foreground" />
+              <span className="font-medium text-sm">{link.name}</span>
+            </a>
+          ))}
+        </div>
+      </CardContent>
     </Card>
   )
 }
@@ -281,9 +382,11 @@ const SocialLinksSection = ({ society }: { society: Society }) => {
 // Goals Section
 const GoalsSection = ({ goals }: { goals: string }) => {
   return (
-    <Card className="p-6">
-      <h2 className="mb-4 font-semibold text-xl">Our Goals</h2>
-      <p className="text-muted-foreground">{goals}</p>
+    <Card>
+      <CardContent className="p-6">
+        <h2 className="mb-4 font-semibold text-xl">Our Goals</h2>
+        <p className="whitespace-pre-wrap text-muted-foreground">{goals}</p>
+      </CardContent>
     </Card>
   )
 }
@@ -291,9 +394,11 @@ const GoalsSection = ({ goals }: { goals: string }) => {
 // Meeting Info Section
 const MeetingInfoSection = ({ schedule }: { schedule: string }) => {
   return (
-    <Card className="p-6">
-      <h2 className="mb-4 font-semibold text-xl">Meeting Schedule</h2>
-      <p className="text-muted-foreground">{schedule}</p>
+    <Card>
+      <CardContent className="p-6">
+        <h2 className="mb-4 font-semibold text-xl">Meeting Schedule</h2>
+        <p className="whitespace-pre-wrap text-muted-foreground">{schedule}</p>
+      </CardContent>
     </Card>
   )
 }
@@ -301,9 +406,13 @@ const MeetingInfoSection = ({ schedule }: { schedule: string }) => {
 // Membership Section
 const MembershipSection = ({ requirements }: { requirements: string }) => {
   return (
-    <Card className="p-6">
-      <h2 className="mb-4 font-semibold text-xl">Membership Requirements</h2>
-      <p className="text-muted-foreground">{requirements}</p>
+    <Card>
+      <CardContent className="p-6">
+        <h2 className="mb-4 font-semibold text-xl">Membership Requirements</h2>
+        <p className="whitespace-pre-wrap text-muted-foreground">
+          {requirements}
+        </p>
+      </CardContent>
     </Card>
   )
 }
@@ -311,28 +420,30 @@ const MembershipSection = ({ requirements }: { requirements: string }) => {
 // Stats Card
 const StatsCard = ({ society }: { society: Society }) => {
   return (
-    <Card className="p-6">
-      <h2 className="mb-4 font-semibold text-xl">Stats</h2>
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-sm">Members</span>
-          <span className="font-semibold">{society.memberCount || 0}</span>
-        </div>
-        {society.foundingYear && (
+    <Card>
+      <CardContent className="p-6">
+        <h2 className="mb-4 font-semibold text-xl">Stats</h2>
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-sm">Founded</span>
-            <span className="font-semibold">{society.foundingYear}</span>
+            <span className="text-muted-foreground text-sm">Members</span>
+            <span className="font-semibold">{society.memberCount || 0}</span>
           </div>
-        )}
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-sm">
-            Profile Completion
-          </span>
-          <span className="font-semibold">
-            {society.profileCompletionPercentage || 0}%
-          </span>
+          {society.foundingYear && (
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-sm">Founded</span>
+              <span className="font-semibold">{society.foundingYear}</span>
+            </div>
+          )}
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground text-sm">
+              Profile Completion
+            </span>
+            <span className="font-semibold">
+              {society.profileCompletionPercentage || 0}%
+            </span>
+          </div>
         </div>
-      </div>
+      </CardContent>
     </Card>
   )
 }

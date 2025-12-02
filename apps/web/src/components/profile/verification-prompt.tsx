@@ -247,6 +247,8 @@ export function VerificationPrompt() {
         setOtp('')
         setParsedData(null)
         refetchIdCards()
+
+        window.location.reload()
       },
       onError: (error: Error) => {
         toast.error(error.message || 'Failed to verify code')
