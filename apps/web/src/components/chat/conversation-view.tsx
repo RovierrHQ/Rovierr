@@ -3,7 +3,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import { Input } from '@rov/ui/components/input'
-import { ScrollArea } from '@rov/ui/components/scroll-area'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { cn } from '@rov/ui/lib/utils'
 import {
@@ -183,7 +182,11 @@ export function ConversationView({
   const messages = (data?.pages.flatMap(
     (page: { messages: Message[] }) => page.messages
   ) ?? []) as Message[]
-  const otherUser = messages[0]?.sender
+
+  // Get the other user (not the current user) from messages
+  const otherUser = messages.find(
+    (msg) => msg.senderId !== session?.user?.id
+  )?.sender
 
   return (
     <div className="flex h-full flex-col">
@@ -218,7 +221,7 @@ export function ConversationView({
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+      <div className="flex-1 overflow-y-auto p-4" ref={scrollAreaRef}>
         {isLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -312,7 +315,7 @@ export function ConversationView({
             <div ref={messagesEndRef} />
           </div>
         ) : null}
-      </ScrollArea>
+      </div>
 
       {/* Input */}
       <div className="border-t p-4">

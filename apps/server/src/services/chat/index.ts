@@ -338,70 +338,98 @@ export class ChatService {
       }
     }
 
-    // Create message
-    const [newMessage] = await this.db
-      .insert(message)
-      .values({
-        conversationId,
-        senderId: userId,
-        content,
-        type,
-        metadata: metadata || null,
-        replyToMessageId: replyToMessageId || null,
-        deliveredAt: new Date().toISOString()
-      })
-      .returning()
+    // Get sender information and participants in parallel before creating message
+    const [sender, participants] = await Promise.all([
+      this.db
+        .select({
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          displayUsername: user.displayUsername,
+          image: user.image,
+          bio: user.bio,
+          isVerified: user.isVerified
+        })
+        .from(user)
+        .where(eq(user.id, userId))
+        .limit(1)
+        .then((res) => res[0]),
+      this.db
+        .select()
+        .from(conversationParticipant)
+        .where(eq(conversationParticipant.conversationId, conversationId))
+    ])
 
-    // Get sender information to include in real-time broadcast
-    const [sender] = await this.db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        displayUsername: user.displayUsername,
-        image: user.image,
-        bio: user.bio,
-        isVerified: user.isVerified
-      })
-      .from(user)
-      .where(eq(user.id, userId))
-      .limit(1)
-
-    const messageWithSender = {
-      ...newMessage,
+    // Create optimistic message object for immediate broadcast
+    const now = new Date().toISOString()
+    const optimisticMessage = {
+      id: crypto.randomUUID(), // Temporary ID
+      conversationId,
+      senderId: userId,
+      content,
+      type,
+      metadata: metadata || null,
+      replyToMessageId: replyToMessageId || null,
+      deliveredAt: now,
+      editedAt: null,
+      isEdited: false,
+      deletedAt: null,
+      createdAt: now,
+      updatedAt: now,
       sender
     }
 
-    // Update conversation last message timestamp
-    await this.db
-      .update(conversation)
-      .set({ lastMessageAt: newMessage.createdAt })
-      .where(eq(conversation.id, conversationId))
-
-    // Get all participants to notify them
-    const participants = await this.db
-      .select()
-      .from(conversationParticipant)
-      .where(eq(conversationParticipant.conversationId, conversationId))
-
-    // Publish to Centrifugo for real-time delivery
-    await this.centrifugo.publish(`conversation:${conversationId}`, {
+    // Publish immediately to Centrifugo (fire and forget)
+    this.centrifugo.publish(`conversation:${conversationId}`, {
       type: 'new_message',
-      message: messageWithSender
+      message: optimisticMessage
     })
+    // .catch((err) => console.error('Failed to publish to conversation:', err))
 
-    // Notify all participants on their personal chat channels
-    const publishPromises = participants.map((p) => {
-      return this.centrifugo.publish(`chat:${p.userId}`, {
-        type: 'new_message',
-        conversationId,
-        message: messageWithSender
-      })
-    })
+    // Notify all participants on their personal chat channels (fire and forget)
+    Promise.all(
+      participants.map(
+        (p) =>
+          this.centrifugo.publish(`chat:${p.userId}`, {
+            type: 'new_message',
+            conversationId,
+            message: optimisticMessage
+          })
+        // .catch((_err) =>
+        // console.error(`Failed to publish to user ${p.userId}:`, err)
+        // )
+      )
+    )
+    // .catch((err) => console.error('Failed to publish to participants:', err))
 
-    await Promise.all(publishPromises)
+    // Now persist to database (don't await, but handle in background)
+    const dbPromise = (async () => {
+      const [newMessage] = await this.db
+        .insert(message)
+        .values({
+          conversationId,
+          senderId: userId,
+          content,
+          type,
+          metadata: metadata || null,
+          replyToMessageId: replyToMessageId || null,
+          deliveredAt: now
+        })
+        .returning()
 
-    return newMessage
+      // Update conversation last message timestamp
+      await this.db
+        .update(conversation)
+        .set({ lastMessageAt: newMessage.createdAt })
+        .where(eq(conversation.id, conversationId))
+
+      return newMessage
+    })()
+
+    // Return optimistic message immediately, but with actual DB ID when available
+    const actualMessage = await dbPromise
+
+    return actualMessage
   }
 
   /**

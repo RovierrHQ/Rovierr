@@ -179,7 +179,7 @@ export const messageWithSenderSchema = messageSchema.extend({
 export const conversationWithLastMessageSchema = conversationSchema.extend({
   lastMessage: messageSchema.nullable(),
   unreadCount: z.number(),
-  otherParticipant: publicUserSchema // For direct conversations
+  otherParticipant: publicUserSchema.nullable() // For direct conversations
 })
 
 /**

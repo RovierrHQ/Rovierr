@@ -116,7 +116,7 @@ export function ChatDrawer() {
             </SheetTitle>
           </SheetHeader>
 
-          <div className="h-[calc(100vh-80px)] overflow-hidden">
+          <div className="flex h-[calc(100vh-80px)] flex-col overflow-hidden">
             {selectedConversationId ? (
               <ConversationView
                 conversationId={selectedConversationId}
