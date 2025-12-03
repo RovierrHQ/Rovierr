@@ -41,8 +41,32 @@ export const posts = {
 
   list: protectedProcedure.campusFeed.list.handler(
     async ({ input, context }) => {
-      const userId = context.session.user.id
-      return await postService.listPosts(input, userId)
+      console.log('[campusFeed.list] Starting with input:', {
+        input,
+        userId: context.session.user.id
+      })
+      try {
+        const userId = context.session.user.id
+        const result = await postService.listPosts(input, userId)
+        console.log('[campusFeed.list] Successfully fetched posts:', {
+          count: result.posts.length,
+          total: result.total,
+          hasMore: result.hasMore
+        })
+        return result
+      } catch (error) {
+        console.error('[campusFeed.list] Error fetching posts:', error)
+        if (error instanceof Error) {
+          console.error('[campusFeed.list] Error details:', {
+            message: error.message,
+            stack: error.stack
+          })
+          throw new ORPCError('INTERNAL_SERVER_ERROR', {
+            message: `Failed to fetch posts: ${error.message}`
+          })
+        }
+        throw error
+      }
     }
   ),
 
