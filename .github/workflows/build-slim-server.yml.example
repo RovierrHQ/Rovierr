@@ -1,0 +1,136 @@
+name: Build and Minify Server Image
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'apps/server/**'
+      - 'packages/**'
+      - '.github/workflows/build-slim-server.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'apps/server/**'
+      - 'packages/**'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/rovierr-server
+
+jobs:
+  build-and-minify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build original image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          push: false
+          load: true
+          tags: rovierr-server:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Install Slim Toolkit
+        run: |
+          curl -L -o ds.tar.gz https://github.com/slimtoolkit/slim/releases/download/1.40.11/dist_linux.tar.gz
+          tar -xvf ds.tar.gz
+          sudo mv dist_linux/slim /usr/local/bin/
+          sudo mv dist_linux/slim-sensor /usr/local/bin/
+          slim version
+
+      - name: Minify image with Slim
+        run: |
+          slim build \
+            --target rovierr-server:${{ github.sha }} \
+            --tag rovierr-server:${{ github.sha }}-slim \
+            --http-probe=false \
+            --continue-after=30 \
+            --include-path=/usr/src/app/apps/server \
+            --include-path=/usr/src/app/packages \
+            --include-bin=/usr/local/bin/bun \
+            --include-bin=/bin/bash \
+            --include-bin=/bin/sh \
+            --include-bin=/usr/bin/curl \
+            --preserve-path=/tmp \
+            --preserve-path=/var/tmp
+
+      - name: Compare image sizes
+        run: |
+          echo "## Image Size Comparison" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|------|" >> $GITHUB_STEP_SUMMARY
+
+          ORIGINAL_SIZE=$(docker images rovierr-server:${{ github.sha }} --format "{{.Size}}")
+          SLIM_SIZE=$(docker images rovierr-server:${{ github.sha }}-slim --format "{{.Size}}")
+
+          echo "| Original | ${ORIGINAL_SIZE} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Minified | ${SLIM_SIZE} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      - name: Tag minified image
+        run: |
+          docker tag rovierr-server:${{ github.sha }}-slim ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-slim
+          docker tag rovierr-server:${{ github.sha }}-slim ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:slim-latest
+
+      - name: Push minified image
+        if: github.event_name != 'pull_request'
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-slim
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:slim-latest
+
+      - name: Generate security profiles
+        run: |
+          # Slim automatically generates seccomp and apparmor profiles
+          # They are saved in the current directory
+          ls -la *.json *.profile || true
+
+      - name: Upload security profiles
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-profiles
+          path: |
+            *.json
+            *.profile
+          if-no-files-found: ignore
+
+      - name: Summary
+        run: |
+          echo "✅ Minified image built and pushed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Pull the image:**" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-slim" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

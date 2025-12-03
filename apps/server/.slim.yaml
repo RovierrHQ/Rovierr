@@ -1,0 +1,35 @@
+# Slim Toolkit Configuration for Rovierr Server
+# This file defines the optimization settings for minifying the server container
+
+# HTTP probing configuration
+http_probe: true
+http_probe_cmds:
+  - /health
+http_probe_cmd_wait: 10
+continue_after: 60
+
+# Include essential paths
+include_paths:
+  - /usr/src/app/apps/server
+  - /usr/src/app/packages
+  - /usr/local/bin/bun
+  - /root/.bun
+
+# Include required binaries
+include_bins:
+  - /usr/local/bin/bun
+  - /bin/bash
+  - /bin/sh
+  - /usr/bin/curl
+
+# Preserve directories needed at runtime
+preserve_paths:
+  - /tmp
+  - /var/tmp
+  - /usr/src/app/apps/server
+
+# Keep working directory structure
+keep_perms: true
+
+# Generate security profiles
+include_shell: false
