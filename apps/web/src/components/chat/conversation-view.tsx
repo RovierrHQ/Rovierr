@@ -117,7 +117,7 @@ export function ConversationView({
     (realtimeData) => {
       // Only add message if it's from another user (to avoid duplicates from optimistic updates)
       if (
-        realtimeData.type === 'message' &&
+        realtimeData.type === 'new_message' &&
         realtimeData.message &&
         realtimeData.message.senderId !== session?.user?.id
       ) {

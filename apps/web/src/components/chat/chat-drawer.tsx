@@ -41,6 +41,16 @@ export function ChatDrawer() {
     orpc.chat.listConversations.queryOptions({ input: {}, enabled: isOpen })
   )
 
+  const { data: connections } = useQuery(
+    orpc.connection.listConnections.queryOptions({
+      input: {
+        limit: 100,
+        offset: 0
+      },
+      enabled: isOpen
+    })
+  )
+
   // Get Centrifugo connection token
   const { data: centrifugoAuth } = useQuery(
     orpc.realtime.getConnectionToken.queryOptions({
@@ -117,6 +127,7 @@ export function ChatDrawer() {
               />
             ) : (
               <ConversationList
+                connections={connections?.connections ?? []}
                 conversations={conversations?.conversations ?? []}
                 onSelect={handleSelectConversation}
               />

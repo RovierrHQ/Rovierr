@@ -7,12 +7,9 @@ USER root
 # Install envsubst
 RUN apk add --no-cache gettext
 
-# Create startup script that handles env substitution
-RUN echo '#!/bin/sh' > /centrifugo/start.sh && \
-    echo 'echo "Substituting environment variables and starting Centrifugo..."' >> /centrifugo/start.sh && \
-    echo 'envsubst < /centrifugo/config.template.json > /centrifugo/config.json' >> /centrifugo/start.sh && \
-    echo 'exec centrifugo -c config.json "$@"' >> /centrifugo/start.sh && \
-    chmod +x /centrifugo/start.sh
+# Copy startup script
+COPY start.sh /centrifugo/start.sh
+RUN chmod +x /centrifugo/start.sh
 
 # Set working directory
 WORKDIR /centrifugo

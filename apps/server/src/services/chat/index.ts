@@ -352,17 +352,54 @@ export class ChatService {
       })
       .returning()
 
+    // Get sender information to include in real-time broadcast
+    const [sender] = await this.db
+      .select({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        displayUsername: user.displayUsername,
+        image: user.image,
+        bio: user.bio,
+        isVerified: user.isVerified
+      })
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1)
+
+    const messageWithSender = {
+      ...newMessage,
+      sender
+    }
+
     // Update conversation last message timestamp
     await this.db
       .update(conversation)
       .set({ lastMessageAt: newMessage.createdAt })
       .where(eq(conversation.id, conversationId))
 
+    // Get all participants to notify them
+    const participants = await this.db
+      .select()
+      .from(conversationParticipant)
+      .where(eq(conversationParticipant.conversationId, conversationId))
+
     // Publish to Centrifugo for real-time delivery
     await this.centrifugo.publish(`conversation:${conversationId}`, {
       type: 'new_message',
-      message: newMessage
+      message: messageWithSender
     })
+
+    // Notify all participants on their personal chat channels
+    const publishPromises = participants.map((p) => {
+      return this.centrifugo.publish(`chat:${p.userId}`, {
+        type: 'new_message',
+        conversationId,
+        message: messageWithSender
+      })
+    })
+
+    await Promise.all(publishPromises)
 
     return newMessage
   }

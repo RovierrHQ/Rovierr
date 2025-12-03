@@ -13,9 +13,18 @@ export function useCentrifugo<T = unknown>(
   onMessage: (data: T) => void
 ) {
   const centrifugeRef = useRef<Centrifuge | null>(null)
+  const onMessageRef = useRef(onMessage)
+
+  // Keep the callback ref up to date
+  useEffect(() => {
+    onMessageRef.current = onMessage
+  }, [onMessage])
 
   useEffect(() => {
-    if (!(config.url && channel)) return
+    // Don't connect if token is not available yet
+    if (!(config.url && channel && config.token)) {
+      return
+    }
 
     // Create Centrifuge instance
     const centrifuge = new Centrifuge(config.url, {
@@ -28,7 +37,8 @@ export function useCentrifugo<T = unknown>(
     const subscription = centrifuge.newSubscription(channel)
 
     subscription.on('publication', (ctx) => {
-      onMessage(ctx.data as T)
+      // Use the ref to get the latest callback
+      onMessageRef.current(ctx.data as T)
     })
 
     subscription.subscribe()
@@ -40,7 +50,7 @@ export function useCentrifugo<T = unknown>(
       centrifuge.disconnect()
       centrifugeRef.current = null
     }
-  }, [config.url, config.token, channel, onMessage])
+  }, [config.url, config.token, channel])
 
   return centrifugeRef
 }

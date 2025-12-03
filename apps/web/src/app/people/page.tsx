@@ -9,9 +9,11 @@ import { Skeleton } from '@rov/ui/components/skeleton'
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient
 } from '@tanstack/react-query'
-import { Users } from 'lucide-react'
+import { UserPlus, Users } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
@@ -38,6 +40,16 @@ export default function PeoplePage() {
       },
       initialPageParam: 0
     })
+
+  const { data: pendingRequests } = useQuery(
+    orpc.connection.listPending.queryOptions({
+      input: {
+        type: 'received',
+        limit: 1,
+        offset: 0
+      }
+    })
+  )
 
   const sendConnectionMutation = useMutation(
     orpc.connection.send.mutationOptions({
@@ -104,9 +116,22 @@ export default function PeoplePage() {
   return (
     <div className="container mx-auto max-w-7xl p-6">
       <div className="mb-8">
-        <div className="mb-2 flex items-center gap-3">
-          <Users className="h-8 w-8" />
-          <h1 className="font-bold text-3xl">Discover People</h1>
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Users className="h-8 w-8" />
+            <h1 className="font-bold text-3xl">Discover People</h1>
+          </div>
+          <Button asChild variant="outline">
+            <Link href="/people/requests">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Requests
+              {pendingRequests && pendingRequests.total > 0 && (
+                <Badge className="ml-2" variant="destructive">
+                  {pendingRequests.total}
+                </Badge>
+              )}
+            </Link>
+          </Button>
         </div>
         <p className="text-muted-foreground">
           Connect with students and build your network
