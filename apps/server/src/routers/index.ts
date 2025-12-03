@@ -3,9 +3,12 @@ import { academic } from './academic'
 import { calendar } from './calendar'
 import { campusFeed } from './campus-feed'
 import { career } from './career'
+import { chat, presence } from './chat'
+import { connection } from './connection'
 import { discussion } from './discussion'
 import { expenses } from './expenses'
 import { form } from './form'
+import { people } from './people'
 import { realtime } from './realtime'
 import { roadmap } from './roadmap'
 import { society } from './society'
@@ -63,5 +66,17 @@ export const appRouter = o.router({
   campusFeed,
 
   // career integration
-  career
+  career,
+
+  // people integration
+  people,
+
+  // connection integration
+  connection,
+
+  // chat integration
+  chat,
+
+  // presence integration
+  presence
 })
