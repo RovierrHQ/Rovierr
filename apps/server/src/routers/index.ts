@@ -7,6 +7,7 @@ import { discussion } from './discussion'
 import { expenses } from './expenses'
 import { form } from './form'
 import { realtime } from './realtime'
+import { resumeRouter } from './resume'
 import { roadmap } from './roadmap'
 import { society } from './society'
 import { societyEmail } from './society-email'
@@ -63,5 +64,8 @@ export const appRouter = o.router({
   campusFeed,
 
   // career integration
-  career
+  career,
+
+  // resume integration
+  resume: resumeRouter
 })

@@ -57,4 +57,32 @@ function TooltipContent({
   )
 }
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+type QuickTooltipProps = React.ComponentPropsWithoutRef<
+  typeof TooltipContent
+> & {
+  content: React.ReactNode
+  showArrow?: boolean
+}
+
+const QuickTooltip = ({
+  content,
+  showArrow = true,
+  children,
+  ...props
+}: QuickTooltipProps) => (
+  <TooltipPrimitive.Root>
+    <TooltipTrigger asChild>{children}</TooltipTrigger>
+    <TooltipContent {...props}>
+      {showArrow && <TooltipPrimitive.Arrow className="text-black" />}
+      {content}
+    </TooltipContent>
+  </TooltipPrimitive.Root>
+)
+
+export {
+  QuickTooltip,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider
+}

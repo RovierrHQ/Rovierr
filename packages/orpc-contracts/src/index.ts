@@ -6,6 +6,7 @@ import { discussion } from './discussion'
 import { expenses } from './expenses'
 import { form } from './form'
 import { realtime } from './realtime'
+import { resume } from './resume'
 import { roadmap } from './roadmap'
 import { societyEmail } from './society-email'
 import { societyRegistration } from './society-registration'
@@ -24,6 +25,8 @@ export { discussion } from './discussion'
 export * from './discussion/schemas'
 export { form } from './form'
 export * from './form/schemas'
+export { resume } from './resume'
+export * from './resume/schemas'
 export { societyEmail } from './society-email'
 export * from './society-email/schemas'
 export { societyRegistration } from './society-registration'
@@ -78,5 +81,8 @@ export const appContract = {
   campusFeed,
 
   // career integration
-  career
+  career,
+
+  // resume integration
+  resume
 }

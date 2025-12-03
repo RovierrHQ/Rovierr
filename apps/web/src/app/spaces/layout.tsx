@@ -28,7 +28,14 @@ function Layout({ children }: LayoutProps<'/spaces'>) {
     redirect('/profile')
   }
   return (
-    <SpacesLayout showHeader={!pathname?.startsWith('/spaces/academics')}>
+    <SpacesLayout
+      showHeader={
+        !(
+          pathname?.startsWith('/spaces/academics') ||
+          pathname?.startsWith('/spaces/career')
+        )
+      }
+    >
       {children}
       <RoadmapFloatButton />
     </SpacesLayout>

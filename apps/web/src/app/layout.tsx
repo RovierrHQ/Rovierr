@@ -1,6 +1,8 @@
 import { CommandMenu } from '@/components/command-menu'
 import Providers from '@/components/providers'
 import '@rov/ui/globals.css'
+import 'react-pdf/dist/Page/AnnotationLayer.css'
+import 'react-pdf/dist/Page/TextLayer.css'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 
