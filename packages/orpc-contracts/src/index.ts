@@ -2,9 +2,12 @@ import { academic } from './academic'
 import { calendar } from './calendar'
 import { campusFeed } from './campus-feed'
 import { career } from './career'
+import { chat, presence } from './chat'
+import { connection } from './connection'
 import { discussion } from './discussion'
 import { expenses } from './expenses'
 import { form } from './form'
+import { people } from './people'
 import { realtime } from './realtime'
 import { resume } from './resume'
 import { roadmap } from './roadmap'
@@ -21,10 +24,37 @@ export { campusFeed } from './campus-feed'
 export * from './campus-feed/schemas'
 export { career } from './career'
 export * from './career/schemas'
+export { chat, presence } from './chat'
+export * from './chat/schemas'
+export { connection } from './connection'
+export {
+  type Connection,
+  type ConnectionId,
+  type ConnectionWithUser,
+  connectionIdSchema,
+  connectionSchema,
+  connectionStatusSchema,
+  connectionWithUserSchema,
+  type ListConnections,
+  type ListPendingRequests,
+  listConnectionsSchema,
+  listPendingRequestsSchema,
+  type SendConnectionRequest,
+  sendConnectionRequestSchema
+} from './connection/schemas'
 export { discussion } from './discussion'
 export * from './discussion/schemas'
 export { form } from './form'
 export * from './form/schemas'
+export { people } from './people'
+export {
+  type ListUsers,
+  listUsersSchema,
+  type PublicUserWithConnection,
+  publicUserWithConnectionSchema,
+  type SearchUsers,
+  searchUsersSchema
+} from './people/schemas'
 export { resume } from './resume'
 export * from './resume/schemas'
 export { societyEmail } from './society-email'
@@ -84,5 +114,17 @@ export const appContract = {
   career,
 
   // resume integration
-  resume
+  resume,
+
+  // people integration
+  people,
+
+  // connection integration
+  connection,
+
+  // chat integration
+  chat,
+
+  // presence integration
+  presence
 }

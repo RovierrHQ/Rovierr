@@ -8,6 +8,8 @@ import {
   SidebarRail
 } from '@rov/ui/components/sidebar'
 import type { ComponentProps } from 'react'
+import { ChatDrawer } from '@/components/chat/chat-drawer'
+import { NavPeople } from '@/components/layout/nav-people'
 import { NavUser } from '@/components/layout/nav-user'
 import { SpaceSwitcher } from '@/components/layout/space-switcher'
 import { spaces } from '@/data/space-sidebar-data'
@@ -28,6 +30,8 @@ function SpacesSidebarContent({ ...props }: ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarFooter>
+        <ChatDrawer />
+        <NavPeople />
         <NavUser />
       </SidebarFooter>
       <SidebarRail />
