@@ -10,6 +10,8 @@ import type {
   SendConnectionRequest
 } from '@rov/orpc-contracts'
 import { and, count, desc, eq, or, sql } from 'drizzle-orm'
+import { env } from '@/lib/env'
+import { sendConnectionRequestEmail } from '@/services/email/sender'
 
 export class ConnectionService {
   private db: DB
@@ -84,6 +86,38 @@ export class ConnectionService {
         expiresAt: expiresAt.toISOString()
       })
       .returning()
+
+    // Get sender and recipient information for email
+    const [sender, recipient] = await Promise.all([
+      this.db.query.user.findFirst({
+        where: eq(user.id, userId),
+        columns: {
+          name: true,
+          username: true
+        }
+      }),
+      this.db.query.user.findFirst({
+        where: eq(user.id, connectedUserId),
+        columns: {
+          name: true,
+          email: true
+        }
+      })
+    ])
+
+    // Send email notification to recipient (don't await - fire and forget)
+    if (sender && recipient?.email) {
+      const profileLink = `${env.WEB_URL}/people/requests`
+      sendConnectionRequestEmail({
+        to: recipient.email,
+        recipientName: recipient.name,
+        senderName: sender.name,
+        senderUsername: sender.username || undefined,
+        profileLink
+      }).catch((error) => {
+        console.error('Failed to send connection request email:', error)
+      })
+    }
 
     return newConnection
   }

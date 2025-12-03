@@ -1,6 +1,7 @@
 import { UseSend } from 'usesend-js'
 import { env } from '@/lib/env'
 import { logger } from '@/lib/logger'
+import { generateConnectionRequestEmail } from './templates/connection-request'
 import { generateInvitationEmail } from './templates/invitation'
 import {
   generateConfirmationEmail,
@@ -276,5 +277,45 @@ export async function sendApplicationConfirmationEmail({
       'Failed to send confirmation email'
     )
     // Don't throw - email failure shouldn't block submission
+  }
+}
+
+/**
+ * Send connection request notification email
+ */
+export async function sendConnectionRequestEmail({
+  to,
+  recipientName,
+  senderName,
+  senderUsername,
+  profileLink
+}: {
+  to: string
+  recipientName: string
+  senderName: string
+  senderUsername?: string
+  profileLink: string
+}) {
+  const { subject, html, text } = generateConnectionRequestEmail({
+    recipientName,
+    senderName,
+    senderUsername,
+    profileLink
+  })
+
+  try {
+    await usesend.emails.send({
+      from: 'Rovierr <noreply@clubs.rovierr.com>',
+      to,
+      subject,
+      html,
+      text
+    })
+  } catch (error) {
+    logger.error(
+      { error, to, senderName },
+      'Failed to send connection request email'
+    )
+    // Don't throw - email failure shouldn't block connection request
   }
 }
