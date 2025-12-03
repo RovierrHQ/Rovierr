@@ -23,6 +23,9 @@ export class PeopleService {
     // Exclude current user from results
     conditions.push(sql`${user.id} != ${currentUserId}`)
 
+    // Only show verified users
+    conditions.push(eq(user.isVerified, true))
+
     // Add search filter if provided
     if (filters.search) {
       const searchPattern = `%${filters.search}%`
@@ -117,6 +120,7 @@ export class PeopleService {
       .where(
         and(
           sql`${user.id} != ${currentUserId}`,
+          eq(user.isVerified, true),
           or(
             ilike(user.name, searchPattern),
             ilike(user.username, searchPattern),
