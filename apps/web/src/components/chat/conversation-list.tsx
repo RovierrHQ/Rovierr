@@ -2,7 +2,6 @@
 
 import type { ConversationWithLastMessage } from '@rov/orpc-contracts'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
-import { Button } from '@rov/ui/components/button'
 import { Input } from '@rov/ui/components/input'
 import { ScrollArea } from '@rov/ui/components/scroll-area'
 import { Separator } from '@rov/ui/components/separator'

@@ -1,6 +1,5 @@
 'use client'
 
-import { useCentrifugo } from '@rov/realtime'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import { Input } from '@rov/ui/components/input'
@@ -17,6 +16,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { ArrowLeft, Send } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { authClient } from '@/lib/auth-client'
+import { useCentrifugo } from '@/lib/centrifuge'
 import { orpc } from '@/utils/orpc'
 
 type Message = {
@@ -108,9 +108,6 @@ export function ConversationView({
   // Subscribe to real-time messages for this conversation
   useCentrifugo<{ type: string; message?: Message }>(
     {
-      url:
-        process.env.NEXT_PUBLIC_CENTRIFUGO_URL ||
-        'ws://localhost:8000/connection/websocket',
       token: centrifugoAuth?.token
     },
     `conversation:${conversationId}`,

@@ -1,6 +1,5 @@
 'use client'
 
-import { useCentrifugo } from '@rov/realtime'
 import { Badge } from '@rov/ui/components/badge'
 import {
   Sheet,
@@ -18,6 +17,7 @@ import { MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { usePresence } from '@/hooks/use-presence'
 import { authClient } from '@/lib/auth-client'
+import { useCentrifugo } from '@/lib/centrifuge'
 import { orpc } from '@/utils/orpc'
 import { ConversationList } from './conversation-list'
 import { ConversationView } from './conversation-view'
@@ -62,9 +62,6 @@ export function ChatDrawer() {
   // Subscribe to user's personal chat channel for new messages and conversation updates
   useCentrifugo<{ type: string; conversationId?: string }>(
     {
-      url:
-        process.env.NEXT_PUBLIC_CENTRIFUGO_URL ||
-        'ws://localhost:8000/connection/websocket',
       token: centrifugoAuth?.token
     },
     `chat:${session?.user?.id}`,

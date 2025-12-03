@@ -3,9 +3,9 @@
  */
 'use client'
 
-import { useCentrifugo } from '@rov/realtime'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { authClient } from '@/lib/auth-client'
+import { useCentrifugo } from '@/lib/centrifuge'
 import { orpc } from '@/utils/orpc'
 
 export function usePresence() {
@@ -28,9 +28,6 @@ export function usePresence() {
     lastSeenAt: string
   }>(
     {
-      url:
-        process.env.NEXT_PUBLIC_CENTRIFUGO_URL ||
-        'ws://localhost:8000/connection/websocket',
       token: centrifugoAuth?.token
     },
     `chat:${session?.user?.id}`,

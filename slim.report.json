@@ -23,12 +23,8 @@
   "source_image": {
     "identity": {
       "id": "sha256:3cd696670b19b539204a0ec4692da6b253102c6eec2b12d5e5208de8338c2c6f",
-      "tags": [
-        "latest"
-      ],
-      "names": [
-        "rovierr-server:latest"
-      ]
+      "tags": ["latest"],
+      "names": ["rovierr-server:latest"]
     },
     "size": 802508978,
     "size_human": "802 MB",
@@ -36,9 +32,7 @@
     "runtime_name": "docker",
     "architecture": "arm64",
     "user": "bun",
-    "exposed_ports": [
-      "3000/tcp"
-    ],
+    "exposed_ports": ["3000/tcp"],
     "os": "linux",
     "labels": {
       "org.opencontainers.image.created": "2025-11-21T19:33:54.084Z",
@@ -78,9 +72,7 @@
       "full_name": "rovierr-server:latest",
       "repo_name": "rovierr-server",
       "version_tag": "latest",
-      "raw_tags": [
-        "rovierr-server:latest"
-      ],
+      "raw_tags": ["rovierr-server:latest"],
       "create_time": "2025-12-03T07:15:30Z",
       "new_size": 802508978,
       "new_size_human": "802 MB",
@@ -96,9 +88,7 @@
           "size_human": "139 MB",
           "command_snippet": "RUN []",
           "command_all": "RUN []",
-          "system_commands": [
-            "[]"
-          ],
+          "system_commands": ["[]"],
           "comment": "debuerreotype 0.16",
           "inst_set_time_bucket": "2025-11-17T08:00:00+08:00",
           "inst_set_time_index": 0,
@@ -272,9 +262,7 @@
           "params": "/home/bun/app",
           "command_snippet": "WORKDIR /home/bun/app",
           "command_all": "WORKDIR /home/bun/app",
-          "system_commands": [
-            "mkdir -p /home/bun/app"
-          ],
+          "system_commands": ["mkdir -p /home/bun/app"],
           "comment": "buildkit.dockerfile.v0",
           "is_buildkit_instruction": true,
           "inst_set_time_bucket": "2025-11-22T03:30:00+08:00",
@@ -325,9 +313,7 @@
           "params": "/usr/src/app",
           "command_snippet": "WORKDIR /usr/src/app",
           "command_all": "WORKDIR /usr/src/app",
-          "system_commands": [
-            "mkdir -p /usr/src/app"
-          ],
+          "system_commands": ["mkdir -p /usr/src/app"],
           "comment": "buildkit.dockerfile.v0",
           "is_buildkit_instruction": true,
           "inst_set_time_bucket": "2025-12-01T04:00:00+08:00",
@@ -463,9 +449,7 @@
           "size_human": "566 MB",
           "command_snippet": "RUN bun install --production --ignore-script...",
           "command_all": "RUN bun install --production --ignore-scripts",
-          "system_commands": [
-            "bun install --production --ignore-scripts"
-          ],
+          "system_commands": ["bun install --production --ignore-scripts"],
           "comment": "buildkit.dockerfile.v0",
           "is_buildkit_instruction": true,
           "inst_set_time_bucket": "2025-12-03T15:00:00+08:00",
@@ -719,9 +703,7 @@
           "params": "/usr/src/app/apps/server",
           "command_snippet": "WORKDIR /usr/src/app/apps/server",
           "command_all": "WORKDIR /usr/src/app/apps/server",
-          "system_commands": [
-            "mkdir -p /usr/src/app/apps/server"
-          ],
+          "system_commands": ["mkdir -p /usr/src/app/apps/server"],
           "comment": "buildkit.dockerfile.v0",
           "is_buildkit_instruction": true,
           "inst_set_time_bucket": "2025-12-03T15:15:00+08:00",
@@ -738,9 +720,7 @@
           "size_human": "1.2 kB",
           "command_snippet": "RUN chmod +x start.sh",
           "command_all": "RUN chmod +x start.sh",
-          "system_commands": [
-            "chmod +x start.sh"
-          ],
+          "system_commands": ["chmod +x start.sh"],
           "comment": "buildkit.dockerfile.v0",
           "is_buildkit_instruction": true,
           "inst_set_time_bucket": "2025-12-03T15:15:00+08:00",
@@ -805,9 +785,7 @@
           "params": "/usr/src/app/apps/server",
           "command_snippet": "WORKDIR /usr/src/app/apps/server",
           "command_all": "WORKDIR /usr/src/app/apps/server",
-          "system_commands": [
-            "mkdir -p /usr/src/app/apps/server"
-          ],
+          "system_commands": ["mkdir -p /usr/src/app/apps/server"],
           "comment": "buildkit.dockerfile.v0",
           "is_buildkit_instruction": true,
           "inst_set_time_bucket": "2025-12-03T15:15:00+08:00",
@@ -843,9 +821,7 @@
           "command_snippet": "ENTRYPOINT [\"./start.sh\"]\n",
           "command_all": "ENTRYPOINT [\"./start.sh\"]\n",
           "comment": "buildkit.dockerfile.v0",
-          "raw_tags": [
-            "rovierr-server:latest"
-          ],
+          "raw_tags": ["rovierr-server:latest"],
           "is_buildkit_instruction": true,
           "inst_set_time_bucket": "2025-12-03T15:15:00+08:00",
           "inst_set_time_index": 4,

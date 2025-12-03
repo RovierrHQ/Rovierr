@@ -1,6 +1,5 @@
 'use client'
 
-import { useCentrifugo } from '@rov/realtime'
 import { Button } from '@rov/ui/components/button'
 import {
   Card,
@@ -13,6 +12,7 @@ import { format, isToday, isTomorrow, isYesterday } from 'date-fns'
 import { CalendarDays, ExternalLink, MapPin } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { authClient } from '@/lib/auth-client'
+import { useCentrifugo } from '@/lib/centrifuge'
 import { orpc } from '@/utils/orpc'
 
 export function NextEventWidget() {
@@ -68,9 +68,6 @@ export function NextEventWidget() {
   // Subscribe to calendar updates for this user with authenticated connection
   useCentrifugo(
     {
-      url:
-        process.env.NEXT_PUBLIC_CENTRIFUGO_URL ||
-        'ws://localhost:8000/connection/websocket',
       token: centrifugoAuth?.token // Use signed JWT token for security
     },
     session?.user?.id ? `calendar:${session.user.id}` : '',
