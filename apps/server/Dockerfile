@@ -18,6 +18,7 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 
 # copy source code and config files
 COPY apps/server/src ./apps/server/src
+COPY apps/server/start.sh ./apps/server/
 COPY apps/server/tsconfig.json apps/server/drizzle.config.ts ./apps/server/
 COPY packages/auth/src ./packages/auth/src
 COPY packages/auth/tsconfig.json ./packages/auth/
@@ -34,9 +35,17 @@ COPY packages/shared/tsconfig.json ./packages/shared/
 ENV NODE_ENV=production
 WORKDIR /usr/src/app/apps/server
 
+# Make start script executable before switching to bun user
+RUN chmod +x start.sh
+
 # run the app
 USER bun
 ARG PORT=3000
 EXPOSE ${PORT}
 WORKDIR /usr/src/app/apps/server
-ENTRYPOINT [ "bun", "run", "src/index.ts" ]
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:${PORT}/health || exit 1
+
+ENTRYPOINT [ "./start.sh" ]

@@ -1,18 +1,20 @@
 services:
-  # server:
-  #   container_name: rovierr-server
-  #   build:
-  #     context: .
-  #     dockerfile: apps/server/Dockerfile
-  #   ports:
-  #     - '3000:3000'
-  #   env_file:
-  #     - ./apps/server/.env
-  #   environment:
-  #     - NODE_ENV=production
-  #     - PORT=3000
-  #     - HOST=0.0.0.0
-  #   restart: unless-stopped
+  server:
+    container_name: rovierr-server
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./apps/server/.env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+    depends_on:
+      - realtime
+    restart: unless-stopped
 
   realtime:
     container_name: rovierr-realtime

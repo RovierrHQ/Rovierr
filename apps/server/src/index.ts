@@ -49,6 +49,14 @@ app.get('/', (c) => {
   return c.text('OK')
 })
 
+app.get('/health', (c) => {
+  return c.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  })
+})
+
 app.get('/api-docs', (c) => {
   return c.json(openAPISpec)
 })
