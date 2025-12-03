@@ -360,6 +360,15 @@ export const profile = {
               .default('Email domain does not match university')
           })
         },
+        EMAIL_ALREADY_TAKEN: {
+          data: z.object({
+            message: z
+              .string()
+              .default(
+                'This university email is already registered to another account'
+              )
+          })
+        },
         EMAIL_SEND_FAILED: {
           data: z.object({
             message: z.string().default('Failed to send verification email')

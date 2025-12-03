@@ -1,27 +1,34 @@
 'use client'
 
-import LoginForm from '@rov/ui/blocks/login-form'
+import SignupForm from '@rov/ui/blocks/signup-form'
 import AnimatedGridPattern from '@rov/ui/components/backgrounds/AnimatedGridPattern'
 import { cn } from '@rov/ui/lib/utils'
 import { toast } from 'sonner'
 import Topnav from '@/components/layout/top-nav'
 import { authClient } from '@/lib/auth-client'
 
-export default function LoginPage() {
-  const handleEmailLogin = async (email: string, password: string) => {
+export default function SignupPage() {
+  const handleEmailSignup = async (
+    name: string,
+    email: string,
+    password: string
+  ) => {
     try {
-      const result = await authClient.signIn.email({
+      const result = await authClient.signUp.email({
+        name,
         email,
-        password,
-        callbackURL: `${window.origin}/spaces/societies`
+        password
       })
 
       if (result.error) {
-        toast.error(result.error.message || 'Failed to sign in')
+        toast.error(result.error.message || 'Failed to create account')
+      } else {
+        toast.success('Account created successfully!')
+        // Redirect to profile page after successful signup
+        window.location.href = '/profile'
       }
-    } catch (error) {
-      toast.error('An error occurred during sign in')
-      console.error('Login error:', error)
+    } catch (_error) {
+      toast.error('An error occurred during sign up')
     }
   }
 
@@ -29,12 +36,12 @@ export default function LoginPage() {
     <div className="relative isolate h-svh overflow-hidden bg-muted">
       <Topnav loginButton={false} />
       <div className="flex h-full items-center justify-center border">
-        <LoginForm
-          handleEmailLogin={handleEmailLogin}
-          handleGoogleLogin={() =>
+        <SignupForm
+          handleEmailSignup={handleEmailSignup}
+          handleGoogleSignup={() =>
             authClient.signIn.social({
               provider: 'google',
-              callbackURL: `${window.origin}/spaces/societies`
+              callbackURL: `${window.origin}/profile`
             })
           }
         />

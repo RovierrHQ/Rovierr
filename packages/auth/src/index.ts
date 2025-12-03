@@ -333,7 +333,10 @@ export function createAuth(config: AuthConfig) {
       }
     }),
     emailAndPassword: {
-      enabled: false
+      enabled: true,
+      requireEmailVerification: false,
+      minPasswordLength: 8,
+      maxPasswordLength: 128
     },
     socialProviders: {
       google: {

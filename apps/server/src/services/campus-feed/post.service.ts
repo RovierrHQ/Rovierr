@@ -324,11 +324,29 @@ export class PostService {
         throw new Error('User not found')
       }
 
-      // For now, we'll use a placeholder for role
-      // In a real implementation, you'd fetch this from a profile or academic table
+      // Fetch user's university information
+      const enrollment = await this.db.query.instituitionEnrollment.findFirst({
+        where: (fields) =>
+          and(
+            eq(fields.userId, authorId),
+            eq(fields.emailVerified, true),
+            eq(fields.studentStatusVerified, true)
+          ),
+        with: {
+          institution: {
+            columns: {
+              name: true,
+              slug: true
+            }
+          }
+        }
+      })
+
+      const role = enrollment?.institution?.name || 'Student'
+
       return {
         ...userInfo,
-        role: 'Student' // TODO: Fetch actual role from user profile
+        role
       }
     }
     const [orgInfo] = await this.db

@@ -115,7 +115,9 @@ export const joinRequests = pgTable(
     paymentNotes: text('payment_notes'), // Notes from president about payment verification
 
     // Approval/Rejection
-    reviewedBy: text('reviewed_by').references(() => user.id),
+    reviewedBy: text('reviewed_by').references(() => user.id, {
+      onDelete: 'set null'
+    }),
     reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
     rejectionReason: text('rejection_reason'),
 

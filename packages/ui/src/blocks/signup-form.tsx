@@ -7,24 +7,43 @@ import { Label } from '@rov/ui/components/label'
 import { cn } from '@rov/ui/lib/utils'
 import { useState } from 'react'
 
-export default function LoginForm({
+export default function SignupForm({
   className,
-  handleGoogleLogin,
-  handleEmailLogin,
+  handleGoogleSignup,
+  handleEmailSignup,
   ...props
 }: React.ComponentProps<'div'> & {
-  handleGoogleLogin: () => void
-  handleEmailLogin: (email: string, password: string) => Promise<void>
+  handleGoogleSignup: () => void
+  handleEmailSignup: (
+    name: string,
+    email: string,
+    password: string
+  ) => Promise<void>
 }) {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
+      return
+    }
+
     setIsLoading(true)
     try {
-      await handleEmailLogin(email, password)
+      await handleEmailSignup(name, email, password)
     } finally {
       setIsLoading(false)
     }
@@ -44,13 +63,25 @@ export default function LoginForm({
                 />
               </div>
               <div className="flex flex-col items-center text-center">
-                <h1 className="font-bold text-2xl">Welcome back</h1>
+                <h1 className="font-bold text-2xl">Create an account</h1>
                 <p className="text-balance text-muted-foreground">
-                  Login to your Rovierr account
+                  Join Rovierr and connect with students
                 </p>
               </div>
 
               <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    disabled={isLoading}
+                    id="name"
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="John Doe"
+                    required
+                    type="text"
+                    value={name}
+                  />
+                </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -69,14 +100,33 @@ export default function LoginForm({
                     disabled={isLoading}
                     id="password"
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder="At least 8 characters"
                     required
                     type="password"
                     value={password}
                   />
                 </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
+                    disabled={isLoading}
+                    id="confirmPassword"
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter your password"
+                    required
+                    type="password"
+                    value={confirmPassword}
+                  />
+                </div>
+
+                {error && (
+                  <p className="font-medium text-destructive text-sm">
+                    {error}
+                  </p>
+                )}
+
                 <Button className="w-full" disabled={isLoading} type="submit">
-                  {isLoading ? 'Signing in...' : 'Sign in'}
+                  {isLoading ? 'Creating account...' : 'Create account'}
                 </Button>
 
                 <div className="relative">
@@ -93,7 +143,7 @@ export default function LoginForm({
                 <Button
                   className="w-full"
                   disabled={isLoading}
-                  onClick={handleGoogleLogin}
+                  onClick={handleGoogleSignup}
                   type="button"
                   variant="outline"
                 >
@@ -103,17 +153,17 @@ export default function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="">Login with Google</span>
+                  <span className="">Sign up with Google</span>
                 </Button>
               </div>
 
               <div className="text-center text-sm">
-                Don&apos;t have an account?{' '}
+                Already have an account?{' '}
                 <a
                   className="font-medium underline underline-offset-4 hover:text-primary"
-                  href="/signup"
+                  href="/login"
                 >
-                  Sign up
+                  Sign in
                 </a>
               </div>
             </div>

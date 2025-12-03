@@ -8,6 +8,9 @@
       },
       "style": {
         "noProcessEnv": "error"
+      },
+      "suspicious": {
+        "noConsole": "off"
       }
     }
   },

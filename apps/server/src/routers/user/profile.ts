@@ -677,36 +677,83 @@ export const profile = {
     sendVerificationOTP:
       protectedProcedure.user.profile.verifyStudent.sendVerificationOTP.handler(
         async ({ input, context }) => {
+          console.log('[sendVerificationOTP] Starting with input:', {
+            email: input.email,
+            universityId: input.universityId,
+            userId: context.session.user.id
+          })
+
           // Find institution by ID
           const institution = await db.query.institution.findFirst({
             where: eq(institutionTable.id, input.universityId)
           })
 
+          console.log('[sendVerificationOTP] Institution found:', {
+            id: institution?.id,
+            name: institution?.name,
+            validEmailDomains: institution?.validEmailDomains
+          })
+
           if (!institution) {
+            console.error('[sendVerificationOTP] Institution not found')
             throw new ORPCError('INVALID_EMAIL_DOMAIN', {
               message: 'Institution not found'
             })
           }
 
           // Validate email domain
+          console.log('[sendVerificationOTP] Validating email domain...')
           const isValidDomain = await validateUniversityEmail(
             input.email,
             input.universityId
           )
+          console.log(
+            '[sendVerificationOTP] Email domain validation result:',
+            isValidDomain
+          )
 
           if (!isValidDomain) {
+            console.error('[sendVerificationOTP] Invalid email domain')
             throw new ORPCError('INVALID_EMAIL_DOMAIN', {
               message: `Email domain does not match ${institution.name} requirements`
             })
           }
 
           // Get user info
+          console.log('[sendVerificationOTP] Fetching user info...')
           const user = await db.query.user.findFirst({
             where: eq(userTable.id, context.session.user.id),
             columns: { name: true }
           })
+          console.log('[sendVerificationOTP] User found:', { name: user?.name })
+
+          // Check if email is already used by ANY user
+          console.log(
+            '[sendVerificationOTP] Checking if email is already taken...'
+          )
+          const existingEmailEnrollment =
+            await db.query.instituitionEnrollment.findFirst({
+              where: eq(institutionEnrollmentTable.email, input.email),
+              columns: { id: true, userId: true }
+            })
+
+          if (
+            existingEmailEnrollment &&
+            existingEmailEnrollment.userId !== context.session.user.id
+          ) {
+            console.error(
+              '[sendVerificationOTP] Email already taken by another user'
+            )
+            throw new ORPCError('EMAIL_ALREADY_TAKEN', {
+              message:
+                'This university email is already registered to another account'
+            })
+          }
 
           // Check for enrollment for the SPECIFIC university
+          console.log(
+            '[sendVerificationOTP] Checking for existing enrollment...'
+          )
           const enrollmentForUniversity =
             await db.query.instituitionEnrollment.findFirst({
               where: and(
@@ -715,56 +762,112 @@ export const profile = {
               ),
               columns: { id: true }
             })
+          console.log('[sendVerificationOTP] Existing enrollment:', {
+            exists: !!enrollmentForUniversity,
+
+            id: enrollmentForUniversity?.id
+          })
 
           // currently we dont allow multiple enrollments for the same university
           if (enrollmentForUniversity) {
-            // Update existing enrollment for this university
-            await db
-              .update(institutionEnrollmentTable)
-              .set({
+            console.log('[sendVerificationOTP] Updating existing enrollment...')
+            try {
+              // Update existing enrollment for this university
+              await db
+                .update(institutionEnrollmentTable)
+                .set({
+                  email: input.email,
+                  studentId: input.email.split('@')[0],
+                  verificationStep: 'otp'
+                })
+                .where(
+                  eq(institutionEnrollmentTable.id, enrollmentForUniversity.id)
+                )
+              console.log('[sendVerificationOTP] Enrollment updated')
+            } catch (updateError) {
+              console.error(
+                '[sendVerificationOTP] Error updating enrollment:',
+                updateError
+              )
+              throw updateError
+            }
+          } else {
+            console.log('[sendVerificationOTP] Creating new enrollment...')
+            try {
+              // Create new enrollment for this university
+              const result = await db
+                .insert(institutionEnrollmentTable)
+                .values({
+                  userId: context.session.user.id,
+                  institutionId: input.universityId,
+                  email: input.email,
+                  studentId: input.email.split('@')[0],
+                  verificationStep: 'otp'
+                })
+              console.log(
+                '[sendVerificationOTP] New enrollment created:',
+                result
+              )
+            } catch (insertError) {
+              console.error(
+                '[sendVerificationOTP] Error creating enrollment:',
+                insertError
+              )
+              console.error('[sendVerificationOTP] Insert values were:', {
+                userId: context.session.user.id,
+                institutionId: input.universityId,
                 email: input.email,
                 studentId: input.email.split('@')[0],
                 verificationStep: 'otp'
               })
-              .where(
-                eq(institutionEnrollmentTable.id, enrollmentForUniversity.id)
-              )
-          } else {
-            // Create new enrollment for this university
-            await db.insert(institutionEnrollmentTable).values({
-              userId: context.session.user.id,
-              institutionId: input.universityId,
-              email: input.email,
-              studentId: input.email.split('@')[0],
-              verificationStep: 'otp'
-            })
+              throw insertError
+            }
           }
 
           // Generate OTP
+          console.log('[sendVerificationOTP] Generating OTP...')
           const otp = generateOTP()
           const hashedOTP = hashOTP(otp)
+          console.log('[sendVerificationOTP] OTP generated and hashed')
 
           // Delete existing verification records
+          console.log(
+            '[sendVerificationOTP] Deleting existing verification records...'
+          )
           await db
             .delete(verificationTable)
             .where(eq(verificationTable.identifier, context.session.user.id))
+          console.log('[sendVerificationOTP] Old verification records deleted')
 
           // Store verification record
+          console.log(
+            '[sendVerificationOTP] Storing new verification record...'
+          )
           await db.insert(verificationTable).values({
             id: nanoid(),
             identifier: context.session.user.id,
             value: hashedOTP,
             expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
           })
+          console.log('[sendVerificationOTP] Verification record stored')
 
           // Send OTP email
+          console.log(
+            '[sendVerificationOTP] Sending OTP email to:',
+            input.email
+          )
           try {
             await sendOTPEmail({
               to: input.email,
               displayName: user?.name ?? 'User',
               otp
             })
-          } catch {
+            console.log('[sendVerificationOTP] OTP email sent successfully')
+          } catch (emailError) {
+            console.error(
+              '[sendVerificationOTP] Failed to send OTP email:',
+              emailError
+            )
             throw new ORPCError('EMAIL_SEND_FAILED', {
               message: 'Failed to send verification email'
             })

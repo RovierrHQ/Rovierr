@@ -12,7 +12,7 @@ export const societyEmail = pgTable(
       .references(() => organization.id, { onDelete: 'cascade' }),
     senderId: text('sender_id')
       .notNull()
-      .references(() => user.id),
+      .references(() => user.id, { onDelete: 'cascade' }),
     subject: text('subject').notNull(),
     bodyHtml: text('body_html').notNull(),
     bodyText: text('body_text').notNull(),
