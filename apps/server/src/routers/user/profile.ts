@@ -700,36 +700,11 @@ export const profile = {
             })
           }
 
-          // Verify student ID card exists and belongs to user
-          const studentIdCard = await db.query.studentIdCard.findFirst({
-            where: and(
-              eq(studentIdCardTable.id, input.studentIdCardId),
-              eq(studentIdCardTable.userId, context.session.user.id)
-            ),
-            columns: {
-              id: true,
-              parsingResult: true
-            }
-          })
-
-          if (!studentIdCard) {
-            throw new ORPCError('NOT_FOUND', {
-              message: 'Student ID card not found'
-            })
-          }
-
           // Get user info
           const user = await db.query.user.findFirst({
             where: eq(userTable.id, context.session.user.id),
             columns: { name: true }
           })
-
-          // Extract student ID from parsing result if available
-          const parsingResult = studentIdCard.parsingResult as
-            | {
-                student_id: string | null
-              }
-            | undefined
 
           // Check for enrollment for the SPECIFIC university
           const enrollmentForUniversity =
@@ -748,9 +723,7 @@ export const profile = {
               .update(institutionEnrollmentTable)
               .set({
                 email: input.email,
-                studentId:
-                  parsingResult?.student_id ?? input.email.split('@')[0],
-                studentIdCardId: input.studentIdCardId,
+                studentId: input.email.split('@')[0],
                 verificationStep: 'otp'
               })
               .where(
@@ -762,8 +735,7 @@ export const profile = {
               userId: context.session.user.id,
               institutionId: input.universityId,
               email: input.email,
-              studentId: parsingResult?.student_id ?? input.email.split('@')[0],
-              studentIdCardId: input.studentIdCardId,
+              studentId: input.email.split('@')[0],
               verificationStep: 'otp'
             })
           }

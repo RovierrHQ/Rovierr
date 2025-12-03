@@ -344,11 +344,7 @@ export const profile = {
       .input(
         z.object({
           email: z.email('Invalid email address'),
-          universityId: z.string().min(1, 'University ID is required'),
-          studentIdCardId: z
-            .string()
-            .min(1, 'Student ID card ID is required')
-            .describe('ID of the student ID card to use for verification')
+          universityId: z.string().min(1, 'University ID is required')
         })
       )
       .output(
