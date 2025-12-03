@@ -11,7 +11,7 @@ import { atom } from 'jotai'
 import type { SectionId } from './types'
 
 // Atoms for each resume section
-export const basicInfoAtom = atom<BasicInfo | undefined>(undefined)
+export const basicInfoAtom = atom<Partial<BasicInfo> | undefined>(undefined)
 export const educationAtom = atom<Education[]>([])
 export const experienceAtom = atom<Experience[]>([])
 export const projectsAtom = atom<Project[]>([])

@@ -25,7 +25,9 @@ export function VolunteerSection() {
 
   const form = useAppForm({
     validators: { onSubmit: volunteerSchema },
-    defaultValues: { ...defaultVolunteer, id: nanoid() } as Volunteer,
+    defaultValues: (editingId
+      ? volunteer.find((vol) => vol.id === editingId)
+      : { ...defaultVolunteer, id: nanoid() }) as Volunteer,
     onSubmit({ value }) {
       let updatedVolunteer: Volunteer[]
       if (editingId) {
@@ -51,7 +53,9 @@ export function VolunteerSection() {
   const handleEdit = (item: Volunteer) => {
     setEditingId(item.id)
     setIsAdding(true)
-    form.reset(item)
+    setTimeout(() => {
+      form.reset(item)
+    }, 0)
   }
 
   return (
@@ -82,7 +86,13 @@ export function VolunteerSection() {
                 <p className="text-muted-foreground text-sm">
                   {item.startDate} - {item.current ? 'Present' : item.endDate}
                 </p>
-                <p className="mt-2 text-sm">{item.description}</p>
+                {item.description && (
+                  <div
+                    className="prose prose-sm mt-2 max-w-none [&_li]:ml-2 [&_ol]:ml-4 [&_ol]:list-decimal [&_ul]:ml-4 [&_ul]:list-disc"
+                    // biome-ignore lint/security/noDangerouslySetInnerHtml: expected
+                    dangerouslySetInnerHTML={{ __html: item.description }}
+                  />
+                )}
               </div>
               <div className="flex gap-2">
                 <Button
@@ -153,10 +163,11 @@ export function VolunteerSection() {
           />
           <form.AppField
             children={(field) => (
-              <field.TextArea
+              <field.RichText
+                description="Use bullet points to highlight key contributions"
                 label="Description"
-                placeholder="Describe your volunteer work..."
-                rows={4}
+                maxLength={2000}
+                placeholder="Describe your volunteer work and impact..."
               />
             )}
             name="description"

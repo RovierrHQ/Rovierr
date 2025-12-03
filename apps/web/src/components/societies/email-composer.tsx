@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@rov/ui/components/select'
-import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -70,12 +69,6 @@ export function EmailComposer({
     immediatelyRender: false,
     extensions: [
       StarterKit,
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-blue-600 underline'
-        }
-      }),
       Placeholder.configure({
         placeholder: 'Write your email message here...'
       })

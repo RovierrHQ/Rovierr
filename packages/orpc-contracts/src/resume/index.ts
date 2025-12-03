@@ -5,6 +5,7 @@ import {
   fullResumeSchema,
   listResumesSchema,
   selectResumeSchema,
+  updateResumeDataSchema,
   updateResumeMetadataSchema,
   updateResumeSectionSchema
 } from './schemas'
@@ -145,6 +146,42 @@ export const resume = {
       tags: ['Resume']
     })
     .input(updateResumeSectionSchema)
+    .output(
+      z.object({
+        success: z.boolean(),
+        updatedAt: z.string()
+      })
+    )
+    .errors({
+      NOT_FOUND: {
+        data: z.object({
+          message: z.string().default('Resume not found')
+        })
+      },
+      UNAUTHORIZED: {
+        data: z.object({
+          message: z.string().default('Not authorized to update this resume')
+        })
+      },
+      VALIDATION_ERROR: {
+        data: z.object({
+          message: z.string(),
+          errors: z.record(z.string(), z.string())
+        })
+      }
+    }),
+
+  // ============================================================================
+  // Update Resume Data (All Sections)
+  // ============================================================================
+  updateData: oc
+    .route({
+      method: 'PATCH',
+      description: 'Update all resume data at once',
+      summary: 'Update Resume Data',
+      tags: ['Resume']
+    })
+    .input(updateResumeDataSchema)
     .output(
       z.object({
         success: z.boolean(),

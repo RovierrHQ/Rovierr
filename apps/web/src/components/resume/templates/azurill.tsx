@@ -2,6 +2,7 @@
 
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 import type { ResumeData } from '@rov/orpc-contracts'
+import { HtmlToPdf } from '../lib/html-to-pdf'
 
 const AzurillTemplate = ({ resumeData }: { resumeData: ResumeData }) => {
   const styles = StyleSheet.create({
@@ -104,7 +105,12 @@ const AzurillTemplate = ({ resumeData }: { resumeData: ResumeData }) => {
                   {exp.location} • {exp.startDate} -{' '}
                   {exp.current ? 'Present' : exp.endDate}
                 </Text>
-                <Text style={styles.itemDescription}>{exp.description}</Text>
+                <View style={{ marginTop: 4 }}>
+                  <HtmlToPdf
+                    html={exp.description}
+                    style={styles.itemDescription}
+                  />
+                </View>
               </View>
             ))}
           </View>
@@ -120,9 +126,12 @@ const AzurillTemplate = ({ resumeData }: { resumeData: ResumeData }) => {
                 {project.url && (
                   <Text style={styles.itemSubtitle}>{project.url}</Text>
                 )}
-                <Text style={styles.itemDescription}>
-                  {project.description}
-                </Text>
+                <View style={{ marginTop: 4 }}>
+                  <HtmlToPdf
+                    html={project.description}
+                    style={styles.itemDescription}
+                  />
+                </View>
                 {project.technologies.length > 0 && (
                   <Text style={styles.itemSubtitle}>
                     Technologies: {project.technologies.join(', ')}
@@ -138,10 +147,17 @@ const AzurillTemplate = ({ resumeData }: { resumeData: ResumeData }) => {
           <View style={styles.section}>
             <Text style={styles.subheader}>Certifications</Text>
             {resumeData.certifications.map((cert) => (
-              <View key={cert.id} style={{ marginBottom: 5 }}>
-                <Text style={styles.text}>
-                  {cert.name} - {cert.issuer} ({cert.issueDate})
+              <View key={cert.id} style={{ marginBottom: 8 }}>
+                <Text style={styles.itemTitle}>{cert.name}</Text>
+                <Text style={styles.itemSubtitle}>
+                  {cert.issuer} • {cert.issueDate}
+                  {cert.expirationDate && ` • Expires: ${cert.expirationDate}`}
                 </Text>
+                {cert.description && (
+                  <View style={{ marginTop: 4 }}>
+                    <HtmlToPdf html={cert.description} style={styles.text} />
+                  </View>
+                )}
               </View>
             ))}
           </View>
@@ -170,7 +186,12 @@ const AzurillTemplate = ({ resumeData }: { resumeData: ResumeData }) => {
                 <Text style={styles.itemSubtitle}>
                   {vol.startDate} - {vol.current ? 'Present' : vol.endDate}
                 </Text>
-                <Text style={styles.itemDescription}>{vol.description}</Text>
+                <View style={{ marginTop: 4 }}>
+                  <HtmlToPdf
+                    html={vol.description}
+                    style={styles.itemDescription}
+                  />
+                </View>
               </View>
             ))}
           </View>

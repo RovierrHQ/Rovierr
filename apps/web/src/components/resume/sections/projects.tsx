@@ -27,12 +27,14 @@ export function ProjectsSection() {
 
   const form = useAppForm({
     validators: { onSubmit: projectSchema },
-    defaultValues: {
-      ...defaultProject,
-      id: nanoid(),
-      technologies: [],
-      order: projects.length
-    } as Project,
+    defaultValues: (editingId
+      ? projects.find((proj) => proj.id === editingId)
+      : {
+          ...defaultProject,
+          id: nanoid(),
+          technologies: [],
+          order: projects.length
+        }) as Project,
     onSubmit({ value }) {
       let updatedProjects: Project[]
       if (editingId) {
@@ -64,7 +66,9 @@ export function ProjectsSection() {
   const handleEdit = (item: Project) => {
     setEditingId(item.id)
     setIsAdding(true)
-    form.reset(item)
+    setTimeout(() => {
+      form.reset(item)
+    }, 0)
   }
 
   // const addTechnology = () => {
@@ -107,7 +111,13 @@ export function ProjectsSection() {
               <div className="flex-1">
                 <h3 className="font-semibold">{item.name}</h3>
                 {item.url && <p className="text-primary text-sm">{item.url}</p>}
-                <p className="mt-2 text-sm">{item.description}</p>
+                {item.description && (
+                  <div
+                    className="prose prose-sm mt-2 max-w-none [&_li]:ml-2 [&_ol]:ml-4 [&_ol]:list-decimal [&_ul]:ml-4 [&_ul]:list-disc"
+                    // biome-ignore lint/security/noDangerouslySetInnerHtml: expected
+                    dangerouslySetInnerHTML={{ __html: item.description }}
+                  />
+                )}
                 {item.technologies.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">
                     {item.technologies.map((tech: string, idx: number) => (
@@ -174,10 +184,11 @@ export function ProjectsSection() {
           />
           <form.AppField
             children={(field) => (
-              <field.TextArea
+              <field.RichText
+                description="Use bullet points to highlight key features and achievements"
                 label="Description"
-                placeholder="Describe the project..."
-                rows={4}
+                maxLength={2000}
+                placeholder="Describe the project, your role, and key outcomes..."
               />
             )}
             name="description"

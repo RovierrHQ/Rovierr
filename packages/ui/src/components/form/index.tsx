@@ -7,6 +7,7 @@ import Checkbox from './fields/checkbox'
 import OTP from './fields/input-otp'
 import MultiSelect from './fields/multiselect'
 import RadioGroup from './fields/radio'
+import RichText from './fields/rich-text'
 import Select from './fields/select'
 import Slider from './fields/slider'
 import Switch from './fields/switch'
@@ -21,6 +22,7 @@ export const { useAppForm, withFieldGroup, withForm } = createFormHook({
   fieldComponents: {
     Text,
     TextArea,
+    RichText,
     Calendar,
     Slider,
     Select,

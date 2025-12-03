@@ -13,7 +13,8 @@ const defaultCertification: Omit<Certification, 'id'> = {
   name: '',
   issuer: '',
   issueDate: '',
-  expirationDate: ''
+  expirationDate: '',
+  description: ''
 }
 
 export function CertificationsSection() {
@@ -23,7 +24,9 @@ export function CertificationsSection() {
 
   const form = useAppForm({
     validators: { onSubmit: certificationSchema },
-    defaultValues: { ...defaultCertification, id: nanoid() } as Certification,
+    defaultValues: (editingId
+      ? certifications.find((cert) => cert.id === editingId)
+      : { ...defaultCertification, id: nanoid() }) as Certification,
     onSubmit({ value }) {
       let updatedCertifications: Certification[]
       if (editingId) {
@@ -51,7 +54,9 @@ export function CertificationsSection() {
   const handleEdit = (item: Certification) => {
     setEditingId(item.id)
     setIsAdding(true)
-    form.reset(item)
+    setTimeout(() => {
+      form.reset(item)
+    }, 0)
   }
 
   return (
@@ -84,6 +89,13 @@ export function CertificationsSection() {
                   <p className="text-muted-foreground text-sm">
                     Expires: {item.expirationDate}
                   </p>
+                )}
+                {item.description && (
+                  <div
+                    className="prose prose-sm mt-2 max-w-none [&_li]:ml-2 [&_ol]:ml-4 [&_ol]:list-decimal [&_ul]:ml-4 [&_ul]:list-disc"
+                    // biome-ignore lint/security/noDangerouslySetInnerHtml: expected
+                    dangerouslySetInnerHTML={{ __html: item.description }}
+                  />
                 )}
               </div>
               <div className="flex gap-2">
@@ -153,6 +165,17 @@ export function CertificationsSection() {
               name="expirationDate"
             />
           </div>
+          <form.AppField
+            children={(field) => (
+              <field.RichText
+                description="Optional: Provide context about the certification"
+                label="Description (optional)"
+                maxLength={1000}
+                placeholder="Add details about what you learned or achieved..."
+              />
+            )}
+            name="description"
+          />
           <div className="flex gap-2">
             <Button type="submit">Save</Button>
             <Button

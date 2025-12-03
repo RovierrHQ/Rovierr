@@ -1,6 +1,6 @@
 'use client'
 
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { use, useEffect } from 'react'
 import {
@@ -34,7 +34,6 @@ function ResumeEditorPage({
   }>
 }) {
   const { resumeid } = use(params)
-  const _queryClient = useQueryClient()
 
   // Fetch resume data (only once on mount)
   const {
@@ -59,6 +58,7 @@ function ResumeEditorPage({
 
   // Initialize atoms when data loads
   useEffect(() => {
+    if (isLoading) return
     if (resume?.data) {
       setBasicInfo(resume.data.basicInfo)
       setEducation(resume.data.education || [])
@@ -77,72 +77,11 @@ function ResumeEditorPage({
     setEducation,
     setExperience,
     setInterests,
-    // setIsDirty,
+    isLoading,
     setLanguages,
     setProjects,
     setVolunteer
   ])
-
-  // Save mutation
-  // const saveMutation = useMutation(
-  //   orpc.resume.updateSection.mutationOptions({
-  //     onSuccess: () => {
-  //       setIsDirty(false)
-  //       queryClient.invalidateQueries({ queryKey: ['resume', 'get', resumeid] })
-  //       toast.success('Resume saved')
-  //     },
-  //     onError: (error) => {
-  //       toast.error(error.message || 'Failed to save resume')
-  //     }
-  //   })
-  // )
-
-  // Save all sections to backend
-  // const saveAllSections = useCallback(async () => {
-  //   if (!isDirty) return
-
-  //   // Save all sections in sequence
-  //   const sections = [
-  //     { section: 'basicInfo', data: resumeData.basicInfo },
-  //     { section: 'education', data: resumeData.education },
-  //     { section: 'experience', data: resumeData.experience },
-  //     { section: 'projects', data: resumeData.projects },
-  //     { section: 'certifications', data: resumeData.certifications },
-  //     { section: 'languages', data: resumeData.languages },
-  //     { section: 'interests', data: resumeData.interests },
-  //     { section: 'volunteer', data: resumeData.volunteer }
-  //   ]
-
-  //   for (const { section, data } of sections) {
-  //     await saveMutation.mutateAsync({
-  //       resumeId: resumeid,
-  //       section: section as any,
-  //       data
-  //     })
-  //   }
-  // }, [isDirty, resumeData, resumeid, saveMutation])
-
-  // // Save on page unload
-  // useEffect(() => {
-  //   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-  //     if (isDirty) {
-  //       e.preventDefault()
-  //       e.returnValue = ''
-  //     }
-  //   }
-
-  //   window.addEventListener('beforeunload', handleBeforeUnload)
-  //   return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  // }, [isDirty])
-
-  // // Save when leaving the page
-  // useEffect(() => {
-  //   return () => {
-  //     if (isDirty) {
-  //       saveAllSections()
-  //     }
-  //   }
-  // }, [isDirty, saveAllSections])
 
   if (isLoading) {
     return (
@@ -183,20 +122,11 @@ function ResumeEditorPage({
 
       {/* Preview */}
       <div className="flex w-1/2 flex-col border-l">
-        {/* {isDirty && (
-          <div className="flex items-center justify-between border-b bg-yellow-50 p-3">
-            <span className="text-sm text-yellow-800">Unsaved changes</span>
-            <button
-              className="rounded bg-primary px-3 py-1 text-primary-foreground text-sm hover:bg-primary/90 disabled:opacity-50"
-              disabled={saveMutation.isPending}
-              onClick={saveAllSections}
-            >
-              {saveMutation.isPending ? 'Saving...' : 'Save Now'}
-            </button>
-          </div>
-        )} */}
         <div className="flex-1">
-          <ResumePreview resumeTitle={resume?.title || 'Resume'} />
+          <ResumePreview
+            resumeId={resumeid}
+            resumeTitle={resume?.title || 'Resume'}
+          />
         </div>
       </div>
     </div>

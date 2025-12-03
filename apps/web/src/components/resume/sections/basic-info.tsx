@@ -3,9 +3,9 @@
 import { type BasicInfo, basicInfoSchema } from '@rov/orpc-contracts'
 import { useAppForm } from '@rov/ui/components/form/index'
 import { useStore } from '@tanstack/react-form'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
-import { basicInfoAtom, isDirtyAtom } from '../lib/atoms'
+import { basicInfoAtom } from '../lib/atoms'
 
 // ============================================================================
 // Schema
@@ -25,8 +25,7 @@ const defaultBasicInfo: BasicInfo = {
 
 export function BasicInfoSection() {
   const [basicInfo, setBasicInfo] = useAtom(basicInfoAtom)
-  const setIsDirty = useSetAtom(isDirtyAtom)
-  const previousValuesRef = useRef<string>('')
+  const hasInitialized = useRef(false)
 
   const form = useAppForm({
     validators: { onSubmit: basicInfoSchema },
@@ -35,24 +34,20 @@ export function BasicInfoSection() {
 
   const formValues = useStore(form.store, (state) => state.values)
 
+  // Reset form when basicInfo atom changes (e.g., when data loads from server)
+  useEffect(() => {
+    if (basicInfo && !hasInitialized.current) {
+      form.reset(basicInfo)
+      hasInitialized.current = true
+    }
+  }, [basicInfo, form])
+
   // Update atom when form changes (with ref to prevent infinite loops)
   useEffect(() => {
-    if (
-      formValues.name &&
-      formValues.email &&
-      formValues.phone &&
-      formValues.location
-    ) {
-      const currentValues = JSON.stringify(formValues)
-
-      // Only update if values actually changed
-      if (currentValues !== previousValuesRef.current) {
-        previousValuesRef.current = currentValues
-        setBasicInfo(formValues as BasicInfo)
-        setIsDirty(true)
-      }
+    if (hasInitialized.current) {
+      setBasicInfo(formValues as BasicInfo)
     }
-  }, [formValues, setBasicInfo, setIsDirty])
+  }, [formValues, setBasicInfo])
 
   return (
     <div className="space-y-6 p-6">

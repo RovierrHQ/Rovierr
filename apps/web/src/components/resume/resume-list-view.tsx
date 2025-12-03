@@ -27,7 +27,11 @@ export default function ResumeListPage() {
   const createMutation = useMutation(
     orpc.resume.create.mutationOptions({
       onSuccess: (result) => {
-        queryClient.invalidateQueries({ queryKey: ['resume', 'list'] })
+        queryClient.invalidateQueries({
+          queryKey: orpc.resume.list.queryKey({
+            input: { limit: 50, offset: 0 }
+          })
+        })
         router.push(`/spaces/career/resume-builder/${result.id}`)
         toast.success('Resume created successfully')
       },

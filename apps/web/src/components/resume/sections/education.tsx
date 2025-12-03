@@ -43,7 +43,9 @@ export function EducationSection() {
 
   const form = useAppForm({
     validators: { onSubmit: educationSchema },
-    defaultValues: { ...defaultEducation, id: nanoid() } as Education,
+    defaultValues: (editingId
+      ? education.find((ed) => ed.id === editingId)
+      : { ...defaultEducation, id: nanoid() }) as Education,
     onSubmit({ value }) {
       let updatedEducation: Education[]
       if (editingId) {
@@ -69,7 +71,10 @@ export function EducationSection() {
   const handleEdit = (item: Education) => {
     setEditingId(item.id)
     setIsAdding(true)
-    form.reset(item)
+    // Reset form with the item data
+    setTimeout(() => {
+      form.reset(item)
+    }, 0)
   }
 
   const sortedEducation = useMemo(() => sortByDate(education), [education])

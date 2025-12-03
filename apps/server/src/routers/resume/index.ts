@@ -223,6 +223,45 @@ export const resumeRouter = {
   ),
 
   // ============================================================================
+  // Update Resume Data (All Sections)
+  // ============================================================================
+
+  updateData: protectedProcedure.resume.updateData.handler(
+    async ({ input, context }) => {
+      const userId = context.session.user.id
+      const { resumeId, data } = input
+
+      // Verify ownership
+      const [existing] = await db
+        .select({ id: resume.id })
+        .from(resume)
+        .where(and(eq(resume.id, resumeId), eq(resume.userId, userId)))
+
+      if (!existing) {
+        throw new ORPCError('NOT_FOUND', {
+          message: 'Resume not found'
+        })
+      }
+
+      // Update all resume data at once
+      const [updated] = await db
+        .update(resume)
+        .set({
+          data
+        })
+        .where(eq(resume.id, resumeId))
+        .returning({
+          updatedAt: resume.updatedAt
+        })
+
+      return {
+        success: true,
+        updatedAt: updated.updatedAt
+      }
+    }
+  ),
+
+  // ============================================================================
   // Delete Resume
   // ============================================================================
 

@@ -78,7 +78,8 @@ export const certificationSchema = z.object({
   name: z.string().min(1, 'Certification name is required'),
   issuer: z.string().min(1, 'Issuer is required'),
   issueDate: z.string().min(1, 'Issue date is required'),
-  expirationDate: z.string().optional()
+  expirationDate: z.string().optional(),
+  description: z.string().max(1000, 'Description too long').optional()
 })
 
 export const languageSchema = z.object({
@@ -98,7 +99,7 @@ export const volunteerSchema = z.object({
 })
 
 export const resumeDataSchema = z.object({
-  basicInfo: basicInfoSchema.optional(),
+  basicInfo: basicInfoSchema.partial().optional(),
   education: z.array(educationSchema).default([]),
   experience: z.array(experienceSchema).default([]),
   projects: z.array(projectSchema).default([]),
@@ -154,6 +155,11 @@ export const updateResumeSectionSchema = z.object({
     'volunteer'
   ]),
   data: z.any() // Will be validated based on section type
+})
+
+export const updateResumeDataSchema = z.object({
+  resumeId: z.string().min(1, 'Resume ID is required'),
+  data: resumeDataSchema
 })
 
 // ============================================================================
