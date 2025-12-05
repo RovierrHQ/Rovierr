@@ -238,7 +238,7 @@ const BrowseClubs = () => {
         <div className="mb-4 flex items-center gap-4">
           <Input className="flex-1" placeholder="Search clubs..." />
           <Button asChild>
-            <Link href="/spaces/clubs/create">
+            <Link href="/spaces/societies/create">
               <Plus className="mr-2 h-4 w-4" />
               Create Club
             </Link>
