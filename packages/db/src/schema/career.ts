@@ -1,4 +1,10 @@
-import { jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import {
+  type AnyPgColumn,
+  jsonb,
+  pgTable,
+  text,
+  timestamp
+} from 'drizzle-orm/pg-core'
 import { primaryId, timestamps } from '../helper'
 import { user } from './auth'
 
@@ -42,6 +48,16 @@ export const jobApplication = pgTable('job_application', {
     .defaultNow(),
   notes: text('notes'),
 
+  // AI-parsed job data
+  parsedJobData: jsonb('parsed_job_data').$type<{
+    description: string
+    requirements: string[]
+    responsibilities: string[]
+    skills: string[]
+    experienceYears: number | null
+    educationLevel: string | null
+  } | null>(),
+
   ...timestamps
 })
 
@@ -63,6 +79,21 @@ export const resume = pgTable('resume', {
     .notNull()
     .default('draft'),
   templateId: text('template_id').notNull().default('default'),
+
+  // AI optimization metadata
+  sourceResumeId: text('source_resume_id').references(
+    (): AnyPgColumn => resume.id,
+    {
+      onDelete: 'set null'
+    }
+  ),
+  optimizedForJobId: text('optimized_for_job_id').references(
+    () => jobApplication.id,
+    { onDelete: 'set null' }
+  ),
+  appliedSuggestions: jsonb('applied_suggestions')
+    .$type<string[]>()
+    .default([]),
 
   // Resume data stored as JSONB (all sections in one field)
   // Can selectively exclude this column in queries for performance
@@ -130,6 +161,83 @@ export const resume = pgTable('resume', {
       }>
     }>()
     .default({}),
+
+  ...timestamps
+})
+
+/**
+ * ========================
+ *  COVER LETTERS
+ * ========================
+ */
+export const coverLetter = pgTable('cover_letter', {
+  id: primaryId,
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  applicationId: text('application_id').references(() => jobApplication.id, {
+    onDelete: 'set null'
+  }),
+  resumeId: text('resume_id')
+    .notNull()
+    .references(() => resume.id, { onDelete: 'cascade' }),
+
+  // Cover letter content
+  content: text('content').notNull(),
+
+  ...timestamps
+})
+
+/**
+ * ========================
+ *  RESUME ANALYSIS RESULTS
+ * ========================
+ */
+export const resumeAnalysisResult = pgTable('resume_analysis_result', {
+  id: primaryId,
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  resumeId: text('resume_id')
+    .notNull()
+    .references(() => resume.id, { onDelete: 'cascade' }),
+  applicationId: text('application_id')
+    .notNull()
+    .references(() => jobApplication.id, { onDelete: 'cascade' }),
+
+  // Analysis results
+  analysis: jsonb('analysis').notNull().$type<{
+    matchScore: number
+    strengths: string[]
+    gaps: string[]
+    keywordMatches: {
+      found: string[]
+      missing: string[]
+    }
+    sectionScores: Record<
+      string,
+      {
+        score: number
+        feedback: string
+      }
+    >
+    overallFeedback: string
+  }>(),
+
+  // Suggestions
+  suggestions: jsonb('suggestions').notNull().$type<
+    Array<{
+      id: string
+      section: string
+      itemId: string | null
+      field: string
+      originalContent: string
+      proposedContent: string
+      reasoning: string
+      impactScore: number
+      keywords: string[]
+    }>
+  >(),
 
   ...timestamps
 })

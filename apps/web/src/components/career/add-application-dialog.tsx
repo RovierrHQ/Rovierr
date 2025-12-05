@@ -20,7 +20,7 @@ export function AddApplicationDialog({
 }: AddApplicationDialogProps) {
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="h-4/5 max-w-2xl overflow-auto">
         <DialogHeader>
           <DialogTitle>Add Job Application</DialogTitle>
           <DialogDescription>

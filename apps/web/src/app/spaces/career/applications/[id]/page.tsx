@@ -10,6 +10,12 @@ import {
   SelectTrigger,
   SelectValue
 } from '@rov/ui/components/select'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@rov/ui/components/tabs'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft,
@@ -18,12 +24,14 @@ import {
   ExternalLink,
   MapPin,
   Pencil,
+  Sparkles,
   Trash2
 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { AIAssistant } from '@/components/career/ai/ai-assistant'
 import { DeleteApplicationDialog } from '@/components/career/delete-application-dialog'
 import { EditApplicationDialog } from '@/components/career/edit-application-dialog'
 import { orpc } from '@/utils/orpc'
@@ -34,6 +42,18 @@ export default function ApplicationDetailPage() {
   const applicationId = params.id as string
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('details')
+  const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null)
+
+  // Fetch user's resumes for AI assistant
+  const { data: resumesData } = useQuery(
+    orpc.resume.list.queryOptions({
+      input: {
+        limit: 50,
+        offset: 0
+      }
+    })
+  )
 
   // Fetch application details
   const { data: application, isLoading } = useQuery(
@@ -211,105 +231,217 @@ export default function ApplicationDetailPage() {
         </div>
       </div>
 
-      {/* Details Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Details */}
-        <Card className="border-border bg-card p-6 lg:col-span-2">
-          <h2 className="mb-4 font-semibold text-foreground text-xl">
-            Application Details
-          </h2>
+      {/* Tabs for Details and AI Assistant */}
+      <Tabs className="mb-6" onValueChange={setActiveTab} value={activeTab}>
+        <TabsList>
+          <TabsTrigger value="details">Application Details</TabsTrigger>
+          <TabsTrigger className="gap-2" value="ai-assistant">
+            <Sparkles className="h-4 w-4" />
+            AI Assistant
+          </TabsTrigger>
+        </TabsList>
 
-          <div className="space-y-4">
-            {application.jobPostUrl && (
-              <div>
-                <p className="mb-1 block font-medium text-foreground text-sm">
-                  Job Posting
-                </p>
-                <a
-                  className="flex items-center gap-2 text-chart-1 hover:underline"
-                  href={application.jobPostUrl}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  View Original Posting
-                </a>
+        <TabsContent className="mt-6" value="details">
+          {/* Details Grid */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Main Details */}
+            <Card className="border-border bg-card p-6 lg:col-span-2">
+              <h2 className="mb-4 font-semibold text-foreground text-xl">
+                Application Details
+              </h2>
+
+              <div className="space-y-4">
+                {application.jobPostUrl && (
+                  <div>
+                    <p className="mb-1 block font-medium text-foreground text-sm">
+                      Job Posting
+                    </p>
+                    <a
+                      className="flex items-center gap-2 text-chart-1 hover:underline"
+                      href={application.jobPostUrl}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      View Original Posting
+                    </a>
+                  </div>
+                )}
+
+                {application.salaryRange && (
+                  <div>
+                    <p className="mb-1 block font-medium text-foreground text-sm">
+                      Salary Range
+                    </p>
+                    <p className="text-muted-foreground">
+                      {application.salaryRange}
+                    </p>
+                  </div>
+                )}
+
+                {application.notes && (
+                  <div>
+                    <p className="mb-1 block font-medium text-foreground text-sm">
+                      Notes
+                    </p>
+                    <p className="whitespace-pre-wrap text-muted-foreground">
+                      {application.notes}
+                    </p>
+                  </div>
+                )}
+
+                {!(application.salaryRange || application.notes) && (
+                  <p className="text-muted-foreground text-sm">
+                    No additional details provided
+                  </p>
+                )}
               </div>
-            )}
+            </Card>
 
-            {application.salaryRange && (
-              <div>
-                <p className="mb-1 block font-medium text-foreground text-sm">
-                  Salary Range
-                </p>
-                <p className="text-muted-foreground">
-                  {application.salaryRange}
-                </p>
+            {/* Status Timeline */}
+            <Card className="border-border bg-card p-6">
+              <h2 className="mb-4 font-semibold text-foreground text-xl">
+                Status
+              </h2>
+
+              <div className="space-y-3">
+                <div className="rounded-lg border border-border bg-card/50 p-3">
+                  <p className="mb-2 font-medium text-foreground text-sm">
+                    Current Status
+                  </p>
+                  <Select
+                    disabled={updateStatusMutation.isPending}
+                    onValueChange={handleStatusChange}
+                    value={application.status}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="applied">Applied</SelectItem>
+                      <SelectItem value="interview_scheduled">
+                        Interview Scheduled
+                      </SelectItem>
+                      <SelectItem value="interview_completed">
+                        Interview Completed
+                      </SelectItem>
+                      <SelectItem value="offer_received">
+                        Offer Received
+                      </SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="rounded-lg border border-border bg-card/50 p-3">
+                  <p className="mb-1 font-medium text-foreground text-sm">
+                    Application Date
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    {formatDate(application.applicationDate)}
+                  </p>
+                </div>
               </div>
-            )}
-
-            {application.notes && (
-              <div>
-                <p className="mb-1 block font-medium text-foreground text-sm">
-                  Notes
-                </p>
-                <p className="whitespace-pre-wrap text-muted-foreground">
-                  {application.notes}
-                </p>
-              </div>
-            )}
-
-            {!(application.salaryRange || application.notes) && (
-              <p className="text-muted-foreground text-sm">
-                No additional details provided
-              </p>
-            )}
+            </Card>
           </div>
-        </Card>
+        </TabsContent>
 
-        {/* Status Timeline */}
-        <Card className="border-border bg-card p-6">
-          <h2 className="mb-4 font-semibold text-foreground text-xl">Status</h2>
+        <TabsContent className="mt-6" value="ai-assistant">
+          {/* Resume Selection */}
+          {resumesData && resumesData.resumes.length > 0 ? (
+            <>
+              {!selectedResumeId && (
+                <Card className="mb-6 border-border bg-card p-6">
+                  <h2 className="mb-4 font-semibold text-foreground text-xl">
+                    Select a Resume
+                  </h2>
+                  <p className="mb-4 text-muted-foreground">
+                    Choose a resume to analyze and optimize for this job
+                    application.
+                  </p>
+                  <div className="grid gap-3">
+                    {resumesData.resumes.map((resume) => (
+                      <button
+                        className="flex items-center justify-between rounded-lg border border-border p-4 text-left transition-colors hover:bg-accent"
+                        key={resume.id}
+                        onClick={() => setSelectedResumeId(resume.id)}
+                        type="button"
+                      >
+                        <div>
+                          <p className="font-medium">{resume.title}</p>
+                          {resume.targetPosition && (
+                            <p className="text-muted-foreground text-sm">
+                              {resume.targetPosition}
+                            </p>
+                          )}
+                        </div>
+                        <span className="rounded-md border border-input bg-background px-3 py-2 font-medium text-sm hover:bg-accent hover:text-accent-foreground">
+                          Select
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </Card>
+              )}
 
-          <div className="space-y-3">
-            <div className="rounded-lg border border-border bg-card/50 p-3">
-              <p className="mb-2 font-medium text-foreground text-sm">
-                Current Status
-              </p>
-              <Select
-                disabled={updateStatusMutation.isPending}
-                onValueChange={handleStatusChange}
-                value={application.status}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="applied">Applied</SelectItem>
-                  <SelectItem value="interview_scheduled">
-                    Interview Scheduled
-                  </SelectItem>
-                  <SelectItem value="interview_completed">
-                    Interview Completed
-                  </SelectItem>
-                  <SelectItem value="offer_received">Offer Received</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="withdrawn">Withdrawn</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              {selectedResumeId && application.jobPostUrl && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="font-semibold text-foreground text-xl">
+                      AI Resume & Cover Letter Assistant
+                    </h2>
+                    <Button
+                      onClick={() => setSelectedResumeId(null)}
+                      size="sm"
+                      variant="outline"
+                    >
+                      Change Resume
+                    </Button>
+                  </div>
+                  <AIAssistant
+                    initialJobData={{
+                      companyName: application.companyName,
+                      positionTitle: application.positionTitle,
+                      location: application.location || '',
+                      salaryRange: application.salaryRange || null,
+                      description: '',
+                      requirements: [],
+                      responsibilities: [],
+                      skills: [],
+                      experienceYears: null,
+                      educationLevel: null
+                    }}
+                    jobApplicationId={applicationId}
+                    resumeId={selectedResumeId}
+                  />
+                </div>
+              )}
 
-            <div className="rounded-lg border border-border bg-card/50 p-3">
-              <p className="mb-1 font-medium text-foreground text-sm">
-                Application Date
+              {selectedResumeId && !application.jobPostUrl && (
+                <Card className="border-border bg-card p-6">
+                  <p className="text-muted-foreground">
+                    No job posting URL available. Please add a job posting URL
+                    to use the AI assistant.
+                  </p>
+                </Card>
+              )}
+            </>
+          ) : (
+            <Card className="border-border bg-card p-6">
+              <h2 className="mb-4 font-semibold text-foreground text-xl">
+                No Resumes Found
+              </h2>
+              <p className="mb-4 text-muted-foreground">
+                You need to create a resume before using the AI assistant.
               </p>
-              <p className="text-muted-foreground text-sm">
-                {formatDate(application.applicationDate)}
-              </p>
-            </div>
-          </div>
-        </Card>
-      </div>
+              <Link href="/spaces/career/resume-builder">
+                <Button>Create Resume</Button>
+              </Link>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Edit Dialog */}
       <EditApplicationDialog

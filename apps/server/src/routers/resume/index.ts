@@ -11,46 +11,67 @@ export const resumeRouter = {
   // ============================================================================
 
   list: protectedProcedure.resume.list.handler(async ({ input, context }) => {
-    const userId = context.session.user.id
-    const { limit, offset, status } = input
+    try {
+      const userId = context.session.user.id
+      const { limit, offset, status } = input
 
-    // Build where clause
-    const whereClause = status
-      ? and(eq(resume.userId, userId), eq(resume.status, status))
-      : eq(resume.userId, userId)
-
-    // Fetch resumes (excluding data field for performance)
-    const resumes = await db
-      .select({
-        id: resume.id,
-        userId: resume.userId,
-        title: resume.title,
-        targetPosition: resume.targetPosition,
-        status: resume.status,
-        templateId: resume.templateId,
-        createdAt: resume.createdAt,
-        updatedAt: resume.updatedAt
+      console.log('[RESUME LIST] Starting query:', {
+        userId,
+        limit,
+        offset,
+        status
       })
-      .from(resume)
-      .where(whereClause)
-      .orderBy(desc(resume.updatedAt))
-      .limit(limit)
-      .offset(offset)
 
-    // Get total count
-    const [{ value: total }] = await db
-      .select({ value: count() })
-      .from(resume)
-      .where(whereClause)
+      // Build where clause
+      const whereClause = status
+        ? and(eq(resume.userId, userId), eq(resume.status, status))
+        : eq(resume.userId, userId)
 
-    return {
-      resumes: resumes.map((r) => ({
-        ...r,
-        createdAt: r.createdAt || new Date().toISOString(),
-        updatedAt: r.updatedAt || new Date().toISOString()
-      })),
-      total,
-      hasMore: offset + limit < total
+      // Fetch resumes (excluding data field for performance)
+      const resumes = await db
+        .select({
+          id: resume.id,
+          userId: resume.userId,
+          title: resume.title,
+          targetPosition: resume.targetPosition,
+          status: resume.status,
+          templateId: resume.templateId,
+          sourceResumeId: resume.sourceResumeId,
+          optimizedForJobId: resume.optimizedForJobId,
+          appliedSuggestions: resume.appliedSuggestions,
+          createdAt: resume.createdAt,
+          updatedAt: resume.updatedAt
+        })
+        .from(resume)
+        .where(whereClause)
+        .orderBy(desc(resume.updatedAt))
+        .limit(limit)
+        .offset(offset)
+
+      // Get total count
+      const [{ value: total }] = await db
+        .select({ value: count() })
+        .from(resume)
+        .where(whereClause)
+
+      const result = {
+        resumes: resumes.map((r) => ({
+          ...r,
+          createdAt: r.createdAt || new Date().toISOString(),
+          updatedAt: r.updatedAt || new Date().toISOString()
+        })),
+        total,
+        hasMore: offset + limit < total
+      }
+
+      console.log('[RESUME LIST] Success:', {
+        count: result.resumes.length,
+        total: result.total
+      })
+      return result
+    } catch (error) {
+      console.error('[RESUME LIST] Error:', error)
+      throw error
     }
   }),
 
@@ -126,7 +147,7 @@ export const resumeRouter = {
       return {
         id: newResume.id,
         title: newResume.title,
-        createdAt: newResume.createdAt
+        createdAt: newResume.createdAt || new Date().toISOString()
       }
     }
   ),
@@ -164,6 +185,9 @@ export const resumeRouter = {
           targetPosition: resume.targetPosition,
           status: resume.status,
           templateId: resume.templateId,
+          sourceResumeId: resume.sourceResumeId,
+          optimizedForJobId: resume.optimizedForJobId,
+          appliedSuggestions: resume.appliedSuggestions,
           createdAt: resume.createdAt,
           updatedAt: resume.updatedAt
         })
@@ -217,7 +241,7 @@ export const resumeRouter = {
 
       return {
         success: true,
-        updatedAt: updated.updatedAt
+        updatedAt: updated.updatedAt || new Date().toISOString()
       }
     }
   ),
@@ -256,7 +280,7 @@ export const resumeRouter = {
 
       return {
         success: true,
-        updatedAt: updated.updatedAt
+        updatedAt: updated.updatedAt || new Date().toISOString()
       }
     }
   ),
