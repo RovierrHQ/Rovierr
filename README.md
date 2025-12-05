@@ -18,15 +18,9 @@ Our infrastructure is built for scalability, cost efficiency, and real-time perf
 
 ## 📜 License
 
-This project is licensed under the **Creative Commons Attribution–NonCommercial–NoDerivatives 4.0 International License (CC BY-NC-ND 4.0)**.
+This project is licensed under the **MIT License**.
 
-This means:
-
-- **Attribution required** (credit the project).
-- **No commercial use** without explicit permission.
-- **No modifications or derivatives** may be distributed.
-
-Full license text: [LICENSE](LICENSE)
+See the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -38,7 +32,7 @@ We welcome contributions! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for
 - Our branch workflow
 - License acknowledgement requirements
 
-All contributors must explicitly agree that their submissions are licensed under **CC BY-NC-ND 4.0** with no additional restrictions.
+All contributors must explicitly agree that their submissions are licensed under the **MIT License**.
 
 ---
 
@@ -77,6 +71,6 @@ Full documentation is available at: [docs.rovierr.com](https://docs.rovierr.com)
 
 ## 📌 Open Source Policy
 
-- **License**: CC BY-NC-ND 4.0
+- **License**: MIT License
 - **Code of Conduct**: See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - **Contribution Process**: See [CONTRIBUTING.md](CONTRIBUTING.md)
