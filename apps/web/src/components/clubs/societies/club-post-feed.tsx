@@ -177,8 +177,10 @@ const ClubPostFeed = () => {
   }
 
   return (
-    <div className="flex gap-4">
-      <div className={`space-y-4 ${selectedPostId ? 'w-1/2' : 'w-full'}`}>
+    <div className="relative flex gap-4">
+      <div
+        className={`space-y-4 transition-all ${selectedPostId ? 'w-1/2' : 'w-full'}`}
+      >
         {posts.map((post) => (
           <Card
             className={`isolate p-6 transition-all ${

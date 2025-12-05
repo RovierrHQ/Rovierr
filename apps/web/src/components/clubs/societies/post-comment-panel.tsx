@@ -87,9 +87,9 @@ export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
   }
 
   return (
-    <div className="flex w-1/2 flex-col border-border border-l pl-4">
+    <div className="sticky top-28 flex h-[calc(100vh-200px)] w-1/2 flex-col border-border border-l pl-4">
       {/* Header */}
-      <div className="mb-4 flex items-start justify-between">
+      <div className="mb-4 flex shrink-0 items-start justify-between">
         <div className="flex-1">
           <h2 className="font-bold text-xl">Comments</h2>
         </div>
@@ -98,7 +98,7 @@ export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
         </Button>
       </div>
 
-      {/* Comments List */}
+      {/* Comments List - Scrollable */}
       <div className="flex-1 overflow-y-auto pr-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
@@ -167,8 +167,8 @@ export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
         )}
       </div>
 
-      {/* Comment Input */}
-      <div className="mt-4 border-border border-t pt-4">
+      {/* Comment Input - Fixed at bottom */}
+      <div className="shrink-0 border-border border-t pt-4">
         <div className="flex gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={session?.user?.image || undefined} />
