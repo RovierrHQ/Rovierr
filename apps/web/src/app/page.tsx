@@ -1,23 +1,24 @@
 'use client'
 
 import { AuroraBackground } from '@rov/ui/components/aurora-background'
-import { PlaceholdersAndVanishInput } from '@rov/ui/components/placeholder-vanish-input'
+import { Button } from '@rov/ui/components/button'
 import { AnimatedShinyText } from '@rov/ui/components/text-animations/animated-shiny'
 import { cn } from '@rov/ui/lib/utils'
 import { ArrowRightIcon } from 'lucide-react'
 import { motion } from 'motion/react'
-import InstallPrompt from '@/components/install-prompt'
+import Link from 'next/link'
+import FeaturesSection from '@/components/landing/features-section'
+import Footer from '@/components/layout/footer'
 import Topnav from '@/components/layout/top-nav'
-import ToolList from '@/components/tool-list'
 
 export default function RovierrLandingPage() {
   return (
-    <div>
+    <div className="flex min-h-screen flex-col">
       <AuroraBackground />
       <Topnav />
-      <div className="container mx-auto">
+      <div className="container mx-auto flex-1">
         <motion.div
-          className="relative mt-32 flex flex-col items-center justify-center gap-4 px-4"
+          className="relative mt-32 flex flex-col items-center justify-center gap-4 px-4 pb-20"
           initial={{ opacity: 0.0, y: 40 }}
           transition={{
             delay: 0.3,
@@ -32,7 +33,7 @@ export default function RovierrLandingPage() {
             )}
           >
             <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400">
-              <span>✨ Introducing Quera</span>
+              <span>✨ Introducing Campus Societies</span>
               <ArrowRightIcon className="ml-1 size-3 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
             </AnimatedShinyText>
           </div>
@@ -44,30 +45,30 @@ export default function RovierrLandingPage() {
             students, driven by simplicity, and built to scale with you.
           </div>
 
-          <InstallPrompt />
-          <div className="mt-20 flex items-center gap-2">
-            <p className="text-muted-foreground">Search</p>
-
-            <PlaceholdersAndVanishInput
-              onChange={() => {
-                // todo
-              }}
-              onSubmit={() => {
-                // todo
-              }}
-              placeholders={[
-                'kahoot games and quizzes',
-                'Create a form for survey',
-                'Quickly create realtime quiz',
-                'Plan your next project',
-                'Manage your expenses',
-                'EventBrite: Send Out event registration form'
-              ]}
-            />
-          </div>
+          <motion.div
+            className="mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            transition={{
+              delay: 0.5,
+              duration: 0.6,
+              ease: 'easeInOut'
+            }}
+            whileInView={{ opacity: 1, y: 0 }}
+          >
+            <Link href="/login">
+              <Button
+                className="transition-transform hover:scale-105"
+                size="lg"
+              >
+                Get Started
+                <ArrowRightIcon className="ml-2 size-4" />
+              </Button>
+            </Link>
+          </motion.div>
         </motion.div>
-        <ToolList />
       </div>
+      <FeaturesSection />
+      <Footer />
     </div>
   )
 }
