@@ -22,7 +22,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { authClient } from '@/lib/auth-client'
 
-interface InviteMemberDialogProps {
+type InviteMemberDialogProps = {
   organizationId: string
   trigger?: React.ReactNode
 }
@@ -32,7 +32,7 @@ const inviteSchema = z.object({
   role: z.string().min(1, 'Role is required')
 })
 
-interface ParsedInvite {
+type ParsedInvite = {
   email: string
   role: string
   isValid: boolean
@@ -139,18 +139,20 @@ export function InviteMemberDialog({
   })
 
   const roles = rolesData?.data ?? []
-  const validRoles = useMemo(() => {
-    return roles.map((r) => r.role.toLowerCase().trim())
-  }, [roles])
+  const validRoles = useMemo(
+    () => roles.map((r) => r.role.toLowerCase().trim()),
+    [roles]
+  )
 
   const parsedInvites = useMemo(() => {
     if (!(isBulkMode && bulkText.trim())) return []
     return parseBulkInvites(bulkText, validRoles)
   }, [bulkText, isBulkMode, validRoles])
 
-  const validInvites = useMemo(() => {
-    return parsedInvites.filter((invite) => invite.isValid)
-  }, [parsedInvites])
+  const validInvites = useMemo(
+    () => parsedInvites.filter((invite) => invite.isValid),
+    [parsedInvites]
+  )
 
   const form = useAppForm({
     validators: {

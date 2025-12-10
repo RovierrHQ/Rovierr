@@ -152,7 +152,7 @@ export async function checkUniqueName(
 /**
  * Validate image file constraints
  */
-export interface ImageConstraints {
+export type ImageConstraints = {
   maxSize: number // in bytes
   formats: string[]
   minWidth: number
@@ -173,7 +173,7 @@ export const BANNER_CONSTRAINTS: ImageConstraints = {
   minHeight: 400
 }
 
-export interface ValidationResult {
+export type ValidationResult = {
   valid: boolean
   error?: string
 }

@@ -16,7 +16,7 @@ import QRCodeReact from 'react-qr-code'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 
-interface QRCodeDisplayProps {
+type QRCodeDisplayProps = {
   societyId: string
   societySlug: string
 }

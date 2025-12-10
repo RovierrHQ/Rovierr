@@ -17,7 +17,7 @@ import { Textarea } from '@rov/ui/components/textarea'
 import { GitBranch, X } from 'lucide-react'
 import type { Page, Question } from './form-builder'
 
-interface PageSettingsProps {
+type PageSettingsProps = {
   page: Page
   allPages: Page[]
   allQuestions: Question[]

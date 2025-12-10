@@ -9,7 +9,7 @@ import {
 } from '@rov/ui/components/dialog'
 import { ApplicationForm } from './application-form'
 
-interface AddApplicationDialogProps {
+type AddApplicationDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }

@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 import type { Reply } from './types'
 
-interface ReplyCardProps {
+type ReplyCardProps = {
   reply: Reply
 }
 

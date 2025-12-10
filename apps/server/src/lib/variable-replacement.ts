@@ -4,7 +4,7 @@
  * Replaces template variables like {{user.name}} with actual values
  */
 
-interface VariableContext {
+type VariableContext = {
   user: {
     name: string
     email: string

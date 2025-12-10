@@ -28,7 +28,7 @@ import { orpc } from '@/utils/orpc'
 import { AssigneeSelector } from './assignee-selector'
 import type { TaskPriority } from './types'
 
-interface CreateTaskDialogProps {
+type CreateTaskDialogProps = {
   open: boolean
   organizationId: string
   onOpenChange: (open: boolean) => void

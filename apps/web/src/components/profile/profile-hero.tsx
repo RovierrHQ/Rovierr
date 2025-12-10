@@ -35,7 +35,7 @@ import { orpc } from '@/utils/orpc'
 import { ImageUploadDialog } from './image-upload-dialog'
 import { ProfileHeroSkeleton } from './loading-skeleton'
 
-interface ProfileHeroProps {
+type ProfileHeroProps = {
   isVerified: boolean
 }
 

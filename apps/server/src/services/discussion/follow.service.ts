@@ -15,7 +15,7 @@ import type { ListFollowedThreadsQuery } from '@rov/orpc-contracts'
 import { and, desc, eq, sql } from 'drizzle-orm'
 
 export class FollowService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

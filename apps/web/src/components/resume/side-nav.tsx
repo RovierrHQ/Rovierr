@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { activeSectionAtom } from './lib/atoms'
 
-interface LeftSidebarProps {
+type LeftSidebarProps = {
   hasResume: boolean
 }
 

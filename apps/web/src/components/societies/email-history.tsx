@@ -15,7 +15,7 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { ChevronLeft, ChevronRight, Eye, Mail } from 'lucide-react'
 
-interface EmailHistoryProps {
+type EmailHistoryProps = {
   emails: EmailHistoryItem[]
   total: number
   hasMore: boolean

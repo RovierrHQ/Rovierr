@@ -20,7 +20,7 @@ const applicationSchema = z.object({
 
 type ApplicationFormData = z.infer<typeof applicationSchema>
 
-interface ApplicationFormProps {
+type ApplicationFormProps = {
   onSuccess?: () => void
   onCancel?: () => void
 }

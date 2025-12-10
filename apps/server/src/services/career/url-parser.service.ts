@@ -6,7 +6,7 @@
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 
-interface ScrapedJobData {
+type ScrapedJobData = {
   jobTitle: string
   jobCompany: string
   jobDescription: string

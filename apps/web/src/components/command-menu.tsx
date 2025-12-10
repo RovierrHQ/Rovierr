@@ -33,7 +33,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-interface MenuItem {
+type MenuItem = {
   id: string
   label: string
   icon: React.ComponentType<{ className?: string }>

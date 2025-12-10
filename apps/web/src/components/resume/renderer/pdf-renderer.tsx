@@ -19,19 +19,17 @@ const PdfRenderer = ({
     height: number
   }
   constraint?: 'width' | 'height'
-}) => {
-  return (
-    <Document file={pdfBlob} rotate={0}>
-      <Page
-        className=""
-        height={constraint === 'height' ? containerDimension.height : undefined}
-        pageNumber={1}
-        scale={1}
-        width={constraint === 'width' ? containerDimension.width : undefined}
-      />
-    </Document>
-  )
-}
+}) => (
+  <Document file={pdfBlob} rotate={0}>
+    <Page
+      className=""
+      height={constraint === 'height' ? containerDimension.height : undefined}
+      pageNumber={1}
+      scale={1}
+      width={constraint === 'width' ? containerDimension.width : undefined}
+    />
+  </Document>
+)
 
 export default dynamic(() => Promise.resolve(PdfRenderer), {
   ssr: false

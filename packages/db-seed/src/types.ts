@@ -1,13 +1,13 @@
 import type { DB } from '@rov/db'
 
-export interface ProgressTracker {
+export type ProgressTracker = {
   updateProgress: (current: number, total: number, message?: string) => void
   setTotal: (total: number) => void
   increment: (message?: string, count?: number) => void
   complete: () => void
 }
 
-export interface SeedOptions {
+export type SeedOptions = {
   only?: string[] // Seed only specified tables
   exclude?: string[] // Exclude specified tables
   clear?: boolean // Truncate before seeding
@@ -20,7 +20,7 @@ export interface SeedOptions {
   skipDependencyCheck?: boolean // Skip dependency validation and ordering
 }
 
-export interface SeedResult {
+export type SeedResult = {
   tableName: string
   recordsInserted: number
   recordsSkipped: number
@@ -28,7 +28,7 @@ export interface SeedResult {
   duration: number
 }
 
-export interface SeedSummary {
+export type SeedSummary = {
   totalRecords: number
   successfulSeeds: string[]
   failedSeeds: string[]
@@ -36,7 +36,7 @@ export interface SeedSummary {
   errors: SeedError[]
 }
 
-export interface SeedError {
+export type SeedError = {
   record?: unknown
   error: Error
   phase: 'validation' | 'execution' | 'cleanup'
@@ -48,7 +48,7 @@ export type ClearFunction = (db: DB) => Promise<void>
 
 export type ValidationFunction = (data: unknown[]) => ValidationResult
 
-export interface ValidationResult {
+export type ValidationResult = {
   valid: boolean
   errors: string[]
 }
@@ -58,7 +58,7 @@ export interface ValidationResult {
  * Generic T should be a record of entity names to their data arrays
  * Example: { courses: CourseRecord[], offerings: OfferingRecord[] }
  */
-export interface PrepareDataResult<T extends Record<string, unknown[]>> {
+export type PrepareDataResult<T extends Record<string, unknown[]>> = {
   data: T
   invalidCount?: number
 }
@@ -71,9 +71,9 @@ export type PrepareDataFunction<T extends Record<string, unknown[]>> = (
   options: SeedOptions
 ) => Promise<PrepareDataResult<T>>
 
-export interface SeedModule<
+export type SeedModule<
   T extends Record<string, unknown[]> = Record<string, unknown[]>
-> {
+> = {
   name: string // Table/module name
   dependencies?: string[] // Required parent seeds
   seed: SeedFunction // Seeding function (does DB operations)
@@ -82,14 +82,14 @@ export interface SeedModule<
   validate?: ValidationFunction // Optional validation
 }
 
-export interface RegistryEntry {
+export type RegistryEntry = {
   module: SeedModule
   order: number // Execution order based on dependencies
   status: 'pending' | 'running' | 'completed' | 'failed'
   result?: SeedResult
 }
 
-export interface DependencyNode {
+export type DependencyNode = {
   name: string
   dependencies: string[]
   dependents: string[]

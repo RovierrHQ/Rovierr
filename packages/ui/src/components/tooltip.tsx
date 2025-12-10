@@ -73,7 +73,7 @@ const QuickTooltip = ({
   <TooltipPrimitive.Root>
     <TooltipTrigger asChild>{children}</TooltipTrigger>
     <TooltipContent {...props}>
-      {showArrow && <TooltipPrimitive.Arrow className="text-black" />}
+      {!!showArrow && <TooltipPrimitive.Arrow className="text-black" />}
       {content}
     </TooltipContent>
   </TooltipPrimitive.Root>

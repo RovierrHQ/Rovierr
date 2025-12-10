@@ -17,7 +17,7 @@ import {
   type PlatformInfo
 } from '@/lib/platform-detector'
 
-interface DownloadButtonProps {
+type DownloadButtonProps = {
   variant?: 'default' | 'outline' | 'secondary' | 'ghost'
   size?: 'sm' | 'default' | 'lg'
   className?: string

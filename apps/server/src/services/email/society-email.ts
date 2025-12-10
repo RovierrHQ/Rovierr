@@ -9,7 +9,7 @@ import { replaceVariables } from '@/lib/variable-replacement'
 
 const usesend = new UseSend(env.USESEND_API_KEY, 'https://usesend.rovierr.com')
 
-interface SendSocietyEmailParams {
+type SendSocietyEmailParams = {
   organizationId: string
   senderId: string
   subject: string
@@ -17,7 +17,7 @@ interface SendSocietyEmailParams {
   bodyText: string
 }
 
-interface SendSocietyEmailResult {
+type SendSocietyEmailResult = {
   emailId: string
   recipientCount: number
   status: 'completed' | 'failed'

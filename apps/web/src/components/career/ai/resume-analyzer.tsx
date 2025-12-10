@@ -19,7 +19,7 @@ import { orpc } from '@/utils/orpc'
 import { ResumeAnalysisView } from './resume-analysis-view'
 import { SuggestionsList } from './suggestions-list'
 
-interface ResumeAnalyzerProps {
+type ResumeAnalyzerProps = {
   resumeId: string
   jobData: ExtendedParsedJobData
   jobApplicationId: string

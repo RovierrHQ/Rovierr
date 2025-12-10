@@ -33,7 +33,7 @@ type Message = {
   }
 }
 
-interface ConversationViewProps {
+type ConversationViewProps = {
   conversationId: string
   onBack: () => void
 }
@@ -50,13 +50,12 @@ export function ConversationView({
 
   const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
     queryKey: ['chat', 'messages', conversationId],
-    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
-      return await orpc.chat.getMessages.call({
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) =>
+      await orpc.chat.getMessages.call({
         conversationId,
         limit: 50,
         before: pageParam
-      })
-    },
+      }),
     getNextPageParam: (lastPage) => {
       if (lastPage.hasMore && lastPage.messages.length > 0) {
         return lastPage.messages[0].id

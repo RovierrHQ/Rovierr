@@ -11,7 +11,7 @@ export const SpacesNames = {
 
 export type SpacesNames = (typeof SpacesNames)[keyof typeof SpacesNames]
 
-export interface ISpacesChildrenItems {
+export type ISpacesChildrenItems = {
   title: string
   url: string
   icon: lr.LucideIcon
@@ -22,7 +22,7 @@ export interface ISpacesChildrenItems {
   }>
 }
 
-export interface ISpaces {
+export type ISpaces = {
   name: SpacesNames
   logo: lr.LucideIcon
   plan: 'Free' | 'Startup' | 'Enterprise'
@@ -31,7 +31,7 @@ export interface ISpaces {
   childrenItems?: ISpacesChildrenItems[]
 }
 
-export interface IProjects {
+export type IProjects = {
   name: string
   url: string
   icon: lr.LucideIcon

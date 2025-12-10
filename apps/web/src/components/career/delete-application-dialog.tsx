@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 
-interface DeleteApplicationDialogProps {
+type DeleteApplicationDialogProps = {
   applicationId: string
   companyName: string
   positionTitle: string

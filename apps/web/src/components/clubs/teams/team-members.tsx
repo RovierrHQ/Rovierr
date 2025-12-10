@@ -18,7 +18,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
 
-interface TeamMembersProps {
+type TeamMembersProps = {
   organizationId: string
   teamId: string
 }

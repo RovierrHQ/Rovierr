@@ -3,7 +3,7 @@
  * Provides registration URL data for QR code generation on the frontend
  */
 
-interface SocietyInfo {
+type SocietyInfo = {
   name: string
   logo?: string | null
   description?: string | null

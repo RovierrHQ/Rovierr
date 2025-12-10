@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 import type { Discussion } from './types'
 
-interface DiscussionCardProps {
+type DiscussionCardProps = {
   discussion: Discussion
   isSelected?: boolean
   onClick: () => void

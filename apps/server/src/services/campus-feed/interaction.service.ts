@@ -16,7 +16,7 @@ import { and, count, desc, eq } from 'drizzle-orm'
 import { getPresignedUrlFromFullUrl, isS3Url } from '@/services/s3'
 
 export class InteractionService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

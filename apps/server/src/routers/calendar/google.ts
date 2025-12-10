@@ -10,13 +10,12 @@ import { protectedProcedure, publicProcedure } from '@/lib/orpc'
 import realtime from '@/lib/realtime'
 
 // Helper to get OAuth2 client
-const getOAuth2Client = () => {
-  return new google.auth.OAuth2(
+const getOAuth2Client = () =>
+  new google.auth.OAuth2(
     env.GOOGLE_CLIENT_ID,
     env.GOOGLE_CLIENT_SECRET,
     `${env.BETTER_AUTH_API_URL}/callback/google`
   )
-}
 
 // Helper to get user's Google account with tokens
 const getUserGoogleAccount = async (userId: string) => {
@@ -304,13 +303,12 @@ export const googleCalendar = {
           const rawEvents = response.data.items || []
 
           const events = rawEvents
-            .filter((event: calendar_v3.Schema$Event) => {
-              return (
+            .filter(
+              (event: calendar_v3.Schema$Event) =>
                 event.id &&
                 event.start &&
                 (event.start.dateTime || event.start.date)
-              )
-            })
+            )
             .map((event: calendar_v3.Schema$Event) => {
               const eventStart =
                 event.start?.dateTime || event.start?.date || ''

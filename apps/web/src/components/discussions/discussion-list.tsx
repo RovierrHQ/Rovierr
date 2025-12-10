@@ -3,7 +3,7 @@ import { MessageSquare } from 'lucide-react'
 import { DiscussionCard } from './discussion-card'
 import type { Discussion } from './types'
 
-interface DiscussionListProps {
+type DiscussionListProps = {
   discussions: Discussion[]
   selectedDiscussionId: string | null
   onSelectDiscussion: (id: string) => void

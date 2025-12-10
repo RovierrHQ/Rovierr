@@ -56,9 +56,7 @@ const SocietySettingsPage = () => {
   // Fetch full society data
   const { data: society, isLoading } = useQuery({
     queryKey: ['society', societyId],
-    queryFn: async () => {
-      return await orpc.society.getById.call({ id: societyId })
-    },
+    queryFn: async () => await orpc.society.getById.call({ id: societyId }),
     enabled: !!societyId
   })
 

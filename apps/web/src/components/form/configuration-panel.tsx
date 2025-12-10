@@ -23,7 +23,7 @@ import { Textarea } from '@rov/ui/components/textarea'
 import { GitBranch, Plus, ShieldCheck, Trash2, X } from 'lucide-react'
 import type { Question } from './form-builder'
 
-interface ConfigurationPanelProps {
+type ConfigurationPanelProps = {
   question: Question
   allQuestions: Question[]
   onUpdate: (updates: Partial<Question>) => void

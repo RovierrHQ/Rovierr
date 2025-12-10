@@ -16,7 +16,7 @@ export class NonRetryableError extends Error {
   }
 }
 
-export interface RetryOptions {
+export type RetryOptions = {
   maxRetries?: number
   baseDelay?: number
   maxDelay?: number
@@ -64,7 +64,6 @@ export async function withRetry<T>(
         onRetry(attempt + 1, lastError)
       }
 
-      // biome-ignore lint/nursery/noAwaitInLoop: wait
       await new Promise<void>((resolve) => {
         setTimeout(() => resolve(), delay)
       })

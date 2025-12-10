@@ -384,79 +384,77 @@ const Step3AdditionalDetails = ({
   society: _society
 }: {
   society: Society
-}) => {
-  return (
-    <div className="space-y-6">
+}) => (
+  <div className="space-y-6">
+    <div>
+      <h2 className="mb-2 font-semibold text-xl">Additional Details</h2>
+      <p className="text-muted-foreground text-sm">
+        Help members learn more about your society
+      </p>
+    </div>
+
+    <div className="space-y-4">
       <div>
-        <h2 className="mb-2 font-semibold text-xl">Additional Details</h2>
-        <p className="text-muted-foreground text-sm">
-          Help members learn more about your society
-        </p>
+        <label
+          className="mb-2 block font-medium text-sm"
+          htmlFor="foundingYear"
+        >
+          Founding Year
+        </label>
+        <input
+          className="w-full rounded-md border px-3 py-2"
+          id="foundingYear"
+          max={new Date().getFullYear()}
+          min={1800}
+          placeholder="2024"
+          type="number"
+        />
       </div>
 
-      <div className="space-y-4">
-        <div>
-          <label
-            className="mb-2 block font-medium text-sm"
-            htmlFor="foundingYear"
-          >
-            Founding Year
-          </label>
-          <input
-            className="w-full rounded-md border px-3 py-2"
-            id="foundingYear"
-            max={new Date().getFullYear()}
-            min={1800}
-            placeholder="2024"
-            type="number"
-          />
-        </div>
+      <div>
+        <label
+          className="mb-2 block font-medium text-sm"
+          htmlFor="meetingSchedule"
+        >
+          Meeting Schedule
+        </label>
+        <input
+          className="w-full rounded-md border px-3 py-2"
+          id="meetingSchedule"
+          placeholder="e.g., Every Tuesday at 6 PM"
+          type="text"
+        />
+      </div>
 
-        <div>
-          <label
-            className="mb-2 block font-medium text-sm"
-            htmlFor="meetingSchedule"
-          >
-            Meeting Schedule
-          </label>
-          <input
-            className="w-full rounded-md border px-3 py-2"
-            id="meetingSchedule"
-            placeholder="e.g., Every Tuesday at 6 PM"
-            type="text"
-          />
-        </div>
+      <div>
+        <label
+          className="mb-2 block font-medium text-sm"
+          htmlFor="membershipRequirements"
+        >
+          Membership Requirements
+        </label>
+        <textarea
+          className="w-full rounded-md border px-3 py-2"
+          id="membershipRequirements"
+          placeholder="Describe any requirements to join your society"
+          rows={3}
+        />
+      </div>
 
-        <div>
-          <label
-            className="mb-2 block font-medium text-sm"
-            htmlFor="membershipRequirements"
-          >
-            Membership Requirements
-          </label>
-          <textarea
-            className="w-full rounded-md border px-3 py-2"
-            id="membershipRequirements"
-            placeholder="Describe any requirements to join your society"
-            rows={3}
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block font-medium text-sm" htmlFor="goals">
-            Goals
-          </label>
-          <textarea
-            className="w-full rounded-md border px-3 py-2"
-            id="goals"
-            placeholder="What does your society aim to achieve?"
-            rows={4}
-          />
-        </div>
+      <div>
+        <label className="mb-2 block font-medium text-sm" htmlFor="goals">
+          Goals
+        </label>
+        <textarea
+          className="w-full rounded-md border px-3 py-2"
+          id="goals"
+          placeholder="What does your society aim to achieve?"
+          rows={4}
+        />
       </div>
     </div>
-  )
-}
+  </div>
+)
 
 export default OnboardingWizard
 

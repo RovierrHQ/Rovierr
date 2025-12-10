@@ -24,7 +24,7 @@ import { and, count, desc, eq, type SQL } from 'drizzle-orm'
 import { getPresignedUrlFromFullUrl, isS3Url } from '@/services/s3'
 
 export class PostService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

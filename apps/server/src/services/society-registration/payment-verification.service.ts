@@ -7,7 +7,7 @@ import { type DB, joinRequests as joinRequestsTable } from '@rov/db'
 import { eq } from 'drizzle-orm'
 
 export class PaymentVerificationService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

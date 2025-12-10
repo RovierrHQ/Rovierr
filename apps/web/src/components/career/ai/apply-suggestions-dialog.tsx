@@ -18,7 +18,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 
-interface ApplySuggestionsDialogProps {
+type ApplySuggestionsDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   selectedSuggestions: string[]

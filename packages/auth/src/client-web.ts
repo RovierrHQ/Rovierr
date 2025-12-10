@@ -20,7 +20,7 @@ import { ac } from './permissions'
 /**
  * Web Auth Client Configuration
  */
-export interface WebAuthClientConfig {
+export type WebAuthClientConfig = {
   baseURL: string
   googleClientId: string
   oneTapOptions?: {
@@ -76,7 +76,7 @@ export function createWebAuthClient(config: WebAuthClientConfig) {
 /**
  * Basic Auth Client Configuration
  */
-export interface BasicAuthClientConfig {
+export type BasicAuthClientConfig = {
   baseURL: string
 }
 

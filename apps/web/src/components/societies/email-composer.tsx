@@ -24,7 +24,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
-interface EmailComposerProps {
+type EmailComposerProps = {
   organizationId: string
   organizationName: string
   memberCount: number

@@ -1,14 +1,14 @@
 import { env } from '@/lib/env'
 import logger from '@/lib/logger'
 
-export interface ParseIDResult {
+export type ParseIDResult = {
   raw_text: string[]
   university: string | null
   student_id: string | null
   expiry_date: string | null
 }
 
-export interface ParseIDError {
+export type ParseIDError = {
   error: string
   message: string
 }
@@ -18,8 +18,8 @@ export interface ParseIDError {
  * This service is private and only accessible from the backend
  */
 class IDParserClient {
-  private baseUrl: string
-  private apiKey: string
+  private readonly baseUrl: string
+  private readonly apiKey: string
 
   constructor() {
     this.baseUrl = env.ID_PARSER_URL || 'http://localhost:8001'

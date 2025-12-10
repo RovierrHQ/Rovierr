@@ -14,7 +14,7 @@ import type {
 import { and, count, desc, eq, ilike, or } from 'drizzle-orm'
 
 export class ApplicationService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

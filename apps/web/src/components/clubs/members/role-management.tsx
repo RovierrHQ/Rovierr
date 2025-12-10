@@ -28,7 +28,7 @@ import { z } from 'zod'
 import { authClient } from '@/lib/auth-client'
 import { PermissionEditor } from './permission-editor'
 
-interface RoleManagementProps {
+type RoleManagementProps = {
   organizationId: string
 }
 
@@ -267,7 +267,7 @@ export function RoleManagement({ organizationId }: RoleManagementProps) {
   )
 }
 
-interface RoleCardProps {
+type RoleCardProps = {
   role: {
     id: string
     role: string
@@ -316,7 +316,7 @@ function RoleCard({ role, canManage, onEdit, onDelete }: RoleCardProps) {
   )
 }
 
-interface CreateRoleDialogProps {
+type CreateRoleDialogProps = {
   organizationId: string
   onCreate: (roleName: string, permissions: Record<string, string[]>) => void
   onClose: () => void
@@ -401,7 +401,7 @@ function CreateRoleDialog({ onCreate, onClose }: CreateRoleDialogProps) {
   )
 }
 
-interface EditRoleDialogProps {
+type EditRoleDialogProps = {
   roleId: string
   organizationId: string
   onClose: () => void

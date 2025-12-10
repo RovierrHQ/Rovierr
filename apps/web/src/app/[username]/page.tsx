@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { PublicProfileView } from '@/components/profile/public-profile-view'
 import { orpc } from '@/utils/orpc'
 
-interface PageProps {
+type PageProps = {
   params: Promise<{
     username: string
   }>

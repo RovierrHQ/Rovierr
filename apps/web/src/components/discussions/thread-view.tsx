@@ -19,7 +19,7 @@ import { orpc } from '@/utils/orpc'
 import { ReplyCard } from './reply-card'
 import type { Discussion, Reply } from './types'
 
-interface ThreadViewProps {
+type ThreadViewProps = {
   discussion: Discussion
   replies: Reply[]
   onClose: () => void

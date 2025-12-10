@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { client } from '@/utils/orpc'
 
-interface VerificationPendingProps {
+type VerificationPendingProps = {
   onVerified?: () => void
   dismissible?: boolean
   onDismiss?: () => void

@@ -16,7 +16,7 @@ import { Separator } from '@rov/ui/components/separator'
 import { formatDistanceToNow } from 'date-fns'
 import { Calendar, CheckCircle, Mail, User, X, XCircle } from 'lucide-react'
 
-interface EmailDetailsModalProps {
+type EmailDetailsModalProps = {
   open: boolean
   onClose: () => void
   email: EmailDetails | null

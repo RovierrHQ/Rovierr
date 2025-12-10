@@ -28,7 +28,7 @@ import { orpc } from '@/utils/orpc'
 import type { Task, TaskAssignee, TaskComment } from './types'
 import { getPriorityColor } from './utils'
 
-interface TaskDetailDialogProps {
+type TaskDetailDialogProps = {
   taskId: string | null
   organizationId: string
   onClose: () => void

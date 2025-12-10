@@ -19,7 +19,7 @@ import { count, eq } from 'drizzle-orm'
 type RegistrationSettings = InferSelectModel<typeof registrationSettingsTable>
 
 export class RegistrationService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

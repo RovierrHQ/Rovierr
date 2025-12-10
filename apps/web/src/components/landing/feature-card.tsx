@@ -3,7 +3,7 @@
 import type { LucideIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 
-interface FeatureCardProps {
+type FeatureCardProps = {
   title: string
   description: string
   icon: LucideIcon

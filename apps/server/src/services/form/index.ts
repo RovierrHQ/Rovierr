@@ -41,7 +41,7 @@ export {
 } from './validation'
 
 export class FormService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db
@@ -510,7 +510,6 @@ export class FormService {
       // 2. Delete pages
       if (input.pages?.delete && input.pages.delete.length > 0) {
         for (const pageId of input.pages.delete) {
-          // biome-ignore lint/nursery/noAwaitInLoop: Sequential deletes required in transaction
           await tx.delete(formPages).where(eq(formPages.id, pageId))
         }
       }
@@ -518,7 +517,6 @@ export class FormService {
       // 3. Delete questions
       if (input.questions?.delete && input.questions.delete.length > 0) {
         for (const questionId of input.questions.delete) {
-          // biome-ignore lint/nursery/noAwaitInLoop: Sequential deletes required in transaction
           await tx.delete(formQuestions).where(eq(formQuestions.id, questionId))
         }
       }
@@ -527,7 +525,6 @@ export class FormService {
       const pageIdMapping = new Map<string, string>()
       if (input.pages?.create && input.pages.create.length > 0) {
         for (const page of input.pages.create) {
-          // biome-ignore lint/nursery/noAwaitInLoop: Sequential creates required to maintain order and get IDs for mapping
           const [newPage] = await tx
             .insert(formPages)
             .values({
@@ -545,7 +542,6 @@ export class FormService {
       // 5. Update existing pages
       if (input.pages?.update && input.pages.update.length > 0) {
         for (const page of input.pages.update) {
-          // biome-ignore lint/nursery/noAwaitInLoop: Sequential updates required in transaction
           await tx.update(formPages).set(page).where(eq(formPages.id, page.id))
         }
       }
@@ -557,7 +553,6 @@ export class FormService {
           const realPageId =
             pageIdMapping.get(question.pageId) || question.pageId
 
-          // biome-ignore lint/nursery/noAwaitInLoop: Sequential creates required to maintain order and use mapped page IDs
           await tx.insert(formQuestions).values({
             formId: input.formId,
             ...question,
@@ -569,7 +564,6 @@ export class FormService {
       // 7. Update existing questions
       if (input.questions?.update && input.questions.update.length > 0) {
         for (const question of input.questions.update) {
-          // biome-ignore lint/nursery/noAwaitInLoop: Sequential updates required in transaction
           await tx
             .update(formQuestions)
             .set(question)

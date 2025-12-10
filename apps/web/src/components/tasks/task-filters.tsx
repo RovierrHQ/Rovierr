@@ -9,7 +9,7 @@ import {
 } from '@rov/ui/components/select'
 import type { TaskPriority, TaskStatus } from './types'
 
-interface TaskFiltersProps {
+type TaskFiltersProps = {
   statusFilter: TaskStatus | 'all'
   priorityFilter: TaskPriority | 'all'
   onStatusFilterChange: (value: TaskStatus | 'all') => void

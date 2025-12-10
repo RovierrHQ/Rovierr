@@ -21,7 +21,7 @@ import type {
 import { and, count, desc, eq, ilike, or, sql } from 'drizzle-orm'
 
 export class ThreadService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

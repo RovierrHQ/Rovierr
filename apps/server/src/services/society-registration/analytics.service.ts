@@ -6,12 +6,12 @@
 import { type DB, joinRequests as joinRequestsTable } from '@rov/db'
 import { and, count, eq, gte, lte, sql } from 'drizzle-orm'
 
-interface DateRange {
+type DateRange = {
   dateFrom?: Date
   dateTo?: Date
 }
 
-interface RegistrationMetrics {
+type RegistrationMetrics = {
   totalApplications: number
   pendingCount: number
   approvedCount: number
@@ -22,13 +22,13 @@ interface RegistrationMetrics {
   averageTimeToApproval: number
 }
 
-interface TrendData {
+type TrendData = {
   date: string
   count: number
 }
 
 export class RegistrationAnalyticsService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

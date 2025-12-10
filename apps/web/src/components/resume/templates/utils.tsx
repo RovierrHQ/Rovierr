@@ -2,7 +2,7 @@ import { pdf } from '@react-pdf/renderer'
 import type { ResumeData } from '@rov/orpc-contracts'
 import AzurillTemplate from './azurill'
 
-interface SelectedTemplateProps {
+type SelectedTemplateProps = {
   resumeData: ResumeData
   zoom?: number
   containerDimension?: {

@@ -2,7 +2,7 @@
  * Connection Request Email Template
  */
 
-interface ConnectionRequestEmailParams {
+type ConnectionRequestEmailParams = {
   recipientName: string
   senderName: string
   senderUsername?: string

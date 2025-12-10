@@ -37,7 +37,7 @@ import {
   defaultVicePresident
 } from './permissions'
 
-export interface AuthConfig {
+export type AuthConfig = {
   appName: string
   baseURL: string
   secret: string
@@ -124,9 +124,7 @@ export function createAuth(config: AuthConfig) {
   const expoPlugin = expo()
   const twoFactorPlugin = twoFactor()
   const phoneNumberPlugin = phoneNumber({
-    sendOTP: (params) => {
-      return config.emails.sendPhoneNumberVerificationOTP(params)
-    }
+    sendOTP: (params) => config.emails.sendPhoneNumberVerificationOTP(params)
   })
   const emailOTPPlugin = emailOTP({
     sendVerificationOTP(params) {

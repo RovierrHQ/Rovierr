@@ -2,7 +2,7 @@ import { Button } from '@rov/ui/components/button'
 import { Input } from '@rov/ui/components/input'
 import { Pin, Search } from 'lucide-react'
 
-interface DiscussionFiltersProps {
+type DiscussionFiltersProps = {
   searchQuery: string
   onSearchChange: (query: string) => void
   selectedFilter: 'all' | 'pinned' | 'resolved' | 'unresolved'

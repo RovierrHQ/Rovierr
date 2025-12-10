@@ -14,7 +14,7 @@ import { Download, FileText, Loader2, RefreshCw, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 
-interface CoverLetterGeneratorProps {
+type CoverLetterGeneratorProps = {
   resumeId: string
   jobData: ExtendedParsedJobData
   applicationId?: string
@@ -68,11 +68,11 @@ export function CoverLetterGenerator({
   }
 
   const handleRegenerate = () => {
-    if (
-      window.confirm('This will replace your current cover letter. Continue?')
-    ) {
-      handleGenerate()
-    }
+    // if (
+    //   window.confirm('This will replace your current cover letter. Continue?')
+    // ) {
+    //   handleGenerate()
+    // }
   }
 
   const handleSave = () => {

@@ -47,9 +47,8 @@ const ClubPostFeed = () => {
     error
   } = useInfiniteQuery({
     queryKey: ['campus-feed', 'posts'],
-    queryFn: async ({ pageParam = 0 }) => {
-      return await orpc.campusFeed.list.call({ limit: 20, offset: pageParam })
-    },
+    queryFn: async ({ pageParam = 0 }) =>
+      await orpc.campusFeed.list.call({ limit: 20, offset: pageParam }),
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.hasMore) {
         return pages.length * 20

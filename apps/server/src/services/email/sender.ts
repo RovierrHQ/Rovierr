@@ -12,7 +12,7 @@ import { generateOTPEmail } from './templates/otp'
 
 const usesend = new UseSend(env.USESEND_API_KEY, 'https://usesend.rovierr.com')
 
-interface SendOTPEmailParams {
+type SendOTPEmailParams = {
   to: string
   displayName: string
   otp: string

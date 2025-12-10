@@ -6,7 +6,7 @@ import { ImageUploadDialog as SharedImageUploadDialog } from '@/components/share
 import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
 
-interface SocietyImageUploadDialogProps {
+type SocietyImageUploadDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   type: 'logo' | 'banner'

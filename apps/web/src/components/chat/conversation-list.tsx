@@ -13,7 +13,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 
-interface ConversationListProps {
+type ConversationListProps = {
   conversations: ConversationWithLastMessage[]
   connections: Array<{
     id: string

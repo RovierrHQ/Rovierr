@@ -2,7 +2,7 @@ import { Command } from 'commander'
 import type { SeedOptions } from '../types'
 
 export class CLIParser {
-  private program: Command
+  private readonly program: Command
 
   constructor() {
     this.program = new Command()

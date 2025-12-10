@@ -18,7 +18,7 @@ import {
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-interface PermissionEditorProps {
+type PermissionEditorProps = {
   permissions: Record<string, string[]>
   onChange: (permissions: Record<string, string[]>) => void
   initialPermissions?: Record<string, string[]>

@@ -25,7 +25,7 @@ import { authClient } from '@/lib/auth-client'
 import { AssignMembersDialog } from './assign-members-dialog'
 import { CreateTeamDialog } from './create-team-dialog'
 
-interface TeamListProps {
+type TeamListProps = {
   organizationId: string
 }
 

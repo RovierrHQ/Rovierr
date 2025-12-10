@@ -1,16 +1,16 @@
-interface WelcomeEmailParams {
+type WelcomeEmailParams = {
   userName: string
   societyName: string
   societyLink: string
 }
 
-interface RejectionEmailParams {
+type RejectionEmailParams = {
   userName: string
   societyName: string
   reason?: string
 }
 
-interface ConfirmationEmailParams {
+type ConfirmationEmailParams = {
   userName: string
   societyName: string
   requiresPayment: boolean
@@ -19,7 +19,7 @@ interface ConfirmationEmailParams {
   isAutoApproval: boolean
 }
 
-interface EmailContent {
+type EmailContent = {
   subject: string
   html: string
   text: string

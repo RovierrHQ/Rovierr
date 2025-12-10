@@ -34,7 +34,7 @@ import { authClient } from '@/lib/auth-client'
 import { ChangeRoleDialog } from './change-role-dialog'
 import { InviteMemberDialog } from './invite-member-dialog'
 
-interface MemberListProps {
+type MemberListProps = {
   organizationId: string
 }
 

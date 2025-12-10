@@ -377,72 +377,64 @@ const SocialLinksSection = ({ society }: { society: Society }) => {
 }
 
 // Goals Section
-const GoalsSection = ({ goals }: { goals: string }) => {
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <h2 className="mb-4 font-semibold text-xl">Our Goals</h2>
-        <p className="whitespace-pre-wrap text-muted-foreground">{goals}</p>
-      </CardContent>
-    </Card>
-  )
-}
+const GoalsSection = ({ goals }: { goals: string }) => (
+  <Card>
+    <CardContent className="p-6">
+      <h2 className="mb-4 font-semibold text-xl">Our Goals</h2>
+      <p className="whitespace-pre-wrap text-muted-foreground">{goals}</p>
+    </CardContent>
+  </Card>
+)
 
 // Meeting Info Section
-const MeetingInfoSection = ({ schedule }: { schedule: string }) => {
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <h2 className="mb-4 font-semibold text-xl">Meeting Schedule</h2>
-        <p className="whitespace-pre-wrap text-muted-foreground">{schedule}</p>
-      </CardContent>
-    </Card>
-  )
-}
+const MeetingInfoSection = ({ schedule }: { schedule: string }) => (
+  <Card>
+    <CardContent className="p-6">
+      <h2 className="mb-4 font-semibold text-xl">Meeting Schedule</h2>
+      <p className="whitespace-pre-wrap text-muted-foreground">{schedule}</p>
+    </CardContent>
+  </Card>
+)
 
 // Membership Section
-const MembershipSection = ({ requirements }: { requirements: string }) => {
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <h2 className="mb-4 font-semibold text-xl">Membership Requirements</h2>
-        <p className="whitespace-pre-wrap text-muted-foreground">
-          {requirements}
-        </p>
-      </CardContent>
-    </Card>
-  )
-}
+const MembershipSection = ({ requirements }: { requirements: string }) => (
+  <Card>
+    <CardContent className="p-6">
+      <h2 className="mb-4 font-semibold text-xl">Membership Requirements</h2>
+      <p className="whitespace-pre-wrap text-muted-foreground">
+        {requirements}
+      </p>
+    </CardContent>
+  </Card>
+)
 
 // Stats Card
-const StatsCard = ({ society }: { society: Society }) => {
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <h2 className="mb-4 font-semibold text-xl">Stats</h2>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-sm">Members</span>
-            <span className="font-semibold">{society.memberCount || 0}</span>
-          </div>
-          {society.foundingYear && (
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-sm">Founded</span>
-              <span className="font-semibold">{society.foundingYear}</span>
-            </div>
-          )}
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-sm">
-              Profile Completion
-            </span>
-            <span className="font-semibold">
-              {society.profileCompletionPercentage || 0}%
-            </span>
-          </div>
+const StatsCard = ({ society }: { society: Society }) => (
+  <Card>
+    <CardContent className="p-6">
+      <h2 className="mb-4 font-semibold text-xl">Stats</h2>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground text-sm">Members</span>
+          <span className="font-semibold">{society.memberCount || 0}</span>
         </div>
-      </CardContent>
-    </Card>
-  )
-}
+        {society.foundingYear && (
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground text-sm">Founded</span>
+            <span className="font-semibold">{society.foundingYear}</span>
+          </div>
+        )}
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground text-sm">
+            Profile Completion
+          </span>
+          <span className="font-semibold">
+            {society.profileCompletionPercentage || 0}%
+          </span>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+)
 
 export default SocietyProfilePage

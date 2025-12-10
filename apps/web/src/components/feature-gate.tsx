@@ -4,7 +4,7 @@ import { type ReactNode, useEffect, useState } from 'react'
 import { client } from '@/utils/orpc'
 import { VerificationPending } from './verification-pending'
 
-interface FeatureGateProps {
+type FeatureGateProps = {
   children: ReactNode
   fallback?: ReactNode
 }
@@ -126,7 +126,7 @@ export function FeatureGate({ children, fallback }: FeatureGateProps) {
   return <>{children}</>
 }
 
-interface VerificationBadgeProps {
+type VerificationBadgeProps = {
   isVerified: boolean
 }
 

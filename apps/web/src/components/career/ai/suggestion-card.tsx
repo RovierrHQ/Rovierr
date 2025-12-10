@@ -6,7 +6,7 @@ import { Card, CardContent } from '@rov/ui/components/card'
 import { Checkbox } from '@rov/ui/components/checkbox'
 import { ArrowRight, Sparkles } from 'lucide-react'
 
-interface SuggestionCardProps {
+type SuggestionCardProps = {
   suggestion: ResumeSuggestion
   isSelected: boolean
   onToggle: () => void

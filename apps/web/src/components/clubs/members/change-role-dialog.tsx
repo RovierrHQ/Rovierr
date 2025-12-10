@@ -17,7 +17,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { authClient } from '@/lib/auth-client'
 
-interface ChangeRoleDialogProps {
+type ChangeRoleDialogProps = {
   member: {
     id: string
     role: string | string[]

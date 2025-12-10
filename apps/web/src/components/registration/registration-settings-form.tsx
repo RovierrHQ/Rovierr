@@ -20,7 +20,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 
-interface RegistrationSettings {
+type RegistrationSettings = {
   id: string
   societyId: string
   isEnabled: boolean
@@ -33,7 +33,7 @@ interface RegistrationSettings {
   isPaused: boolean
 }
 
-interface RegistrationSettingsFormProps {
+type RegistrationSettingsFormProps = {
   societyId: string
   settings?: RegistrationSettings | null
 }

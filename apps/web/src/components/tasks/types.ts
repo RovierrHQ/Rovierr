@@ -2,20 +2,20 @@ export type TaskStatus = 'todo' | 'in_progress' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high'
 export type TaskVisibility = 'private' | 'club' | 'assignees'
 
-export interface User {
+export type User = {
   id: string
   name?: string | null
   email?: string | null
   image?: string | null
 }
 
-export interface TaskAssignee {
+export type TaskAssignee = {
   id: string
   userId: string
   user?: User
 }
 
-export interface TaskComment {
+export type TaskComment = {
   id: string
   userId: string
   message: string
@@ -23,7 +23,7 @@ export interface TaskComment {
   user?: User
 }
 
-export interface Task {
+export type Task = {
   id: string
   title: string
   description?: string

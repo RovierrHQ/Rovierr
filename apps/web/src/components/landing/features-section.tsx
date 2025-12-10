@@ -3,7 +3,7 @@
 import { Briefcase, GraduationCap, Mail, Users } from 'lucide-react'
 import FeatureCard from './feature-card'
 
-interface FeaturesSectionProps {
+type FeaturesSectionProps = {
   className?: string
 }
 

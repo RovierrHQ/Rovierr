@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 
-export interface Space {
+export type Space = {
   id: string
   name: string
   icon: LucideIcon

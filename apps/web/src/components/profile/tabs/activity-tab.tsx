@@ -33,12 +33,11 @@ export function ActivityTab() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
       queryKey: ['user', 'profile', 'activity'],
-      queryFn: async ({ pageParam = 0 }) => {
-        return await orpc.user.profile.activity.call({
+      queryFn: async ({ pageParam = 0 }) =>
+        await orpc.user.profile.activity.call({
           limit: 50,
           offset: pageParam
-        })
-      },
+        }),
       getNextPageParam: (lastPage, pages) => {
         if (lastPage.hasMore) {
           return pages.length * 50

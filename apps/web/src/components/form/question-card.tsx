@@ -10,7 +10,7 @@ import { Asterisk, Copy, GripVertical, Trash2 } from 'lucide-react'
 import type { Question } from './form-builder'
 import { QuestionPreview } from './question-preview'
 
-interface QuestionCardProps {
+type QuestionCardProps = {
   question: Question
   isSelected: boolean
   onSelect: () => void

@@ -1,7 +1,7 @@
 import { Card } from '@rov/ui/components/card'
 import type { LucideIcon } from 'lucide-react'
 
-interface StatCardProps {
+type StatCardProps = {
   title: string
   value: string
   change?: string

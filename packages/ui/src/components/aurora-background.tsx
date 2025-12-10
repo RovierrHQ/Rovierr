@@ -2,7 +2,7 @@
 import { cn } from '@rov/ui/lib/utils'
 import type React from 'react'
 
-interface AuroraBackgroundProps {
+type AuroraBackgroundProps = {
   showRadialGradient?: boolean
 }
 

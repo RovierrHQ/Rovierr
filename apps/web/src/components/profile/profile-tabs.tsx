@@ -11,7 +11,7 @@ import {
   Users
 } from 'lucide-react'
 
-interface ProfileTabsProps {
+type ProfileTabsProps = {
   activeTab: string
   onTabChange: (tab: string) => void
 }

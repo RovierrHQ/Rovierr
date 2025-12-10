@@ -23,14 +23,14 @@ import { sendRejectionEmail, sendWelcomeEmail } from '@/services/email/sender'
 
 type JoinRequest = InferSelectModel<typeof joinRequestsTable>
 
-interface BulkOperationResult {
+type BulkOperationResult = {
   successful: number
   failed: number
   errors: Array<{ requestId: string; error: string }>
 }
 
 export class JoinRequestService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

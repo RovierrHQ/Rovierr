@@ -29,7 +29,7 @@ export type Question = FullForm['questions'][number]
 // Use the API type directly
 type FormData = FullForm
 
-interface FormBuilderProps {
+type FormBuilderProps = {
   formId?: string
   entityType: 'society' | 'event' | 'survey'
   entityId: string
@@ -210,7 +210,6 @@ export default function FormBuilder({
         // Only delete if it's a real ID (not temporary)
         if (!(pageId.startsWith('temp-') || pageId.startsWith('page-'))) {
           try {
-            // biome-ignore lint/nursery/noAwaitInLoop: Sequential deletes required for proper cleanup
             await orpc.form.page.delete.call({ id: pageId })
           } catch (_error) {
             // Continue with other operations even if delete fails
@@ -224,7 +223,6 @@ export default function FormBuilder({
         // Only delete if it's a real ID (not temporary)
         if (!questionId.startsWith('q-')) {
           try {
-            // biome-ignore lint/nursery/noAwaitInLoop: Sequential deletes required for proper cleanup
             await orpc.form.question.delete.call({ id: questionId })
           } catch (_error) {
             // Continue with other operations even if delete fails
@@ -242,8 +240,7 @@ export default function FormBuilder({
           page.id.startsWith('temp-') || page.id.startsWith('page-')
 
         if (isTemporaryId) {
-          // Create new page
-          // biome-ignore lint/nursery/noAwaitInLoop: Sequential saves required to maintain order and get IDs for mapping
+          // Create new pag
           const result = await orpc.form.page.create.call({
             formId: currentFormId,
             title: page.title,
@@ -279,8 +276,6 @@ export default function FormBuilder({
         const realPageId = pageIdMapping.get(question.pageId) || question.pageId
 
         if (isTemporaryId) {
-          // Create new question
-          // biome-ignore lint/nursery/noAwaitInLoop: Sequential saves required to maintain order and use mapped page IDs
           const result = await orpc.form.question.create.call({
             formId: currentFormId,
             pageId: realPageId,

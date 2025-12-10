@@ -9,9 +9,14 @@
     "declarationMap": true,
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "strictNullChecks": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../db" }]
+  "references": [
+    {
+      "path": "../db"
+    }
+  ]
 }

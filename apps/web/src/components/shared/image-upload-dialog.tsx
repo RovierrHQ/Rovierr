@@ -16,7 +16,7 @@ import type { Area, Point } from 'react-easy-crop'
 import Cropper from 'react-easy-crop'
 import { toast } from 'sonner'
 
-interface ImageUploadDialogProps {
+type ImageUploadDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   type: 'profile' | 'banner'

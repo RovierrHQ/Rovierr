@@ -14,7 +14,7 @@ import { PageSettings } from './page-settings'
 import { QuestionCard } from './question-card'
 import { QuestionTypeSelector } from './question-type-selector'
 
-interface FormEditorProps {
+type FormEditorProps = {
   formData: FormData
   setFormData: (data: FormData) => void
   selectedQuestionId: string | null

@@ -1,10 +1,10 @@
-interface OTPEmailParams {
+type OTPEmailParams = {
   displayName: string
   otp: string
   expiresIn: string
 }
 
-interface EmailContent {
+type EmailContent = {
   subject: string
   html: string
   text: string

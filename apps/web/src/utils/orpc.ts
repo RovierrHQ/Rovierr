@@ -27,8 +27,8 @@ export const queryClient = new QueryClient({
 export const link = new RPCLink({
   url: `${process.env.NEXT_PUBLIC_SERVER_URL}/rpc-v1`,
   method: inferRPCMethodFromContractRouter(appContract),
-  fetch(url, options) {
-    return fetch(url, {
+  fetch(_url, options) {
+    return fetch(_url, {
       ...options,
       credentials: 'include'
     })

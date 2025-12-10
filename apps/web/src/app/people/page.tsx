@@ -25,13 +25,12 @@ export default function PeoplePage() {
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ['people', 'list', searchQuery],
-      queryFn: async ({ pageParam = 0 }) => {
-        return await orpc.people.list.call({
+      queryFn: async ({ pageParam = 0 }) =>
+        await orpc.people.list.call({
           search: searchQuery || undefined,
           limit: 50,
           offset: pageParam
-        })
-      },
+        }),
       getNextPageParam: (lastPage, pages) => {
         if (lastPage.hasMore) {
           return pages.length * 50

@@ -18,7 +18,7 @@ import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
 
-interface AssignMembersDialogProps {
+type AssignMembersDialogProps = {
   organizationId: string
   teamId: string
   onClose: () => void
@@ -120,13 +120,15 @@ export function AssignMembersDialog({
   )
 
   // Filter out members already in team - TypeScript infers the types
-  const availableMembers = useMemo(() => {
-    return allMembers.filter((member) => {
-      const m = member as { userId?: string; user?: { id?: string } }
-      const userId = m.userId ?? m.user?.id ?? ''
-      return !currentTeamMemberIds.has(userId)
-    })
-  }, [allMembers, currentTeamMemberIds])
+  const availableMembers = useMemo(
+    () =>
+      allMembers.filter((member) => {
+        const m = member as { userId?: string; user?: { id?: string } }
+        const userId = m.userId ?? m.user?.id ?? ''
+        return !currentTeamMemberIds.has(userId)
+      }),
+    [allMembers, currentTeamMemberIds]
+  )
 
   // Filter by search query - TypeScript infers the types
   const filteredMembers = useMemo(() => {

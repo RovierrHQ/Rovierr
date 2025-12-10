@@ -28,7 +28,7 @@ import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
 import { InviteMemberDialog } from './invite-member-dialog'
 
-interface PendingInvitationsProps {
+type PendingInvitationsProps = {
   organizationId: string
 }
 

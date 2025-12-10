@@ -4,13 +4,13 @@ import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 // Types for the component
-interface DockApp {
+type DockApp = {
   id: string
   name: string
   icon: string
 }
 
-interface MacOSDockProps {
+type MacOSDockProps = {
   apps: DockApp[]
   onAppClick: (appId: string) => void
   openApps?: string[]
@@ -146,19 +146,19 @@ const MacOSDock: React.FC<MacOSDockProps> = ({
     const targetPositions = calculatePositions(targetScales)
     const lerpFactor = mouseX !== null ? 0.2 : 0.12
 
-    setCurrentScales((prevScales) => {
-      return prevScales.map((currentScale, index) => {
+    setCurrentScales((prevScales) =>
+      prevScales.map((currentScale, index) => {
         const diff = targetScales[index] ?? 0 - currentScale
         return currentScale + diff * lerpFactor
       })
-    })
+    )
 
-    setCurrentPositions((prevPositions) => {
-      return prevPositions.map((currentPos, index) => {
+    setCurrentPositions((prevPositions) =>
+      prevPositions.map((currentPos, index) => {
         const diff = (targetPositions[index] ?? 0) - currentPos
         return currentPos + diff * lerpFactor
       })
-    })
+    )
 
     const scalesNeedUpdate = currentScales.some(
       (scale, index) => Math.abs(scale - (targetScales[index] ?? 0)) > 0.002

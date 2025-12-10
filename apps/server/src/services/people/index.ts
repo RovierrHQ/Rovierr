@@ -8,7 +8,7 @@ import type { ListUsers, SearchUsers } from '@rov/orpc-contracts'
 import { and, count, desc, eq, ilike, or, sql } from 'drizzle-orm'
 
 export class PeopleService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

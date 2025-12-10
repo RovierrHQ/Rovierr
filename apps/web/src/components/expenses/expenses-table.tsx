@@ -13,7 +13,7 @@ import {
 import { useState } from 'react'
 import { ExpenseDetailModal } from './expense-detail-modal'
 
-interface Expense {
+type Expense = {
   id: string
   description: string
   category: string
@@ -179,7 +179,7 @@ const statusColors = {
   paid: 'bg-[var(--status-paid)] text-background'
 }
 
-interface ExpensesTableProps {
+type ExpensesTableProps = {
   filterStatus?: 'all' | 'pending' | 'approved' | 'rejected' | 'paid'
 }
 

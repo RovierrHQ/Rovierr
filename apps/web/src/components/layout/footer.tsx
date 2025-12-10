@@ -4,7 +4,7 @@ import { Github, Linkedin, Twitter } from 'lucide-react'
 import Link from 'next/link'
 import Logo from '../icons/logo'
 
-interface FooterProps {
+type FooterProps = {
   className?: string
 }
 

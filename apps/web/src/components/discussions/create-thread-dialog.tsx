@@ -22,7 +22,7 @@ const createThreadSchema = z.object({
   tags: z.array(z.string()).max(5).optional()
 })
 
-interface CreateThreadDialogProps {
+type CreateThreadDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   contextType: 'course' | 'society' | 'event' | 'project'

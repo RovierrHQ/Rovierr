@@ -3,7 +3,7 @@
 import { TaskTable } from './task-table'
 import type { Task } from './types'
 
-interface TaskListProps {
+type TaskListProps = {
   tasks: Task[]
   isLoading: boolean
   organizationId: string

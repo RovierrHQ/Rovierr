@@ -1,4 +1,4 @@
-export interface Discussion {
+export type Discussion = {
   id: string
   title: string
   content: string
@@ -18,7 +18,7 @@ export interface Discussion {
   contextId: string
 }
 
-export interface Reply {
+export type Reply = {
   threadId: string
   id: string
   content: string

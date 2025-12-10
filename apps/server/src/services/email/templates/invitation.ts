@@ -1,4 +1,4 @@
-interface InvitationEmailParams {
+type InvitationEmailParams = {
   organizationName: string
   inviterName: string
   role: string
@@ -7,7 +7,7 @@ interface InvitationEmailParams {
   expiresAt: Date
 }
 
-interface EmailContent {
+type EmailContent = {
   subject: string
   html: string
   text: string

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import AzurillTemplate from '../templates/azurill'
 
-interface UseDownloadResumeProps {
+type UseDownloadResumeProps = {
   resumeData: ResumeData
   resumeTitle: string
 }

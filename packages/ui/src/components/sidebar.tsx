@@ -102,9 +102,10 @@ function SidebarProvider({
   )
 
   // Helper to toggle the sidebar.
-  const toggleSidebar = useCallback(() => {
-    return isMobile ? setOpenMobile((o) => !o) : setOpen((o) => !o)
-  }, [isMobile, setOpen])
+  const toggleSidebar = useCallback(
+    () => (isMobile ? setOpenMobile((o) => !o) : setOpen((o) => !o)),
+    [isMobile, setOpen]
+  )
 
   // Adds a keyboard shortcut to toggle the sidebar.
   useEffect(() => {
@@ -573,7 +574,7 @@ function SidebarMenuAction({
         'peer-data-[size=default]/menu-button:top-1.5',
         'peer-data-[size=lg]/menu-button:top-2.5',
         'group-data-[collapsible=icon]:hidden',
-        showOnHover &&
+        !!showOnHover &&
           'group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0',
         className
       )}
@@ -611,9 +612,7 @@ function SidebarMenuSkeleton({
   showIcon?: boolean
 }) {
   // Random width between 50 to 90%.
-  const width = useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
-  }, [])
+  const width = useMemo(() => `${Math.floor(Math.random() * 40) + 50}%`, [])
 
   return (
     <div
@@ -622,7 +621,7 @@ function SidebarMenuSkeleton({
       data-slot="sidebar-menu-skeleton"
       {...props}
     >
-      {showIcon && (
+      {!!showIcon && (
         <Skeleton
           className="size-4 rounded-md"
           data-sidebar="menu-skeleton-icon"

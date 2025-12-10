@@ -9,9 +9,9 @@ import { createCentrifugeServerClient } from '@rov/realtime'
 import { and, eq } from 'drizzle-orm'
 
 export class PresenceService {
-  private db: DB
-  private centrifugo: ReturnType<typeof createCentrifugeServerClient>
-  private typingTimeouts: Map<string, NodeJS.Timeout> = new Map()
+  private readonly db: DB
+  private readonly centrifugo: ReturnType<typeof createCentrifugeServerClient>
+  private readonly typingTimeouts: Map<string, NodeJS.Timeout> = new Map()
 
   constructor(db: DB, centrifugoConfig: { url: string; apiKey: string }) {
     this.db = db

@@ -17,7 +17,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
 
-interface CreateTeamDialogProps {
+type CreateTeamDialogProps = {
   organizationId: string
   trigger?: React.ReactNode
 }

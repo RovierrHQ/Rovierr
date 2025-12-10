@@ -10,7 +10,6 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "composite": true,
-
     "skipLibCheck": true,
     "strict": true,
     "noUnusedLocals": true,
@@ -22,13 +21,20 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "strictNullChecks": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist", "src-tauri/target", "src-tauri/gen"],
   "references": [
-    { "path": "../server" },
-    { "path": "../../packages/shared" },
-    { "path": "../../packages/ui" }
+    {
+      "path": "../server"
+    },
+    {
+      "path": "../../packages/shared"
+    },
+    {
+      "path": "../../packages/ui"
+    }
   ]
 }

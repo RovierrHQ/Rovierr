@@ -12,7 +12,7 @@ import {
   useState
 } from 'react'
 
-interface BackgroundCellsProps {
+type BackgroundCellsProps = {
   children?: React.ReactNode
   className?: string
 }
@@ -20,23 +20,21 @@ interface BackgroundCellsProps {
 export const BackgroundCells = ({
   children,
   className
-}: BackgroundCellsProps) => {
-  return (
-    <div
-      className={cn(
-        'relative flex h-screen justify-center overflow-hidden',
-        className
-      )}
-    >
-      <BackgroundCellCore />
-      {children && (
-        <div className="pointer-events-none relative z-50 mt-40 select-none">
-          {children}
-        </div>
-      )}
-    </div>
-  )
-}
+}: BackgroundCellsProps) => (
+  <div
+    className={cn(
+      'relative flex h-screen justify-center overflow-hidden',
+      className
+    )}
+  >
+    <BackgroundCellCore />
+    {children && (
+      <div className="pointer-events-none relative z-50 mt-40 select-none">
+        {children}
+      </div>
+    )}
+  </div>
+)
 
 const BackgroundCellCore = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
@@ -84,7 +82,7 @@ const BackgroundCellCore = () => {
   )
 }
 
-interface PatternProps {
+type PatternProps = {
   className?: string
   cellClassName?: string
 }
@@ -103,18 +101,16 @@ const Pattern = ({ className, cellClassName }: PatternProps) => {
           className="relative z-20 flex flex-col border-b"
           key={`matrix-row-${rowIdx}`}
         >
-          {row.map((_column, colIdx) => {
-            return (
-              <Ripples
-                cellClassName={cellClassName}
-                clickedCell={clickedCell}
-                colIdx={colIdx}
-                key={colIdx}
-                rowIdx={rowIdx}
-                setClickedCell={setClickedCell}
-              />
-            )
-          })}
+          {row.map((_column, colIdx) => (
+            <Ripples
+              cellClassName={cellClassName}
+              clickedCell={clickedCell}
+              colIdx={colIdx}
+              key={colIdx}
+              rowIdx={rowIdx}
+              setClickedCell={setClickedCell}
+            />
+          ))}
         </div>
       ))}
     </div>

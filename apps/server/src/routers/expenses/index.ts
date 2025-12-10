@@ -15,9 +15,10 @@ import { protectedProcedure } from '@/lib/orpc'
 
 // Helper function to validate double-entry (sum of entries must equal 0)
 function validateDoubleEntry(entries: Array<{ amount: string }>): boolean {
-  const sum = entries.reduce((acc, entry) => {
-    return acc + Number.parseFloat(entry.amount)
-  }, 0)
+  const sum = entries.reduce(
+    (acc, entry) => acc + Number.parseFloat(entry.amount),
+    0
+  )
   return Math.abs(sum) < 0.01 // Allow for floating point precision
 }
 

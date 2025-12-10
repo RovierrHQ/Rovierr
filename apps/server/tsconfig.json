@@ -16,12 +16,17 @@
     "declarationMap": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "types": ["@types/bun"]
+    "types": ["@types/bun"],
+    "strictNullChecks": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "drizzle.config.ts"],
   "exclude": ["node_modules", "dist"],
   "references": [
-    { "path": "../../packages/db" },
-    { "path": "../../packages/auth" }
+    {
+      "path": "../../packages/db"
+    },
+    {
+      "path": "../../packages/auth"
+    }
   ]
 }

@@ -17,7 +17,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 
-interface JobDescriptionInputProps {
+type JobDescriptionInputProps = {
   onJobParsed: (jobData: ExtendedParsedJobData) => void
   onError: (error: string) => void
 }

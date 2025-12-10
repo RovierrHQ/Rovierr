@@ -6,7 +6,7 @@ import {
 } from '@rov/ui/components/card'
 import { MessageSquare, ThumbsUp, TrendingUp } from 'lucide-react'
 
-interface DiscussionStatsProps {
+type DiscussionStatsProps = {
   totalDiscussions: number
   activeToday: number
   userContributions: number

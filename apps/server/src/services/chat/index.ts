@@ -23,8 +23,8 @@ import { createCentrifugeServerClient } from '@rov/realtime'
 import { and, count, desc, eq, ilike, lt, or, sql } from 'drizzle-orm'
 
 export class ChatService {
-  private db: DB
-  private centrifugo: ReturnType<typeof createCentrifugeServerClient>
+  private readonly db: DB
+  private readonly centrifugo: ReturnType<typeof createCentrifugeServerClient>
 
   constructor(db: DB, centrifugoConfig: { url: string; apiKey: string }) {
     this.db = db

@@ -11,7 +11,7 @@ import {
 import { Progress } from '@rov/ui/components/progress'
 import { CheckCircle2, TrendingUp, XCircle } from 'lucide-react'
 
-interface ResumeAnalysisViewProps {
+type ResumeAnalysisViewProps = {
   analysis: ResumeAnalysis
 }
 

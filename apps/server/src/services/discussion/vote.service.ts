@@ -8,7 +8,7 @@ import type { UnvoteInput, VoteInput } from '@rov/orpc-contracts'
 import { and, eq, sql } from 'drizzle-orm'
 
 export class VoteService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

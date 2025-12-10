@@ -8,7 +8,7 @@ import { useEffect } from 'react'
 import { Toolbar } from './toolbar'
 import { sanitizeHtml } from './utils'
 
-interface RichTextEditorProps {
+type RichTextEditorProps = {
   value: string
   onChange: (html: string) => void
   placeholder?: string

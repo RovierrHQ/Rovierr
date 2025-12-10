@@ -14,7 +14,7 @@ import { env } from '@/lib/env'
 import { sendConnectionRequestEmail } from '@/services/email/sender'
 
 export class ConnectionService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

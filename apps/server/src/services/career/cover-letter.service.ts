@@ -9,7 +9,7 @@ import { and, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 
 export class CoverLetterService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

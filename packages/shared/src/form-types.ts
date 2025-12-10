@@ -56,7 +56,7 @@ export type TemplateCategory =
 // Validation Rules
 // ============================================================================
 
-export interface ValidationRule {
+export type ValidationRule = {
   minLength?: number
   maxLength?: number
   minLengthMessage?: string
@@ -77,7 +77,7 @@ export interface ValidationRule {
 // Conditional Logic
 // ============================================================================
 
-export interface ConditionalLogic {
+export type ConditionalLogic = {
   enabled: boolean
   sourceQuestionId?: string
   condition?: ConditionOperator
@@ -88,7 +88,7 @@ export interface ConditionalLogic {
 // Form Models
 // ============================================================================
 
-export interface Form {
+export type Form = {
   id: string
   title: string
   description?: string
@@ -124,7 +124,7 @@ export interface Form {
   publishedAt?: Date
 }
 
-export interface FormPage {
+export type FormPage = {
   id: string
   formId: string
   title: string
@@ -141,7 +141,7 @@ export interface FormPage {
   updatedAt: Date
 }
 
-export interface FormQuestion {
+export type FormQuestion = {
   id: string
   formId: string
   pageId: string
@@ -177,7 +177,7 @@ export interface FormQuestion {
   updatedAt: Date
 }
 
-export interface FormResponse {
+export type FormResponse = {
   id: string
   formId: string
   userId?: string
@@ -200,7 +200,7 @@ export interface FormResponse {
   status: ResponseStatus
 }
 
-export interface FormProgress {
+export type FormProgress = {
   id: string
   formId: string
   userId: string
@@ -211,7 +211,7 @@ export interface FormProgress {
   updatedAt: Date
 }
 
-export interface FormTemplate {
+export type FormTemplate = {
   id: string
   name: string
   description?: string
@@ -224,7 +224,7 @@ export interface FormTemplate {
   updatedAt: Date
 }
 
-export interface FormTemplateData {
+export type FormTemplateData = {
   title: string
   description?: string
   pages: Array<{
@@ -245,7 +245,7 @@ export interface FormTemplateData {
   }>
 }
 
-export interface FormFileUpload {
+export type FormFileUpload = {
   id: string
   responseId: string
   questionId: string
@@ -260,7 +260,7 @@ export interface FormFileUpload {
 // Smart Field System
 // ============================================================================
 
-export interface ProfileFieldMapping {
+export type ProfileFieldMapping = {
   id: string
   fieldKey: string
   displayLabel: string
@@ -275,7 +275,7 @@ export interface ProfileFieldMapping {
   updatedAt: Date
 }
 
-export interface SmartFieldConfig {
+export type SmartFieldConfig = {
   questionId: string
   profileFieldKey: string
   enableAutoFill: boolean
@@ -283,14 +283,14 @@ export interface SmartFieldConfig {
   promptUserForUpdate: boolean
 }
 
-export interface AutoFillData {
+export type AutoFillData = {
   questionId: string
   value: unknown
   source: 'profile' | 'saved_progress'
   isComplete: boolean
 }
 
-export interface ProfileUpdateRequest {
+export type ProfileUpdateRequest = {
   id: string
   userId: string
   responseId: string
@@ -306,7 +306,7 @@ export interface ProfileUpdateRequest {
 // Analytics
 // ============================================================================
 
-export interface FormAnalytics {
+export type FormAnalytics = {
   totalResponses: number
   completionRate: number
   averageCompletionTime: number
@@ -322,7 +322,7 @@ export interface FormAnalytics {
 // Filters
 // ============================================================================
 
-export interface ResponseFilters {
+export type ResponseFilters = {
   dateFrom?: Date
   dateTo?: Date
   paymentStatus?: PaymentStatus
@@ -330,7 +330,7 @@ export interface ResponseFilters {
   searchQuery?: string
 }
 
-export interface FormFilters {
+export type FormFilters = {
   entityType?: EntityType
   entityId?: string
   status?: FormStatus

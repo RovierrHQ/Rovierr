@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
     "ignoreUnknown": false,
     "includes": [
@@ -21,7 +21,7 @@
       "!**/worker-configuration.d.ts"
     ]
   },
-  "extends": ["ultracite"],
+  "extends": ["ultracite/core", "ultracite/react", "ultracite/next"],
   "javascript": {
     "formatter": {
       "jsxQuoteStyle": "double",
@@ -38,35 +38,37 @@
   "linter": {
     "rules": {
       "correctness": {
-        "noChildrenProp": "off"
+        "noChildrenProp": "off",
+        "useImageSize": "off"
       },
       "style": {
-        "useBlockStatements": "off"
+        "useBlockStatements": "off",
+        "noNestedTernary": "info"
       },
       "a11y": {
         "useKeyWithClickEvents": "off",
         "noStaticElementInteractions": "off",
-        "noSvgWithoutTitle": "off"
+        "noSvgWithoutTitle": "off",
+        "noNoninteractiveElementInteractions": "warn",
+        "useSemanticElements": "warn"
       },
       "performance": {
         "noImgElement": "off",
-        "noNamespaceImport": "warn"
+        "noNamespaceImport": "warn",
+        "noBarrelFile": "warn"
       },
-      "nursery": {
-        "noNoninteractiveElementInteractions": "off",
-        "noUnknownAtRule": "off",
-        "noBitwiseOperators": {
-          "options": {
-            "allow": ["<<", ">>"]
-          }
-        }
-      },
+      "nursery": "off",
       "complexity": {
         "noExcessiveCognitiveComplexity": {
+          "level": "error",
           "options": {
-            "maxAllowedComplexity": 20
+            "maxAllowedComplexity": 50
           }
         }
+      },
+      "suspicious": {
+        "noArrayIndexKey": "info",
+        "noAlert": "warn"
       }
     }
   }

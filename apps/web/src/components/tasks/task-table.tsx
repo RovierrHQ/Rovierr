@@ -25,7 +25,7 @@ import { orpc } from '@/utils/orpc'
 import type { Task } from './types'
 import { getPriorityColor, getStatusIcon } from './utils'
 
-interface TaskTableProps {
+type TaskTableProps = {
   tasks: Task[]
   isLoading: boolean
   organizationId: string

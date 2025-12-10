@@ -5,12 +5,12 @@ import { Card, CardContent } from '@rov/ui/components/card'
 import { AlertCircle } from 'lucide-react'
 import { Component, type ReactNode } from 'react'
 
-interface Props {
+type Props = {
   children: ReactNode
   fallback?: ReactNode
 }
 
-interface State {
+type State = {
   hasError: boolean
   error?: Error
 }

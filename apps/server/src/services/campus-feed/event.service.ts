@@ -8,7 +8,7 @@ import type { RSVPInput } from '@rov/orpc-contracts'
 import { and, count, eq } from 'drizzle-orm'
 
 export class EventService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

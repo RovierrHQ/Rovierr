@@ -8,7 +8,8 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "strictNullChecks": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist"]

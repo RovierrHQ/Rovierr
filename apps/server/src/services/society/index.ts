@@ -14,7 +14,7 @@ type UpdateSocietyFieldsInput = z.infer<typeof updateSocietyFieldsSchema>
 type Society = InferSelectModel<typeof organizationTable>
 
 export class SocietyService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

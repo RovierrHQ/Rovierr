@@ -3,13 +3,13 @@
  * Handles all GPA calculations for academic profiles
  */
 
-export interface CourseGrade {
+export type CourseGrade = {
   grade: string
   credits: string
   status: 'in_progress' | 'completed' | 'withdrawn'
 }
 
-export interface TermGPA {
+export type TermGPA = {
   gpa: string
   credits: string
 }

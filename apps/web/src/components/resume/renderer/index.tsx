@@ -18,7 +18,7 @@ import { resumeDataAtom } from '../lib/atoms'
 import SelectedTemplate from '../templates'
 import useDownloadResume from './download-resume'
 
-interface ResumePreviewProps {
+type ResumePreviewProps = {
   resumeTitle: string
   resumeId: string
 }

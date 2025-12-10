@@ -9,7 +9,7 @@ import { createAuthClient } from 'better-auth/react'
 /**
  * Native Auth Client Configuration
  */
-export interface NativeAuthClientConfig {
+export type NativeAuthClientConfig = {
   baseURL: string
   storagePrefix?: string
   storage: {

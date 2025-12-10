@@ -1,4 +1,4 @@
-export interface PlatformInfo {
+export type PlatformInfo = {
   name: string
   downloadUrl: string
   fileExtension: string

@@ -22,7 +22,7 @@ import { CalendarIcon, Upload } from 'lucide-react'
 import type React from 'react'
 import { useState } from 'react'
 
-interface CreateExpenseModalProps {
+type CreateExpenseModalProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }

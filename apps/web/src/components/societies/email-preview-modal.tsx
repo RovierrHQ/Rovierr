@@ -11,7 +11,7 @@ import {
 } from '@rov/ui/components/dialog'
 import { X } from 'lucide-react'
 
-interface EmailPreviewModalProps {
+type EmailPreviewModalProps = {
   open: boolean
   onClose: () => void
   subject: string

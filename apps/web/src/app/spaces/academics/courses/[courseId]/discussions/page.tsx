@@ -12,7 +12,7 @@ import { ThreadView } from '@/components/discussions/thread-view'
 import type { Discussion, Reply } from '@/components/discussions/types'
 import { orpc } from '@/utils/orpc'
 
-interface PageProps {
+type PageProps = {
   params: Promise<{ courseId: string }>
 }
 

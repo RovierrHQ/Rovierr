@@ -13,7 +13,7 @@ import { Textarea } from '@rov/ui/components/textarea'
 import { Star } from 'lucide-react'
 import type { Question } from './form-builder'
 
-interface QuestionPreviewProps {
+type QuestionPreviewProps = {
   question: Question
 }
 

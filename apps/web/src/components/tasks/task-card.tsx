@@ -17,7 +17,7 @@ import { orpc } from '@/utils/orpc'
 import type { Task } from './types'
 import { getPriorityColor, getStatusIcon } from './utils'
 
-interface TaskCardProps {
+type TaskCardProps = {
   task: Task
   organizationId: string
   onStatusChange: (taskId: string, status: Task['status']) => void

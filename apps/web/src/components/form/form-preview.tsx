@@ -27,7 +27,7 @@ import { z } from 'zod'
 import type { FormData, Page, Question } from './form-builder'
 import { createFormSchema } from './validation-schema'
 
-interface FormPreviewProps {
+type FormPreviewProps = {
   formData: FormData
 }
 

@@ -12,7 +12,7 @@ import type {
 import { asc, eq, sql } from 'drizzle-orm'
 
 export class ReplyService {
-  private db: DB
+  private readonly db: DB
 
   constructor(db: DB) {
     this.db = db

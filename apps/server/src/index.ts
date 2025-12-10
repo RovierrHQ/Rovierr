@@ -45,21 +45,17 @@ app.use('/rpc-v1/*', async (c, next) => {
   await next()
 })
 
-app.get('/', (c) => {
-  return c.text('OK')
-})
+app.get('/', (c) => c.text('OK'))
 
-app.get('/health', (c) => {
-  return c.json({
+app.get('/health', (c) =>
+  c.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   })
-})
+)
 
-app.get('/api-docs', (c) => {
-  return c.json(openAPISpec)
-})
+app.get('/api-docs', (c) => c.json(openAPISpec))
 
 // Start the server
 const port = Number.parseInt(env.PORT, 10)

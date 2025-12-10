@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
 
-interface PostCommentPanelProps {
+type PostCommentPanelProps = {
   postId: string
   onClose: () => void
 }
@@ -24,13 +24,12 @@ export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
 
   const { data, isLoading } = useQuery({
     queryKey: ['campus-feed', 'comments', postId],
-    queryFn: async () => {
-      return await orpc.campusFeed.getComments.call({
+    queryFn: async () =>
+      await orpc.campusFeed.getComments.call({
         postId,
         limit: 50,
         offset: 0
       })
-    }
   })
 
   const commentMutation = useMutation(

@@ -29,7 +29,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 
-interface JoinRequestsProps {
+type JoinRequestsProps = {
   organizationId: string
 }
 

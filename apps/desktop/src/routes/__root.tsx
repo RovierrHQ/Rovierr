@@ -5,7 +5,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import type { AuthState } from '@/lib/auth-client'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
-interface MyRouterContext {
+type MyRouterContext = {
   queryClient: QueryClient
   auth: AuthState | undefined
 }

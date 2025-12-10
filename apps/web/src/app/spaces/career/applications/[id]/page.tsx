@@ -111,12 +111,11 @@ export default function ApplicationDetailPage() {
   }
 
   // Format status for display
-  const formatStatus = (status: string) => {
-    return status
+  const formatStatus = (status: string) =>
+    status
       .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ')
-  }
 
   // Format date
   const formatDate = (dateString: string) => {

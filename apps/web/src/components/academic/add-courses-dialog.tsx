@@ -27,7 +27,7 @@ const addCoursesSchema = z.object({
 
 type AddCoursesInput = z.infer<typeof addCoursesSchema>
 
-interface AddCoursesDialogProps {
+type AddCoursesDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }

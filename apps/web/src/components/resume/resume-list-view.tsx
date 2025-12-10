@@ -191,15 +191,13 @@ const EmptyView = ({
 }: {
   onCreateResume: () => void
   isCreating: boolean
-}) => {
-  return (
-    <div className="flex h-64 w-full flex-col items-center justify-center">
-      <strong>Kickstart Building Your Resume</strong>
-      <p>Quickly create your resume to enhance chance of getting a job.</p>
-      <Button className="mt-4" disabled={isCreating} onClick={onCreateResume}>
-        {isCreating ? 'Creating...' : 'Create Resume'}
-        <Plus className="ml-2" size={18} strokeWidth={1.5} />
-      </Button>
-    </div>
-  )
-}
+}) => (
+  <div className="flex h-64 w-full flex-col items-center justify-center">
+    <strong>Kickstart Building Your Resume</strong>
+    <p>Quickly create your resume to enhance chance of getting a job.</p>
+    <Button className="mt-4" disabled={isCreating} onClick={onCreateResume}>
+      {isCreating ? 'Creating...' : 'Create Resume'}
+      <Plus className="ml-2" size={18} strokeWidth={1.5} />
+    </Button>
+  </div>
+)

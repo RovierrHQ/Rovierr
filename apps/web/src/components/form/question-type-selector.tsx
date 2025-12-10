@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import type React from 'react'
 
-interface QuestionTypeSelectorProps {
+type QuestionTypeSelectorProps = {
   onSelect: (type: QuestionType) => void
   onCancel: () => void
 }

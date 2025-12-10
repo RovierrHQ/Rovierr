@@ -24,12 +24,12 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
-interface SplitMember {
+type SplitMember = {
   name: string
   amount: number
 }
 
-interface Expense {
+type Expense = {
   id: string
   description: string
   category: string
@@ -50,7 +50,7 @@ interface Expense {
   rejectionReason?: string
 }
 
-interface ExpenseDetailModalProps {
+type ExpenseDetailModalProps = {
   expense: Expense
   isOpen: boolean
   onClose: () => void

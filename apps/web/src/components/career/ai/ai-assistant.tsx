@@ -24,7 +24,7 @@ import { CoverLetterGenerator } from './cover-letter-generator'
 import { JobDescriptionInput } from './job-description-input'
 import { ResumeAnalyzer } from './resume-analyzer'
 
-interface AIAssistantProps {
+type AIAssistantProps = {
   resumeId: string
   jobApplicationId?: string
   initialJobData?: ExtendedParsedJobData

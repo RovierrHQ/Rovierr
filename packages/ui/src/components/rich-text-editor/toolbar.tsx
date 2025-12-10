@@ -4,7 +4,7 @@ import { Button } from '@rov/ui/components/button'
 import type { Editor } from '@tiptap/react'
 import { Bold, Italic, List, ListOrdered, Redo, Undo } from 'lucide-react'
 
-interface ToolbarProps {
+type ToolbarProps = {
   editor: Editor
 }
 

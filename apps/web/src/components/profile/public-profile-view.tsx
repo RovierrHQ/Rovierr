@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-interface PublicProfileProps {
+type PublicProfileProps = {
   profile: {
     id: string
     name: string

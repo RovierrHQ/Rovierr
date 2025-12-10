@@ -13,7 +13,7 @@ import { useState } from 'react'
 import { ApplySuggestionsDialog } from './apply-suggestions-dialog'
 import { SuggestionCard } from './suggestion-card'
 
-interface SuggestionsListProps {
+type SuggestionsListProps = {
   suggestions: ResumeSuggestion[]
   sourceResumeId: string
   jobApplicationId: string

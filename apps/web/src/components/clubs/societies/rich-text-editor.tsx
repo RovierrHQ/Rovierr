@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { useEffect } from 'react'
 
-interface RichTextEditorProps {
+type RichTextEditorProps = {
   content: string
   onChange: (content: string) => void
   placeholder?: string

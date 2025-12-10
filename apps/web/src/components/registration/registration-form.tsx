@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { orpc } from '@/utils/orpc'
 
-interface RegistrationFormProps {
+type RegistrationFormProps = {
   form: {
     id: string
     title: string

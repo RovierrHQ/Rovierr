@@ -25,7 +25,7 @@ const applicationSchema = z.object({
 
 type ApplicationFormData = z.infer<typeof applicationSchema>
 
-interface EditApplicationDialogProps {
+type EditApplicationDialogProps = {
   application: Application
   open: boolean
   onOpenChange: (open: boolean) => void
