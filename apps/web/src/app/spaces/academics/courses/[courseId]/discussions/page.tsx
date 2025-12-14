@@ -2,15 +2,15 @@
 
 import { Button } from '@rov/ui/components/button'
 import { useQuery } from '@tanstack/react-query'
+import { CreateThreadDialog } from '@web/components/discussions/create-thread-dialog'
+import { DiscussionFilters } from '@web/components/discussions/discussion-filters'
+import { DiscussionList } from '@web/components/discussions/discussion-list'
+import { DiscussionStats } from '@web/components/discussions/discussion-stats'
+import { ThreadView } from '@web/components/discussions/thread-view'
+import type { Discussion, Reply } from '@web/components/discussions/types'
+import { orpc } from '@web/utils/orpc'
 import { MessageSquare } from 'lucide-react'
 import { use, useState } from 'react'
-import { CreateThreadDialog } from '@/components/discussions/create-thread-dialog'
-import { DiscussionFilters } from '@/components/discussions/discussion-filters'
-import { DiscussionList } from '@/components/discussions/discussion-list'
-import { DiscussionStats } from '@/components/discussions/discussion-stats'
-import { ThreadView } from '@/components/discussions/thread-view'
-import type { Discussion, Reply } from '@/components/discussions/types'
-import { orpc } from '@/utils/orpc'
 
 type PageProps = {
   params: Promise<{ courseId: string }>

@@ -14,11 +14,11 @@ import {
 import { Switch } from '@rov/ui/components/switch'
 import { Textarea } from '@rov/ui/components/textarea'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { ExternalLink, Loader2, Plus, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 
 type RegistrationSettings = {
   id: string

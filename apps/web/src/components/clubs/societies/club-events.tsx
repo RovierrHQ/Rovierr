@@ -1,7 +1,7 @@
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
+import { mockEvents } from '@web/data/space-club-data'
 import { Calendar, Clock, MapPin, Users } from 'lucide-react'
-import { mockEvents } from '@/data/space-club-data'
 
 const ClubEvents = () => (
   <div>

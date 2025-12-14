@@ -23,11 +23,11 @@ import {
 import { Checkbox } from '@rov/ui/components/checkbox'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { format } from 'date-fns'
 import { Check, ClipboardList, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 
 type JoinRequestsProps = {
   organizationId: string

@@ -17,6 +17,10 @@ import {
   TabsTrigger
 } from '@rov/ui/components/tabs'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { AIAssistant } from '@web/components/career/ai/ai-assistant'
+import { DeleteApplicationDialog } from '@web/components/career/delete-application-dialog'
+import { EditApplicationDialog } from '@web/components/career/edit-application-dialog'
+import { orpc } from '@web/utils/orpc'
 import {
   ArrowLeft,
   Briefcase,
@@ -31,10 +35,6 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { AIAssistant } from '@/components/career/ai/ai-assistant'
-import { DeleteApplicationDialog } from '@/components/career/delete-application-dialog'
-import { EditApplicationDialog } from '@/components/career/edit-application-dialog'
-import { orpc } from '@/utils/orpc'
 
 export default function ApplicationDetailPage() {
   const params = useParams()

@@ -13,10 +13,10 @@ import {
 import { Input } from '@rov/ui/components/input'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { Check, Search, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
 
 type AssignMembersDialogProps = {
   organizationId: string

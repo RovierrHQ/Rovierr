@@ -3,14 +3,14 @@
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { RegistrationForm } from '@web/components/registration/registration-form'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import { AlertCircle, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { RegistrationForm } from '@/components/registration/registration-form'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
 const ApplyPage = () => {
   const params = useParams()

@@ -16,8 +16,8 @@ import {
   SidebarMenuItem,
   useSidebar
 } from '@rov/ui/components/sidebar'
+import type { IProjects } from '@web/types/types-space-sidebar-data'
 import { Folder, Forward, MoreHorizontal, Trash2 } from 'lucide-react'
-import type { IProjects } from '@/types/types-space-sidebar-data'
 
 export function NavProjects({
   projects,

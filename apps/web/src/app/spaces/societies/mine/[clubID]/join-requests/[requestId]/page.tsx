@@ -4,6 +4,8 @@ import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { Textarea } from '@rov/ui/components/textarea'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import {
   ArrowLeft,
   CheckCircle,
@@ -16,8 +18,6 @@ import {
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
 const JoinRequestDetailPage = () => {
   const params = useParams()

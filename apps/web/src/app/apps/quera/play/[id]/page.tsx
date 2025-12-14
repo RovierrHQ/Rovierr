@@ -10,8 +10,6 @@ import {
   CardTitle
 } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
-import Link from 'next/link'
-import { use, useEffect, useMemo, useRef, useState } from 'react'
 import {
   getHostState,
   getLeaderboard,
@@ -19,7 +17,9 @@ import {
   makeId,
   onStorage,
   upsertLeaderboard
-} from '@/lib/quera-store'
+} from '@web/lib/quera-store'
+import Link from 'next/link'
+import { use, useEffect, useMemo, useRef, useState } from 'react'
 
 type Props = {
   params: Promise<{ id: string }>

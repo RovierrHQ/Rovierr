@@ -1,4 +1,9 @@
 import {
+  type IProjects,
+  type ISpaces,
+  SpacesNames
+} from '@web/types/types-space-sidebar-data'
+import {
   AudioWaveform,
   BriefcaseBusiness,
   Compass,
@@ -9,11 +14,6 @@ import {
   UserRound,
   Users
 } from 'lucide-react'
-import {
-  type IProjects,
-  type ISpaces,
-  SpacesNames
-} from '@/types/types-space-sidebar-data'
 
 export const spaces: ISpaces[] = [
   {

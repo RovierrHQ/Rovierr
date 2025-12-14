@@ -9,13 +9,13 @@ import {
   DropdownMenuTrigger
 } from '@rov/ui/components/dropdown-menu'
 import { cn } from '@rov/ui/lib/utils'
-import { ChevronDownIcon, DownloadIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import {
   detectPlatform,
   getAllPlatforms,
   type PlatformInfo
-} from '@/lib/platform-detector'
+} from '@web/lib/platform-detector'
+import { ChevronDownIcon, DownloadIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 type DownloadButtonProps = {
   variant?: 'default' | 'outline' | 'secondary' | 'ghost'

@@ -1,7 +1,7 @@
 'use client'
 
 import { Card } from '@rov/ui/components/card'
-
+import { NextEventWidget } from '@web/components/widgets/next-event'
 import {
   BookOpen,
   Briefcase,
@@ -13,7 +13,6 @@ import {
   TrendingUp,
   Users
 } from 'lucide-react'
-import { NextEventWidget } from '@/components/widgets/next-event'
 
 export default function SummaryPage() {
   return (

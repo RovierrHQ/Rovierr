@@ -7,12 +7,12 @@ import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import { Separator } from '@rov/ui/components/separator'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import { Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
 export function ProfileSettings() {
   const queryClient = useQueryClient()

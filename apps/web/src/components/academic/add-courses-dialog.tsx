@@ -14,11 +14,11 @@ import { useAppForm } from '@rov/ui/components/form/index'
 import { Input } from '@rov/ui/components/input'
 import { useStore } from '@tanstack/react-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { orpc } from '@/utils/orpc'
 
 const addCoursesSchema = z.object({
   termId: z.string().min(1, 'Please select a term'),

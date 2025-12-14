@@ -10,9 +10,9 @@ import {
 } from '@rov/ui/components/card'
 import { Textarea } from '@rov/ui/components/textarea'
 import { useMutation } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { Download, FileText, Loader2, RefreshCw, Save } from 'lucide-react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 
 type CoverLetterGeneratorProps = {
   resumeId: string

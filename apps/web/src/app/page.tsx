@@ -4,12 +4,12 @@ import { AuroraBackground } from '@rov/ui/components/aurora-background'
 import { Button } from '@rov/ui/components/button'
 import { AnimatedShinyText } from '@rov/ui/components/text-animations/animated-shiny'
 import { cn } from '@rov/ui/lib/utils'
+import FeaturesSection from '@web/components/landing/features-section'
+import Footer from '@web/components/layout/footer'
+import Topnav from '@web/components/layout/top-nav'
 import { ArrowRightIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
-import FeaturesSection from '@/components/landing/features-section'
-import Footer from '@/components/layout/footer'
-import Topnav from '@/components/layout/top-nav'
 
 export default function RovierrLandingPage() {
   return (

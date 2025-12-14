@@ -17,10 +17,10 @@ import {
   useSidebar
 } from '@rov/ui/components/sidebar'
 import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
+import { authClient } from '@web/lib/auth-client'
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { authClient } from '@/lib/auth-client'
 
 export function NavUser() {
   const { isMobile } = useSidebar()

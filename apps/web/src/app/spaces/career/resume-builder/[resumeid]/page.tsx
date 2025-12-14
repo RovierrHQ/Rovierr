@@ -1,8 +1,6 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { useAtomValue, useSetAtom } from 'jotai'
-import { use, useEffect } from 'react'
 import {
   activeSectionAtom,
   basicInfoAtom,
@@ -13,18 +11,20 @@ import {
   languagesAtom,
   projectsAtom,
   volunteerAtom
-} from '@/components/resume/lib/atoms'
-import ResumePreview from '@/components/resume/renderer'
-import { BasicInfoSection } from '@/components/resume/sections/basic-info'
-import { CertificationsSection } from '@/components/resume/sections/certifications'
-import { EducationSection } from '@/components/resume/sections/education'
-import { ExperienceSection } from '@/components/resume/sections/experience'
-import { InterestsSection } from '@/components/resume/sections/interests'
-import { LanguagesSection } from '@/components/resume/sections/languages'
-import { ProjectsSection } from '@/components/resume/sections/projects'
-import { VolunteerSection } from '@/components/resume/sections/volunteer'
-import { LeftSidebar } from '@/components/resume/side-nav'
-import { orpc } from '@/utils/orpc'
+} from '@web/components/resume/lib/atoms'
+import ResumePreview from '@web/components/resume/renderer'
+import { BasicInfoSection } from '@web/components/resume/sections/basic-info'
+import { CertificationsSection } from '@web/components/resume/sections/certifications'
+import { EducationSection } from '@web/components/resume/sections/education'
+import { ExperienceSection } from '@web/components/resume/sections/experience'
+import { InterestsSection } from '@web/components/resume/sections/interests'
+import { LanguagesSection } from '@web/components/resume/sections/languages'
+import { ProjectsSection } from '@web/components/resume/sections/projects'
+import { VolunteerSection } from '@web/components/resume/sections/volunteer'
+import { LeftSidebar } from '@web/components/resume/side-nav'
+import { orpc } from '@web/utils/orpc'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { use, useEffect } from 'react'
 
 function ResumeEditorPage({
   params

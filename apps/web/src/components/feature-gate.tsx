@@ -1,7 +1,7 @@
 'use client'
 
+import { client } from '@web/utils/orpc'
 import { type ReactNode, useEffect, useState } from 'react'
-import { client } from '@/utils/orpc'
 import { VerificationPending } from './verification-pending'
 
 type FeatureGateProps = {

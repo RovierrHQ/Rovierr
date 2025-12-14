@@ -2,10 +2,10 @@
 
 import { Card, CardContent, CardHeader } from '@rov/ui/components/card'
 import { Skeleton } from '@rov/ui/components/skeleton'
+import { TeamList } from '@web/components/clubs/teams/team-list'
+import { authClient } from '@web/lib/auth-client'
 import { useParams } from 'next/navigation'
 import { useMemo } from 'react'
-import { TeamList } from '@/components/clubs/teams/team-list'
-import { authClient } from '@/lib/auth-client'
 
 const TeamsPage = () => {
   const params = useParams()

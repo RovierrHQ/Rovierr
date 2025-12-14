@@ -15,6 +15,7 @@ import {
   TabsTrigger
 } from '@rov/ui/components/tabs'
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import {
   BookOpen,
   Calendar,
@@ -27,7 +28,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { use } from 'react'
-import { orpc } from '@/utils/orpc'
 
 export default function CoursePage({
   params

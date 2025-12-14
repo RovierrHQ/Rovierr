@@ -5,10 +5,10 @@ import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
 import { useQuery } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { Calendar, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { authClient } from '@/lib/auth-client'
 
 export function ClubsTab() {
   const router = useRouter()

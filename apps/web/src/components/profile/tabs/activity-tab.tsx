@@ -4,6 +4,7 @@ import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
 import { useInfiniteQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import {
   Activity,
   Calendar,
@@ -11,7 +12,6 @@ import {
   Trophy,
   UserPlus
 } from 'lucide-react'
-import { orpc } from '@/utils/orpc'
 
 const activityIcons = {
   post: MessageSquare,

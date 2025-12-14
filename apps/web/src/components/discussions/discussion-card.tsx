@@ -4,9 +4,9 @@ import { Button } from '@rov/ui/components/button'
 import { Card, CardContent, CardHeader } from '@rov/ui/components/card'
 import { Separator } from '@rov/ui/components/separator'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { ArrowDown, ArrowUp, Check, MessageSquare, Pin } from 'lucide-react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 import type { Discussion } from './types'
 
 type DiscussionCardProps = {

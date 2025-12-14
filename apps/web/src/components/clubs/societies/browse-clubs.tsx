@@ -11,12 +11,12 @@ import {
   useQuery,
   useQueryClient
 } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import { CheckCircle2, Clock, GraduationCap, Plus, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
 // Helper function to get icon from tags or default
 const getIconFromTags = (tags: string[] | null | undefined): string => {

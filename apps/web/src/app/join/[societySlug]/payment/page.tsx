@@ -5,6 +5,8 @@ import { Card } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import {
   AlertCircle,
   ArrowLeft,
@@ -16,8 +18,6 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
 const PaymentPage = () => {
   const params = useParams()

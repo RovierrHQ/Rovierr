@@ -11,17 +11,17 @@ import {
   TabsTrigger
 } from '@rov/ui/components/tabs'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { QRCodeDisplay } from '@web/components/registration/qr-code-display'
+import { RegistrationSettingsForm } from '@web/components/registration/registration-settings-form'
+import { ImageUploadDialog } from '@web/components/shared/image-upload-dialog'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { QRCodeDisplay } from '@/components/registration/qr-code-display'
-import { RegistrationSettingsForm } from '@/components/registration/registration-settings-form'
-import { ImageUploadDialog } from '@/components/shared/image-upload-dialog'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
 type Society = z.infer<typeof societySchema>
 

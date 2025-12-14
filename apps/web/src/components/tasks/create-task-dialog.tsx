@@ -21,10 +21,10 @@ import {
 } from '@rov/ui/components/select'
 import { Textarea } from '@rov/ui/components/textarea'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 import { AssigneeSelector } from './assignee-selector'
 import type { TaskPriority } from './types'
 

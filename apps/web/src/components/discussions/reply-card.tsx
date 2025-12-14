@@ -2,9 +2,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { ArrowDown, ArrowUp, Check } from 'lucide-react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 import type { Reply } from './types'
 
 type ReplyCardProps = {

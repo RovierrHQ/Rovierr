@@ -21,6 +21,8 @@ import {
 } from '@rov/ui/components/table'
 import { Textarea } from '@rov/ui/components/textarea'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import {
   ArrowLeft,
   CheckCircle,
@@ -34,8 +36,6 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
 const JoinRequestsPage = () => {
   const params = useParams()

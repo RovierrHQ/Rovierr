@@ -3,6 +3,7 @@
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import {
   AlertCircle,
   Award,
@@ -16,7 +17,6 @@ import {
   TrendingUp,
   Users
 } from 'lucide-react'
-import { orpc } from '@/utils/orpc'
 
 export default function CareerPage() {
   // Fetch statistics

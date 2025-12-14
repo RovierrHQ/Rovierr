@@ -21,11 +21,11 @@ import {
 } from '@rov/ui/components/card'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { format } from 'date-fns'
 import { Mail, RefreshCw, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
 import { InviteMemberDialog } from './invite-member-dialog'
 
 type PendingInvitationsProps = {

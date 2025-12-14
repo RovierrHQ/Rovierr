@@ -10,9 +10,9 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { Input } from '@rov/ui/components/input'
+import { mockPeople } from '@web/data/space-club-data'
 import { Filter, MessageCircle, UserPlus } from 'lucide-react'
 import { useState } from 'react'
-import { mockPeople } from '@/data/space-club-data'
 
 const Network = () => {
   const [selectedPerson, setSelectedPerson] = useState<

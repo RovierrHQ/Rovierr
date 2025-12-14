@@ -12,6 +12,7 @@ import {
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import {
   CheckCircle2,
   Facebook,
@@ -28,7 +29,6 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import type { z } from 'zod'
-import { orpc } from '@/utils/orpc'
 
 type Society = z.infer<typeof societySchema>
 

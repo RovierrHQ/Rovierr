@@ -1,10 +1,10 @@
 'use client'
 
+import SpacesLayout from '@web/components/layout/spaces-layout'
+import ProfileSidebarSetup from '@web/components/profile/profile-sidebar-setup'
+import RoadmapFloatButton from '@web/components/roadmap/roadmap-float-button'
+import { authClient } from '@web/lib/auth-client'
 import { redirect } from 'next/navigation'
-import SpacesLayout from '@/components/layout/spaces-layout'
-import ProfileSidebarSetup from '@/components/profile/profile-sidebar-setup'
-import RoadmapFloatButton from '@/components/roadmap/roadmap-float-button'
-import { authClient } from '@/lib/auth-client'
 
 function Layout({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = authClient.useSession()

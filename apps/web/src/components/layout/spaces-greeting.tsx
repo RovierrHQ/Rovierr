@@ -1,4 +1,4 @@
-import { authClient } from '@/lib/auth-client'
+import { authClient } from '@web/lib/auth-client'
 
 export const SpacesHeader = () => {
   const { data } = authClient.useSession()

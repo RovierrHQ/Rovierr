@@ -7,11 +7,11 @@ import { ScrollArea } from '@rov/ui/components/scroll-area'
 import { Separator } from '@rov/ui/components/separator'
 import { cn } from '@rov/ui/lib/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { formatDistanceToNow } from 'date-fns'
 import { MessageCircle, Search, UserPlus } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 
 type ConversationListProps = {
   conversations: ConversationWithLastMessage[]

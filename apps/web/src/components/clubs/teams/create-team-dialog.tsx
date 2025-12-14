@@ -13,9 +13,9 @@ import {
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
 
 type CreateTeamDialogProps = {
   organizationId: string

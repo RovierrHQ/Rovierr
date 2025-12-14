@@ -12,11 +12,11 @@ import {
   useQuery,
   useQueryClient
 } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { UserPlus, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 
 export default function PeoplePage() {
   const [searchQuery, setSearchQuery] = useState('')

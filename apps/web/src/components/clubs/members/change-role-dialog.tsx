@@ -12,10 +12,10 @@ import {
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { authClient } from '@/lib/auth-client'
 
 type ChangeRoleDialogProps = {
   member: {

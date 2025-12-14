@@ -15,9 +15,9 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem
 } from '@rov/ui/components/sidebar'
+import type { ISpacesChildrenItems } from '@web/types/types-space-sidebar-data'
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
-import type { ISpacesChildrenItems } from '@/types/types-space-sidebar-data'
 
 const SpacesNav = ({
   spacesChildrenItems

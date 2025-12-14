@@ -1,10 +1,10 @@
 'use client'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { ImageUploadDialog as SharedImageUploadDialog } from '@web/components/shared/image-upload-dialog'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import { toast } from 'sonner'
-import { ImageUploadDialog as SharedImageUploadDialog } from '@/components/shared/image-upload-dialog'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
 type SocietyImageUploadDialogProps = {
   open: boolean

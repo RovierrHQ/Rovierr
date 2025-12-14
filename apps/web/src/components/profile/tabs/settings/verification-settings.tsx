@@ -2,9 +2,9 @@
 
 import { Badge } from '@rov/ui/components/badge'
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { CheckCircle2, Shield, XCircle } from 'lucide-react'
 import Link from 'next/link'
-import { orpc } from '@/utils/orpc'
 
 export function VerificationSettings() {
   const { data: profileInfo } = useQuery(orpc.user.profile.info.queryOptions())

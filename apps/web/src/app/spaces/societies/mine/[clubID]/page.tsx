@@ -14,6 +14,9 @@ import {
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
 import { useQuery } from '@tanstack/react-query'
+import { SocietyImageUploadDialog } from '@web/components/societies/society-image-upload-dialog'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import {
   AlertCircle,
   Calendar,
@@ -29,9 +32,6 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import type { z } from 'zod'
-import { SocietyImageUploadDialog } from '@/components/societies/society-image-upload-dialog'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
 type Society = z.infer<typeof societySchema>
 

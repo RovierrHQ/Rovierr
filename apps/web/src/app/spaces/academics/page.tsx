@@ -1,10 +1,10 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { orpc } from '@/utils/orpc'
 
 export default function AcademicsPage() {
   const router = useRouter()

@@ -9,7 +9,7 @@ import { env } from './env'
 
 export const auth = createAuth({
   appName: 'Rovierr',
-  baseURL: env.SERVER_URL,
+  baseURL: `${env.SERVER_URL}/auth`,
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins: env.CORS_ORIGIN.split(','),
   db,

@@ -18,10 +18,10 @@ import {
   TableRow
 } from '@rov/ui/components/table'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { format } from 'date-fns'
 import { Calendar, MessageSquare, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 import type { Task } from './types'
 import { getPriorityColor, getStatusIcon } from './utils'
 

@@ -17,10 +17,10 @@ import {
   TabsList,
   TabsTrigger
 } from '@rov/ui/components/tabs'
+import { authClient } from '@web/lib/auth-client'
 import { CheckCircle2, Clock, Mail, Plus, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo } from 'react'
-import { authClient } from '@/lib/auth-client'
 
 export default function MySocietiesPage() {
   const { data: organizations, isPending: isLoadingOrgs } =

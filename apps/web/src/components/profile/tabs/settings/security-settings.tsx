@@ -4,10 +4,10 @@ import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { Monitor, Smartphone, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { UAParser } from 'ua-parser-js'
-import { authClient } from '@/lib/auth-client'
 
 export function SecuritySettings() {
   const queryClient = useQueryClient()

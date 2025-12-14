@@ -20,11 +20,11 @@ import {
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
 import { cn } from '@rov/ui/lib/utils'
+import type { ISpaces } from '@web/types/types-space-sidebar-data'
 import { ChevronsUpDown, Info } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import type { ISpaces } from '@/types/types-space-sidebar-data'
 
 export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
   const { isMobile } = useSidebar()

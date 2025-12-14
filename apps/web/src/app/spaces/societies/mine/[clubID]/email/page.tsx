@@ -15,15 +15,15 @@ import {
   TabsTrigger
 } from '@rov/ui/components/tabs'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { EmailComposer } from '@web/components/societies/email-composer'
+import { EmailDetailsModal } from '@web/components/societies/email-details-modal'
+import { EmailHistory } from '@web/components/societies/email-history'
+import { EmailPreviewModal } from '@web/components/societies/email-preview-modal'
+import { orpc } from '@web/utils/orpc'
 import { History, Mail } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { EmailComposer } from '@/components/societies/email-composer'
-import { EmailDetailsModal } from '@/components/societies/email-details-modal'
-import { EmailHistory } from '@/components/societies/email-history'
-import { EmailPreviewModal } from '@/components/societies/email-preview-modal'
-import { orpc } from '@/utils/orpc'
 
 export default function EmailPage() {
   const params = useParams()

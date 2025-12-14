@@ -1,5 +1,5 @@
+import type { Question } from '@web/components/form/form-builder'
 import { z } from 'zod'
-import type { Question } from '@/components/form/form-builder'
 
 // Regex patterns defined at module level for performance
 const PHONE_PATTERN = /^\+?[\d\s-()]+$/

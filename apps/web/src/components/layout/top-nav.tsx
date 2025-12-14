@@ -2,9 +2,9 @@
 import { Avatar, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
+import { authClient } from '@web/lib/auth-client'
 import { LogInIcon } from 'lucide-react'
 import Link from 'next/link'
-import { authClient } from '@/lib/auth-client'
 import Logo from '../icons/logo'
 
 function Topnav({

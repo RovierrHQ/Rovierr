@@ -5,12 +5,12 @@ import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { Progress } from '@rov/ui/components/progress'
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { ArrowLeft, ArrowRight, Check, Loader2, Save } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { orpc } from '@/utils/orpc'
 
 type Society = z.infer<typeof societySchema>
 type OnboardingStep = 1 | 2 | 3

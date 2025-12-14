@@ -20,12 +20,12 @@ import {
 import { useAppForm } from '@rov/ui/components/form/index'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { format } from 'date-fns'
 import { Plus, Shield, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { authClient } from '@/lib/auth-client'
 import { PermissionEditor } from './permission-editor'
 
 type RoleManagementProps = {

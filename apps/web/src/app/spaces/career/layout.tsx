@@ -1,10 +1,10 @@
 'use client'
 
+import type { SidebarTree } from '@web/components/layout/use-space-sidebar-items'
+import { useSpaceSidebarItems } from '@web/components/layout/use-space-sidebar-items'
 import { Briefcase, FileText, GraduationCap, Home } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useEffect, useRef } from 'react'
-import type { SidebarTree } from '@/components/layout/use-space-sidebar-items'
-import { useSpaceSidebarItems } from '@/components/layout/use-space-sidebar-items'
 
 const CareerLayout = ({ children }: { children: ReactNode }) => {
   const { setSidebarTree } = useSpaceSidebarItems()

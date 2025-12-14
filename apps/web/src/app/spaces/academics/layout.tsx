@@ -6,6 +6,13 @@ import {
   InputGroupInput
 } from '@rov/ui/components/input-group'
 import { useQuery } from '@tanstack/react-query'
+import { AcademicHeader } from '@web/components/layout/academic-header'
+import type {
+  SidebarNode,
+  SidebarTree
+} from '@web/components/layout/use-space-sidebar-items'
+import { useSpaceSidebarItems } from '@web/components/layout/use-space-sidebar-items'
+import { orpc } from '@web/utils/orpc'
 import {
   BookOpen,
   Compass,
@@ -16,13 +23,6 @@ import {
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useEffect, useRef } from 'react'
-import { AcademicHeader } from '@/components/layout/academic-header'
-import type {
-  SidebarNode,
-  SidebarTree
-} from '@/components/layout/use-space-sidebar-items'
-import { useSpaceSidebarItems } from '@/components/layout/use-space-sidebar-items'
-import { orpc } from '@/utils/orpc'
 
 const AcademicsLayout = ({ children }: { children: ReactNode }) => {
   const { setSidebarTree } = useSpaceSidebarItems()

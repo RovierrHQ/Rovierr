@@ -1,14 +1,14 @@
 'use client'
 
-import { Calendar, Compass, Home, Network, Plus, Users } from 'lucide-react'
-import type { ReactNode } from 'react'
-import { useEffect, useRef, useState } from 'react'
 import type {
   SidebarNode,
   SidebarTree
-} from '@/components/layout/use-space-sidebar-items'
-import { useSpaceSidebarItems } from '@/components/layout/use-space-sidebar-items'
-import { authClient } from '@/lib/auth-client'
+} from '@web/components/layout/use-space-sidebar-items'
+import { useSpaceSidebarItems } from '@web/components/layout/use-space-sidebar-items'
+import { authClient } from '@web/lib/auth-client'
+import { Calendar, Compass, Home, Network, Plus, Users } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const SocietiesLayout = ({ children }: { children: ReactNode }) => {
   const { setSidebarTree } = useSpaceSidebarItems()

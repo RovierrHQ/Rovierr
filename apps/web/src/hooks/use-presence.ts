@@ -4,9 +4,9 @@
 'use client'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { authClient } from '@/lib/auth-client'
-import { useCentrifugo } from '@/lib/centrifuge'
-import { orpc } from '@/utils/orpc'
+import { authClient } from '@web/lib/auth-client'
+import { useCentrifugo } from '@web/lib/centrifuge'
+import { orpc } from '@web/utils/orpc'
 
 export function usePresence() {
   const queryClient = useQueryClient()

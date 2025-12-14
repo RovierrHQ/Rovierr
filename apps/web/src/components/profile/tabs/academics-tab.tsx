@@ -9,8 +9,8 @@ import {
   CardTitle
 } from '@rov/ui/components/card'
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { BookOpen, Calendar, CheckCircle, GraduationCap } from 'lucide-react'
-import { orpc } from '@/utils/orpc'
 
 export function AcademicsTab() {
   const { data: academicData, isLoading } = useQuery(

@@ -1,7 +1,7 @@
 'use client'
 
-import ResumeList from '@/components/resume/resume-list-view'
-import { authClient } from '@/lib/auth-client'
+import ResumeList from '@web/components/resume/resume-list-view'
+import { authClient } from '@web/lib/auth-client'
 
 function ResumeListPage() {
   const { data: session, isPending } = authClient.useSession()

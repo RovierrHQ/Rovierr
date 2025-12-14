@@ -13,9 +13,9 @@ import {
   CardTitle
 } from '@rov/ui/components/card'
 import { useMutation } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { AlertCircle, Brain, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 import { ResumeAnalysisView } from './resume-analysis-view'
 import { SuggestionsList } from './suggestions-list'
 

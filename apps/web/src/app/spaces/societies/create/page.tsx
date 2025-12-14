@@ -5,14 +5,14 @@ import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { useAppForm } from '@rov/ui/components/form/index'
 import { useQuery } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
 const CreateClubPage = () => {
   const router = useRouter()

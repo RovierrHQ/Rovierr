@@ -1,6 +1,6 @@
+import { env } from '@api/lib/env'
+import { logger } from '@api/lib/logger'
 import { UseSend } from 'usesend-js'
-import { env } from '@/lib/env'
-import { logger } from '@/lib/logger'
 import { generateConnectionRequestEmail } from './templates/connection-request'
 import { generateInvitationEmail } from './templates/invitation'
 import {

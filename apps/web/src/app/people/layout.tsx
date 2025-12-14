@@ -1,8 +1,8 @@
 'use client'
 
+import SpacesLayout from '@web/components/layout/spaces-layout'
+import { authClient } from '@web/lib/auth-client'
 import { redirect } from 'next/navigation'
-import SpacesLayout from '@/components/layout/spaces-layout'
-import { authClient } from '@/lib/auth-client'
 
 export default function PeopleLayout({
   children

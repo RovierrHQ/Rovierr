@@ -21,10 +21,10 @@ import {
 } from '@rov/ui/components/select'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { format } from 'date-fns'
 import { MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 import type { Task, TaskAssignee, TaskComment } from './types'
 import { getPriorityColor } from './utils'
 

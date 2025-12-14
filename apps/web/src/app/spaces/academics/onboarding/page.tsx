@@ -13,6 +13,7 @@ import { useAppForm } from '@rov/ui/components/form/index'
 import { Input } from '@rov/ui/components/input'
 import { useStore } from '@tanstack/react-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import {
   ArrowLeft,
   ArrowRight,
@@ -24,7 +25,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { orpc } from '@/utils/orpc'
 
 // Enrollment schema
 const enrollmentSchema = z.object({

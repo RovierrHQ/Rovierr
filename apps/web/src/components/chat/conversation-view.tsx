@@ -11,12 +11,12 @@ import {
   useQuery,
   useQueryClient
 } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
+import { useCentrifugo } from '@web/lib/centrifuge'
+import { orpc } from '@web/utils/orpc'
 import { formatDistanceToNow } from 'date-fns'
 import { ArrowLeft, Send } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { authClient } from '@/lib/auth-client'
-import { useCentrifugo } from '@/lib/centrifuge'
-import { orpc } from '@/utils/orpc'
 
 type Message = {
   id: string

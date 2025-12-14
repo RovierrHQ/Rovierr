@@ -1,9 +1,9 @@
 'use client'
 
+import type { SidebarTree } from '@web/components/layout/use-space-sidebar-items'
+import { useSpaceSidebarItems } from '@web/components/layout/use-space-sidebar-items'
+import { spaces } from '@web/data/space-sidebar-data'
 import { useEffect } from 'react'
-import type { SidebarTree } from '@/components/layout/use-space-sidebar-items'
-import { useSpaceSidebarItems } from '@/components/layout/use-space-sidebar-items'
-import { spaces } from '@/data/space-sidebar-data'
 
 export default function ProfileSidebarSetup() {
   const { setSidebarTree } = useSpaceSidebarItems()

@@ -17,11 +17,11 @@ import {
 import { Input } from '@rov/ui/components/input'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { format } from 'date-fns'
 import { MoreVertical, Search, Trash2, Users } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
 import { AssignMembersDialog } from './assign-members-dialog'
 import { CreateTeamDialog } from './create-team-dialog'
 

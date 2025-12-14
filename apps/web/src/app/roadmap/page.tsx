@@ -1,9 +1,9 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
-import Topnav from '@/components/layout/top-nav'
-import AddRoadmap from '@/components/roadmap/add-roadmap'
-import RoadmapFeed from '@/components/roadmap/roadmap-feed'
+import Topnav from '@web/components/layout/top-nav'
+import AddRoadmap from '@web/components/roadmap/add-roadmap'
+import RoadmapFeed from '@web/components/roadmap/roadmap-feed'
 
 const RoadmapPage = () => (
   <div>

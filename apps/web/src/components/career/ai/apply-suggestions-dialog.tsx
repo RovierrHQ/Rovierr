@@ -13,10 +13,10 @@ import {
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import { useMutation } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { AlertTriangle, FileText, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 
 type ApplySuggestionsDialogProps = {
   open: boolean

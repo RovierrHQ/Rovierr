@@ -13,11 +13,11 @@ import {
 import { Button } from '@rov/ui/components/button'
 import { DataTable } from '@rov/ui/components/data-table'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { Plus, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 import { columns } from './resume-table-columns'
 
 export default function ResumeListPage() {

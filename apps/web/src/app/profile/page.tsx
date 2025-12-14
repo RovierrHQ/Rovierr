@@ -1,8 +1,8 @@
 'use client'
 
+import ProfilePage from '@web/components/profile'
+import { authClient } from '@web/lib/auth-client'
 import { redirect } from 'next/navigation'
-import ProfilePage from '@/components/profile'
-import { authClient } from '@/lib/auth-client'
 
 export default function Page() {
   const { data, isPending } = authClient.useSession()

@@ -18,6 +18,8 @@ import {
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
 import { useQuery } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import {
   AlertCircle,
   Camera,
@@ -30,8 +32,6 @@ import {
 import { useState } from 'react'
 import QRCode from 'react-qr-code'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 import { ImageUploadDialog } from './image-upload-dialog'
 import { ProfileHeroSkeleton } from './loading-skeleton'
 

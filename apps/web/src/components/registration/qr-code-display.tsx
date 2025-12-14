@@ -10,11 +10,11 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { Download, Loader2, Printer, QrCode } from 'lucide-react'
 import { useRef, useState } from 'react'
 import QRCodeReact from 'react-qr-code'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 
 type QRCodeDisplayProps = {
   societyId: string

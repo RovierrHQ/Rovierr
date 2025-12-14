@@ -16,11 +16,11 @@ import { Label } from '@rov/ui/components/label'
 import { Switch } from '@rov/ui/components/switch'
 import { Textarea } from '@rov/ui/components/textarea'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { CheckCircle2, UserPlus, XCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { authClient } from '@/lib/auth-client'
 
 type InviteMemberDialogProps = {
   organizationId: string

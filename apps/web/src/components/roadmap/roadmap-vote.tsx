@@ -2,12 +2,12 @@
 
 import { Button } from '@rov/ui/components/button'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
+import { orpc } from '@web/utils/orpc'
 import { ThumbsUp } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import type { FC } from 'react'
 import { useMemo } from 'react'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
 type RoadmapVoteProps = {
   roadmapId: string

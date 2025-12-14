@@ -1,4 +1,4 @@
-import Network from '@/components/clubs/discover/network'
+import Network from '@web/components/clubs/discover/network'
 
 const NetworkPage = () => (
   <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">

@@ -4,6 +4,7 @@ import { Button } from '@rov/ui/components/button'
 import { Separator } from '@rov/ui/components/separator'
 import { Textarea } from '@rov/ui/components/textarea'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import {
   ArrowDown,
   ArrowUp,
@@ -15,7 +16,6 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 import { ReplyCard } from './reply-card'
 import type { Discussion, Reply } from './types'
 

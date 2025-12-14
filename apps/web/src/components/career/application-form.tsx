@@ -3,11 +3,11 @@
 import { Button } from '@rov/ui/components/button'
 import { useAppForm } from '@rov/ui/components/form/index'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { Loader2, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { orpc } from '@/utils/orpc'
 
 const applicationSchema = z.object({
   companyName: z.string().min(1, 'Company name is required'),

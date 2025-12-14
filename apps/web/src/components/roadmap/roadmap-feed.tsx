@@ -16,9 +16,9 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
-import { orpc } from '@/utils/orpc'
 import UserInfo from '../profile/user-info'
 import RoadmapComments from './roadmap-comments'
 import RoadmapVote from './roadmap-vote'

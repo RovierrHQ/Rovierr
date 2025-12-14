@@ -9,9 +9,9 @@ import {
   CardTitle
 } from '@rov/ui/components/card'
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { Activity, BookOpen, Calendar, TrendingUp, Users } from 'lucide-react'
 import Link from 'next/link'
-import { orpc } from '@/utils/orpc'
 
 export function OverviewTab() {
   const { data: profileInfo } = useQuery(orpc.user.profile.info.queryOptions())

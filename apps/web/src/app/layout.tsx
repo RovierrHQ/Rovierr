@@ -1,5 +1,5 @@
-import { CommandMenu } from '@/components/command-menu'
-import Providers from '@/components/providers'
+import { CommandMenu } from '@web/components/command-menu'
+import Providers from '@web/components/providers'
 import '@rov/ui/globals.css'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'

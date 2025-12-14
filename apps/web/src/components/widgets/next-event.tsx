@@ -8,12 +8,12 @@ import {
   CardTitle
 } from '@rov/ui/components/card'
 import { useQuery } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
+import { useCentrifugo } from '@web/lib/centrifuge'
+import { orpc } from '@web/utils/orpc'
 import { format, isToday, isTomorrow, isYesterday } from 'date-fns'
 import { CalendarDays, ExternalLink, MapPin } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-import { authClient } from '@/lib/auth-client'
-import { useCentrifugo } from '@/lib/centrifuge'
-import { orpc } from '@/utils/orpc'
 
 export function NextEventWidget() {
   const [isConnecting, setIsConnecting] = useState(false)

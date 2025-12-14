@@ -12,10 +12,10 @@ import {
 } from '@rov/ui/components/tabs'
 import { Textarea } from '@rov/ui/components/textarea'
 import { useMutation } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 
 type JobDescriptionInputProps = {
   onJobParsed: (jobData: ExtendedParsedJobData) => void

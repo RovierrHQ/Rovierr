@@ -12,9 +12,9 @@ import {
   TabsTrigger
 } from '@rov/ui/components/tabs'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { Check, UserPlus, Users, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 
 export default function ConnectionRequestsPage() {
   const queryClient = useQueryClient()

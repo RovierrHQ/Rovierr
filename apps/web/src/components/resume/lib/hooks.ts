@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { useEffect, useRef, useState } from 'react'
-import { orpc } from '@/utils/orpc'
 
 /**
  * Auto-save hook with debouncing

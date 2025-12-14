@@ -7,12 +7,12 @@ import {
   SidebarHeader,
   SidebarRail
 } from '@rov/ui/components/sidebar'
+import { ChatDrawer } from '@web/components/chat/chat-drawer'
+import { NavPeople } from '@web/components/layout/nav-people'
+import { NavUser } from '@web/components/layout/nav-user'
+import { SpaceSwitcher } from '@web/components/layout/space-switcher'
+import { spaces } from '@web/data/space-sidebar-data'
 import type { ComponentProps } from 'react'
-import { ChatDrawer } from '@/components/chat/chat-drawer'
-import { NavPeople } from '@/components/layout/nav-people'
-import { NavUser } from '@/components/layout/nav-user'
-import { SpaceSwitcher } from '@/components/layout/space-switcher'
-import { spaces } from '@/data/space-sidebar-data'
 import SidebarNodeRenderer from './sidebar-node-renderer'
 import { useSpaceSidebarItems } from './use-space-sidebar-items'
 

@@ -3,6 +3,7 @@
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import {
   AlertCircle,
   Calendar,
@@ -18,7 +19,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { orpc } from '@/utils/orpc'
 
 const PublicJoinPage = () => {
   const params = useParams()

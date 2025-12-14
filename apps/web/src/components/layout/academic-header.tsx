@@ -8,10 +8,10 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { useQuery } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { GraduationCap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { orpc } from '@/utils/orpc'
 
 export const AcademicHeader = () => {
   const router = useRouter()

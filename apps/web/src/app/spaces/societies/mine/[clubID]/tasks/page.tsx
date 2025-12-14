@@ -2,15 +2,15 @@
 
 import { Button } from '@rov/ui/components/button'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { CreateTaskDialog } from '@web/components/tasks/create-task-dialog'
+import { TaskDetailDialog } from '@web/components/tasks/task-detail-dialog'
+import { TaskFilters } from '@web/components/tasks/task-filters'
+import { TaskList } from '@web/components/tasks/task-list'
+import type { Task } from '@web/components/tasks/types'
+import { orpc } from '@web/utils/orpc'
 import { Plus } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
-import { CreateTaskDialog } from '@/components/tasks/create-task-dialog'
-import { TaskDetailDialog } from '@/components/tasks/task-detail-dialog'
-import { TaskFilters } from '@/components/tasks/task-filters'
-import { TaskList } from '@/components/tasks/task-list'
-import type { Task } from '@/components/tasks/types'
-import { orpc } from '@/utils/orpc'
 
 const TasksPage = () => {
   const params = useParams()

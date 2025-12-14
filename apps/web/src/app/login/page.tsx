@@ -3,11 +3,18 @@
 import LoginForm from '@rov/ui/blocks/login-form'
 import AnimatedGridPattern from '@rov/ui/components/backgrounds/AnimatedGridPattern'
 import { cn } from '@rov/ui/lib/utils'
+import Topnav from '@web/components/layout/top-nav'
+import { authClient } from '@web/lib/auth-client'
+import { redirect } from 'next/navigation'
 import { toast } from 'sonner'
-import Topnav from '@/components/layout/top-nav'
-import { authClient } from '@/lib/auth-client'
 
 export default function LoginPage() {
+  const { data: session } = authClient.useSession()
+
+  if (session) {
+    redirect('/spaces/societies')
+  }
+
   const handleEmailLogin = async (email: string, password: string) => {
     try {
       const result = await authClient.signIn.email({

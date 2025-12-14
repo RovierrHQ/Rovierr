@@ -1,8 +1,8 @@
 'use client'
 
+import { client } from '@web/utils/orpc'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { client } from '@/utils/orpc'
 
 type VerificationPendingProps = {
   onVerified?: () => void

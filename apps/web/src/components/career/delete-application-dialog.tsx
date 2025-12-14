@@ -10,9 +10,9 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orpc } from '@web/utils/orpc'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 
 type DeleteApplicationDialogProps = {
   applicationId: string

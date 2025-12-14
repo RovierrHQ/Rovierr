@@ -13,12 +13,12 @@ import {
   SidebarMenuItem
 } from '@rov/ui/components/sidebar'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { usePresence } from '@web/hooks/use-presence'
+import { authClient } from '@web/lib/auth-client'
+import { useCentrifugo } from '@web/lib/centrifuge'
+import { orpc } from '@web/utils/orpc'
 import { MessageCircle } from 'lucide-react'
 import { useState } from 'react'
-import { usePresence } from '@/hooks/use-presence'
-import { authClient } from '@/lib/auth-client'
-import { useCentrifugo } from '@/lib/centrifuge'
-import { orpc } from '@/utils/orpc'
 import { ConversationList } from './conversation-list'
 import { ConversationView } from './conversation-view'
 

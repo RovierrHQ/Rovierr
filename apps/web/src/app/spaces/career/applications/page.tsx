@@ -12,6 +12,8 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { useQuery } from '@tanstack/react-query'
+import { AddApplicationDialog } from '@web/components/career/add-application-dialog'
+import { orpc } from '@web/utils/orpc'
 import {
   Briefcase,
   Clock,
@@ -22,8 +24,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { AddApplicationDialog } from '@/components/career/add-application-dialog'
-import { orpc } from '@/utils/orpc'
 
 export default function ApplicationsPage() {
   const [searchQuery, setSearchQuery] = useState('')

@@ -1,7 +1,7 @@
+import { PublicProfileView } from '@web/components/profile/public-profile-view'
+import { orpc } from '@web/utils/orpc'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { PublicProfileView } from '@/components/profile/public-profile-view'
-import { orpc } from '@/utils/orpc'
 
 type PageProps = {
   params: Promise<{

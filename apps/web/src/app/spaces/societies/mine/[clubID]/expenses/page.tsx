@@ -9,6 +9,12 @@ import {
   TabsList,
   TabsTrigger
 } from '@rov/ui/components/tabs'
+import { ActivityFeed } from '@web/components/expenses/activity-feed'
+import { ExpensesTable } from '@web/components/expenses/expenses-table'
+import { Header } from '@web/components/expenses/header'
+import { ReportsCharts } from '@web/components/expenses/reports-charts'
+import { ReportsFilters } from '@web/components/expenses/reports-filters'
+import { StatCard } from '@web/components/expenses/stat-card'
 import {
   BarChart3,
   CheckCircle,
@@ -20,12 +26,6 @@ import {
   Receipt
 } from 'lucide-react'
 import { useState } from 'react'
-import { ActivityFeed } from '@/components/expenses/activity-feed'
-import { ExpensesTable } from '@/components/expenses/expenses-table'
-import { Header } from '@/components/expenses/header'
-import { ReportsCharts } from '@/components/expenses/reports-charts'
-import { ReportsFilters } from '@/components/expenses/reports-filters'
-import { StatCard } from '@/components/expenses/stat-card'
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState('dashboard')

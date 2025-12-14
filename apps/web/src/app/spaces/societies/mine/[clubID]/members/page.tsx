@@ -9,14 +9,14 @@ import {
   TabsTrigger
 } from '@rov/ui/components/tabs'
 import { useQuery } from '@tanstack/react-query'
+import { JoinRequests } from '@web/components/clubs/members/join-requests'
+import { MemberList } from '@web/components/clubs/members/member-list'
+import { PendingInvitations } from '@web/components/clubs/members/pending-invitations'
+import { RoleManagement } from '@web/components/clubs/members/role-management'
+import { authClient } from '@web/lib/auth-client'
 import { ClipboardList, Shield, UserPlus, Users } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useMemo } from 'react'
-import { JoinRequests } from '@/components/clubs/members/join-requests'
-import { MemberList } from '@/components/clubs/members/member-list'
-import { PendingInvitations } from '@/components/clubs/members/pending-invitations'
-import { RoleManagement } from '@/components/clubs/members/role-management'
-import { authClient } from '@/lib/auth-client'
 
 const MembersPage = () => {
   const params = useParams()

@@ -1,7 +1,7 @@
 'use client'
 
+import FormBuilder from '@web/components/form/form-builder'
 import { useParams } from 'next/navigation'
-import FormBuilder from '@/components/form/form-builder'
 
 export default function CreateFormPage() {
   const params = useParams()
