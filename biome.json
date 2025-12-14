@@ -60,9 +60,9 @@
       "nursery": "off",
       "complexity": {
         "noExcessiveCognitiveComplexity": {
-          "level": "error",
+          "level": "warn",
           "options": {
-            "maxAllowedComplexity": 50
+            "maxAllowedComplexity": 25
           }
         }
       },

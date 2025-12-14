@@ -1,7 +1,13 @@
 {
   "root": false,
   "extends": "//",
-
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noUnknownAtRules": "off"
+      }
+    }
+  },
   "overrides": [
     {
       "includes": ["app/+not-found.tsx", "app/+html.tsx"],
