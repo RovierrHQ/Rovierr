@@ -1,10 +1,6 @@
+import { cors } from '@elysiajs/cors'
 import { RPCHandler } from '@orpc/server/fetch'
-import { Hono } from 'hono'
-import { cors } from 'hono/cors'
-// import { logger, pinoConfig } from '@/lib/logger'
-import { logger as honoLogger } from 'hono/logger'
-// import { pinoLogger } from 'hono-pino'
-// import { nanoid } from 'nanoid'
+import { Elysia } from 'elysia'
 import { auth } from '@/lib/auth'
 import { createContext } from '@/lib/context'
 import { env } from '@/lib/env'
@@ -12,16 +8,13 @@ import logger from '@/lib/logger'
 import { appRouter } from '@/routers'
 import { openAPISpec } from './lib/orpc'
 
-const app = new Hono()
+const app = new Elysia()
 
-// Automatic request/response logging with hono-pino
-app.use(honoLogger())
 app.use(
-  '/*',
   cors({
     origin: env.CORS_ORIGIN.split(',') || '',
-    allowMethods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
-    allowHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
     credentials: true
   })
 )
@@ -29,33 +22,38 @@ app.use(
 // Extract just the path from BETTER_AUTH_API_URL (e.g., "/api/auth")
 const authPath = new URL(env.BETTER_AUTH_API_URL).pathname
 
-app.on(['POST', 'GET'], `${authPath}/**`, (c) => auth.handler(c.req.raw))
-
-const handler = new RPCHandler(appRouter)
-app.use('/rpc-v1/*', async (c, next) => {
-  const context = await createContext({ context: c })
-  const { matched, response } = await handler.handle(c.req.raw, {
-    prefix: '/rpc-v1',
-    context
-  })
-
-  if (matched) {
-    return c.newResponse(response.body, response)
-  }
-  await next()
+app.all(`${authPath}/*`, async (c) => {
+  const response = await auth.handler(c.request)
+  return response
 })
 
-app.get('/', (c) => c.text('OK'))
+const handler = new RPCHandler(appRouter)
+app.group('/rpc-v1', (app) =>
+  app.all('/*', async (c) => {
+    const context = await createContext({ context: c })
+    const { matched, response } = await handler.handle(c.request, {
+      prefix: '/rpc-v1',
+      context
+    })
 
-app.get('/health', (c) =>
-  c.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    if (matched) {
+      return response
+    }
+    // If not matched, return 404
+    c.set.status = 404
+    return { error: 'Not found' }
   })
 )
 
-app.get('/api-docs', (c) => c.json(openAPISpec))
+app.get('/', () => 'OK')
+
+app.get('/health', () => ({
+  status: 'ok',
+  timestamp: new Date().toISOString(),
+  uptime: process.uptime()
+}))
+
+app.get('/api-docs', () => openAPISpec)
 
 // Start the server
 const port = Number.parseInt(env.PORT, 10)
