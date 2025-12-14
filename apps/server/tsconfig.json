@@ -8,7 +8,8 @@
     "skipLibCheck": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
+      "@api/*": ["./src/*"],
+      "@web/*": ["../web/src/*"]
     },
     "outDir": "./dist",
     "composite": true,

@@ -20,7 +20,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@api/*": ["../server/src/*"],
+      "@web/*": ["./src/*"]
     },
     "strictNullChecks": true
   },

@@ -9,6 +9,6 @@ if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
 }
 
 export const authClient = createWebAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
+  baseURL: `${process.env.NEXT_PUBLIC_SERVER_URL}/auth`,
   googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
 })

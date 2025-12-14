@@ -29,6 +29,8 @@
     "@rov/orpc-contracts": "workspace:*",
     "@rov/realtime": "workspace:*",
     "@rov/shared": "workspace:*",
+    "@sinclair/typebox": "0.34.41",
+    "@tqman/nice-logger": "^1.1.1",
     "ai": "^5.0.106",
     "axios": "^1.13.2",
     "better-auth": "1.3.34",

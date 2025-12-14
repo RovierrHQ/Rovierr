@@ -1,10 +1,10 @@
-import { createAuth } from '@rov/auth'
-import { db } from '@/db'
+import { db } from '@api/db'
 import {
   sendEmailVerificationOTP,
   sendInvitationEmail,
   sendPhoneNumberVerificationOTP
-} from '@/services/email/sender'
+} from '@api/services/email/sender'
+import { createAuth } from '@rov/auth'
 import { env } from './env'
 
 export const auth = createAuth({
