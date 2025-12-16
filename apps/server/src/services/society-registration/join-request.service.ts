@@ -3,6 +3,12 @@
  * Handles join request creation, approval, rejection, and management
  */
 
+import { auth } from '@api/lib/auth'
+import { env } from '@api/lib/env'
+import {
+  sendRejectionEmail,
+  sendWelcomeEmail
+} from '@api/services/email/sender'
 import {
   type DB,
   formResponses as formResponsesTable,
@@ -17,9 +23,6 @@ import type {
 } from '@rov/orpc-contracts'
 import type { InferSelectModel } from 'drizzle-orm'
 import { and, count, desc, eq, gte, inArray, lte, or } from 'drizzle-orm'
-import { auth } from '@/lib/auth'
-import { env } from '@/lib/env'
-import { sendRejectionEmail, sendWelcomeEmail } from '@/services/email/sender'
 
 type JoinRequest = InferSelectModel<typeof joinRequestsTable>
 

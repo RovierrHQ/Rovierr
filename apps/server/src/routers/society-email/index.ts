@@ -1,3 +1,15 @@
+import { db } from '@api/db'
+import { auth } from '@api/lib/auth'
+import { logger } from '@api/lib/logger'
+import { protectedProcedure } from '@api/lib/orpc'
+import {
+  replaceVariables,
+  validateVariables
+} from '@api/lib/variable-replacement'
+import {
+  getOrganizationMemberCount,
+  sendSocietyEmail as sendEmail
+} from '@api/services/email/society-email'
 import { ORPCError } from '@orpc/server'
 import {
   organization,
@@ -5,15 +17,6 @@ import {
   user
 } from '@rov/db/schema'
 import { and, desc, eq } from 'drizzle-orm'
-import { db } from '@/db'
-import { auth } from '@/lib/auth'
-import { logger } from '@/lib/logger'
-import { protectedProcedure } from '@/lib/orpc'
-import { validateVariables } from '@/lib/variable-replacement'
-import {
-  getOrganizationMemberCount,
-  sendSocietyEmail as sendEmail
-} from '@/services/email/society-email'
 
 /**
  * Check if user is president of the organization
@@ -164,9 +167,6 @@ export const societyEmail = {
           name: org.name
         }
       }
-
-      // Replace variables with sample data
-      const { replaceVariables } = await import('@/lib/variable-replacement')
 
       const previewSubject = replaceVariables(subject, sampleData, false)
       const previewHtml = replaceVariables(bodyHtml, sampleData, true)

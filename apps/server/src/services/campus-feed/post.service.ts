@@ -3,6 +3,7 @@
  * Handles campus feed post CRUD operations
  */
 
+import { getPresignedUrlFromFullUrl, isS3Url } from '@api/services/s3'
 import {
   type DB,
   eventPosts,
@@ -21,7 +22,6 @@ import type {
   PostWithDetails
 } from '@rov/orpc-contracts'
 import { and, count, desc, eq, type SQL } from 'drizzle-orm'
-import { getPresignedUrlFromFullUrl, isS3Url } from '@/services/s3'
 
 export class PostService {
   private readonly db: DB

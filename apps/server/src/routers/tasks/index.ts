@@ -1,5 +1,5 @@
 import { db } from '@api/db'
-import { UNAUTHORIZED } from '@api/lib/common-erros'
+import { UNAUTHORIZED } from '@api/lib/common-errors'
 import { betterAuth } from '@api/middleware/auth'
 import {
   member as memberTable,

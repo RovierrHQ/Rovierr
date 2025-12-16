@@ -1,5 +1,12 @@
-import { enrollment } from './enrollment'
+/**
+ * Academic Router
+ *
+ * Main router for academic features including enrollment management.
+ */
 
-export const academic = {
-  enrollment
-}
+import { Elysia } from 'elysia'
+import { enrollmentRouter } from './enrollment'
+
+export const academicRouter = new Elysia({ prefix: '/academic' }).use(
+  enrollmentRouter
+)

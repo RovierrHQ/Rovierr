@@ -1,27 +1,37 @@
+import { env } from '@api/lib/env'
+import { betterAuth } from '@api/middleware/auth'
 import { generateConnectionToken } from '@rov/realtime/server'
-import { env } from '@/lib/env'
-import { protectedProcedure } from '../lib/orpc'
+import Elysia from 'elysia'
+import z from 'zod'
 
-export const realtime = {
-  // Get Centrifugo connection token for authenticated user
-  getConnectionToken: protectedProcedure.realtime.getConnectionToken.handler(
-    async ({ context }) => {
-      const secret = env.CENTRIFUGO_HMAC_SECRET_KEY
+export const realtime = new Elysia({ name: 'realtime' })
+  .use(betterAuth)
+  .group('/realtime', { auth: true }, (app) =>
+    app.get(
+      '/token',
+      async ({ user }) => {
+        const secret = env.CENTRIFUGO_HMAC_SECRET_KEY
 
-      if (!secret) {
-        throw new Error('CENTRIFUGO_HMAC_SECRET_KEY not configured')
+        if (!secret) {
+          throw new Error('CENTRIFUGO_HMAC_SECRET_KEY not configured')
+        }
+
+        const token = await generateConnectionToken(
+          user.id,
+          secret,
+          '1h' // Token valid for 1 hour
+        )
+
+        return {
+          token,
+          expiresIn: 3600 // seconds
+        }
+      },
+      {
+        response: z.object({
+          token: z.string(),
+          expiresIn: z.number()
+        })
       }
-
-      const token = await generateConnectionToken(
-        context.session.user.id,
-        secret,
-        '1h' // Token valid for 1 hour
-      )
-
-      return {
-        token,
-        expiresIn: 3600 // seconds
-      }
-    }
+    )
   )
-}

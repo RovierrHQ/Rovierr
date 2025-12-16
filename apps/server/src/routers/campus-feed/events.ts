@@ -1,29 +1,51 @@
-import { ORPCError } from '@orpc/server'
-import { db } from '@/db'
-import { protectedProcedure } from '@/lib/orpc'
-import { EventService } from '@/services/campus-feed/event.service'
+/**
+ * Campus Feed Events Router
+ *
+ * Handles event RSVP operations
+ */
+
+import { db } from '@api/db'
+import { betterAuth } from '@api/middleware/auth'
+import { EventService } from '@api/services/campus-feed/event.service'
+import { Elysia } from 'elysia'
+import { rsvpResponseSchema, rsvpSchema } from './schemas'
 
 const eventService = new EventService(db)
 
-export const events = {
-  // ============================================================================
-  // RSVP Operations
-  // ============================================================================
-
-  rsvp: protectedProcedure.campusFeed.rsvp.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await eventService.rsvpToEvent(input, userId)
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message === 'Event post not found'
-        ) {
-          throw new ORPCError('NOT_FOUND', { message: 'Event post not found' })
+export const eventsRouter = new Elysia({ name: '/events' })
+  .use(betterAuth)
+  .group('/events', { auth: true }, (app) =>
+    /**
+     * RSVP to an event post
+     * POST /campus-feed/events/rsvp
+     */
+    app.post(
+      '/rsvp',
+      async ({ body, user }) => {
+        if (!user) {
+          throw new Error('User not authenticated')
         }
-        throw error
+
+        try {
+          return await eventService.rsvpToEvent(body, user.id)
+        } catch (error) {
+          if (
+            error instanceof Error &&
+            error.message === 'Event post not found'
+          ) {
+            throw new Error('Event post not found')
+          }
+          throw error
+        }
+      },
+      {
+        body: rsvpSchema,
+        response: rsvpResponseSchema,
+        detail: {
+          summary: 'RSVP to Event',
+          description: 'RSVP to an event post',
+          tags: ['Campus Feed']
+        }
       }
-    }
+    )
   )
-}

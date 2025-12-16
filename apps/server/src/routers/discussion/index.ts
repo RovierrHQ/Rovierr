@@ -1,11 +1,11 @@
-import { follows } from './follows'
-import { replies } from './replies'
-import { threads } from './threads'
-import { votes } from './votes'
+import { Elysia } from 'elysia'
+import { followsRouter } from './follows'
+import { repliesRouter } from './replies'
+import { threadsRouter } from './threads'
+import { votesRouter } from './votes'
 
-export const discussion = {
-  thread: threads,
-  reply: replies,
-  vote: votes,
-  follow: follows
-}
+export const discussionRouter = new Elysia({ prefix: '/discussion' })
+  .use(threadsRouter)
+  .use(repliesRouter)
+  .use(votesRouter)
+  .use(followsRouter)

@@ -1,315 +1,380 @@
-import { ORPCError } from '@orpc/server'
+import { db } from '@api/db'
+import { NOT_FOUND } from '@api/lib/common-errors'
+import { betterAuth } from '@api/middleware/auth'
 import { resume } from '@rov/db/schema'
 import { and, count, desc, eq } from 'drizzle-orm'
+import Elysia, { t } from 'elysia'
 import { nanoid } from 'nanoid'
-import { db } from '@/db'
-import { protectedProcedure } from '@/lib/orpc'
+import {
+  createResumeSchema,
+  listResumesSchema,
+  updateResumeDataSchema,
+  updateResumeMetadataSchema,
+  updateResumeSectionSchema
+} from './schemas'
 
-export const resumeRouter = {
-  // ============================================================================
-  // List Resumes
-  // ============================================================================
+export const resumeRouter = new Elysia({ prefix: '/resume' })
+  .use(betterAuth)
+  .group('', { auth: true }, (app) =>
+    app
+      // ============================================================================
+      // List Resumes
+      // ============================================================================
+      .get(
+        '/',
+        async ({ query, user }) => {
+          try {
+            const userId = user.id
+            const { limit, offset, status } = query
 
-  list: protectedProcedure.resume.list.handler(async ({ input, context }) => {
-    try {
-      const userId = context.session.user.id
-      const { limit, offset, status } = input
+            console.log('[RESUME LIST] Starting query:', {
+              userId,
+              limit,
+              offset,
+              status
+            })
 
-      console.log('[RESUME LIST] Starting query:', {
-        userId,
-        limit,
-        offset,
-        status
-      })
+            // Build where clause
+            const whereClause = status
+              ? and(eq(resume.userId, userId), eq(resume.status, status))
+              : eq(resume.userId, userId)
 
-      // Build where clause
-      const whereClause = status
-        ? and(eq(resume.userId, userId), eq(resume.status, status))
-        : eq(resume.userId, userId)
+            // Fetch resumes (excluding data field for performance)
+            const resumes = await db
+              .select({
+                id: resume.id,
+                userId: resume.userId,
+                title: resume.title,
+                targetPosition: resume.targetPosition,
+                status: resume.status,
+                templateId: resume.templateId,
+                sourceResumeId: resume.sourceResumeId,
+                optimizedForJobId: resume.optimizedForJobId,
+                appliedSuggestions: resume.appliedSuggestions,
+                createdAt: resume.createdAt,
+                updatedAt: resume.updatedAt
+              })
+              .from(resume)
+              .where(whereClause)
+              .orderBy(desc(resume.updatedAt))
+              .limit(limit)
+              .offset(offset)
 
-      // Fetch resumes (excluding data field for performance)
-      const resumes = await db
-        .select({
-          id: resume.id,
-          userId: resume.userId,
-          title: resume.title,
-          targetPosition: resume.targetPosition,
-          status: resume.status,
-          templateId: resume.templateId,
-          sourceResumeId: resume.sourceResumeId,
-          optimizedForJobId: resume.optimizedForJobId,
-          appliedSuggestions: resume.appliedSuggestions,
-          createdAt: resume.createdAt,
-          updatedAt: resume.updatedAt
-        })
-        .from(resume)
-        .where(whereClause)
-        .orderBy(desc(resume.updatedAt))
-        .limit(limit)
-        .offset(offset)
+            // Get total count
+            const [{ value: total }] = await db
+              .select({ value: count() })
+              .from(resume)
+              .where(whereClause)
 
-      // Get total count
-      const [{ value: total }] = await db
-        .select({ value: count() })
-        .from(resume)
-        .where(whereClause)
+            const result = {
+              resumes: resumes.map((r) => ({
+                ...r,
+                createdAt: r.createdAt || new Date().toISOString(),
+                updatedAt: r.updatedAt || new Date().toISOString()
+              })),
+              total,
+              hasMore: offset + limit < total
+            }
 
-      const result = {
-        resumes: resumes.map((r) => ({
-          ...r,
-          createdAt: r.createdAt || new Date().toISOString(),
-          updatedAt: r.updatedAt || new Date().toISOString()
-        })),
-        total,
-        hasMore: offset + limit < total
-      }
-
-      console.log('[RESUME LIST] Success:', {
-        count: result.resumes.length,
-        total: result.total
-      })
-      return result
-    } catch (error) {
-      console.error('[RESUME LIST] Error:', error)
-      throw error
-    }
-  }),
-
-  // ============================================================================
-  // Get Resume
-  // ============================================================================
-
-  get: protectedProcedure.resume.get.handler(async ({ input, context }) => {
-    const userId = context.session.user.id
-    const { id } = input
-
-    const [result] = await db
-      .select()
-      .from(resume)
-      .where(and(eq(resume.id, id), eq(resume.userId, userId)))
-
-    if (!result) {
-      throw new ORPCError('NOT_FOUND', {
-        message: 'Resume not found'
-      })
-    }
-
-    return {
-      ...result,
-      createdAt: result.createdAt || new Date().toISOString(),
-      updatedAt: result.updatedAt || new Date().toISOString(),
-      data: result.data || {
-        basicInfo: undefined,
-        education: [],
-        experience: [],
-        projects: [],
-        certifications: [],
-        languages: [],
-        interests: [],
-        volunteer: []
-      }
-    }
-  }),
-
-  // ============================================================================
-  // Create Resume
-  // ============================================================================
-
-  create: protectedProcedure.resume.create.handler(
-    async ({ input, context }) => {
-      const userId = context.session.user.id
-      const { title, targetPosition, templateId } = input
-
-      const resumeId = nanoid()
-
-      const [newResume] = await db
-        .insert(resume)
-        .values({
-          id: resumeId,
-          userId,
-          title,
-          targetPosition: targetPosition || null,
-          status: 'draft' as const,
-          templateId: templateId || 'default',
-          data: {
-            basicInfo: undefined,
-            education: [],
-            experience: [],
-            projects: [],
-            certifications: [],
-            languages: [],
-            interests: [],
-            volunteer: []
+            console.log('[RESUME LIST] Success:', {
+              count: result.resumes.length,
+              total: result.total
+            })
+            return result
+          } catch (error) {
+            console.error('[RESUME LIST] Error:', error)
+            throw error
           }
-        })
-        .returning()
+        },
+        {
+          query: listResumesSchema,
+          detail: {
+            tags: ['Resume'],
+            summary: 'List Resumes',
+            description: 'List all resumes for the authenticated user'
+          }
+        }
+      )
 
-      return {
-        id: newResume.id,
-        title: newResume.title,
-        createdAt: newResume.createdAt || new Date().toISOString()
-      }
-    }
-  ),
+      // ============================================================================
+      // Get Resume
+      // ============================================================================
+      .get(
+        '/:id',
+        async ({ params, user }) => {
+          const userId = user.id
+          const { id } = params
 
-  // ============================================================================
-  // Update Resume Metadata
-  // ============================================================================
+          const [result] = await db
+            .select()
+            .from(resume)
+            .where(and(eq(resume.id, id), eq(resume.userId, userId)))
 
-  updateMetadata: protectedProcedure.resume.updateMetadata.handler(
-    async ({ input, context }) => {
-      const userId = context.session.user.id
-      const { id, ...updates } = input
+          if (!result) {
+            throw new NOT_FOUND('Resume not found')
+          }
 
-      // Verify ownership
-      const [existing] = await db
-        .select({ id: resume.id })
-        .from(resume)
-        .where(and(eq(resume.id, id), eq(resume.userId, userId)))
+          return {
+            ...result,
+            createdAt: result.createdAt || new Date().toISOString(),
+            updatedAt: result.updatedAt || new Date().toISOString(),
+            data: result.data || {
+              basicInfo: undefined,
+              education: [],
+              experience: [],
+              projects: [],
+              certifications: [],
+              languages: [],
+              interests: [],
+              volunteer: []
+            }
+          }
+        },
+        {
+          params: t.Object({
+            id: t.String({ minLength: 1, description: 'Resume ID' })
+          }),
+          detail: {
+            tags: ['Resume'],
+            summary: 'Get Resume',
+            description: 'Get a resume by ID with all data'
+          }
+        }
+      )
 
-      if (!existing) {
-        throw new ORPCError('NOT_FOUND', {
-          message: 'Resume not found'
-        })
-      }
+      // ============================================================================
+      // Create Resume
+      // ============================================================================
+      .post(
+        '/',
+        async ({ body, user }) => {
+          const userId = user.id
+          const { title, targetPosition, templateId } = body
 
-      // Update metadata (updatedAt is handled by $onUpdate)
-      const [updated] = await db
-        .update(resume)
-        .set(updates)
-        .where(eq(resume.id, id))
-        .returning({
-          id: resume.id,
-          userId: resume.userId,
-          title: resume.title,
-          targetPosition: resume.targetPosition,
-          status: resume.status,
-          templateId: resume.templateId,
-          sourceResumeId: resume.sourceResumeId,
-          optimizedForJobId: resume.optimizedForJobId,
-          appliedSuggestions: resume.appliedSuggestions,
-          createdAt: resume.createdAt,
-          updatedAt: resume.updatedAt
-        })
+          const resumeId = nanoid()
 
-      return {
-        ...updated,
-        createdAt: updated.createdAt || new Date().toISOString(),
-        updatedAt: updated.updatedAt || new Date().toISOString()
-      }
-    }
-  ),
+          const [newResume] = await db
+            .insert(resume)
+            .values({
+              id: resumeId,
+              userId,
+              title,
+              targetPosition: targetPosition || null,
+              status: 'draft' as const,
+              templateId: templateId || 'default',
+              data: {
+                education: [],
+                experience: [],
+                projects: [],
+                certifications: [],
+                languages: [],
+                interests: [],
+                volunteer: []
+              }
+            })
+            .returning()
 
-  // ============================================================================
-  // Update Resume Section
-  // ============================================================================
+          return {
+            id: newResume.id,
+            title: newResume.title,
+            createdAt: newResume.createdAt || new Date().toISOString()
+          }
+        },
+        {
+          body: createResumeSchema,
+          detail: {
+            tags: ['Resume'],
+            summary: 'Create Resume',
+            description: 'Create a new resume'
+          }
+        }
+      )
 
-  updateSection: protectedProcedure.resume.updateSection.handler(
-    async ({ input, context }) => {
-      const userId = context.session.user.id
-      const { resumeId, section, data } = input
+      // ============================================================================
+      // Update Resume Metadata
+      // ============================================================================
+      .patch(
+        '/metadata',
+        async ({ body, user }) => {
+          const userId = user.id
+          const { id, ...updates } = body
 
-      // Verify ownership and get current data
-      const [existing] = await db
-        .select()
-        .from(resume)
-        .where(and(eq(resume.id, resumeId), eq(resume.userId, userId)))
+          // Verify ownership
+          const [existing] = await db
+            .select({ id: resume.id })
+            .from(resume)
+            .where(and(eq(resume.id, id), eq(resume.userId, userId)))
 
-      if (!existing) {
-        throw new ORPCError('NOT_FOUND', {
-          message: 'Resume not found'
-        })
-      }
+          if (!existing) {
+            throw new NOT_FOUND('Resume not found')
+          }
 
-      // Merge new section data with existing data
-      const currentData = existing.data || {}
-      const updatedData = {
-        ...currentData,
-        [section]: data
-      }
+          // Update metadata (updatedAt is handled by $onUpdate)
+          const [updated] = await db
+            .update(resume)
+            .set(updates)
+            .where(eq(resume.id, id))
+            .returning({
+              id: resume.id,
+              userId: resume.userId,
+              title: resume.title,
+              targetPosition: resume.targetPosition,
+              status: resume.status,
+              templateId: resume.templateId,
+              sourceResumeId: resume.sourceResumeId,
+              optimizedForJobId: resume.optimizedForJobId,
+              appliedSuggestions: resume.appliedSuggestions,
+              createdAt: resume.createdAt,
+              updatedAt: resume.updatedAt
+            })
 
-      // Update the resume (updatedAt is handled by $onUpdate)
-      const [updated] = await db
-        .update(resume)
-        .set({
-          data: updatedData
-        })
-        .where(eq(resume.id, resumeId))
-        .returning({
-          updatedAt: resume.updatedAt
-        })
+          return {
+            ...updated,
+            createdAt: updated.createdAt || new Date().toISOString(),
+            updatedAt: updated.updatedAt || new Date().toISOString()
+          }
+        },
+        {
+          body: updateResumeMetadataSchema,
+          detail: {
+            tags: ['Resume'],
+            summary: 'Update Resume Metadata',
+            description: 'Update resume title, position, status, or template'
+          }
+        }
+      )
 
-      return {
-        success: true,
-        updatedAt: updated.updatedAt || new Date().toISOString()
-      }
-    }
-  ),
+      // ============================================================================
+      // Update Resume Section
+      // ============================================================================
+      .patch(
+        '/section',
+        async ({ body, user }) => {
+          const userId = user.id
+          const { resumeId, section, data } = body
 
-  // ============================================================================
-  // Update Resume Data (All Sections)
-  // ============================================================================
+          // Verify ownership and get current data
+          const [existing] = await db
+            .select()
+            .from(resume)
+            .where(and(eq(resume.id, resumeId), eq(resume.userId, userId)))
 
-  updateData: protectedProcedure.resume.updateData.handler(
-    async ({ input, context }) => {
-      const userId = context.session.user.id
-      const { resumeId, data } = input
+          if (!existing) {
+            throw new NOT_FOUND('Resume not found')
+          }
 
-      // Verify ownership
-      const [existing] = await db
-        .select({ id: resume.id })
-        .from(resume)
-        .where(and(eq(resume.id, resumeId), eq(resume.userId, userId)))
+          // Merge new section data with existing data
+          const currentData = existing.data || {}
+          const updatedData = {
+            ...currentData,
+            [section]: data
+          }
 
-      if (!existing) {
-        throw new ORPCError('NOT_FOUND', {
-          message: 'Resume not found'
-        })
-      }
+          // Update the resume (updatedAt is handled by $onUpdate)
+          const [updated] = await db
+            .update(resume)
+            .set({
+              data: updatedData
+            })
+            .where(eq(resume.id, resumeId))
+            .returning({
+              updatedAt: resume.updatedAt
+            })
 
-      // Update all resume data at once
-      const [updated] = await db
-        .update(resume)
-        .set({
-          data
-        })
-        .where(eq(resume.id, resumeId))
-        .returning({
-          updatedAt: resume.updatedAt
-        })
+          return {
+            success: true,
+            updatedAt: updated.updatedAt || new Date().toISOString()
+          }
+        },
+        {
+          body: updateResumeSectionSchema,
+          detail: {
+            tags: ['Resume'],
+            summary: 'Update Resume Section',
+            description: 'Update a specific section of resume data'
+          }
+        }
+      )
 
-      return {
-        success: true,
-        updatedAt: updated.updatedAt || new Date().toISOString()
-      }
-    }
-  ),
+      // ============================================================================
+      // Update Resume Data (All Sections)
+      // ============================================================================
+      .patch(
+        '/data',
+        async ({ body, user }) => {
+          const userId = user.id
+          const { resumeId, data } = body
 
-  // ============================================================================
-  // Delete Resume
-  // ============================================================================
+          // Verify ownership
+          const [existing] = await db
+            .select({ id: resume.id })
+            .from(resume)
+            .where(and(eq(resume.id, resumeId), eq(resume.userId, userId)))
 
-  delete: protectedProcedure.resume.delete.handler(
-    async ({ input, context }) => {
-      const userId = context.session.user.id
-      const { id } = input
+          if (!existing) {
+            throw new NOT_FOUND('Resume not found')
+          }
 
-      // Verify ownership
-      const [existing] = await db
-        .select({ id: resume.id })
-        .from(resume)
-        .where(and(eq(resume.id, id), eq(resume.userId, userId)))
+          // Update all resume data at once
+          const [updated] = await db
+            .update(resume)
+            .set({
+              // @ts-expect-error - Database type expects required basicInfo fields, but API allows partial
+              data
+            })
+            .where(eq(resume.id, resumeId))
+            .returning({
+              updatedAt: resume.updatedAt
+            })
 
-      if (!existing) {
-        throw new ORPCError('NOT_FOUND', {
-          message: 'Resume not found'
-        })
-      }
+          return {
+            success: true,
+            updatedAt: updated.updatedAt || new Date().toISOString()
+          }
+        },
+        {
+          body: updateResumeDataSchema,
+          detail: {
+            tags: ['Resume'],
+            summary: 'Update Resume Data',
+            description: 'Update all resume data at once'
+          }
+        }
+      )
 
-      // Delete the resume
-      await db.delete(resume).where(eq(resume.id, id))
+      // ============================================================================
+      // Delete Resume
+      // ============================================================================
+      .delete(
+        '/:id',
+        async ({ params, user }) => {
+          const userId = user.id
+          const { id } = params
 
-      return { success: true }
-    }
+          // Verify ownership
+          const [existing] = await db
+            .select({ id: resume.id })
+            .from(resume)
+            .where(and(eq(resume.id, id), eq(resume.userId, userId)))
+
+          if (!existing) {
+            throw new NOT_FOUND('Resume not found')
+          }
+
+          // Delete the resume
+          await db.delete(resume).where(eq(resume.id, id))
+
+          return { success: true }
+        },
+        {
+          params: t.Object({
+            id: t.String({ minLength: 1, description: 'Resume ID' })
+          }),
+          detail: {
+            tags: ['Resume'],
+            summary: 'Delete Resume',
+            description: 'Delete a resume'
+          }
+        }
+      )
   )
-}

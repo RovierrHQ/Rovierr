@@ -3,6 +3,7 @@
  * Handles likes, comments, and shares for campus feed posts
  */
 
+import { getPresignedUrlFromFullUrl, isS3Url } from '@api/services/s3'
 import {
   commentLikes,
   type DB,
@@ -13,7 +14,6 @@ import {
 } from '@rov/db'
 import type { CommentWithAuthor, CreateCommentInput } from '@rov/orpc-contracts'
 import { and, count, desc, eq } from 'drizzle-orm'
-import { getPresignedUrlFromFullUrl, isS3Url } from '@/services/s3'
 
 export class InteractionService {
   private readonly db: DB

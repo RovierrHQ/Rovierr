@@ -1,155 +1,259 @@
-import { ORPCError } from '@orpc/server'
-import { db } from '@/db'
-import { protectedProcedure } from '@/lib/orpc'
-import { ReplyService } from '@/services/discussion/reply.service'
-import { ThreadService } from '@/services/discussion/thread.service'
+import { db } from '@api/db'
+import { betterAuth } from '@api/middleware/auth'
+import { ReplyService } from '@api/services/discussion/reply.service'
+import { ThreadService } from '@api/services/discussion/thread.service'
+import { Elysia } from 'elysia'
+import {
+  createThreadSchema,
+  listThreadsSchema,
+  lockThreadSchema,
+  pinThreadSchema,
+  updateThreadSchema
+} from './schemas'
 
 const replyService = new ReplyService(db)
 const threadService = new ThreadService(db)
 
-export const threads = {
-  // ============================================================================
-  // Thread CRUD Operations
-  // ============================================================================
-
-  create: protectedProcedure.discussion.thread.create.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await threadService.createThread(input, userId)
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('permission')) {
-          throw new ORPCError('FORBIDDEN', { message: error.message })
-        }
-        throw error
-      }
-    }
-  ),
-
-  list: protectedProcedure.discussion.thread.list.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await threadService.listThreads(input, userId)
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('permission')) {
-          throw new ORPCError('FORBIDDEN', { message: error.message })
-        }
-        throw error
-      }
-    }
-  ),
-
-  get: protectedProcedure.discussion.thread.get.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        const thread = await threadService.getThreadById(input.id, userId)
-
-        // Fetch replies for the thread
-        const replies = await replyService.getRepliesForThread(input.id, userId)
-
-        return {
-          ...thread,
-          replies
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Thread not found') {
-            throw new ORPCError('NOT_FOUND', { message: 'Thread not found' })
+export const threadsRouter = new Elysia({ prefix: '/thread' })
+  .use(betterAuth)
+  .group('', { auth: true }, (app) =>
+    app
+      // ============================================================================
+      // Thread CRUD Operations
+      // ============================================================================
+      .post(
+        '/create',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
           }
-          if (error.message.includes('permission')) {
-            throw new ORPCError('FORBIDDEN', { message: error.message })
+
+          try {
+            const userId = user.id
+            return await threadService.createThread(body, userId)
+          } catch (error) {
+            if (
+              error instanceof Error &&
+              error.message.includes('permission')
+            ) {
+              throw new Error(error.message)
+            }
+            throw error
+          }
+        },
+        {
+          body: createThreadSchema,
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Create Thread',
+            description: 'Create a new discussion thread'
           }
         }
-        throw error
-      }
-    }
-  ),
-
-  update: protectedProcedure.discussion.thread.update.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        // TODO: Check if user is moderator for the context
-        const isModerator = false
-        return await threadService.updateThread(input, userId, isModerator)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Thread not found') {
-            throw new ORPCError('NOT_FOUND', { message: 'Thread not found' })
+      )
+      .get(
+        '/list',
+        async ({ query, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
           }
-          if (error.message.includes('permission')) {
-            throw new ORPCError('FORBIDDEN', { message: error.message })
+
+          try {
+            const userId = user.id
+            return await threadService.listThreads(query, userId)
+          } catch (error) {
+            if (
+              error instanceof Error &&
+              error.message.includes('permission')
+            ) {
+              throw new Error(error.message)
+            }
+            throw error
+          }
+        },
+        {
+          query: listThreadsSchema,
+          detail: {
+            tags: ['Discussion'],
+            summary: 'List Threads',
+            description: 'List discussion threads with filters'
           }
         }
-        throw error
-      }
-    }
-  ),
-
-  delete: protectedProcedure.discussion.thread.delete.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        // TODO: Check if user is moderator for the context
-        const isModerator = false
-        return await threadService.deleteThread(input.id, userId, isModerator)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Thread not found') {
-            throw new ORPCError('NOT_FOUND', { message: 'Thread not found' })
+      )
+      .get(
+        '/:id',
+        async ({ params, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
           }
-          if (error.message.includes('permission')) {
-            throw new ORPCError('FORBIDDEN', { message: error.message })
+
+          try {
+            const userId = user.id
+            const thread = await threadService.getThreadById(params.id, userId)
+
+            // Fetch replies for the thread
+            const replies = await replyService.getRepliesForThread(
+              params.id,
+              userId
+            )
+
+            return {
+              ...thread,
+              replies
+            }
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Thread not found') {
+                throw new Error('Thread not found')
+              }
+              if (error.message.includes('permission')) {
+                throw new Error(error.message)
+              }
+            }
+            throw error
+          }
+        },
+        {
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Get Thread',
+            description: 'Get a single thread with replies'
           }
         }
-        throw error
-      }
-    }
-  ),
-
-  // ============================================================================
-  // Moderator Actions
-  // ============================================================================
-
-  pin: protectedProcedure.discussion.thread.pin.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        // TODO: Check if user is moderator for the context
-        return await threadService.pinThread(input, userId)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Thread not found') {
-            throw new ORPCError('NOT_FOUND', { message: 'Thread not found' })
+      )
+      .patch(
+        '/update',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
           }
-          throw new ORPCError('FORBIDDEN', {
-            message: 'User does not have moderator permission to pin threads'
-          })
-        }
-        throw error
-      }
-    }
-  ),
 
-  lock: protectedProcedure.discussion.thread.lock.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        // TODO: Check if user is moderator for the context
-        return await threadService.lockThread(input, userId)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Thread not found') {
-            throw new ORPCError('NOT_FOUND', { message: 'Thread not found' })
+          try {
+            const userId = user.id
+            // TODO: Check if user is moderator for the context
+            const isModerator = false
+            return await threadService.updateThread(body, userId, isModerator)
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Thread not found') {
+                throw new Error('Thread not found')
+              }
+              if (error.message.includes('permission')) {
+                throw new Error(error.message)
+              }
+            }
+            throw error
           }
-          throw new ORPCError('FORBIDDEN', {
-            message: 'User does not have moderator permission to lock threads'
-          })
+        },
+        {
+          body: updateThreadSchema,
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Update Thread',
+            description: 'Update a thread'
+          }
         }
-        throw error
-      }
-    }
+      )
+      .delete(
+        '/:id',
+        async ({ params, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
+
+          try {
+            const userId = user.id
+            // TODO: Check if user is moderator for the context
+            const isModerator = false
+            return await threadService.deleteThread(
+              params.id,
+              userId,
+              isModerator
+            )
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Thread not found') {
+                throw new Error('Thread not found')
+              }
+              if (error.message.includes('permission')) {
+                throw new Error(error.message)
+              }
+            }
+            throw error
+          }
+        },
+        {
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Delete Thread',
+            description: 'Delete a thread'
+          }
+        }
+      )
+      // ============================================================================
+      // Moderator Actions
+      // ============================================================================
+      .patch(
+        '/pin',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
+
+          try {
+            const userId = user.id
+            // TODO: Check if user is moderator for the context
+            return await threadService.pinThread(body, userId)
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Thread not found') {
+                throw new Error('Thread not found')
+              }
+              throw new Error(
+                'User does not have moderator permission to pin threads'
+              )
+            }
+            throw error
+          }
+        },
+        {
+          body: pinThreadSchema,
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Pin Thread',
+            description: 'Pin or unpin a thread'
+          }
+        }
+      )
+      .patch(
+        '/lock',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
+
+          try {
+            const userId = user.id
+            // TODO: Check if user is moderator for the context
+            return await threadService.lockThread(body, userId)
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Thread not found') {
+                throw new Error('Thread not found')
+              }
+              throw new Error(
+                'User does not have moderator permission to lock threads'
+              )
+            }
+            throw error
+          }
+        },
+        {
+          body: lockThreadSchema,
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Lock Thread',
+            description: 'Lock or unlock a thread'
+          }
+        }
+      )
   )
-}

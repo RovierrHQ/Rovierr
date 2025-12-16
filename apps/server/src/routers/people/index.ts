@@ -1,7 +1,7 @@
+import { db } from '@api/db'
+import { protectedProcedure } from '@api/lib/orpc'
+import { PeopleService } from '@api/services/people'
 import { ORPCError } from '@orpc/server'
-import { db } from '@/db'
-import { protectedProcedure } from '@/lib/orpc'
-import { PeopleService } from '@/services/people'
 
 const peopleService = new PeopleService(db)
 

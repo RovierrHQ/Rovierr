@@ -1,140 +1,256 @@
-import { ORPCError } from '@orpc/server'
-import { db } from '@/db'
-import { protectedProcedure } from '@/lib/orpc'
-import { PostService } from '@/services/campus-feed/post.service'
-import { getPresignedUrlFromFullUrl, uploadImageToS3 } from '@/services/s3'
+/**
+ * Campus Feed Posts Router
+ *
+ * Handles post CRUD operations
+ */
+
+import { db } from '@api/db'
+import { betterAuth } from '@api/middleware/auth'
+import { PostService } from '@api/services/campus-feed/post.service'
+import { getPresignedUrlFromFullUrl, uploadImageToS3 } from '@api/services/s3'
+import { Elysia } from 'elysia'
+import { z } from 'zod'
+import {
+  createEventPostSchema,
+  createPostSchema,
+  deleteResponseSchema,
+  listPostsSchema,
+  paginatedPostsSchema,
+  postWithDetailsSchema,
+  uploadMediaResponseSchema,
+  uploadMediaSchema
+} from './schemas'
 
 const postService = new PostService(db)
 
-export const posts = {
-  // ============================================================================
-  // Post CRUD Operations
-  // ============================================================================
-
-  create: protectedProcedure.campusFeed.create.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await postService.createPost(input, userId, 'user')
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new ORPCError('VALIDATION_ERROR', { message: error.message })
-        }
-        throw error
-      }
-    }
-  ),
-
-  createEvent: protectedProcedure.campusFeed.createEvent.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await postService.createEventPost(input, userId, 'user')
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new ORPCError('VALIDATION_ERROR', { message: error.message })
-        }
-        throw error
-      }
-    }
-  ),
-
-  list: protectedProcedure.campusFeed.list.handler(
-    async ({ input, context }) => {
-      console.log('[campusFeed.list] Starting with input:', {
-        input,
-        userId: context.session.user.id
-      })
-      try {
-        const userId = context.session.user.id
-        const result = await postService.listPosts(input, userId)
-        console.log('[campusFeed.list] Successfully fetched posts:', {
-          count: result.posts.length,
-          total: result.total,
-          hasMore: result.hasMore
-        })
-        return result
-      } catch (error) {
-        console.error('[campusFeed.list] Error fetching posts:', error)
-        if (error instanceof Error) {
-          console.error('[campusFeed.list] Error details:', {
-            message: error.message,
-            stack: error.stack
-          })
-          throw new ORPCError('INTERNAL_SERVER_ERROR', {
-            message: `Failed to fetch posts: ${error.message}`
-          })
-        }
-        throw error
-      }
-    }
-  ),
-
-  get: protectedProcedure.campusFeed.get.handler(async ({ input, context }) => {
-    try {
-      const userId = context.session.user.id
-      return await postService.getPostById(input.id, userId)
-    } catch (error) {
-      if (error instanceof Error && error.message === 'Post not found') {
-        throw new ORPCError('NOT_FOUND', { message: 'Post not found' })
-      }
-      throw error
-    }
-  }),
-
-  delete: protectedProcedure.campusFeed.delete.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        await postService.deletePost(input.id, userId)
-        return { success: true }
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Post not found') {
-            throw new ORPCError('NOT_FOUND', { message: 'Post not found' })
+export const postsRouter = new Elysia({ name: 'posts' })
+  .use(betterAuth)
+  .group('/posts', { auth: true }, (app) =>
+    /**
+     * Create a new post
+     * POST /campus-feed/posts
+     */
+    app
+      .post(
+        '/',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
           }
-          if (error.message.includes('Not authorized')) {
-            throw new ORPCError('UNAUTHORIZED', {
-              message: 'Not authorized to delete this post'
+
+          try {
+            return await postService.createPost(body, user.id, 'user')
+          } catch (error) {
+            if (error instanceof Error) {
+              throw new Error(error.message)
+            }
+            throw error
+          }
+        },
+        {
+          body: createPostSchema,
+          response: postWithDetailsSchema,
+          detail: {
+            summary: 'Create Post',
+            description: 'Create a new post',
+            tags: ['Campus Feed']
+          }
+        }
+      )
+
+      /**
+       * Create a new event post
+       * POST /campus-feed/posts/events
+       */
+      .post(
+        '/events',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
+
+          try {
+            return await postService.createEventPost(body, user.id, 'user')
+          } catch (error) {
+            if (error instanceof Error) {
+              throw new Error(error.message)
+            }
+            throw error
+          }
+        },
+        {
+          body: createEventPostSchema,
+          response: postWithDetailsSchema,
+          detail: {
+            summary: 'Create Event Post',
+            description: 'Create a new event post',
+            tags: ['Campus Feed']
+          }
+        }
+      )
+
+      /**
+       * List posts with pagination and filters
+       * GET /campus-feed/posts
+       */
+      .get(
+        '/',
+        async ({ query, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
+
+          console.log('[campusFeed.list] Starting with input:', {
+            query,
+            userId: user.id
+          })
+
+          try {
+            const result = await postService.listPosts(query, user.id)
+            console.log('[campusFeed.list] Successfully fetched posts:', {
+              count: result.posts.length,
+              total: result.total,
+              hasMore: result.hasMore
             })
+            return result
+          } catch (error) {
+            console.error('[campusFeed.list] Error fetching posts:', error)
+            if (error instanceof Error) {
+              console.error('[campusFeed.list] Error details:', {
+                message: error.message,
+                stack: error.stack
+              })
+              throw new Error(`Failed to fetch posts: ${error.message}`)
+            }
+            throw error
+          }
+        },
+        {
+          query: listPostsSchema,
+          response: paginatedPostsSchema,
+          detail: {
+            summary: 'List Posts',
+            description: 'List posts with pagination and filters',
+            tags: ['Campus Feed']
           }
         }
-        throw error
-      }
-    }
-  ),
+      )
 
-  uploadMedia: protectedProcedure.campusFeed.uploadMedia.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
+      /**
+       * Get a single post by ID
+       * GET /campus-feed/posts/:id
+       */
+      .get(
+        '/:id',
+        async ({ params, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
 
-        // For now, we only support images. Video support can be added later
-        if (input.mediaType === 'video') {
-          throw new Error('Video upload not yet supported')
+          try {
+            return await postService.getPostById(params.id, user.id)
+          } catch (error) {
+            if (error instanceof Error && error.message === 'Post not found') {
+              throw new Error('Post not found')
+            }
+            throw error
+          }
+        },
+        {
+          params: z.object({ id: z.string() }),
+          response: postWithDetailsSchema,
+          detail: {
+            summary: 'Get Post',
+            description: 'Get a single post by ID',
+            tags: ['Campus Feed']
+          }
         }
+      )
 
-        // Upload to S3 (returns S3 key URL)
-        const s3KeyUrl = await uploadImageToS3(
-          input.base64Data,
-          'campus-feed',
-          userId
-        )
+      /**
+       * Delete a post
+       * DELETE /campus-feed/posts/:id
+       */
+      .delete(
+        '/:id',
+        async ({ params, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
 
-        // Generate presigned URL for immediate preview
-        const presignedUrl = await getPresignedUrlFromFullUrl(s3KeyUrl)
-
-        // Return both: presigned URL for preview, S3 key URL for storage
-        return {
-          url: presignedUrl,
-          s3KeyUrl
+          try {
+            await postService.deletePost(params.id, user.id)
+            return { success: true }
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Post not found') {
+                throw new Error('Post not found')
+              }
+              if (error.message.includes('Not authorized')) {
+                throw new Error('Not authorized to delete this post')
+              }
+            }
+            throw error
+          }
+        },
+        {
+          params: z.object({ id: z.string() }),
+          response: deleteResponseSchema,
+          detail: {
+            summary: 'Delete Post',
+            description: 'Delete a post',
+            tags: ['Campus Feed']
+          }
         }
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new ORPCError('VALIDATION_ERROR', { message: error.message })
+      )
+
+      /**
+       * Upload media for a post
+       * POST /campus-feed/posts/media
+       */
+      .post(
+        '/media',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
+
+          try {
+            // For now, we only support images. Video support can be added later
+            if (body.mediaType === 'video') {
+              throw new Error('Video upload not yet supported')
+            }
+
+            // Upload to S3 (returns S3 key URL)
+            const s3KeyUrl = await uploadImageToS3(
+              body.base64Data,
+              'campus-feed',
+              user.id
+            )
+
+            // Generate presigned URL for immediate preview
+            const presignedUrl = await getPresignedUrlFromFullUrl(s3KeyUrl)
+
+            // Return both: presigned URL for preview, S3 key URL for storage
+            return {
+              url: presignedUrl,
+              s3KeyUrl
+            }
+          } catch (error) {
+            if (error instanceof Error) {
+              throw new Error(error.message)
+            }
+            throw error
+          }
+        },
+        {
+          body: uploadMediaSchema,
+          response: uploadMediaResponseSchema,
+          detail: {
+            summary: 'Upload Media',
+            description: 'Upload an image or video for a post',
+            tags: ['Campus Feed']
+          }
         }
-        throw error
-      }
-    }
+      )
   )
-}

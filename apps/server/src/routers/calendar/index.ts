@@ -1,5 +1,12 @@
-import { googleCalendar } from './google'
+/**
+ * Calendar Router
+ *
+ * Main router for calendar features including Google Calendar integration.
+ */
 
-export const calendar = {
-  google: googleCalendar
-}
+import { Elysia } from 'elysia'
+import { googleCalendarRouter } from './google'
+
+export const calendarRouter = new Elysia({ prefix: '/calendar' }).use(
+  googleCalendarRouter
+)

@@ -1,4 +1,13 @@
-import { ORPCError } from '@orpc/server'
+import { db } from '@api/db'
+import { auth } from '@api/lib/auth'
+import { betterAuth } from '@api/middleware/auth'
+import {
+  deleteImageFromS3,
+  getPresignedUrlFromFullUrl,
+  isS3Url,
+  uploadImageToS3
+} from '@api/services/s3'
+import { SocietyService } from '@api/services/society'
 import {
   institution as institutionTable,
   member as memberTable,
@@ -6,16 +15,14 @@ import {
 } from '@rov/db'
 import type { InferSelectModel } from 'drizzle-orm'
 import { eq, sql } from 'drizzle-orm'
-import { db } from '@/db'
-import { auth } from '@/lib/auth'
-import { protectedProcedure } from '@/lib/orpc'
+import { Elysia } from 'elysia'
 import {
-  deleteImageFromS3,
-  getPresignedUrlFromFullUrl,
-  isS3Url,
-  uploadImageToS3
-} from '@/services/s3'
-import { SocietyService } from '@/services/society'
+  SocietyForbiddenError,
+  SocietyNotFoundError,
+  SocietyValidationError,
+  UploadFailedError
+} from './errors'
+import { societySchema, updateSocietyFieldsSchema } from './schemas'
 
 const societyService = new SocietyService(db)
 
@@ -29,10 +36,18 @@ const BASE64_IMAGE_REGEX = /^data:image\/\w+;base64,/
  */
 async function isPresident(
   societyId: string,
-  headers: Headers
+  headers: Record<string, string | undefined>
 ): Promise<boolean> {
+  // Convert headers record to Headers object
+  const headersObj = new Headers()
+  for (const [key, value] of Object.entries(headers)) {
+    if (value !== undefined) {
+      headersObj.set(key, value)
+    }
+  }
+
   const membership = await auth.api.hasPermission({
-    headers,
+    headers: headersObj,
     body: {
       permissions: {
         organization: ['update']
@@ -46,7 +61,6 @@ async function isPresident(
 
 /**
  * Transform society database model to API response format
- * Matches the societySchema from ORPC contracts
  */
 async function transformSociety(soc: Society) {
   // Get member count
@@ -123,221 +137,291 @@ async function transformSociety(soc: Society) {
   }
 }
 
-export const society = {
-  /**
-   * Get society by ID (enriched with society fields)
-   */
-  getById: protectedProcedure.society.getById.handler(async ({ input }) => {
-    const soc = await societyService.getById(input.id)
+export const society = new Elysia({ prefix: '/society' })
+  .use(betterAuth)
+  .group('', { auth: true }, (app) =>
+    app
+      /**
+       * Get society by ID (enriched with society fields)
+       * GET /society/:id
+       */
+      .get(
+        '/:id',
+        async ({ params }) => {
+          const soc = await societyService.getById(params.id)
 
-    if (!soc) {
-      return null
-    }
-
-    return await transformSociety(soc)
-  }),
-
-  /**
-   * Get society by slug (enriched with society fields)
-   */
-  getBySlug: protectedProcedure.society.getBySlug.handler(async ({ input }) => {
-    const soc = await societyService.getBySlug(input.slug)
-
-    if (!soc) {
-      return null
-    }
-
-    return await transformSociety(soc)
-  }),
-
-  /**
-   * Update society-specific fields (social links, branding, additional details)
-   * Note: name/slug/logo are updated via Better-Auth
-   */
-  updateFields: protectedProcedure.society.updateFields.handler(
-    async ({ input, context }) => {
-      const { organizationId, data } = input
-
-      try {
-        // Check if society exists
-        const existing = await societyService.getById(organizationId)
-        if (!existing) {
-          throw new ORPCError('NOT_FOUND', {
-            message: 'Society not found'
-          })
-        }
-
-        // Check if user is president
-        const hasPermission = await isPresident(organizationId, context.headers)
-        if (!hasPermission) {
-          throw new ORPCError('FORBIDDEN', {
-            message: 'You do not have permission to update this society'
-          })
-        }
-
-        // Process logo and banner images if they're base64 data URLs
-        const processedData = { ...data }
-
-        // Process logo image
-        if (data.logo !== undefined) {
-          if (data.logo === '' || data.logo === null) {
-            // Delete existing logo from S3 if removing
-            if (
-              existing.logo &&
-              BASE64_IMAGE_REGEX.test(existing.logo) === false &&
-              isS3Url(existing.logo)
-            ) {
-              await deleteImageFromS3(existing.logo)
-            }
-            processedData.logo = ''
-          } else if (BASE64_IMAGE_REGEX.test(data.logo)) {
-            // Upload new logo to S3
-            // Delete old logo if it exists and is an S3 URL
-            if (
-              existing.logo &&
-              BASE64_IMAGE_REGEX.test(existing.logo) === false &&
-              isS3Url(existing.logo)
-            ) {
-              await deleteImageFromS3(existing.logo)
-            }
-            const s3Url = await uploadImageToS3(
-              data.logo,
-              'profile-pictures',
-              organizationId
-            )
-            processedData.logo = s3Url
+          if (!soc) {
+            return null
           }
-          // If it's already a URL, use as-is
-        }
 
-        // Process banner image
-        if (data.banner !== undefined) {
-          if (data.banner === '' || data.banner === null) {
-            // Delete existing banner from S3 if removing
-            if (
-              existing.banner &&
-              BASE64_IMAGE_REGEX.test(existing.banner) === false &&
-              isS3Url(existing.banner)
-            ) {
-              await deleteImageFromS3(existing.banner)
-            }
-            processedData.banner = ''
-          } else if (BASE64_IMAGE_REGEX.test(data.banner)) {
-            // Upload new banner to S3
-            // Delete old banner if it exists and is an S3 URL
-            if (
-              existing.banner &&
-              BASE64_IMAGE_REGEX.test(existing.banner) === false &&
-              isS3Url(existing.banner)
-            ) {
-              await deleteImageFromS3(existing.banner)
-            }
-            const s3Url = await uploadImageToS3(
-              data.banner,
-              'banners',
-              organizationId
-            )
-            processedData.banner = s3Url
+          return await transformSociety(soc)
+        },
+        {
+          response: societySchema.nullable(),
+          detail: {
+            tags: ['Societies'],
+            summary: 'Get Society',
+            description: 'Get society by ID with all fields'
           }
-          // If it's already a URL, use as-is
         }
+      )
 
-        // Update society fields
-        const soc = await societyService.updateFields(
-          organizationId,
-          processedData
-        )
+      /**
+       * Get society by slug (enriched with society fields)
+       * GET /society/slug/:slug
+       */
+      .get(
+        '/slug/:slug',
+        async ({ params }) => {
+          const soc = await societyService.getBySlug(params.slug)
 
-        return await transformSociety(soc)
-      } catch (error) {
-        if (error instanceof ORPCError) {
-          throw error
+          if (!soc) {
+            return null
+          }
+
+          return await transformSociety(soc)
+        },
+        {
+          response: societySchema.nullable(),
+          detail: {
+            tags: ['Societies'],
+            summary: 'Get Society by Slug',
+            description: 'Get society by slug with all fields'
+          }
         }
+      )
 
-        throw new ORPCError('VALIDATION_ERROR', {
-          message:
-            error instanceof Error ? error.message : 'Failed to update society'
-        })
-      }
-    }
-  ),
+      /**
+       * Update society-specific fields
+       * PATCH /society/:organizationId/fields
+       */
+      .patch(
+        '/:organizationId/fields',
+        async ({ params, body, headers, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
 
-  /**
-   * Upload banner image for society
-   * Note: Logo upload is handled by Better-Auth
-   */
-  uploadBanner: protectedProcedure.society.uploadBanner.handler(
-    async ({ input, context }) => {
-      const { organizationId } = input
+          const { organizationId } = params
 
-      try {
-        // Check if user is president
-        const hasPermission = await isPresident(organizationId, context.headers)
-        if (!hasPermission) {
-          throw new ORPCError('FORBIDDEN', {
-            message:
-              'You do not have permission to upload banner for this society'
-          })
+          try {
+            // Check if society exists
+            const existing = await societyService.getById(organizationId)
+            if (!existing) {
+              throw new SocietyNotFoundError()
+            }
+
+            // Check if user is president
+            const hasPermission = await isPresident(organizationId, headers)
+            if (!hasPermission) {
+              throw new SocietyForbiddenError(
+                'You do not have permission to update this society'
+              )
+            }
+
+            // Process logo and banner images if they're base64 data URLs
+            const processedData = { ...body }
+
+            // Process logo image
+            if (body.logo !== undefined) {
+              if (body.logo === '' || body.logo === null) {
+                // Delete existing logo from S3 if removing
+                if (
+                  existing.logo &&
+                  BASE64_IMAGE_REGEX.test(existing.logo) === false &&
+                  isS3Url(existing.logo)
+                ) {
+                  await deleteImageFromS3(existing.logo)
+                }
+                processedData.logo = ''
+              } else if (BASE64_IMAGE_REGEX.test(body.logo)) {
+                // Upload new logo to S3
+                // Delete old logo if it exists and is an S3 URL
+                if (
+                  existing.logo &&
+                  BASE64_IMAGE_REGEX.test(existing.logo) === false &&
+                  isS3Url(existing.logo)
+                ) {
+                  await deleteImageFromS3(existing.logo)
+                }
+                const s3Url = await uploadImageToS3(
+                  body.logo,
+                  'profile-pictures',
+                  organizationId
+                )
+                processedData.logo = s3Url
+              }
+              // If it's already a URL, use as-is
+            }
+
+            // Process banner image
+            if (body.banner !== undefined) {
+              if (body.banner === '' || body.banner === null) {
+                // Delete existing banner from S3 if removing
+                if (
+                  existing.banner &&
+                  BASE64_IMAGE_REGEX.test(existing.banner) === false &&
+                  isS3Url(existing.banner)
+                ) {
+                  await deleteImageFromS3(existing.banner)
+                }
+                processedData.banner = ''
+              } else if (BASE64_IMAGE_REGEX.test(body.banner)) {
+                // Upload new banner to S3
+                // Delete old banner if it exists and is an S3 URL
+                if (
+                  existing.banner &&
+                  BASE64_IMAGE_REGEX.test(existing.banner) === false &&
+                  isS3Url(existing.banner)
+                ) {
+                  await deleteImageFromS3(existing.banner)
+                }
+                const s3Url = await uploadImageToS3(
+                  body.banner,
+                  'banners',
+                  organizationId
+                )
+                processedData.banner = s3Url
+              }
+              // If it's already a URL, use as-is
+            }
+
+            // Update society fields
+            const soc = await societyService.updateFields(
+              organizationId,
+              processedData
+            )
+
+            return await transformSociety(soc)
+          } catch (error) {
+            if (
+              error instanceof SocietyNotFoundError ||
+              error instanceof SocietyForbiddenError
+            ) {
+              throw error
+            }
+
+            throw new SocietyValidationError(
+              error instanceof Error
+                ? error.message
+                : 'Failed to update society'
+            )
+          }
+        },
+        {
+          body: updateSocietyFieldsSchema,
+          response: societySchema,
+          detail: {
+            tags: ['Societies'],
+            summary: 'Update Society Fields',
+            description:
+              'Update society-specific fields (social links, branding, additional details)'
+          }
         }
+      )
 
-        // Note: File upload is handled via FormData in the actual HTTP request
-        // This is a placeholder that would be implemented with proper file handling
-        // For now, we'll throw an error indicating this needs to be implemented
-        throw new ORPCError('UPLOAD_FAILED', {
-          message: 'Banner upload not yet implemented - use multipart/form-data'
-        })
-      } catch (error) {
-        if (error instanceof ORPCError) {
-          throw error
+      /**
+       * Upload banner image for society
+       * POST /society/:organizationId/banner
+       */
+      .post(
+        '/:organizationId/banner',
+        async ({ params, headers, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
+
+          const { organizationId } = params
+
+          try {
+            // Check if user is president
+            const hasPermission = await isPresident(organizationId, headers)
+            if (!hasPermission) {
+              throw new SocietyForbiddenError(
+                'You do not have permission to upload banner for this society'
+              )
+            }
+
+            // Note: File upload is handled via FormData in the actual HTTP request
+            // This is a placeholder that would be implemented with proper file handling
+            throw new UploadFailedError(
+              'Banner upload not yet implemented - use multipart/form-data'
+            )
+          } catch (error) {
+            if (
+              error instanceof SocietyForbiddenError ||
+              error instanceof UploadFailedError
+            ) {
+              throw error
+            }
+
+            throw new UploadFailedError(
+              error instanceof Error ? error.message : 'Failed to upload banner'
+            )
+          }
+        },
+        {
+          detail: {
+            tags: ['Societies'],
+            summary: 'Upload Society Banner',
+            description: 'Upload banner image for society'
+          }
         }
+      )
 
-        throw new ORPCError('UPLOAD_FAILED', {
-          message:
-            error instanceof Error ? error.message : 'Failed to upload banner'
-        })
-      }
-    }
-  ),
+      /**
+       * Mark society onboarding as complete
+       * POST /society/:organizationId/complete-onboarding
+       */
+      .post(
+        '/:organizationId/complete-onboarding',
+        async ({ params, headers, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
 
-  /**
-   * Mark society onboarding as complete
-   */
-  completeOnboarding: protectedProcedure.society.completeOnboarding.handler(
-    async ({ input, context }) => {
-      const { organizationId } = input
+          const { organizationId } = params
 
-      try {
-        // Check if society exists
-        const existing = await societyService.getById(organizationId)
-        if (!existing) {
-          throw new ORPCError('NOT_FOUND', {
-            message: 'Society not found'
-          })
+          try {
+            // Check if society exists
+            const existing = await societyService.getById(organizationId)
+            if (!existing) {
+              throw new SocietyNotFoundError()
+            }
+
+            // Check if user is president
+            const hasPermission = await isPresident(organizationId, headers)
+            if (!hasPermission) {
+              throw new SocietyForbiddenError(
+                'You do not have permission to update this society'
+              )
+            }
+
+            // Mark onboarding as complete
+            await societyService.markOnboardingComplete(organizationId)
+
+            return { success: true }
+          } catch (error) {
+            if (
+              error instanceof SocietyNotFoundError ||
+              error instanceof SocietyForbiddenError
+            ) {
+              throw error
+            }
+
+            throw new Error(
+              error instanceof Error
+                ? error.message
+                : 'Failed to complete onboarding'
+            )
+          }
+        },
+        {
+          detail: {
+            tags: ['Societies'],
+            summary: 'Complete Onboarding',
+            description: 'Mark society onboarding as complete'
+          }
         }
-
-        // Check if user is president
-        const hasPermission = await isPresident(organizationId, context.headers)
-        if (!hasPermission) {
-          throw new ORPCError('FORBIDDEN', {
-            message: 'You do not have permission to update this society'
-          })
-        }
-
-        // Mark onboarding as complete
-        await societyService.markOnboardingComplete(organizationId)
-
-        return { success: true }
-      } catch (error) {
-        if (error instanceof ORPCError) {
-          throw error
-        }
-
-        throw new Error(
-          error instanceof Error
-            ? error.message
-            : 'Failed to complete onboarding'
-        )
-      }
-    }
+      )
   )
-}

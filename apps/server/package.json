@@ -37,6 +37,7 @@
     "cheerio": "^1.1.2",
     "dotenv": "17.2.2",
     "drizzle-orm": "0.44.5",
+    "drizzle-zod": "^0.8.3",
     "elysia": "1.4.19",
     "googleapis": "161.0.0",
     "hono": "4.9.8",

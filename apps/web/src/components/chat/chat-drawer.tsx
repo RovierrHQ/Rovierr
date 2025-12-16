@@ -14,6 +14,7 @@ import {
 } from '@rov/ui/components/sidebar'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { usePresence } from '@web/hooks/use-presence'
+import api from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { useCentrifugo } from '@web/lib/centrifuge'
 import { orpc } from '@web/utils/orpc'
@@ -52,17 +53,17 @@ export function ChatDrawer() {
   )
 
   // Get Centrifugo connection token
-  const { data: centrifugoAuth } = useQuery(
-    orpc.realtime.getConnectionToken.queryOptions({
-      enabled: !!session?.user?.id,
-      staleTime: 55 * 60 * 1000 // 55 minutes (token expires in 1 hour)
-    })
-  )
+  const { data: centrifugoAuth } = useQuery({
+    queryKey: ['realtime', 'token'],
+    queryFn: () => api.realtime.token.get(),
+    enabled: !!session?.user?.id,
+    staleTime: 55 * 60 * 1000 // 55 minutes (token expires in 1 hour)
+  })
 
   // Subscribe to user's personal chat channel for new messages and conversation updates
   useCentrifugo<{ type: string; conversationId?: string }>(
     {
-      token: centrifugoAuth?.token
+      token: centrifugoAuth?.data?.token
     },
     `chat:${session?.user?.id}`,
     (data) => {

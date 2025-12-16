@@ -1,3 +1,5 @@
+import { db } from '@api/db'
+import { publicProcedure } from '@api/lib/orpc'
 import { ORPCError } from '@orpc/server'
 import {
   instituitionEnrollment as institutionEnrollmentTable,
@@ -5,8 +7,6 @@ import {
   organization as organizationTable
 } from '@rov/db'
 import { and, count, desc, eq, inArray, or, sql } from 'drizzle-orm'
-import { db } from '@/db'
-import { publicProcedure } from '@/lib/orpc'
 
 export const studentOrganizations = {
   // Note: Organization creation is handled by Better-Auth authClient.organization.create()

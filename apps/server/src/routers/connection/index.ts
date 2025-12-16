@@ -1,150 +1,223 @@
-import { ORPCError } from '@orpc/server'
-import { db } from '@/db'
-import { protectedProcedure } from '@/lib/orpc'
-import { ConnectionService } from '@/services/connection'
+import { db } from '@api/db'
+import { betterAuth } from '@api/middleware/auth'
+import { ConnectionService } from '@api/services/connection'
+import Elysia from 'elysia'
+import { z } from 'zod'
+import {
+  ALREADY_CONNECTED,
+  FORBIDDEN,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+  PENDING_REQUEST,
+  SELF_CONNECTION
+} from './errors'
+import {
+  connectionIdSchema,
+  connectionSchema,
+  connectionWithUserSchema,
+  listConnectionsSchema,
+  listPendingRequestsSchema,
+  sendConnectionRequestSchema
+} from './schemas'
 
+// Initialize connection service
 const connectionService = new ConnectionService(db)
 
-export const connection = {
-  send: protectedProcedure.connection.send.handler(
-    async ({ input, context }) => {
-      try {
-        const result = await connectionService.sendConnectionRequest(
-          context.session.user.id,
-          input
-        )
-        return result
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'SELF_CONNECTION') {
-            throw new ORPCError('SELF_CONNECTION', {
-              message: 'Cannot connect with yourself'
-            })
+export const connection = new Elysia({ name: 'connection' })
+  .use(betterAuth)
+  .group('/connection', { auth: true }, (app) =>
+    app
+      // POST /connection/send - Send connection request
+      .post(
+        '/send',
+        async ({ body, user }) => {
+          try {
+            const result = await connectionService.sendConnectionRequest(
+              user.id,
+              body
+            )
+            return result
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'SELF_CONNECTION') {
+                throw new SELF_CONNECTION('Cannot connect with yourself')
+              }
+              if (error.message === 'ALREADY_CONNECTED') {
+                throw new ALREADY_CONNECTED('Already connected with this user')
+              }
+              if (error.message === 'PENDING_REQUEST') {
+                throw new PENDING_REQUEST('Connection request already pending')
+              }
+            }
+            throw error
           }
-          if (error.message === 'ALREADY_CONNECTED') {
-            throw new ORPCError('ALREADY_CONNECTED', {
-              message: 'Already connected with this user'
-            })
-          }
-          if (error.message === 'PENDING_REQUEST') {
-            throw new ORPCError('PENDING_REQUEST', {
-              message: 'Connection request already pending'
-            })
+        },
+        {
+          body: sendConnectionRequestSchema,
+          response: connectionSchema,
+          detail: {
+            description: 'Send a connection request to another user',
+            summary: 'Send Connection Request',
+            tags: ['Connection']
           }
         }
-        throw error
-      }
-    }
-  ),
+      )
 
-  accept: protectedProcedure.connection.accept.handler(
-    async ({ input, context }) => {
-      try {
-        return await connectionService.acceptConnectionRequest(
-          context.session.user.id,
-          input.connectionId
-        )
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'NOT_FOUND') {
-            throw new ORPCError('NOT_FOUND', {
-              message: 'Connection request not found'
-            })
+      // POST /connection/accept - Accept connection request
+      .post(
+        '/accept',
+        async ({ body, user }) => {
+          try {
+            return await connectionService.acceptConnectionRequest(
+              user.id,
+              body.connectionId
+            )
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'NOT_FOUND') {
+                throw new NOT_FOUND('Connection request not found')
+              }
+              if (error.message === 'FORBIDDEN') {
+                throw new FORBIDDEN(
+                  'You do not have permission to accept this request'
+                )
+              }
+            }
+            throw error
           }
-          if (error.message === 'FORBIDDEN') {
-            throw new ORPCError('FORBIDDEN', {
-              message: 'You do not have permission to accept this request'
-            })
+        },
+        {
+          body: connectionIdSchema,
+          response: connectionSchema,
+          detail: {
+            description: 'Accept a connection request',
+            summary: 'Accept Connection',
+            tags: ['Connection']
           }
         }
-        throw error
-      }
-    }
-  ),
+      )
 
-  reject: protectedProcedure.connection.reject.handler(
-    async ({ input, context }) => {
-      try {
-        return await connectionService.rejectConnectionRequest(
-          context.session.user.id,
-          input.connectionId
-        )
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'NOT_FOUND') {
-            throw new ORPCError('NOT_FOUND', {
-              message: 'Connection request not found'
-            })
+      // POST /connection/reject - Reject connection request
+      .post(
+        '/reject',
+        async ({ body, user }) => {
+          try {
+            return await connectionService.rejectConnectionRequest(
+              user.id,
+              body.connectionId
+            )
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'NOT_FOUND') {
+                throw new NOT_FOUND('Connection request not found')
+              }
+              if (error.message === 'FORBIDDEN') {
+                throw new FORBIDDEN(
+                  'You do not have permission to reject this request'
+                )
+              }
+            }
+            throw error
           }
-          if (error.message === 'FORBIDDEN') {
-            throw new ORPCError('FORBIDDEN', {
-              message: 'You do not have permission to reject this request'
-            })
+        },
+        {
+          body: connectionIdSchema,
+          response: z.object({ success: z.boolean() }),
+          detail: {
+            description: 'Reject a connection request',
+            summary: 'Reject Connection',
+            tags: ['Connection']
           }
         }
-        throw error
-      }
-    }
-  ),
+      )
 
-  remove: protectedProcedure.connection.remove.handler(
-    async ({ input, context }) => {
-      try {
-        return await connectionService.removeConnection(
-          context.session.user.id,
-          input.connectionId
-        )
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'NOT_FOUND') {
-            throw new ORPCError('NOT_FOUND', {
-              message: 'Connection not found'
-            })
+      // DELETE /connection/remove - Remove connection
+      .delete(
+        '/remove',
+        async ({ body, user }) => {
+          try {
+            return await connectionService.removeConnection(
+              user.id,
+              body.connectionId
+            )
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'NOT_FOUND') {
+                throw new NOT_FOUND('Connection not found')
+              }
+              if (error.message === 'FORBIDDEN') {
+                throw new FORBIDDEN(
+                  'You do not have permission to remove this connection'
+                )
+              }
+            }
+            throw error
           }
-          if (error.message === 'FORBIDDEN') {
-            throw new ORPCError('FORBIDDEN', {
-              message: 'You do not have permission to remove this connection'
-            })
+        },
+        {
+          body: connectionIdSchema,
+          response: z.object({ success: z.boolean() }),
+          detail: {
+            description: 'Remove an existing connection',
+            summary: 'Remove Connection',
+            tags: ['Connection']
           }
         }
-        throw error
-      }
-    }
-  ),
+      )
 
-  listPending: protectedProcedure.connection.listPending.handler(
-    async ({ input, context }) => {
-      try {
-        return await connectionService.listPendingRequests(
-          context.session.user.id,
-          input
-        )
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new ORPCError('INTERNAL_SERVER_ERROR', {
-            message: error.message
-          })
+      // GET /connection/pending - List pending requests
+      .get(
+        '/pending',
+        async ({ query, user }) => {
+          try {
+            return await connectionService.listPendingRequests(user.id, query)
+          } catch (error) {
+            if (error instanceof Error) {
+              throw new INTERNAL_SERVER_ERROR(error.message)
+            }
+            throw error
+          }
+        },
+        {
+          query: listPendingRequestsSchema,
+          response: z.object({
+            connections: z.array(connectionWithUserSchema),
+            total: z.number(),
+            hasMore: z.boolean()
+          }),
+          detail: {
+            description: 'List pending connection requests',
+            summary: 'List Pending Requests',
+            tags: ['Connection']
+          }
         }
-        throw error
-      }
-    }
-  ),
+      )
 
-  listConnections: protectedProcedure.connection.listConnections.handler(
-    async ({ input, context }) => {
-      try {
-        return await connectionService.listConnections(
-          context.session.user.id,
-          input
-        )
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new ORPCError('INTERNAL_SERVER_ERROR', {
-            message: error.message
-          })
+      // GET /connection/list - List connections
+      .get(
+        '/list',
+        async ({ query, user }) => {
+          try {
+            return await connectionService.listConnections(user.id, query)
+          } catch (error) {
+            if (error instanceof Error) {
+              throw new INTERNAL_SERVER_ERROR(error.message)
+            }
+            throw error
+          }
+        },
+        {
+          query: listConnectionsSchema,
+          response: z.object({
+            connections: z.array(connectionWithUserSchema),
+            total: z.number(),
+            hasMore: z.boolean()
+          }),
+          detail: {
+            description: 'List accepted connections',
+            summary: 'List Connections',
+            tags: ['Connection']
+          }
         }
-        throw error
-      }
-    }
+      )
   )
-}

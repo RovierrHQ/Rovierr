@@ -3,6 +3,8 @@
  * Handles user-to-user connection requests and management
  */
 
+import { env } from '@api/lib/env'
+import { sendConnectionRequestEmail } from '@api/services/email/sender'
 import { connection, type DB, user } from '@rov/db'
 import type {
   ListConnections,
@@ -10,8 +12,6 @@ import type {
   SendConnectionRequest
 } from '@rov/orpc-contracts'
 import { and, count, desc, eq, or, sql } from 'drizzle-orm'
-import { env } from '@/lib/env'
-import { sendConnectionRequestEmail } from '@/services/email/sender'
 
 export class ConnectionService {
   private readonly db: DB

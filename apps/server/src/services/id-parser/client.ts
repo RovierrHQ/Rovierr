@@ -1,5 +1,5 @@
-import { env } from '@/lib/env'
-import logger from '@/lib/logger'
+import { env } from '@api/lib/env'
+import logger from '@api/lib/logger'
 
 export type ParseIDResult = {
   raw_text: string[]

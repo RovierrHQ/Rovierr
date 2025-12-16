@@ -1,6 +1,7 @@
-// import { academic } from './academic'
+import { Elysia } from 'elysia'
 import { profile } from './profile'
 
-export const user = {
-  profile
-}
+// Export the user router as an Elysia instance
+export const user = new Elysia({ name: 'user' }).group('/user', (app) =>
+  app.use(profile)
+)

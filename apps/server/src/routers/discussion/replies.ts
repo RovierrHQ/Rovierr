@@ -1,95 +1,151 @@
-import { ORPCError } from '@orpc/server'
-import { db } from '@/db'
-import { protectedProcedure } from '@/lib/orpc'
-import { ReplyService } from '@/services/discussion/reply.service'
+import { db } from '@api/db'
+import { betterAuth } from '@api/middleware/auth'
+import { ReplyService } from '@api/services/discussion/reply.service'
+import { Elysia } from 'elysia'
+import {
+  createReplySchema,
+  endorseReplySchema,
+  updateReplySchema
+} from './schemas'
 
 const replyService = new ReplyService(db)
 
-export const replies = {
-  create: protectedProcedure.discussion.reply.create.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await replyService.createReply(input, userId)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Thread not found') {
-            throw new ORPCError('NOT_FOUND', {
-              message: 'Thread or parent reply not found'
-            })
+export const repliesRouter = new Elysia({ prefix: '/reply' })
+  .use(betterAuth)
+  .group('', { auth: true }, (app) =>
+    app
+      .post(
+        '/create',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
           }
-          if (error.message === 'Thread is locked') {
-            throw new ORPCError('FORBIDDEN', {
-              message:
-                'Thread is locked or user does not have permission to reply'
-            })
-          }
-        }
-        throw error
-      }
-    }
-  ),
 
-  update: protectedProcedure.discussion.reply.update.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        // TODO: Check if user is moderator for the context
-        const isModerator = false
-        return await replyService.updateReply(input, userId, isModerator)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Reply not found') {
-            throw new ORPCError('NOT_FOUND', { message: 'Reply not found' })
+          try {
+            const userId = user.id
+            return await replyService.createReply(body, userId)
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Thread not found') {
+                throw new Error('Thread or parent reply not found')
+              }
+              if (error.message === 'Thread is locked') {
+                throw new Error(
+                  'Thread is locked or user does not have permission to reply'
+                )
+              }
+            }
+            throw error
           }
-          if (error.message.includes('permission')) {
-            throw new ORPCError('FORBIDDEN', { message: error.message })
+        },
+        {
+          body: createReplySchema,
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Create Reply',
+            description: 'Create a reply to a thread or another reply'
           }
         }
-        throw error
-      }
-    }
-  ),
+      )
+      .patch(
+        '/update',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
 
-  delete: protectedProcedure.discussion.reply.delete.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        // TODO: Check if user is moderator for the context
-        const isModerator = false
-        return await replyService.deleteReply(input.id, userId, isModerator)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Reply not found') {
-            throw new ORPCError('NOT_FOUND', { message: 'Reply not found' })
+          try {
+            const userId = user.id
+            // TODO: Check if user is moderator for the context
+            const isModerator = false
+            return await replyService.updateReply(body, userId, isModerator)
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Reply not found') {
+                throw new Error('Reply not found')
+              }
+              if (error.message.includes('permission')) {
+                throw new Error(error.message)
+              }
+            }
+            throw error
           }
-          if (error.message.includes('permission')) {
-            throw new ORPCError('FORBIDDEN', { message: error.message })
+        },
+        {
+          body: updateReplySchema,
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Update Reply',
+            description: 'Update a reply'
           }
         }
-        throw error
-      }
-    }
-  ),
+      )
+      .delete(
+        '/:id',
+        async ({ params, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
 
-  endorse: protectedProcedure.discussion.reply.endorse.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        // TODO: Check if user is moderator for the context
-        return await replyService.endorseReply(input, userId)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Reply not found') {
-            throw new ORPCError('NOT_FOUND', { message: 'Reply not found' })
+          try {
+            const userId = user.id
+            // TODO: Check if user is moderator for the context
+            const isModerator = false
+            return await replyService.deleteReply(
+              params.id,
+              userId,
+              isModerator
+            )
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Reply not found') {
+                throw new Error('Reply not found')
+              }
+              if (error.message.includes('permission')) {
+                throw new Error(error.message)
+              }
+            }
+            throw error
           }
-          throw new ORPCError('FORBIDDEN', {
-            message:
-              'User does not have moderator permission to endorse replies'
-          })
+        },
+        {
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Delete Reply',
+            description: 'Delete a reply'
+          }
         }
-        throw error
-      }
-    }
+      )
+      .patch(
+        '/endorse',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
+
+          try {
+            const userId = user.id
+            // TODO: Check if user is moderator for the context
+            return await replyService.endorseReply(body, userId)
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Reply not found') {
+                throw new Error('Reply not found')
+              }
+              throw new Error(
+                'User does not have moderator permission to endorse replies'
+              )
+            }
+            throw error
+          }
+        },
+        {
+          body: endorseReplySchema,
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Endorse Reply',
+            description: 'Endorse or unendorse a reply'
+          }
+        }
+      )
   )
-}

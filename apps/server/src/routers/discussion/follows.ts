@@ -1,43 +1,94 @@
-import { ORPCError } from '@orpc/server'
-import { db } from '@/db'
-import { protectedProcedure } from '@/lib/orpc'
-import { FollowService } from '@/services/discussion/follow.service'
+import { db } from '@api/db'
+import { betterAuth } from '@api/middleware/auth'
+import { FollowService } from '@api/services/discussion/follow.service'
+import { Elysia } from 'elysia'
+import {
+  followThreadSchema,
+  listFollowedThreadsSchema,
+  unfollowThreadSchema
+} from './schemas'
 
 const followService = new FollowService(db)
 
-export const follows = {
-  follow: protectedProcedure.discussion.follow.follow.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await followService.followThread(input.threadId, userId)
-      } catch (error) {
-        if (error instanceof Error && error.message === 'Thread not found') {
-          throw new ORPCError('NOT_FOUND', { message: 'Thread not found' })
-        }
-        throw error
-      }
-    }
-  ),
+export const followsRouter = new Elysia({ prefix: '/follow' })
+  .use(betterAuth)
+  .group('', { auth: true }, (app) =>
+    app
+      .post(
+        '/follow',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
 
-  unfollow: protectedProcedure.discussion.follow.unfollow.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await followService.unfollowThread(input.threadId, userId)
-      } catch (error) {
-        if (error instanceof Error && error.message === 'Thread not found') {
-          throw new ORPCError('NOT_FOUND', { message: 'Thread not found' })
+          try {
+            const userId = user.id
+            return await followService.followThread(body.threadId, userId)
+          } catch (error) {
+            if (
+              error instanceof Error &&
+              error.message === 'Thread not found'
+            ) {
+              throw new Error('Thread not found')
+            }
+            throw error
+          }
+        },
+        {
+          body: followThreadSchema,
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Follow Thread',
+            description: 'Follow a thread to receive notifications'
+          }
         }
-        throw error
-      }
-    }
-  ),
+      )
+      .delete(
+        '/unfollow',
+        async ({ body, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
 
-  list: protectedProcedure.discussion.follow.list.handler(
-    async ({ input, context }) => {
-      const userId = context.session.user.id
-      return await followService.getFollowedThreads(input, userId)
-    }
+          try {
+            const userId = user.id
+            return await followService.unfollowThread(body.threadId, userId)
+          } catch (error) {
+            if (
+              error instanceof Error &&
+              error.message === 'Thread not found'
+            ) {
+              throw new Error('Thread not found')
+            }
+            throw error
+          }
+        },
+        {
+          body: unfollowThreadSchema,
+          detail: {
+            tags: ['Discussion'],
+            summary: 'Unfollow Thread',
+            description: 'Unfollow a thread'
+          }
+        }
+      )
+      .get(
+        '/list',
+        async ({ query, user }) => {
+          if (!user) {
+            throw new Error('User not authenticated')
+          }
+
+          const userId = user.id
+          return await followService.getFollowedThreads(query, userId)
+        },
+        {
+          query: listFollowedThreadsSchema,
+          detail: {
+            tags: ['Discussion'],
+            summary: 'List Followed Threads',
+            description: 'List threads the user is following'
+          }
+        }
+      )
   )
-}

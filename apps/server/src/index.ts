@@ -1,10 +1,24 @@
 import { auth } from '@api/lib/auth'
 import { env } from '@api/lib/env'
+import { academicRouter } from '@api/routers/academic'
+import { calendarRouter } from '@api/routers/calendar'
+import { campusFeed } from '@api/routers/campus-feed'
+import { chat } from '@api/routers/chat'
+import { connection } from '@api/routers/connection'
+import { discussionRouter } from '@api/routers/discussion'
+import { form } from '@api/routers/form'
+import { realtime } from '@api/routers/realtime'
+import { resumeRouter } from '@api/routers/resume'
+import { society } from '@api/routers/society'
 import { tasks } from '@api/routers/tasks'
+import { universityRouter } from '@api/routers/university'
+import { user } from '@api/routers/user'
 import { cors } from '@elysiajs/cors'
 import { openapi } from '@elysiajs/openapi'
 import { logger } from '@tqman/nice-logger'
 import { Elysia } from 'elysia'
+import { careerRouter } from './routers/career'
+import { societyRegistrationRouter } from './routers/society-registration'
 
 const port = Number.parseInt(env.PORT, 10)
 
@@ -33,6 +47,20 @@ const app = new Elysia()
     uptime: process.uptime()
   }))
   .use(tasks)
+  .use(realtime)
+  .use(user)
+  .use(chat)
+  .use(connection)
+  .use(campusFeed)
+  .use(discussionRouter)
+  .use(society)
+  .use(form)
+  .use(academicRouter)
+  .use(calendarRouter)
+  .use(careerRouter)
+  .use(resumeRouter)
+  .use(universityRouter)
+  .use(societyRegistrationRouter)
   .listen(port)
 
 export type App = typeof app
