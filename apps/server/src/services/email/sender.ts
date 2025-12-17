@@ -1,5 +1,4 @@
 import { env } from '@api/lib/env'
-import { logger } from '@api/lib/logger'
 import { UseSend } from 'usesend-js'
 import { generateConnectionRequestEmail } from './templates/connection-request'
 import { generateInvitationEmail } from './templates/invitation'
@@ -39,7 +38,7 @@ export async function sendOTPEmail(params: SendOTPEmailParams) {
       text
     })
   } catch (error) {
-    logger.error({ error, to: params.to }, 'Failed to send OTP email')
+    console.error({ error, to: params.to }, 'Failed to send OTP email')
     throw new Error('Email delivery failed')
   }
 }
@@ -75,7 +74,7 @@ export async function sendEmailVerificationOTP({
       text
     })
   } catch (error) {
-    logger.error(
+    console.error(
       { error, to: email, type },
       'Failed to send email verification OTP'
     )
@@ -101,7 +100,7 @@ export function sendPhoneNumberVerificationOTP({
   // For phone numbers, SMS is typically handled by the phone plugin directly
   // This function exists to satisfy the AuthConfig interface
   // In production, integrate with an SMS service like Twilio if needed
-  logger.info(
+  console.info(
     { phoneNumber: _phoneNumber },
     'Phone verification code requested'
   )
@@ -158,7 +157,7 @@ export async function sendInvitationEmail({
       text
     })
   } catch (error) {
-    logger.error(
+    console.error(
       { error, to: email, organizationId: organization.id },
       'Failed to send invitation email'
     )
@@ -195,7 +194,7 @@ export async function sendWelcomeEmail({
       text
     })
   } catch (error) {
-    logger.error({ error, to, societyName }, 'Failed to send welcome email')
+    console.error({ error, to, societyName }, 'Failed to send welcome email')
     // Don't throw - email failure shouldn't block approval
   }
 }
@@ -229,7 +228,7 @@ export async function sendRejectionEmail({
       text
     })
   } catch (error) {
-    logger.error({ error, to, societyName }, 'Failed to send rejection email')
+    console.error({ error, to, societyName }, 'Failed to send rejection email')
     // Don't throw - email failure shouldn't block rejection
   }
 }
@@ -272,7 +271,7 @@ export async function sendApplicationConfirmationEmail({
       text
     })
   } catch (error) {
-    logger.error(
+    console.error(
       { error, to, societyName },
       'Failed to send confirmation email'
     )
@@ -312,7 +311,7 @@ export async function sendConnectionRequestEmail({
       text
     })
   } catch (error) {
-    logger.error(
+    console.error(
       { error, to, senderName },
       'Failed to send connection request email'
     )

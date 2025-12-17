@@ -3,6 +3,7 @@ import { env } from '@api/lib/env'
 import { academicRouter } from '@api/routers/academic'
 import { calendarRouter } from '@api/routers/calendar'
 import { campusFeed } from '@api/routers/campus-feed'
+import { careerRouter } from '@api/routers/career'
 import { chat } from '@api/routers/chat'
 import { connection } from '@api/routers/connection'
 import { discussionRouter } from '@api/routers/discussion'
@@ -17,8 +18,9 @@ import { cors } from '@elysiajs/cors'
 import { openapi } from '@elysiajs/openapi'
 import { logger } from '@tqman/nice-logger'
 import { Elysia } from 'elysia'
-import { careerRouter } from './routers/career'
-import { societyRegistrationRouter } from './routers/society-registration'
+import z from 'zod'
+
+// import { societyRegistrationRouter } from './routers/society-registration'
 
 const port = Number.parseInt(env.PORT, 10)
 
@@ -29,7 +31,13 @@ const app = new Elysia()
       withTimestamp: true // optional (default: false)
     })
   )
-  .use(openapi())
+  .use(
+    openapi({
+      mapJsonSchema: {
+        zod: z.toJSONSchema
+      }
+    })
+  )
   .use(
     cors({
       origin: env.CORS_ORIGIN.split(',') || '',
@@ -60,7 +68,7 @@ const app = new Elysia()
   .use(careerRouter)
   .use(resumeRouter)
   .use(universityRouter)
-  .use(societyRegistrationRouter)
+  // .use(societyRegistrationRouter)
   .listen(port)
 
 export type App = typeof app

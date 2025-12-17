@@ -1,3 +1,14 @@
+import { db } from '@api/db'
+import { auth } from '@api/lib/auth'
+import { env } from '@api/lib/env'
+import { protectedProcedure, publicProcedure } from '@api/lib/orpc'
+import {
+  JoinRequestService,
+  PaymentVerificationService,
+  QRCodeService,
+  RegistrationAnalyticsService,
+  RegistrationService
+} from '@api/services/society-registration'
 import { ORPCError } from '@orpc/server'
 import {
   formResponses,
@@ -7,17 +18,6 @@ import {
   user as userTable
 } from '@rov/db'
 import { and, eq } from 'drizzle-orm'
-import { db } from '@/db'
-import { auth } from '@/lib/auth'
-import { env } from '@/lib/env'
-import { protectedProcedure, publicProcedure } from '@/lib/orpc'
-import {
-  JoinRequestService,
-  PaymentVerificationService,
-  QRCodeService,
-  RegistrationAnalyticsService,
-  RegistrationService
-} from '@/services/society-registration'
 
 const registrationService = new RegistrationService(db)
 const joinRequestService = new JoinRequestService(db)

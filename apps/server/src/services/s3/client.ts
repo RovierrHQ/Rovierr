@@ -1,5 +1,4 @@
 import { env } from '@api/lib/env'
-import { logger } from '@api/lib/logger'
 import {
   DeleteObjectCommand,
   GetObjectCommand,
@@ -58,7 +57,7 @@ export async function uploadImageToS3(
 
     await s3Client.send(command)
 
-    logger.info({ key, folder, userId }, 'Image uploaded to S3 successfully')
+    console.info({ key, folder, userId }, 'Image uploaded to S3 successfully')
 
     // Store the S3 key URL in database (we'll generate presigned URLs on-demand)
     // The key URL format: https://bucket.s3.region.amazonaws.com/key
@@ -66,7 +65,7 @@ export async function uploadImageToS3(
 
     return keyUrl
   } catch (error) {
-    logger.error({ error, folder, userId }, 'Failed to upload image to S3')
+    console.error({ error, folder, userId }, 'Failed to upload image to S3')
     throw new Error('Failed to upload image')
   }
 }
@@ -82,7 +81,7 @@ export async function deleteImageFromS3(imageUrl: string): Promise<void> {
     const match = imageUrl.match(S3_URL_PATTERN)
 
     if (!match) {
-      logger.warn({ imageUrl }, 'Invalid S3 URL format for deletion')
+      console.warn({ imageUrl }, 'Invalid S3 URL format for deletion')
       return
     }
 
@@ -95,9 +94,9 @@ export async function deleteImageFromS3(imageUrl: string): Promise<void> {
 
     await s3Client.send(command)
 
-    logger.info({ key }, 'Image deleted from S3 successfully')
+    console.info({ key }, 'Image deleted from S3 successfully')
   } catch (error) {
-    logger.error({ error, imageUrl }, 'Failed to delete image from S3')
+    console.error({ error, imageUrl }, 'Failed to delete image from S3')
     // Don't throw - deletion failures shouldn't break the flow
   }
 }
@@ -121,7 +120,7 @@ export async function getPresignedUrl(
     const url = await getSignedUrl(s3Client, command, { expiresIn })
     return url
   } catch (error) {
-    logger.error({ error, key }, 'Failed to generate presigned URL')
+    console.error({ error, key }, 'Failed to generate presigned URL')
     throw new Error('Failed to generate presigned URL')
   }
 }

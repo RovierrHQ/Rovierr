@@ -7,7 +7,6 @@
 
 import { db } from '@api/db'
 import { env } from '@api/lib/env'
-import { logger } from '@api/lib/logger'
 import realtime from '@api/lib/realtime'
 import { betterAuth } from '@api/middleware/auth'
 import { account } from '@rov/db'
@@ -95,7 +94,7 @@ const getValidAccessToken = async (
 
       return credentials.access_token
     } catch (error) {
-      logger.error(
+      console.log(
         { error, accountId: userAccount.id },
         'Failed to refresh Google access token'
       )
@@ -131,7 +130,7 @@ export const googleCalendarRouter = new Elysia({ prefix: '/google' })
       const resourceState = headers['x-goog-resource-state']
       const resourceId = headers['x-goog-resource-id']
 
-      logger.info(
+      console.info(
         {
           channelId,
           resourceState,
@@ -161,14 +160,14 @@ export const googleCalendarRouter = new Elysia({ prefix: '/google' })
           resourceState
         })
 
-        logger.info(
+        console.info(
           { userId, channel: `calendar:${userId}` },
           'Published calendar update to Centrifugo'
         )
 
         return { success: true }
       } catch (error) {
-        logger.error({ error, userId }, 'Failed to process calendar webhook')
+        console.log({ error, userId }, 'Failed to process calendar webhook')
         throw new Error('Failed to process webhook')
       }
     },
@@ -221,7 +220,7 @@ export const googleCalendarRouter = new Elysia({ prefix: '/google' })
               expiration: response.data.expiration || ''
             }
           } catch (error) {
-            logger.error(
+            console.log(
               { error, userId: user.id },
               'Failed to setup calendar watch'
             )
@@ -262,7 +261,7 @@ export const googleCalendarRouter = new Elysia({ prefix: '/google' })
 
             return { success: true }
           } catch (error) {
-            logger.error(
+            console.log(
               { error, userId: user.id },
               'Failed to stop calendar watch'
             )
@@ -306,7 +305,7 @@ export const googleCalendarRouter = new Elysia({ prefix: '/google' })
           }
 
           // Fetch events
-          logger.info(
+          console.info(
             {
               userId: user.id,
               hasRefreshToken: !!userAccount.refreshToken,
@@ -368,7 +367,7 @@ export const googleCalendarRouter = new Elysia({ prefix: '/google' })
               events
             }
           } catch (error) {
-            logger.error(
+            console.log(
               { error, userId: user.id },
               'Failed to fetch calendar events'
             )
