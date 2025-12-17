@@ -18,7 +18,6 @@ TanStack React Form provides type-safe form handling with built-in validation us
 import { useAppForm } from '@rov/ui/components/form/index'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 import type z from 'zod'
 ```
 
@@ -34,7 +33,7 @@ const form = useAppForm({
   } as z.infer<typeof yourZodSchema>,
   onSubmit: async ({ value }) => {
     try {
-      await orpc.your.endpoint.call(value)
+      await api call ...
       toast.success('Success!')
     } catch (error) {
       toast.error(error.message)
@@ -124,8 +123,6 @@ import { useAppForm } from '@rov/ui/components/form/index'
 import { Button } from '@rov/ui/components/button'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
-import { profileUpdateSchema } from '@rov/orpc-contracts/user/profile'
 import type z from 'zod'
 
 export function ProfileForm() {

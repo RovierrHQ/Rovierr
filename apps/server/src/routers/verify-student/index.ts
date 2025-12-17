@@ -141,7 +141,7 @@ export const verifyStudent = new Elysia({ name: 'verify-student' })
                   university: parsingResult?.university ?? null,
                   studentId: parsingResult?.student_id ?? null,
                   expiryDate: parsingResult?.expiry_date ?? null,
-                  createdAt: new Date(card.createdAt),
+                  createdAt: card.createdAt,
                   isVerified: card.isVerified
                 }
               })

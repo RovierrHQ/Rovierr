@@ -12,9 +12,8 @@
 * **Backend:**
 
   * Bun runtime
-  * Hono framework (fast, lightweight, ESM-based)
+  * Elysia framework (fast, lightweight, ESM-based)
   * Drizzle ORM with PostgreSQL (via Neon)
-  * ORPC for type-safe client-server contracts
   * Centrifugo for real-time communication
 * **Auth:**
 
@@ -26,17 +25,16 @@
   * Biome for linting & formatting
 * **Documentation:**
 
-  * MDX + Next.js Docs App
+  * mintlify Docs App
 * **CI/CD (planned):**
 
-  * GitHub Actions and AWS Amplify for deploy pipelines
+  * GitHub Actions for deploy pipelines
 
 **Technical Constraints**
 
 * All internal packages published under `@rov/*`
 * ES modules only — no CommonJS compatibility required
 * Real-time system built around Centrifugo protocol (no WebSocket fallbacks)
-* Unified type contracts between server and client enforced via ORPC
 * Shared UI & config packages to ensure consistency across platforms
 
 **Preferred Tooling**

@@ -6,12 +6,11 @@
 │   ├── web/                  # Next.js web app (main student interface)
 │   ├── native/               # Expo mobile app
 │   ├── desktop/              # Tauri desktop client
-│   ├── server/               # Bun + Hono backend server
-│   └── docs/                 # MDX documentation app
+│   ├── server/               # Bun + elysia backend server
+│   └── docs/                 # MDX with mintlify documentation app
 │
 ├── packages/
 │   ├── ui/                   # Shared UI kit (Radix + Tailwind)
-│   ├── orpc-contracts/       # Type-safe ORPC API contracts
 │   ├── realtime/             # Centrifugo client & server integrations
 │   ├── shared/               # Common utilities & cross-platform logic
 │   └── typescript-config/    # Centralized TS configs
@@ -32,13 +31,12 @@
 
   * `@rov/ui` → UI components
   * `@rov/shared` → utilities and logic
-  * `@rov/orpc-contracts` → type-safe endpoints
 * Strict separation between presentation (UI) and logic (contracts, shared)
 * Use `src/` inside each app and package to scope code organization
 
 **Architectural Notes**
 
-* **Frontend & Backend sync:** all communication happens via ORPC contracts
+* **Frontend & Backend sync:** all communication happens via eden treaty
 * **Realtime module:** uses Centrifugo client and server wrappers from `@rov/realtime`
 * **Database layer:** Drizzle ORM models reside in the `apps/server` project
 * **Scalability:** new modules can be added by creating a new folder under `packages/` or `apps/` without disrupting existing ones

@@ -14,7 +14,6 @@ Unlike traditional LMS platforms, Rovierr focuses on **students first**, offerin
 
 **Key Features (Initial Modules)**
 
-* Real-time classroom tools (interactive slides, live quizzes, polls)
 * University club management tools (events, communication, finances)
 * Money management & student budgeting
 * Social learning spaces & student communities

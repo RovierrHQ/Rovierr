@@ -10,7 +10,7 @@ export const studentIdCardSchema = z.object({
   university: z.string().nullable(),
   studentId: z.string().nullable(),
   expiryDate: z.string().nullable(),
-  createdAt: z.date(),
+  createdAt: z.iso.datetime(),
   isVerified: z.boolean()
 })
 
@@ -35,7 +35,7 @@ export const deleteIdCardSchema = z.object({
 })
 
 export const sendVerificationOTPSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email(),
   universityId: z.string().min(1, 'University ID is required')
 })
 
