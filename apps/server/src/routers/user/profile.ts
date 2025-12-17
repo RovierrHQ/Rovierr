@@ -156,7 +156,7 @@ export const profile = new Elysia({ name: 'user-profile' })
             studentStatusVerified: Boolean(
               enrollmentData?.studentStatusVerified ?? false
             ),
-            createdAt: new Date(userData.createdAt),
+            createdAt: userData.createdAt,
             major: null,
             yearOfStudy: null
           }
@@ -410,11 +410,9 @@ export const profile = new Elysia({ name: 'user-profile' })
               studentStatusVerified: Boolean(
                 enrollment.studentStatusVerified ?? false
               ),
-              startedOn: enrollment.startedOn
-                ? new Date(enrollment.startedOn)
-                : null,
+              startedOn: enrollment.startedOn ? enrollment.startedOn : null,
               graduatedOn: enrollment.graduatedOn
-                ? new Date(enrollment.graduatedOn)
+                ? enrollment.graduatedOn
                 : null,
               isPrimary: enrollment.type === 'major'
             }))
@@ -444,7 +442,7 @@ export const profile = new Elysia({ name: 'user-profile' })
             type: 'post' | 'comment' | 'join' | 'event' | 'achievement'
             title: string
             description: string | null
-            timestamp: Date
+            timestamp: string
             metadata: Record<string, unknown>
           }> = []
           const total = 0
@@ -539,7 +537,7 @@ export const profile = new Elysia({ name: 'user-profile' })
             studentStatusVerified: Boolean(
               enrollmentData?.studentStatusVerified ?? false
             ),
-            createdAt: new Date(user.createdAt),
+            createdAt: user.createdAt,
             major: null,
             yearOfStudy: null
           }

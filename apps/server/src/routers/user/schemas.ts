@@ -105,7 +105,7 @@ export const profileDetailsSchema = z.object({
   socialLinks: socialLinksSchema,
   currentUniversity: universitySchema.omit({ slug: true }).nullable(),
   studentStatusVerified: z.boolean(),
-  createdAt: z.date(),
+  createdAt: z.iso.date(),
   major: z.string().nullable(),
   yearOfStudy: z.string().nullable()
 })
@@ -143,8 +143,8 @@ export const academicEnrollmentSchema = z.object({
     logo: z.string().nullable()
   }),
   studentStatusVerified: z.boolean(),
-  startedOn: z.date().nullable(),
-  graduatedOn: z.date().nullable(),
+  startedOn: z.iso.date().nullable(),
+  graduatedOn: z.iso.date().nullable(),
   isPrimary: z.boolean()
 })
 
@@ -166,7 +166,7 @@ export const activityItemSchema = z.object({
   type: z.enum(['post', 'comment', 'join', 'event', 'achievement']),
   title: z.string(),
   description: z.string().nullable(),
-  timestamp: z.date(),
+  timestamp: z.iso.date(),
   metadata: z.record(z.string(), z.any())
 })
 
@@ -196,7 +196,7 @@ export const publicProfileSchema = z.object({
   socialLinks: socialLinksSchema,
   currentUniversity: universitySchema.omit({ slug: true }).nullable(),
   studentStatusVerified: z.boolean(),
-  createdAt: z.date(),
+  createdAt: z.iso.date(),
   major: z.string().nullable(),
   yearOfStudy: z.string().nullable()
 })
