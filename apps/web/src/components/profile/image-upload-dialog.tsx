@@ -22,30 +22,27 @@ export function ImageUploadDialog({
 }: ImageUploadDialogProps) {
   const queryClient = useQueryClient()
 
-  const updateMutation = useMutation(
-    api.user.profile.update.put,
-    {
-      onSuccess: (res) => {
-        // Update profile cache with Immer
-        queryClient.setQueryData<
-          Treaty.Data<typeof api.user.profile.details.get>
-        >(['user', 'profile', 'details'], (old) => {
-          if (!old) return old
-          return produce(old, (draft) => {
-            draft.image = res.user.image
-            draft.bannerImage = res.user.bannerImage
-          })
+  const updateMutation = useMutation(api.user.profile.update.put, {
+    onSuccess: (res) => {
+      // Update profile cache with Immer
+      queryClient.setQueryData<
+        Treaty.Data<typeof api.user.profile.details.get>
+      >(['user', 'profile', 'details'], (old) => {
+        if (!old) return old
+        return produce(old, (draft) => {
+          draft.image = res.user.image
+          draft.bannerImage = res.user.bannerImage
         })
-        toast.success(
-          `${type === 'profile' ? 'Profile picture' : 'Banner'} updated successfully`
-        )
-        onOpenChange(false)
-      },
-      onError: () => {
-        toast.error('Failed to update image')
-      }
+      })
+      toast.success(
+        `${type === 'profile' ? 'Profile picture' : 'Banner'} updated successfully`
+      )
+      onOpenChange(false)
+    },
+    onError: () => {
+      toast.error('Failed to update image')
     }
-  )
+  })
 
   const handleSave = async (croppedImage: string) => {
     await updateMutation.mutateAsync({

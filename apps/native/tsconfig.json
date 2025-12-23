@@ -4,22 +4,7 @@
     "strict": true,
     "paths": {
       "@/*": ["./*"]
-    },
-    "strictNullChecks": true
+    }
   },
-  "include": [
-    "app/**/*.ts",
-    "app/**/*.tsx",
-    "components/**/*.ts",
-    "components/**/*.tsx",
-    "lib/**/*.ts",
-    "lib/**/*.tsx",
-    "utils/**/*.ts",
-    "utils/**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts",
-    "app-env.d.ts",
-    "nativewind-env.d.ts"
-  ],
-  "exclude": ["node_modules", "dist", ".expo"]
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }

@@ -1,14 +1,29 @@
-import { Text, View } from 'react-native'
-import { Container } from '@/components/container'
+import { Link } from 'expo-router'
+import { StyleSheet } from 'react-native'
 
-export default function Modal() {
+import { ThemedText } from '@/components/themed-text'
+import { ThemedView } from '@/components/themed-view'
+
+export default function ModalScreen() {
   return (
-    <Container>
-      <View className="flex-1 p-6">
-        <View className="mb-8 flex-row items-center justify-between">
-          <Text className="font-bold text-2xl text-foreground">Modal</Text>
-        </View>
-      </View>
-    </Container>
+    <ThemedView style={styles.container}>
+      <ThemedText type="title">This is a modal</ThemedText>
+      <Link dismissTo href="/" style={styles.link}>
+        <ThemedText type="link">Go to home screen</ThemedText>
+      </Link>
+    </ThemedView>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20
+  },
+  link: {
+    marginTop: 15,
+    paddingVertical: 15
+  }
+})
