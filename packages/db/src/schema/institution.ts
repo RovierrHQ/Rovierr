@@ -59,7 +59,7 @@ export const instituitionEnrollment = pgTable('instituition_enrollment', {
     }
   ), // Reference to student ID card used for verification
   verificationStep: text('verification_step', {
-    enum: ['upload', 'email', 'otp']
+    enum: ['upload', 'email', 'otp', 'completed']
   }), // Current step in verification process
   ...timestamps
 })

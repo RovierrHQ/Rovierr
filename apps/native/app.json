@@ -9,10 +9,16 @@
       "output": "static",
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-router", "expo-secure-store", "expo-web-browser"],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-font"
+    ],
     "experiments": {
       "typedRoutes": true,
-      "tsconfigPaths": true
+      "tsconfigPaths": true,
+      "autolinkingModuleResolution": true
     },
     "newArchEnabled": true,
     "orientation": "portrait",
@@ -26,14 +32,14 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.amanvarshney01.mybettertapp"
+      "bundleIdentifier": "com.rexcode.rovierr"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.amanvarshney01.mybettertapp",
+      "package": "com.rexcode.rovierr",
       "edgeToEdgeEnabled": true
     }
   }
