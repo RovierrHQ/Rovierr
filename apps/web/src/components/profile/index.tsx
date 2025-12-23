@@ -1,6 +1,5 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
 import { ProfileErrorBoundary } from '@web/components/profile/error-boundary'
 import { ProfilePageSkeleton } from '@web/components/profile/loading-skeleton'
 import { ProfileHero } from '@web/components/profile/profile-hero'
@@ -12,7 +11,7 @@ import { ClubsTab } from '@web/components/profile/tabs/clubs-tab'
 import { OverviewTab } from '@web/components/profile/tabs/overview-tab'
 import { SettingsTab } from '@web/components/profile/tabs/settings-tab'
 import { VerificationPrompt } from '@web/components/profile/verification-prompt'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery } from '@web/lib/api-client'
 import { useEffect, useState } from 'react'
 
 export default function ProfilePage() {
@@ -23,7 +22,7 @@ export default function ProfilePage() {
     data: profileInfo,
     isLoading,
     error
-  } = useQuery(orpc.user.profile.info.queryOptions())
+  } = useQuery(['user', 'profile', 'info'], () => api.user.profile.info.get())
 
   // Handle tab changes from URL query params
   useEffect(() => {

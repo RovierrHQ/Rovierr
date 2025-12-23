@@ -22,8 +22,6 @@ import z from 'zod'
 
 // import { societyRegistrationRouter } from './routers/society-registration'
 
-const port = Number.parseInt(env.PORT, 10)
-
 const app = new Elysia()
   .use(
     logger({
@@ -69,6 +67,6 @@ const app = new Elysia()
   // .use(resumeRouter)
   // .use(universityRouter)
   // .use(societyRegistrationRouter)
-  .listen(port)
+  .listen(env.PORT)
 
 export type App = typeof app

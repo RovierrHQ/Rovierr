@@ -23,7 +23,7 @@ const envSchema = z.object({
     .describe('Logging level (default: info)'),
 
   // Server
-  PORT: z.string().default('3000'),
+  PORT: z.coerce.number().default(3000),
   HOST: z.string().default('0.0.0.0'),
 
   // Database
