@@ -51,7 +51,7 @@ export const verificationStatusSchema = z.object({
   hasUniversityEmail: z.boolean(),
   emailVerified: z.boolean(),
   studentStatusVerified: z.boolean(),
-  verificationStep: z.enum(['upload', 'email', 'otp']).nullable(),
+  verificationStep: z.enum(['upload', 'email', 'otp', 'completed']).nullable(),
   hasIdCard: z.boolean(),
   parsedData: z
     .object({

@@ -13,7 +13,7 @@ import { useFieldContext } from '../context'
 type Props = {
   label?: string
   description?: string
-} & Omit<ComponentProps<typeof PhoneInput>, 'onChange' | 'value'>
+} & ComponentProps<typeof PhoneInput>
 
 function Phone({ label, placeholder, description, ...props }: Props) {
   const field = useFieldContext<string | undefined>()

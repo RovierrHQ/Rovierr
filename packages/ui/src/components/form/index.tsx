@@ -15,7 +15,6 @@ import Switch from './fields/switch'
 import TagInput from './fields/tag-input'
 import Text from './fields/text'
 import TextArea from './fields/text-area'
-import TextWithUnit from './fields/text-with-unit'
 
 export const { useAppForm, withFieldGroup, withForm } = createFormHook({
   fieldContext,
@@ -30,7 +29,6 @@ export const { useAppForm, withFieldGroup, withForm } = createFormHook({
     Switch,
     Checkbox,
     RadioGroup,
-    TextWithUnit,
     MultiSelect,
     OTP,
     TagInput,

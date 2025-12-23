@@ -9,29 +9,10 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
+import { SocialLinksFieldGroup } from '@rov/ui/components/form/groups/social-links'
 import { useAppForm } from '@rov/ui/components/form/index'
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  InputGroupText
-} from '@rov/ui/components/input-group'
 import { useQueryClient } from '@tanstack/react-query'
 import api, { useQuery } from '@web/lib/api-client'
-import {
-  buildFacebookUrl,
-  buildInstagramUrl,
-  buildLinkedInUrl,
-  buildTelegramUrl,
-  buildTwitterUrl,
-  buildWhatsAppUrl,
-  extractFacebookHandle,
-  extractInstagramHandle,
-  extractLinkedInHandle,
-  extractTelegramUsername,
-  extractTwitterHandle,
-  extractWhatsAppNumber
-} from '@web/lib/social-links'
 import {
   Edit,
   Facebook,
@@ -46,9 +27,6 @@ import {
 import { useState } from 'react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-
-// Regex patterns defined at top level for performance
-const AT_PREFIX_REGEX = /^@/
 
 export function AboutTab() {
   const [isEditing, setIsEditing] = useState(false)
@@ -74,29 +52,7 @@ export function AboutTab() {
     } as z.infer<typeof aboutUpdateSchema>,
     onSubmit: async ({ value }) => {
       try {
-        // Convert handles/phone numbers to full URLs before submitting
-        const submitValue = {
-          ...value,
-          whatsapp: value.whatsapp
-            ? buildWhatsAppUrl(value.whatsapp)
-            : value.whatsapp,
-          telegram: value.telegram
-            ? buildTelegramUrl(value.telegram)
-            : value.telegram,
-          instagram: value.instagram
-            ? buildInstagramUrl(value.instagram)
-            : value.instagram,
-          facebook: value.facebook
-            ? buildFacebookUrl(value.facebook)
-            : value.facebook,
-          twitter: value.twitter
-            ? buildTwitterUrl(value.twitter)
-            : value.twitter,
-          linkedin: value.linkedin
-            ? buildLinkedInUrl(value.linkedin)
-            : value.linkedin
-        }
-        await api.user.profile.update.put(submitValue)
+        await api.user.profile.update.put(value)
         queryClient.invalidateQueries({
           queryKey: ['user', 'profile', 'details']
         })
@@ -119,30 +75,15 @@ export function AboutTab() {
       form.setFieldValue('summary', profileDetails.summary ?? '')
       form.setFieldValue('website', profileDetails.website ?? '')
       // Extract handles/phone numbers from URLs
-      form.setFieldValue(
-        'whatsapp',
-        extractWhatsAppNumber(profileDetails.socialLinks.whatsapp ?? '')
-      )
-      form.setFieldValue(
-        'telegram',
-        extractTelegramUsername(profileDetails.socialLinks.telegram ?? '')
-      )
+      form.setFieldValue('whatsapp', profileDetails.socialLinks.whatsapp ?? '')
+      form.setFieldValue('telegram', profileDetails.socialLinks.telegram ?? '')
       form.setFieldValue(
         'instagram',
-        extractInstagramHandle(profileDetails.socialLinks.instagram ?? '')
+        profileDetails.socialLinks.instagram ?? ''
       )
-      form.setFieldValue(
-        'facebook',
-        extractFacebookHandle(profileDetails.socialLinks.facebook ?? '')
-      )
-      form.setFieldValue(
-        'twitter',
-        extractTwitterHandle(profileDetails.socialLinks.twitter ?? '')
-      )
-      form.setFieldValue(
-        'linkedin',
-        extractLinkedInHandle(profileDetails.socialLinks.linkedin ?? '')
-      )
+      form.setFieldValue('facebook', profileDetails.socialLinks.facebook ?? '')
+      form.setFieldValue('twitter', profileDetails.socialLinks.twitter ?? '')
+      form.setFieldValue('linkedin', profileDetails.socialLinks.linkedin ?? '')
     }
     setIsEditing(true)
   }
@@ -169,6 +110,14 @@ export function AboutTab() {
   }
 
   const socialLinks = [
+    {
+      key: 'website',
+      label: 'Website',
+      icon: Globe,
+      color: 'text-gray-500',
+      placeholder: 'https://yourwebsite.com',
+      prefix: 'https://'
+    },
     {
       key: 'whatsapp',
       label: 'WhatsApp',
@@ -308,47 +257,6 @@ export function AboutTab() {
         </CardContent>
       </Card>
 
-      {/* Website */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            Website
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isEditing ? (
-            <form.AppField
-              children={(field) => (
-                <field.Text
-                  label="Website URL"
-                  placeholder="https://yourwebsite.com"
-                  type="url"
-                />
-              )}
-              name="website"
-            />
-          ) : (
-            <div>
-              {profileDetails?.website ? (
-                <a
-                  className="text-primary hover:underline"
-                  href={profileDetails.website}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {profileDetails.website}
-                </a>
-              ) : (
-                <p className="text-muted-foreground text-sm italic">
-                  No website added
-                </p>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Social Links */}
       <Card>
         <CardHeader>
@@ -356,107 +264,18 @@ export function AboutTab() {
         </CardHeader>
         <CardContent>
           {isEditing ? (
-            <div className="space-y-4">
-              {socialLinks.map((social) => {
-                const Icon = social.icon
-                const renderInput = (field: {
-                  state: {
-                    meta: { isTouched: boolean; isValid: boolean }
-                    value: string | undefined
-                  }
-                  name: string
-                  handleBlur: () => void
-                  handleChange: (value: string) => void
-                }) => {
-                  if (social.key === 'whatsapp') {
-                    return (
-                      <form.AppField
-                        children={(field) => (
-                          <field.Phone
-                            label={social.label}
-                            placeholder={social.placeholder}
-                          />
-                        )}
-                        name="whatsapp"
-                      />
-                    )
-                  }
-                  if (social.key === 'telegram') {
-                    return (
-                      <InputGroup>
-                        <InputGroupAddon align="inline-start">
-                          <InputGroupText>@</InputGroupText>
-                        </InputGroupAddon>
-                        <InputGroupInput
-                          aria-invalid={
-                            field.state.meta.isTouched &&
-                            !field.state.meta.isValid
-                          }
-                          autoComplete={field.name}
-                          id={field.name}
-                          name={field.name}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => {
-                            const value = e.target.value
-                            // Remove @ if user types it, we add it via prefix
-                            field.handleChange(
-                              value.replace(AT_PREFIX_REGEX, '')
-                            )
-                          }}
-                          placeholder={social.placeholder}
-                          type="text"
-                          value={field.state.value ?? ''}
-                        />
-                      </InputGroup>
-                    )
-                  }
-                  return (
-                    <InputGroup>
-                      <InputGroupAddon align="inline-start">
-                        <InputGroupText>
-                          https://www.{social.prefix}
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        aria-invalid={
-                          field.state.meta.isTouched &&
-                          !field.state.meta.isValid
-                        }
-                        autoComplete={field.name}
-                        id={field.name}
-                        name={field.name}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => {
-                          const value = e.target.value
-                          // Remove @ if user types it
-                          field.handleChange(value.replace(AT_PREFIX_REGEX, ''))
-                        }}
-                        placeholder={social.placeholder}
-                        type="text"
-                        value={field.state.value ?? ''}
-                      />
-                    </InputGroup>
-                  )
-                }
-                return (
-                  <form.AppField
-                    children={(field) => (
-                      <div className="space-y-2">
-                        <div className="mb-2 flex items-center gap-2">
-                          <Icon className={`h-4 w-4 ${social.color}`} />
-                          <span className="font-medium text-sm">
-                            {social.label}
-                          </span>
-                        </div>
-                        {renderInput(field)}
-                      </div>
-                    )}
-                    key={social.key}
-                    name={social.key as keyof typeof form.state.values}
-                  />
-                )
-              })}
-            </div>
+            <SocialLinksFieldGroup
+              fields={{
+                website: 'website',
+                whatsapp: 'whatsapp',
+                telegram: 'telegram',
+                instagram: 'instagram',
+                facebook: 'facebook',
+                twitter: 'twitter',
+                linkedin: 'linkedin'
+              }}
+              form={form}
+            />
           ) : (
             <div className="space-y-3">
               {socialLinks.map((social) => {

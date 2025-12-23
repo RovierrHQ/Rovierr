@@ -4,7 +4,7 @@ import {
   INTERNAL_SERVER_ERROR,
   NOT_FOUND
 } from '@api/lib/common-errors'
-import { generateOTP, hashOTP, validateUniversityEmail } from '@api/lib/utils'
+import { generateOTP, hashOTP } from '@api/lib/utils'
 import { betterAuth } from '@api/middleware/auth'
 import { sendOTPEmail } from '@api/services/email/sender'
 import { idParserClient } from '@api/services/id-parser/client'
@@ -311,19 +311,35 @@ export const verifyStudentRouter = new Elysia({ name: 'verify-student' })
 
             // Validate email domain
             console.log('[sendVerificationOTP] Validating email domain...')
-            const isValidDomain = await validateUniversityEmail(
-              body.email,
-              body.universityId
-            )
-            console.log(
-              '[sendVerificationOTP] Email domain validation result:',
-              isValidDomain
+            const isValidDomain = institution.validEmailDomains.some((domain) =>
+              body.email.toLowerCase().endsWith(domain.toLowerCase())
             )
 
             if (!isValidDomain) {
               console.error('[sendVerificationOTP] Invalid email domain')
               throw new INVALID_EMAIL_DOMAIN(
                 `Email domain does not match ${institution.name} requirements`
+              )
+            }
+
+            // Delete any enrollments in 'otp' step to clean up stale verifications
+            console.log(
+              '[sendVerificationOTP] Deleting any enrollments in OTP step...'
+            )
+            const deletedEnrollments = await db
+              .delete(institutionEnrollmentTable)
+              .where(
+                and(
+                  eq(institutionEnrollmentTable.userId, user.id),
+                  eq(institutionEnrollmentTable.verificationStep, 'otp')
+                )
+              )
+              .returning()
+
+            if (deletedEnrollments.length > 0) {
+              console.log(
+                '[sendVerificationOTP] Deleted stale OTP enrollments:',
+                deletedEnrollments.map((e) => e.id)
               )
             }
 
@@ -337,10 +353,11 @@ export const verifyStudentRouter = new Elysia({ name: 'verify-student' })
               name: userData?.name
             })
 
-            // Check if email is already used by ANY user
-            console.log(
-              '[sendVerificationOTP] Checking if email is already taken...'
-            )
+            // Enrollment checks
+            // Note: Since email domains are unique per university, we only need to check:
+            // 1. If email is used by another user (email is globally unique)
+            // 2. If user has existing enrollment for this university
+
             const existingEmailEnrollment =
               await db.query.instituitionEnrollment.findFirst({
                 where: eq(institutionEnrollmentTable.email, body.email),
@@ -352,17 +369,18 @@ export const verifyStudentRouter = new Elysia({ name: 'verify-student' })
               existingEmailEnrollment.userId !== user.id
             ) {
               console.error(
-                '[sendVerificationOTP] Email already taken by another user'
+                '[sendVerificationOTP] Email already taken by another user',
+                {
+                  email: body.email,
+                  otherUserId: existingEmailEnrollment.userId
+                }
               )
               throw new EMAIL_ALREADY_TAKEN(
                 'This university email is already registered to another account'
               )
             }
 
-            // Check for enrollment for the SPECIFIC university
-            console.log(
-              '[sendVerificationOTP] Checking for existing enrollment...'
-            )
+            // Check for existing enrollment for this specific university
             const enrollmentForUniversity =
               await db.query.instituitionEnrollment.findFirst({
                 where: and(
@@ -374,9 +392,10 @@ export const verifyStudentRouter = new Elysia({ name: 'verify-student' })
                 ),
                 columns: { id: true }
               })
-            console.log('[sendVerificationOTP] Existing enrollment:', {
-              exists: !!enrollmentForUniversity,
-              id: enrollmentForUniversity?.id
+
+            console.log('[sendVerificationOTP] Enrollment check results:', {
+              hasEnrollmentForUniversity: !!enrollmentForUniversity,
+              enrollmentId: enrollmentForUniversity?.id
             })
 
             // currently we dont allow multiple enrollments for the same university
@@ -531,13 +550,24 @@ export const verifyStudentRouter = new Elysia({ name: 'verify-student' })
               )
             }
 
-            // Get user's institution enrollment
+            // Get user's institution enrollment that's in OTP verification step
+            // This ensures we verify the correct enrollment (the one from send-otp)
             const enrollment = await db.query.instituitionEnrollment.findFirst({
-              where: eq(institutionEnrollmentTable.userId, user.id)
+              where: and(
+                eq(institutionEnrollmentTable.userId, user.id),
+                eq(institutionEnrollmentTable.verificationStep, 'otp')
+              ),
+              columns: {
+                id: true,
+                institutionId: true,
+                email: true
+              }
             })
 
             if (!enrollment) {
-              throw new USER_NOT_FOUND('Institution enrollment not found')
+              throw new USER_NOT_FOUND(
+                'No pending verification found. Please request a new OTP.'
+              )
             }
 
             // Run updates in parallel
@@ -553,7 +583,7 @@ export const verifyStudentRouter = new Elysia({ name: 'verify-student' })
                 .set({
                   studentStatusVerified: true,
                   emailVerified: true,
-                  verificationStep: null
+                  verificationStep: 'completed'
                 })
                 .where(eq(institutionEnrollmentTable.id, enrollment.id)),
               // Delete verification record (single-use)
@@ -684,7 +714,7 @@ export const verifyStudentRouter = new Elysia({ name: 'verify-student' })
               hasUniversityEmail: !!enrollment?.email,
               emailVerified: enrollment?.emailVerified ?? false,
               studentStatusVerified: enrollment?.studentStatusVerified ?? false,
-              verificationStep: enrollment?.verificationStep ?? null,
+              verificationStep: enrollment?.verificationStep ?? 'email',
               hasIdCard: !!enrollment?.studentIdCardId,
               parsedData
             }

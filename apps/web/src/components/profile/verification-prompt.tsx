@@ -85,7 +85,7 @@ export function VerificationPrompt() {
         await Promise.all([
           queryClient.setQueryData<
             Treaty.Data<typeof api.user.profile.details.get>
-          >(['user', 'profile'], (old) => {
+          >(['user', 'profile', 'details'], (old) => {
             if (!old) return old
             return produce(old, (draft) => {
               draft.studentStatusVerified = res.verified
