@@ -608,14 +608,20 @@ export const verifyStudentRouter = new Elysia({ name: 'verify-student' })
         .post(
           '/resend-otp',
           async ({ user }) => {
-            // Get user's institution enrollment email
+            // Get user's institution enrollment that's in OTP verification step
+            // This ensures we resend OTP for the correct enrollment
             const enrollment = await db.query.instituitionEnrollment.findFirst({
-              where: eq(institutionEnrollmentTable.userId, user.id),
+              where: and(
+                eq(institutionEnrollmentTable.userId, user.id),
+                eq(institutionEnrollmentTable.verificationStep, 'otp')
+              ),
               columns: { email: true }
             })
 
             if (!enrollment?.email) {
-              throw new USER_NOT_FOUND('Institution email not found')
+              throw new USER_NOT_FOUND(
+                'No pending OTP verification found. Please request a new OTP.'
+              )
             }
 
             // Get user name
