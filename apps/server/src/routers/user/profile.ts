@@ -465,7 +465,7 @@ export const profile = new Elysia({ name: 'user-profile' })
   )
 
   // Public routes (no auth required)
-  .group('/profile', (app) =>
+  .group('/profile', { detail: { tags: ['User'] } }, (app) =>
     app
       // GET /profile/public/:username - Get public profile by username
       .get(
