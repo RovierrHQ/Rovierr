@@ -6,7 +6,6 @@ import { ProfileHero } from '@web/components/profile/profile-hero'
 import { ProfileTabs } from '@web/components/profile/profile-tabs'
 import { AboutTab } from '@web/components/profile/tabs/about-tab'
 import { AcademicsTab } from '@web/components/profile/tabs/academics-tab'
-import { ActivityTab } from '@web/components/profile/tabs/activity-tab'
 import { ClubsTab } from '@web/components/profile/tabs/clubs-tab'
 import { OverviewTab } from '@web/components/profile/tabs/overview-tab'
 import { SettingsTab } from '@web/components/profile/tabs/settings-tab'
@@ -79,11 +78,11 @@ export default function ProfilePage() {
               <AcademicsTab />
             </ProfileErrorBoundary>
           )}
-          {activeTab === 'activity' && (
+          {/* {activeTab === 'activity' && (
             <ProfileErrorBoundary>
               <ActivityTab />
             </ProfileErrorBoundary>
-          )}
+          )} */}
           {activeTab === 'clubs' && (
             <ProfileErrorBoundary>
               <ClubsTab />

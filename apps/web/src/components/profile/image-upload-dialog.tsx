@@ -23,8 +23,7 @@ export function ImageUploadDialog({
   const queryClient = useQueryClient()
 
   const updateMutation = useMutation(
-    (data: { image?: string; bannerImage?: string }) =>
-      api.user.profile.update.put(data),
+    api.user.profile.update.put,
     {
       onSuccess: (res) => {
         // Update profile cache with Immer

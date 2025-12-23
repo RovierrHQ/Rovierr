@@ -1,5 +1,6 @@
 'use client'
 
+import type { Treaty } from '@elysiajs/eden'
 import { Alert, AlertDescription } from '@rov/ui/components/alert'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
@@ -20,9 +21,10 @@ import {
   SelectTrigger,
   SelectValue
 } from '@rov/ui/components/select'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
+import { produce } from 'immer'
 import { AlertCircle, CheckCircle2, Loader2, Mail } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -34,10 +36,11 @@ export function VerificationPrompt() {
   const [otp, setOtp] = useState('')
   const [selectedUniversityId, setSelectedUniversityId] = useState<string>('')
   const [selectedDomain, setSelectedDomain] = useState<string>('')
-
+  const email = `${emailLocalPart.trim()}@${selectedDomain}`
   // Fetch universities from database
   const { data: universitiesData } = useQuery(
-    orpc.university.list.queryOptions()
+    ['university', 'list'],
+    api.university.get
   )
 
   const universities = universitiesData?.universities ?? []
@@ -60,25 +63,32 @@ export function VerificationPrompt() {
   }, [selectedUniversity])
 
   const sendOTPMutation = useMutation(
-    orpc.user.profile.verifyStudent.sendVerificationOTP.mutationOptions({
+    api['verify-student']['send-otp'].post,
+
+    {
       onSuccess: () => {
         setStep('otp')
         toast.success('Verification code sent to your email')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to send verification code')
+      onError: (error) => {
+        toast.error(error.value.message || 'Failed to send verification code')
       }
-    })
+    }
   )
 
   const verifyOTPMutation = useMutation(
-    orpc.user.profile.verifyStudent.verifyOTP.mutationOptions({
-      onSuccess: async () => {
+    api['verify-student']['verify-otp'].post,
+    {
+      onSuccess: async (res) => {
         // Invalidate and refetch all relevant queries
         await Promise.all([
-          queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
-          queryClient.invalidateQueries({
-            queryKey: ['better-auth', 'session']
+          queryClient.setQueryData<
+            Treaty.Data<typeof api.user.profile.details.get>
+          >(['user', 'profile'], (old) => {
+            if (!old) return old
+            return produce(old, (draft) => {
+              draft.studentStatusVerified = res.verified
+            })
           }),
           await authClient.getSession({ query: { disableCookieCache: true } })
         ])
@@ -89,24 +99,23 @@ export function VerificationPrompt() {
         setStep('email')
         setEmailLocalPart('')
         setOtp('')
-
-        window.location.reload()
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to verify code')
+      onError: (error) => {
+        toast.error(error.value.message || 'Failed to verify code')
       }
-    })
+    }
   )
 
   const resendOTPMutation = useMutation(
-    orpc.user.profile.verifyStudent.resendOTP.mutationOptions({
+    api['verify-student']['resend-otp'].post,
+    {
       onSuccess: () => {
         toast.success('Verification code resent')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to resend code')
+      onError: (error) => {
+        toast.error(error.value.message || 'Failed to resend code')
       }
-    })
+    }
   )
 
   const handleSendOTP = async () => {
@@ -121,7 +130,6 @@ export function VerificationPrompt() {
     }
 
     // Construct full email with selected domain (add @ since validEmailDomains doesn't include it)
-    const email = `${emailLocalPart.trim()}@${selectedDomain}`
 
     try {
       await sendOTPMutation.mutateAsync({

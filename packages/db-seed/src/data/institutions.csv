@@ -1,5 +1,5 @@
 name,slug,type,country,city,address,website,validEmailDomains,logo
-"Chinese University of Hong Kong",cuhk,university,"Hong Kong",Shatin,"Shatin, New Territories, Hong Kong",https://www.cuhk.edu.hk,cuhk.edu.hk|link.cuhk.edu.hk,
+"Chinese University of Hong Kong",cuhk,university,"Hong Kong",Shatin,"Shatin, New Territories, Hong Kong",https://www.cuhk.edu.hk,link.cuhk.edu.hk|cuhk.edu.hk,
 "University of Hong Kong",hku,university,"Hong Kong","Pok Fu Lam","Pok Fu Lam, Hong Kong",https://www.hku.hk,hku.hk|connect.hku.hk,
 "Hong Kong University of Science and Technology",hkust,university,"Hong Kong","Clear Water Bay","Clear Water Bay, Kowloon, Hong Kong",https://www.hkust.edu.hk,ust.hk|connect.ust.hk,
 "City University of Hong Kong",cityu,university,"Hong Kong","Kowloon Tong","83 Tat Chee Avenue, Kowloon, Hong Kong",https://www.cityu.edu.hk,cityu.edu.hk|my.cityu.edu.hk,

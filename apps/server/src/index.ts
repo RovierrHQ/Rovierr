@@ -8,12 +8,13 @@ import { env } from '@api/lib/env'
 // import { connection } from '@api/routers/connection'
 // import { discussionRouter } from '@api/routers/discussion'
 // import { form } from '@api/routers/form'
-// import { realtime } from '@api/routers/realtime'
+import { realtime } from '@api/routers/realtime'
 // import { resumeRouter } from '@api/routers/resume'
 // import { society } from '@api/routers/society'
 // import { tasks } from '@api/routers/tasks'
-// import { universityRouter } from '@api/routers/university'
+import { universityRouter } from '@api/routers/university'
 import { user } from '@api/routers/user'
+import { verifyStudentRouter } from '@api/routers/verify-student'
 import { cors } from '@elysiajs/cors'
 import { openapi } from '@elysiajs/openapi'
 import { logger } from '@tqman/nice-logger'
@@ -54,7 +55,7 @@ const app = new Elysia()
   }))
   .use(user)
   // .use(tasks)
-  // .use(realtime)
+  .use(realtime)
   // .use(chat)
   // .use(connection)
   // .use(campusFeed)
@@ -65,7 +66,8 @@ const app = new Elysia()
   // .use(calendarRouter)
   // .use(careerRouter)
   // .use(resumeRouter)
-  // .use(universityRouter)
+  .use(universityRouter)
+  .use(verifyStudentRouter)
   // .use(societyRegistrationRouter)
   .listen(env.PORT)
 

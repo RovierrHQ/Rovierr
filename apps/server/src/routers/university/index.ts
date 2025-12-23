@@ -1,10 +1,14 @@
 import { db } from '@api/db'
 import { betterAuth } from '@api/middleware/auth'
 import Elysia from 'elysia'
+import { listUniversitiesOutputSchema } from './schemas'
 
-export const universityRouter = new Elysia({ prefix: '/university' })
+export const universityRouter = new Elysia({
+  name: 'university',
+  detail: { tags: ['University'] }
+})
   .use(betterAuth)
-  .group('', { auth: true }, (app) =>
+  .group('/university', { auth: true }, (app) =>
     app
       // ============================================================================
       // List Universities
@@ -31,10 +35,10 @@ export const universityRouter = new Elysia({ prefix: '/university' })
         },
         {
           detail: {
-            tags: ['University'],
             summary: 'Get List of Universities',
             description: 'Gets the list of universities.'
-          }
+          },
+          response: listUniversitiesOutputSchema
         }
       )
   )

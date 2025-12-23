@@ -47,7 +47,7 @@ import {
 
 const BASE64_IMAGE_REGEX = /^data:image\/\w+;base64,/
 
-export const verifyStudent = new Elysia({ name: 'verify-student' })
+export const verifyStudentRouter = new Elysia({ name: 'verify-student' })
   .use(betterAuth)
   // Student verification routes (auth required)
   .group(

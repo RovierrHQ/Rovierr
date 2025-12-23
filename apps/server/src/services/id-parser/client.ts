@@ -1,5 +1,4 @@
 import { env } from '@api/lib/env'
-import logger from '@api/lib/logger'
 
 export type ParseIDResult = {
   raw_text: string[]
@@ -66,7 +65,7 @@ class IDParserClient {
 
       if (!response.ok) {
         const errorText = await response.text()
-        logger.error(
+        console.error(
           { status: response.status, error: errorText },
           'ID Parser service error'
         )
@@ -76,14 +75,14 @@ class IDParserClient {
       }
 
       const result = (await response.json()) as ParseIDResult
-      logger.info(
+      console.info(
         { studentId: result.student_id, university: result.university },
         'ID parsed successfully'
       )
 
       return result
     } catch (error) {
-      logger.error({ error }, 'Failed to parse ID card')
+      console.error({ error }, 'Failed to parse ID card')
       throw error
     }
   }
