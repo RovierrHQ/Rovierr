@@ -1,5 +1,5 @@
 import { PublicProfileView } from '@web/components/profile/public-profile-view'
-import { orpc } from '@web/utils/orpc'
+import api from '@web/lib/api-client'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
@@ -15,22 +15,27 @@ export async function generateMetadata({
   const { username } = await params
 
   try {
-    const profile = await orpc.user.profile.public.call({ username })
+    const profile = await api.user.profile
+      .public({ username })
+      .get()
+      .then((res) => res.data)
 
     return {
-      title: `${profile.name} (@${profile.username}) - Rovierr`,
-      description: profile.bio || `View ${profile.name}'s profile on Rovierr`,
+      title: `${profile?.name} (@${profile?.username}) - Rovierr`,
+      description: profile?.bio || `View ${profile?.name}'s profile on Rovierr`,
       openGraph: {
-        title: `${profile.name} (@${profile.username})`,
-        description: profile.bio || `View ${profile.name}'s profile on Rovierr`,
-        images: profile.image ? [profile.image] : [],
+        title: `${profile?.name} (@${profile?.username})`,
+        description:
+          profile?.bio || `View ${profile?.name}'s profile on Rovierr`,
+        images: profile?.image ? [profile?.image] : [],
         type: 'profile'
       },
       twitter: {
         card: 'summary',
-        title: `${profile.name} (@${profile.username})`,
-        description: profile.bio || `View ${profile.name}'s profile on Rovierr`,
-        images: profile.image ? [profile.image] : []
+        title: `${profile?.name} (@${profile?.username})`,
+        description:
+          profile?.bio || `View ${profile?.name}'s profile on Rovierr`,
+        images: profile?.image ? [profile?.image] : []
       }
     }
   } catch {
@@ -43,11 +48,14 @@ export async function generateMetadata({
 
 export default async function PublicProfilePage({ params }: PageProps) {
   const { username } = await params
-  try {
-    const profile = await orpc.user.profile.public.call({ username })
+  const profile = await api.user.profile
+    .public({ username })
+    .get()
+    .then((res) => res.data)
 
-    return <PublicProfileView profile={profile} />
-  } catch {
+  if (!profile) {
     notFound()
   }
+
+  return <PublicProfileView profile={profile} />
 }

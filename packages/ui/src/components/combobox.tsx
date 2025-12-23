@@ -14,7 +14,7 @@ import {
 } from '@rov/ui/components/popover'
 import { cn } from '@rov/ui/lib/utils'
 import { Check, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { type Ref, useState } from 'react'
 
 export type ComboboxOption = {
   value: string
@@ -43,7 +43,9 @@ type ComboboxPropsMultiple = {
   onValueChange?: (value: string[]) => void
 }
 
-export type ComboboxProps = ComboboxPropsSingle | ComboboxPropsMultiple
+export type ComboboxProps = (ComboboxPropsSingle | ComboboxPropsMultiple) & {
+  ref?: Ref<HTMLInputElement>
+}
 
 const handleSingleSelect = (
   props: ComboboxPropsSingle,
@@ -68,14 +70,12 @@ const handleMultipleSelect = (
   }
 }
 
-// eslint-disable-next-line react/display-name
 export const Combobox = ({ ref, ...props }: ComboboxProps) => {
   const [open, setOpen] = useState(false)
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>
-        {/** biome-ignore lint/a11y/useSemanticElements: b*/}
         <Button
           aria-expanded={open}
           className="w-full justify-between hover:bg-secondary/20 active:scale-100"
@@ -105,49 +105,54 @@ export const Combobox = ({ ref, ...props }: ComboboxProps) => {
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="p-0">
-        <Command>
+      <PopoverContent
+        align="start"
+        className="p-0 w-[var(--radix-popover-trigger-width)]"
+      >
+        <Command className="w-full">
           <CommandInput
             placeholder={props.searchPlaceholder ?? 'Search for an option'}
-            ref={ref}
+            // ref={ref}
           />
           <CommandList>
             <CommandEmpty>{props.emptyText ?? 'No results found'}</CommandEmpty>
             <CommandGroup>
-              {props.options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  onSelect={(selectedValue) => {
-                    const foundOption = props.options.find(
-                      (o) => o.value.toLowerCase().trim() === selectedValue
-                    )
+              {props.options.map((option) => {
+                // Extract label text for keywords
+                const labelText =
+                  typeof option.label === 'string'
+                    ? option.label
+                    : String(option.label)
 
-                    if (!foundOption) return null
-
-                    if (props.multiple) {
-                      handleMultipleSelect(props, foundOption)
-                    } else {
-                      handleSingleSelect(props, foundOption)
-
-                      setOpen(false)
-                    }
-                  }}
-                  value={option.value.toLowerCase().trim()}
-                >
-                  <Check
-                    className={cn(
-                      'mr-2 size-4 opacity-0',
-                      !props.multiple &&
-                        props.value === option.value &&
-                        'opacity-100',
-                      props.multiple &&
-                        props.value?.includes(option.value) &&
-                        'opacity-100'
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
+                return (
+                  <CommandItem
+                    key={option.value}
+                    keywords={[labelText]}
+                    onSelect={() => {
+                      if (props.multiple) {
+                        handleMultipleSelect(props, option)
+                      } else {
+                        handleSingleSelect(props, option)
+                        setOpen(false)
+                      }
+                    }}
+                    value={option.value}
+                  >
+                    <Check
+                      className={cn(
+                        'mr-2 size-4 opacity-0',
+                        !props.multiple &&
+                          props.value === option.value &&
+                          'opacity-100',
+                        props.multiple &&
+                          props.value?.includes(option.value) &&
+                          'opacity-100'
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                )
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

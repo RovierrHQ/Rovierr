@@ -1,5 +1,6 @@
 'use client'
 
+import type { Treaty } from '@elysiajs/eden'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
@@ -10,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
+import type api from '@web/lib/api-client'
 import {
   AlertCircle,
   CheckCircle2,
@@ -21,34 +23,7 @@ import {
 import Link from 'next/link'
 
 type PublicProfileProps = {
-  profile: {
-    id: string
-    name: string
-    username: string
-    image: string | null
-    bannerImage: string | null
-    bio: string | null
-    website: string | null
-    socialLinks: {
-      whatsapp: string | null
-      telegram: string | null
-      instagram: string | null
-      facebook: string | null
-      twitter: string | null
-      linkedin: string | null
-    }
-    currentUniversity: {
-      id: string
-      name: string
-      logo: string | null
-      city: string
-      country: string
-    } | null
-    studentStatusVerified: boolean
-    createdAt: Date
-    major: string | null
-    yearOfStudy: string | null
-  }
+  profile: Treaty.Data<ReturnType<typeof api.user.profile.public>['get']>
 }
 
 export function PublicProfileView({ profile }: PublicProfileProps) {

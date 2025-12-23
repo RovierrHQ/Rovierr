@@ -4,6 +4,7 @@ import type { Treaty } from '@elysiajs/eden'
 import { Alert, AlertDescription } from '@rov/ui/components/alert'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
+import { Combobox } from '@rov/ui/components/combobox'
 import {
   InputGroup,
   InputGroupAddon,
@@ -195,7 +196,15 @@ export function VerificationPrompt() {
             <label className="font-medium text-sm" htmlFor="university-select">
               Select Your University
             </label>
-            <select
+            <Combobox
+              onValueChange={setSelectedUniversityId}
+              options={universities.map((uni) => ({
+                label: uni.name,
+                value: uni.id
+              }))}
+              value={selectedUniversityId}
+            />
+            {/* <Select
               className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               id="university-select"
               onChange={(e) => setSelectedUniversityId(e.target.value)}
@@ -206,7 +215,7 @@ export function VerificationPrompt() {
                   {uni.name}
                 </option>
               ))}
-            </select>
+            </Select> */}
           </div>
 
           <div className="space-y-2">
