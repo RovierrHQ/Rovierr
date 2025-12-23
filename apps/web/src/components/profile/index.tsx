@@ -12,38 +12,18 @@ import { OverviewTab } from '@web/components/profile/tabs/overview-tab'
 import { SettingsTab } from '@web/components/profile/tabs/settings-tab'
 import { VerificationPrompt } from '@web/components/profile/verification-prompt'
 import api, { useQuery } from '@web/lib/api-client'
-import { useEffect, useState } from 'react'
+import { useQueryState } from 'nuqs'
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useQueryState('tab')
 
-  // Fetch profile info to get verification status
   const {
-    data: profileInfo,
+    data: profileDetails,
     isLoading,
     error
-  } = useQuery(['user', 'profile', 'info'], () => api.user.profile.info.get())
-
-  // Handle tab changes from URL query params
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      const tab = params.get('tab')
-      if (tab) {
-        setActiveTab(tab)
-      }
-    }
-  }, [])
-
-  // Update URL when tab changes
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab)
-    if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href)
-      url.searchParams.set('tab', tab)
-      window.history.pushState({}, '', url.toString())
-    }
-  }
+  } = useQuery(['user', 'profile', 'details'], () =>
+    api.user.profile.details.get()
+  )
 
   if (isLoading) {
     return <ProfilePageSkeleton />
@@ -59,13 +39,13 @@ export default function ProfilePage() {
     )
   }
 
-  const isVerified = profileInfo?.studentStatusVerified ?? false
+  const isVerified = profileDetails?.studentStatusVerified ?? false
 
   return (
     <div className="min-h-screen bg-background pt-10 pb-20 sm:px-10">
       <main className="mx-auto max-w-4xl space-y-0 py-4 sm:py-6">
         {/* Hero Section - Always visible */}
-        <ProfileHero isVerified={isVerified} />
+        <ProfileHero />
 
         {/* Verification Prompt - Only if unverified */}
         {!isVerified && (
@@ -76,7 +56,10 @@ export default function ProfilePage() {
 
         {/* Tab Navigation */}
         <div className="mt-4 sm:mt-6">
-          <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange} />
+          <ProfileTabs
+            activeTab={activeTab || 'overview'}
+            onTabChange={setActiveTab}
+          />
         </div>
 
         {/* Tab Content with Error Boundaries */}

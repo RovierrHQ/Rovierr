@@ -96,7 +96,7 @@ const envSchema = z.object({
     .min(1)
     .describe('API key for ID Parser service authentication (required)'),
 
-  // AWS S3 (Image Storage)
+  // AWS S3 (Image Storage) deprecated, use cloudflare
   AWS_REGION: z
     .string()
     .min(1)
@@ -109,7 +109,23 @@ const envSchema = z.object({
   AWS_S3_BUCKET_NAME: z
     .string()
     .min(1)
-    .describe('S3 bucket name for storing images')
+    .describe('S3 bucket name for storing images'),
+
+  CLOUDFLARE_ACCESS_KEY: z
+    .string()
+    .min(1)
+    .describe('Cloudflare access key for image storage'),
+  CLOUDFLARE_SECRET_KEY: z
+    .string()
+    .min(1)
+    .describe('Cloudflare secret key for image storage'),
+  CLOUDFLARE_BUCKET_NAME: z
+    .string()
+    .min(1)
+    .describe('Cloudflare bucket name for storing images'),
+  CLOUDFLARE_R2_ENDPOINT: z
+    .url()
+    .describe('Cloudflare R2 endpoint for image storage')
 })
 
 /**

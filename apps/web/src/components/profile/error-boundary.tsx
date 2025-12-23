@@ -28,7 +28,6 @@ export class ProfileErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error for debugging in development
     if (process.env.NODE_ENV === 'development') {
-      // biome-ignore lint/suspicious/noConsole: Error logging in development
       console.error('Profile Error:', error, errorInfo)
     }
   }

@@ -23,7 +23,6 @@ import {
   activityQuerySchema,
   activityResponseSchema,
   profileDetailsSchema,
-  profileInfoSchema,
   profileUpdateResponseSchema,
   profileUpdateSchema,
   publicProfileSchema
@@ -36,53 +35,6 @@ export const profile = new Elysia({ name: 'user-profile' })
   .use(betterAuth)
   .group('/profile', { auth: true, detail: { tags: ['User'] } }, (app) =>
     app
-      // GET /profile/info - Get basic profile info
-      .get(
-        '/info',
-        async ({ user }) => {
-          const [userData] = await db
-            .select({
-              currentUniversity: {
-                id: institutionTable.id,
-                name: institutionTable.name,
-                logo: institutionTable.logo,
-                slug: institutionTable.slug,
-                country: institutionTable.country,
-                city: institutionTable.city
-              },
-              studentStatusVerified:
-                institutionEnrollmentTable.studentStatusVerified
-            })
-            .from(institutionEnrollmentTable)
-            .leftJoin(
-              institutionTable,
-              eq(institutionTable.id, institutionEnrollmentTable.institutionId)
-            )
-            .where(eq(institutionEnrollmentTable.userId, user.id))
-            .limit(1)
-
-          if (!userData?.currentUniversity?.id) {
-            return {
-              studentStatusVerified: false
-            }
-          }
-
-          return {
-            currentUniversity: userData.currentUniversity,
-            studentStatusVerified: Boolean(
-              userData.studentStatusVerified ?? false
-            )
-          }
-        },
-        {
-          response: profileInfoSchema,
-          detail: {
-            description: 'Gets the profile info for the user.',
-            summary: 'Get Profile Info'
-          }
-        }
-      )
-
       // GET /profile/details - Get full profile details
       .get(
         '/details',
@@ -117,28 +69,13 @@ export const profile = new Elysia({ name: 'user-profile' })
             .where(eq(institutionEnrollmentTable.userId, user.id))
             .limit(1)
 
-          // Generate presigned URLs for S3 images
-          const imageUrl =
-            userData.image && isS3Url(userData.image)
-              ? await getPresignedUrlFromFullUrl(userData.image).catch(
-                  () => userData.image
-                )
-              : userData.image
-
-          const bannerImageUrl =
-            userData.bannerImage && isS3Url(userData.bannerImage)
-              ? await getPresignedUrlFromFullUrl(userData.bannerImage).catch(
-                  () => userData.bannerImage
-                )
-              : userData.bannerImage
-
           return {
             id: userData.id,
             name: userData.name,
             username: userData.username,
             email: userData.email,
-            image: imageUrl,
-            bannerImage: bannerImageUrl,
+            image: userData.image,
+            bannerImage: userData.bannerImage,
             bio: userData.bio,
             summary: userData.summary,
             website: userData.website,
@@ -156,7 +93,7 @@ export const profile = new Elysia({ name: 'user-profile' })
             studentStatusVerified: Boolean(
               enrollmentData?.studentStatusVerified ?? false
             ),
-            createdAt: userData.createdAt,
+            createdAt: new Date(userData.createdAt).toISOString(),
             major: null,
             yearOfStudy: null
           }
@@ -410,9 +347,11 @@ export const profile = new Elysia({ name: 'user-profile' })
               studentStatusVerified: Boolean(
                 enrollment.studentStatusVerified ?? false
               ),
-              startedOn: enrollment.startedOn ? enrollment.startedOn : null,
+              startedOn: enrollment.startedOn
+                ? new Date(enrollment.startedOn).toISOString()
+                : null,
               graduatedOn: enrollment.graduatedOn
-                ? enrollment.graduatedOn
+                ? new Date(enrollment.graduatedOn).toISOString()
                 : null,
               isPrimary: enrollment.type === 'major'
             }))
@@ -537,7 +476,7 @@ export const profile = new Elysia({ name: 'user-profile' })
             studentStatusVerified: Boolean(
               enrollmentData?.studentStatusVerified ?? false
             ),
-            createdAt: user.createdAt,
+            createdAt: new Date(user.createdAt).toISOString(),
             major: null,
             yearOfStudy: null
           }

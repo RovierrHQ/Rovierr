@@ -17,9 +17,8 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
-import { useQuery } from '@tanstack/react-query'
+import api, { useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import {
   AlertCircle,
   Camera,
@@ -35,14 +34,11 @@ import { toast } from 'sonner'
 import { ImageUploadDialog } from './image-upload-dialog'
 import { ProfileHeroSkeleton } from './loading-skeleton'
 
-type ProfileHeroProps = {
-  isVerified: boolean
-}
-
-export function ProfileHero({ isVerified }: ProfileHeroProps) {
+export function ProfileHero() {
   const { data: session } = authClient.useSession()
   const { data: profileDetails, isLoading } = useQuery(
-    orpc.user.profile.details.queryOptions()
+    ['user', 'profile', 'details'],
+    () => api.user.profile.details.get()
   )
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isProfileImageDialogOpen, setIsProfileImageDialogOpen] =
@@ -178,7 +174,7 @@ export function ProfileHero({ isVerified }: ProfileHeroProps) {
                     {user.name}
                   </h2>
 
-                  {isVerified ? (
+                  {profileDetails.studentStatusVerified ? (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>

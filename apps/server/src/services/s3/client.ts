@@ -8,10 +8,11 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 const s3Client = new S3Client({
-  region: env.AWS_REGION,
+  endpoint: env.CLOUDFLARE_R2_ENDPOINT,
+  region: 'auto',
   credentials: {
-    accessKeyId: env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: env.AWS_SECRET_ACCESS_KEY
+    accessKeyId: env.CLOUDFLARE_ACCESS_KEY,
+    secretAccessKey: env.CLOUDFLARE_SECRET_KEY
   }
 })
 
@@ -49,7 +50,7 @@ export async function uploadImageToS3(
 
     // Upload to S3
     const command = new PutObjectCommand({
-      Bucket: env.AWS_S3_BUCKET_NAME,
+      Bucket: env.CLOUDFLARE_BUCKET_NAME,
       Key: key,
       Body: buffer,
       ContentType: `image/${mimeType}`
@@ -61,7 +62,7 @@ export async function uploadImageToS3(
 
     // Store the S3 key URL in database (we'll generate presigned URLs on-demand)
     // The key URL format: https://bucket.s3.region.amazonaws.com/key
-    const keyUrl = `https://${env.AWS_S3_BUCKET_NAME}.s3.${env.AWS_REGION}.amazonaws.com/${key}`
+    const keyUrl = `${env.CLOUDFLARE_R2_ENDPOINT}/${key}`
 
     return keyUrl
   } catch (error) {
@@ -71,39 +72,48 @@ export async function uploadImageToS3(
 }
 
 /**
- * Delete image from S3 bucket
- * @param imageUrl - Full S3 URL of the image to delete
+ * Delete image from R2 bucket
+ * @param imageUrl - Full R2 URL of the image to delete
  */
 export async function deleteImageFromS3(imageUrl: string): Promise<void> {
   try {
+    // Skip deletion if it's an old AWS S3 URL (we can't delete from AWS with R2 credentials)
+    if (imageUrl.includes('amazonaws.com')) {
+      console.warn(
+        { imageUrl },
+        'Skipping deletion of old AWS S3 image - migration in progress'
+      )
+      return
+    }
+
     // Extract key from URL
-    // Format: https://bucket-name.s3.region.amazonaws.com/folder/filename
+    // Format: https://endpoint/folder/filename
     const match = imageUrl.match(S3_URL_PATTERN)
 
     if (!match) {
-      console.warn({ imageUrl }, 'Invalid S3 URL format for deletion')
+      console.warn({ imageUrl }, 'Invalid R2 URL format for deletion')
       return
     }
 
     const key = match[1]
 
     const command = new DeleteObjectCommand({
-      Bucket: env.AWS_S3_BUCKET_NAME,
+      Bucket: env.CLOUDFLARE_BUCKET_NAME,
       Key: key
     })
 
     await s3Client.send(command)
 
-    console.info({ key }, 'Image deleted from S3 successfully')
+    console.info({ key }, 'Image deleted from R2 successfully')
   } catch (error) {
-    console.error({ error, imageUrl }, 'Failed to delete image from S3')
+    console.error({ error, imageUrl }, 'Failed to delete image from R2')
     // Don't throw - deletion failures shouldn't break the flow
   }
 }
 
 /**
- * Generate a presigned URL for an S3 object
- * @param key - S3 object key (e.g., 'profile-pictures/user-id-timestamp.jpg')
+ * Generate a presigned URL for an R2 object
+ * @param key - R2 object key (e.g., 'profile-pictures/user-id-timestamp.jpg')
  * @param expiresIn - URL expiration time in seconds (default: 1 hour)
  * @returns Presigned URL that allows temporary access to the object
  */
@@ -113,7 +123,7 @@ export async function getPresignedUrl(
 ): Promise<string> {
   try {
     const command = new GetObjectCommand({
-      Bucket: env.AWS_S3_BUCKET_NAME,
+      Bucket: env.CLOUDFLARE_BUCKET_NAME,
       Key: key
     })
 
@@ -126,8 +136,8 @@ export async function getPresignedUrl(
 }
 
 /**
- * Generate presigned URL from full S3 URL
- * @param imageUrl - Full S3 URL (e.g., 'https://bucket.s3.region.amazonaws.com/key')
+ * Generate presigned URL from full R2 URL
+ * @param imageUrl - Full R2 URL (e.g., 'https://endpoint/key')
  * @param expiresIn - URL expiration time in seconds (default: 1 hour)
  * @returns Presigned URL
  */
@@ -137,16 +147,20 @@ export async function getPresignedUrlFromFullUrl(
 ): Promise<string> {
   const match = imageUrl.match(S3_URL_PATTERN)
   if (!match) {
-    throw new Error('Invalid S3 URL format')
+    throw new Error('Invalid R2 URL format')
   }
   const key = match[1]
   return await getPresignedUrl(key, expiresIn)
 }
 
 /**
- * Check if a URL is an S3 URL
+ * Check if a URL is an S3/R2 URL
  */
 export function isS3Url(url: string | null | undefined): boolean {
   if (!url) return false
-  return url.includes('s3') && url.includes('amazonaws.com')
+  // Check for both AWS S3 and Cloudflare R2 URLs
+  return (
+    (url.includes('s3') && url.includes('amazonaws.com')) ||
+    url.includes(env.CLOUDFLARE_R2_ENDPOINT)
+  )
 }

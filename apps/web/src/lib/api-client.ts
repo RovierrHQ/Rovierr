@@ -2,7 +2,9 @@ import type { App } from '@api/index'
 import { type Treaty, treaty } from '@elysiajs/eden'
 import {
   type QueryKey,
+  type UseMutationOptions,
   type UseQueryOptions,
+  useMutation as useTanstackMutation,
   useQuery as useTanstackQuery
 } from '@tanstack/react-query'
 
@@ -38,6 +40,47 @@ export function useQuery<
     queryKey,
     queryFn: async () => {
       const response = await treatyFn()
+
+      if (response.error) {
+        throw response.error
+      }
+
+      if (response.data !== undefined) {
+        return response.data as Treaty.Data<Treaty.TreatyResponse<T>>
+      }
+
+      throw new Error('No data returned from API')
+    },
+    ...options
+  })
+}
+
+/**
+ * Typed useMutation hook for Eden Treaty endpoints
+ * Automatically infers data, error, and variables types from the Treaty response
+ * Usage: const mutation = useMutation((data) => api.user.profile.patch(data))
+ */
+export function useMutation<
+  TVariables = void,
+  T extends Record<number, unknown> = Record<number, unknown>
+>(
+  treatyFn: (variables: TVariables) => Promise<Treaty.TreatyResponse<T>>,
+  options?: Omit<
+    UseMutationOptions<
+      Treaty.Data<Treaty.TreatyResponse<T>>,
+      Treaty.Error<Treaty.TreatyResponse<T>>,
+      TVariables
+    >,
+    'mutationFn'
+  >
+) {
+  return useTanstackMutation<
+    Treaty.Data<Treaty.TreatyResponse<T>>,
+    Treaty.Error<Treaty.TreatyResponse<T>>,
+    TVariables
+  >({
+    mutationFn: async (variables: TVariables) => {
+      const response = await treatyFn(variables)
 
       if (response.error) {
         throw response.error
