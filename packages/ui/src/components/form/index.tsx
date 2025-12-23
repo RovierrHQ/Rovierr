@@ -6,6 +6,7 @@ import Calendar from './fields/calendar'
 import Checkbox from './fields/checkbox'
 import OTP from './fields/input-otp'
 import MultiSelect from './fields/multiselect'
+import Phone from './fields/phone'
 import RadioGroup from './fields/radio'
 import RichText from './fields/rich-text'
 import Select from './fields/select'
@@ -32,7 +33,8 @@ export const { useAppForm, withFieldGroup, withForm } = createFormHook({
     TextWithUnit,
     MultiSelect,
     OTP,
-    TagInput
+    TagInput,
+    Phone
   },
   formComponents: {
     // SubmitButton

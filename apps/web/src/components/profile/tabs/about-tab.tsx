@@ -1,5 +1,6 @@
 'use client'
 
+import type { Treaty } from '@elysiajs/eden'
 import { aboutUpdateSchema } from '@rov/orpc-contracts/user/profile-schemas'
 import { Button } from '@rov/ui/components/button'
 import {
@@ -15,7 +16,8 @@ import {
   InputGroupInput,
   InputGroupText
 } from '@rov/ui/components/input-group'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useQuery } from '@web/lib/api-client'
 import {
   buildFacebookUrl,
   buildInstagramUrl,
@@ -30,7 +32,6 @@ import {
   extractTwitterHandle,
   extractWhatsAppNumber
 } from '@web/lib/social-links'
-import { orpc } from '@web/utils/orpc'
 import {
   Edit,
   Facebook,
@@ -47,7 +48,6 @@ import { toast } from 'sonner'
 import type { z } from 'zod'
 
 // Regex patterns defined at top level for performance
-const PLUS_PREFIX_REGEX = /^\+/
 const AT_PREFIX_REGEX = /^@/
 
 export function AboutTab() {
@@ -55,7 +55,8 @@ export function AboutTab() {
   const queryClient = useQueryClient()
 
   const { data: profileDetails, isLoading } = useQuery(
-    orpc.user.profile.details.queryOptions()
+    ['user', 'profile', 'details'],
+    api.user.profile.details.get
   )
 
   const form = useAppForm({
@@ -95,27 +96,18 @@ export function AboutTab() {
             ? buildLinkedInUrl(value.linkedin)
             : value.linkedin
         }
-        await orpc.user.profile.update.call(submitValue)
-        // Invalidate and refetch all profile-related queries
-        // Use exact query key from queryOptions for profile details
-        const detailsQueryKey =
-          orpc.user.profile.details.queryOptions().queryKey
-        await queryClient.invalidateQueries({ queryKey: detailsQueryKey })
-        await queryClient.refetchQueries({ queryKey: detailsQueryKey })
-        // Also invalidate broader profile queries to catch any other components
-        await queryClient.invalidateQueries({
-          predicate: (query) => {
-            const key = query.queryKey
-            return (
-              Array.isArray(key) && key[0] === 'user' && key[1] === 'profile'
-            )
-          }
+        await api.user.profile.update.put(submitValue)
+        queryClient.invalidateQueries({
+          queryKey: ['user', 'profile', 'details']
         })
 
         setIsEditing(false)
         toast.success('Profile updated successfully')
       } catch (error) {
-        toast.error((error as Error).message || 'Failed to update profile')
+        toast.error(
+          (error as Treaty.Error<typeof api.user.profile.update.put>).value
+            .message || 'Failed to update profile'
+        )
       }
     }
   })
@@ -378,31 +370,15 @@ export function AboutTab() {
                 }) => {
                   if (social.key === 'whatsapp') {
                     return (
-                      <InputGroup>
-                        <InputGroupAddon align="inline-start">
-                          <InputGroupText>+</InputGroupText>
-                        </InputGroupAddon>
-                        <InputGroupInput
-                          aria-invalid={
-                            field.state.meta.isTouched &&
-                            !field.state.meta.isValid
-                          }
-                          autoComplete={field.name}
-                          id={field.name}
-                          name={field.name}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => {
-                            const value = e.target.value
-                            // Remove + if user types it, we add it via prefix
-                            field.handleChange(
-                              value.replace(PLUS_PREFIX_REGEX, '')
-                            )
-                          }}
-                          placeholder={social.placeholder}
-                          type="tel"
-                          value={field.state.value ?? ''}
-                        />
-                      </InputGroup>
+                      <form.AppField
+                        children={(field) => (
+                          <field.Phone
+                            label={social.label}
+                            placeholder={social.placeholder}
+                          />
+                        )}
+                        name="whatsapp"
+                      />
                     )
                   }
                   if (social.key === 'telegram') {

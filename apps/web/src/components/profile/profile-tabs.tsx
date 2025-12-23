@@ -2,7 +2,7 @@
 
 import { Button } from '@rov/ui/components/button'
 import { cn } from '@rov/ui/lib/utils'
-import { BookOpen, Info, LayoutGrid, Settings, Users } from 'lucide-react'
+import { BookOpen, Info, Settings, Users } from 'lucide-react'
 
 type ProfileTabsProps = {
   activeTab: string
@@ -10,7 +10,7 @@ type ProfileTabsProps = {
 }
 
 const tabs = [
-  { id: 'overview', label: 'Overview', icon: LayoutGrid },
+  // { id: 'overview', label: 'Overview', icon: LayoutGrid },
   { id: 'about', label: 'About', icon: Info },
   { id: 'academics', label: 'Academics', icon: BookOpen },
   // { id: 'activity', label: 'Activity', icon: Activity },

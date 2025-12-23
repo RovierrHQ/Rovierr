@@ -7,7 +7,6 @@ import { ProfileTabs } from '@web/components/profile/profile-tabs'
 import { AboutTab } from '@web/components/profile/tabs/about-tab'
 import { AcademicsTab } from '@web/components/profile/tabs/academics-tab'
 import { ClubsTab } from '@web/components/profile/tabs/clubs-tab'
-import { OverviewTab } from '@web/components/profile/tabs/overview-tab'
 import { SettingsTab } from '@web/components/profile/tabs/settings-tab'
 import { VerificationPrompt } from '@web/components/profile/verification-prompt'
 import api, { useQuery } from '@web/lib/api-client'
@@ -63,11 +62,11 @@ export default function ProfilePage() {
 
         {/* Tab Content with Error Boundaries */}
         <div className="px-3 py-4 sm:px-4 sm:py-6">
-          {activeTab === 'overview' && (
+          {/* {activeTab === 'overview' && (
             <ProfileErrorBoundary>
               <OverviewTab />
             </ProfileErrorBoundary>
-          )}
+          )} */}
           {activeTab === 'about' && (
             <ProfileErrorBoundary>
               <AboutTab />
