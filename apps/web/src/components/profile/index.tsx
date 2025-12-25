@@ -13,7 +13,9 @@ import api, { useQuery } from '@web/lib/api-client'
 import { useQueryState } from 'nuqs'
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useQueryState('tab')
+  const [activeTab, setActiveTab] = useQueryState('tab', {
+    defaultValue: 'about'
+  })
 
   const {
     data: profileDetails,
@@ -54,10 +56,7 @@ export default function ProfilePage() {
 
         {/* Tab Navigation */}
         <div className="mt-4 sm:mt-6">
-          <ProfileTabs
-            activeTab={activeTab || 'overview'}
-            onTabChange={setActiveTab}
-          />
+          <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
         {/* Tab Content with Error Boundaries */}
