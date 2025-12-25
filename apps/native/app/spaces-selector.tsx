@@ -1,4 +1,4 @@
-import { useTranslation } from '@rovierr/localization'
+import { useTranslation } from '@rov/localization'
 import { useRouter } from 'expo-router'
 import { useAtom } from 'jotai'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'

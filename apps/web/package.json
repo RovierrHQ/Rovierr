@@ -21,6 +21,7 @@
     "@orpc/tanstack-query": "1.10.4",
     "@react-pdf/renderer": "4.3.1",
     "@rov/auth": "workspace:*",
+    "@rov/localization": "workspace:*",
     "@rov/orpc-contracts": "workspace:*",
     "@rov/realtime": "workspace:*",
     "@rov/shared": "workspace:*",

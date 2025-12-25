@@ -6,11 +6,12 @@ import {
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
-import { initLocalization } from '@rovierr/localization'
+import { initLocalization } from '@rov/localization'
 import { ActivityIndicator, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { useColorScheme } from '@/hooks/use-color-scheme'
 import '@/global.css'
+import { getLocales } from 'expo-localization'
 import { useEffect, useState } from 'react'
 
 export const unstable_settings = {
@@ -22,7 +23,8 @@ export default function RootLayout() {
   const [isI18nInitialized, setIsI18nInitialized] = useState(false)
 
   useEffect(() => {
-    initLocalization()
+    const locale = getLocales()[0]?.languageTag
+    initLocalization(locale)
       .then(() => setIsI18nInitialized(true))
       .catch((e) => console.error('Failed to init localization', e))
   }, [])

@@ -1,9 +1,10 @@
 import {
   type DrawerContentComponentProps,
   DrawerContentScrollView,
-  DrawerItemList
+  DrawerItem
 } from '@react-navigation/drawer'
 import { Drawer } from 'expo-router/drawer'
+
 import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol'
@@ -33,7 +34,46 @@ function CustomDrawerContent({
           {spaceName}
         </ThemedText>
       </ThemedView>
-      <DrawerItemList {...props} />
+      {props.state.routes.map((route, index) => {
+        const { options } = props.descriptors[route.key]
+        const label =
+          options.drawerLabel !== undefined
+            ? options.drawerLabel
+            : options.title !== undefined
+              ? options.title
+              : route.name
+
+        const isFocused = props.state.index === index
+
+        const onPress = () => {
+          const event = props.navigation.emit({
+            type: 'drawerItemPress',
+            target: route.key,
+            canPreventDefault: true
+          })
+
+          if (!(isFocused || event.defaultPrevented)) {
+            props.navigation.navigate(route.name, route.params)
+          }
+        }
+
+        return (
+          <DrawerItem
+            activeBackgroundColor={options.drawerActiveBackgroundColor}
+            activeTintColor={options.drawerActiveTintColor}
+            focused={isFocused}
+            // biome-ignore lint/suspicious/noExplicitAny: React 19 type mismatch
+            icon={options.drawerIcon as any}
+            inactiveBackgroundColor={options.drawerInactiveBackgroundColor}
+            inactiveTintColor={options.drawerInactiveTintColor}
+            key={route.key}
+            label={label as string}
+            labelStyle={options.drawerLabelStyle}
+            onPress={onPress}
+            style={options.drawerItemStyle}
+          />
+        )
+      })}
     </DrawerContentScrollView>
   )
 }

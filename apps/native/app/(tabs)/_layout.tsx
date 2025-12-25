@@ -1,4 +1,4 @@
-import { useTranslation } from '@rovierr/localization'
+import { useTranslation } from '@rov/localization'
 import { Tabs, useRouter } from 'expo-router'
 import { HapticTab } from '@/components/haptic-tab'
 import { IconSymbol } from '@/components/ui/icon-symbol'
