@@ -402,9 +402,3 @@ export type Session = {
     isVerified: boolean
   }
 }
-
-// Re-export common types that clients might need
-export type { DB, user as User } from '@rov/db'
-
-// Re-export permissions for use in UI components
-export { statement } from './permissions'

@@ -27,7 +27,8 @@ export function createNativeAuthClient(config: NativeAuthClientConfig) {
     baseURL: config.baseURL,
     plugins: [
       expoClient({
-        storagePrefix: config.storagePrefix || 'app',
+        storagePrefix: config.storagePrefix || 'rovierr',
+        scheme: 'rovierr',
         storage: config.storage
       })
     ]
