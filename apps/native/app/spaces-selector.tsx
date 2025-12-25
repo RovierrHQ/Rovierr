@@ -14,7 +14,7 @@ export default function SpacesSelector() {
     { id: 'personal', name: t('common:personal', 'Personal') },
     { id: 'societies', name: t('common:societies', 'Societies') },
     { id: 'career', name: t('common:career', 'Career') }
-  ]
+  ] as const
 
   return (
     <View style={styles.container}>
@@ -25,6 +25,7 @@ export default function SpacesSelector() {
           onPress={() => {
             setCurrentSpaceId(space.id)
             router.dismiss()
+            router.replace(`/(tabs)/spaces/${space.id}`)
           }}
           style={styles.item}
         >
