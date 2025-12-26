@@ -29,6 +29,7 @@ The User Profile Page feature provides a comprehensive interface for students to
 3. WHEN the User selects a Profile Tab, THE Profile System SHALL display the corresponding content section
 4. WHEN the Profile System loads profile data, THE Profile System SHALL fetch the User's current university information from the database
 5. WHERE the User has a verified student status, THE Profile System SHALL display a verified badge on the Profile Hero
+6. WHEN the Profile Hero is displayed, THE Profile System SHALL show action icons at the top right corner of the banner for quick access to settings and profile actions
 
 ### Requirement 2: Profile Information Management
 
@@ -137,3 +138,16 @@ The User Profile Page feature provides a comprehensive interface for students to
 3. WHEN clubs are displayed, THE Profile System SHALL show club name, logo, role, and membership status for each club
 4. WHEN the User clicks on a club, THE Profile System SHALL navigate to the club's detail page
 5. WHERE the User has no club memberships, THE Profile System SHALL display a prompt to discover and join clubs
+
+### Requirement 11: Profile Action Icons
+
+**User Story:** As a student, I want quick access to profile actions from the banner, so that I can efficiently manage my profile settings and share my profile
+
+#### Acceptance Criteria
+
+1. WHEN the Profile Hero banner is displayed, THE Profile System SHALL show action icons at the top right corner of the banner
+2. WHEN the User clicks the Settings icon, THE Profile System SHALL navigate to the Settings tab
+3. WHEN the User clicks the Share icon, THE Profile System SHALL open the profile sharing dialog with QR code
+4. WHEN the User clicks the Edit Profile icon, THE Profile System SHALL navigate to the Settings tab for profile editing
+5. WHEN the User hovers over action icons, THE Profile System SHALL display tooltips explaining each action
+6. WHEN action icons are displayed, THE Profile System SHALL use a semi-transparent background with backdrop blur for better visibility over the banner image

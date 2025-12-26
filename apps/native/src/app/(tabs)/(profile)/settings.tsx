@@ -1,11 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native'
 
-export default function DiscoverClubsScreen() {
+export default function SettingsScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Discover Clubs</Text>
-      <Text style={styles.subtitle}>Find clubs to join</Text>
-      <Text style={styles.description}>Discover clubs screen coming soon</Text>
+      <Text style={styles.title}>Settings</Text>
+      <Text style={styles.subtitle}>Settings screen coming soon</Text>
     </View>
   )
 }
@@ -25,12 +24,6 @@ const styles = StyleSheet.create({
     marginBottom: 8
   },
   subtitle: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: '#5865F2',
-    marginBottom: 8
-  },
-  description: {
     fontSize: 16,
     color: '#8E9297',
     textAlign: 'center'

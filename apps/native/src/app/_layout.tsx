@@ -12,12 +12,29 @@ import { ActivityIndicator, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import '@native/global.css'
 import { authClient } from '@native/lib/auth-client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { getLocales } from 'expo-localization'
 import { useEffect, useState } from 'react'
 
 export const unstable_settings = {
   initialRouteName: undefined // Don't set initial route, let auth state decide
 }
+
+// Create a single QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30_000)
+    },
+    mutations: {
+      retry: 1,
+      retryDelay: 1000
+    }
+  }
+})
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme()
@@ -36,7 +53,7 @@ function RootLayoutNav() {
     if (!session && inTabsGroup) {
       router.replace('/welcome')
     } else if (session && (inAuthGroup || onWelcome)) {
-      router.replace('/(tabs)')
+      router.replace('/(tabs)/(profile)')
     }
   }, [session, isPending, segments, router])
 
@@ -100,7 +117,9 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <RootLayoutNav />
+      <QueryClientProvider client={queryClient}>
+        <RootLayoutNav />
+      </QueryClientProvider>
     </GestureHandlerRootView>
   )
 }

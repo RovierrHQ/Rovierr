@@ -10,10 +10,10 @@ export default function SpacesSelector() {
   const [, setCurrentSpaceId] = useAtom(currentSpaceAtom)
 
   const spaces = [
-    { id: 'academics', name: t('common:academics', 'Academics') },
+    // { id: 'academics', name: t('common:academics', 'Academics') },
     { id: 'personal', name: t('common:personal', 'Personal') },
-    { id: 'societies', name: t('common:societies', 'Societies') },
-    { id: 'career', name: t('common:career', 'Career') }
+    { id: 'societies', name: t('common:societies', 'Societies') }
+    // { id: 'career', name: t('common:career', 'Career') }
   ] as const
 
   return (
@@ -39,8 +39,7 @@ export default function SpacesSelector() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff'
+    padding: 20
   },
   title: {
     fontSize: 24,

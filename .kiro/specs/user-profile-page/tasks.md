@@ -23,7 +23,18 @@
   - Display current university information (name, city, country)
   - Show join date using `createdAt` field
   - Fetch data using `orpc.user.profile.info.query()` and `authClient.useSession()`
-  - _Requirements: 1.1, 1.2, 1.5_
+  - _Requirements: 1.1, 1.2, 1.5, 1.6_
+
+- [ ] 3.1. Add Discord-style action icons to profile banner
+  - Add action icons container at top right corner of banner in `ProfileHero` component
+  - Implement Settings icon button that navigates to Settings tab
+  - Implement Share icon button that opens profile sharing dialog
+  - Implement Edit Profile icon button that navigates to Settings tab
+  - Style icons with semi-transparent background and backdrop blur effect
+  - Add tooltips for each action icon using Tooltip component
+  - Ensure icons are visible over both gradient and image banners
+  - Make icons responsive for mobile (adjust size and spacing)
+  - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6_
 
 - [x] 4. Create profile tabs navigation component
   - Build `ProfileTabs` component in `apps/web/src/components/profile/profile-tabs.tsx`

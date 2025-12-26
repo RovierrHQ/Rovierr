@@ -7,12 +7,22 @@ import {
   useMutation as useTanstackMutation,
   useQuery as useTanstackQuery
 } from '@tanstack/react-query'
+import { authClient } from './auth-client'
 
-const api = treaty<App>(process.env.NEXT_PUBLIC_SERVER_URL || '', {
+const headers = () => {
+  const headers = new Map<string, string>()
+  const cookies = authClient.getCookie()
+  if (cookies) {
+    headers.set('Cookie', cookies)
+  }
+  return Object.fromEntries(headers)
+}
+const api = treaty<App>(process.env.EXPO_PUBLIC_SERVER_URL || '', {
   fetch: {
     credentials: 'include',
     mode: 'cors'
-  }
+  },
+  headers: headers()
 })
 
 /**

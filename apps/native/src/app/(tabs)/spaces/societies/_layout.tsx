@@ -1,6 +1,7 @@
 import SpaceDrawer, {
   type DrawerItemType
 } from '@native/components/SpaceDrawer'
+import { Drawer } from 'expo-router/drawer'
 
 const ITEMS: DrawerItemType[] = [
   { name: 'index', label: 'Campus Feed', icon: 'house.fill' },
@@ -10,5 +11,15 @@ const ITEMS: DrawerItemType[] = [
 ]
 
 export default function SocietiesLayout() {
-  return <SpaceDrawer items={ITEMS} spaceId="societies" />
+  return (
+    <SpaceDrawer items={ITEMS} spaceId="societies">
+      <Drawer.Screen
+        name="[organizationId]"
+        options={{
+          drawerItemStyle: { display: 'none' },
+          headerShown: false
+        }}
+      />
+    </SpaceDrawer>
+  )
 }

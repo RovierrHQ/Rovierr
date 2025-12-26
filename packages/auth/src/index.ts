@@ -21,7 +21,7 @@ import {
   emailOTP,
   type Invitation,
   type Member,
-  type Organization,
+  type Organization as Org,
   oneTap,
   organization,
   phoneNumber,
@@ -68,7 +68,7 @@ export type AuthConfig = {
       id: string
       role: string
       email: string
-      organization: Organization
+      organization: Org
       invitation: Invitation
       inviter: Member & {
         user: User
@@ -401,4 +401,32 @@ export type Session = {
     displayUsername: string | null
     isVerified: boolean
   }
+}
+
+export type Organization = {
+  logo: string | null
+  id: string
+  name: string
+  slug: string
+  createdAt: Date
+  // biome-ignore lint/suspicious/noExplicitAny: no strict reason for now
+  metadata?: any
+  type?: string | undefined
+  visibility?: string | undefined
+  institutionId?: string | undefined
+  description?: string | undefined
+  tags?: string[] | undefined
+  banner?: string | undefined
+  instagram?: string | undefined
+  facebook?: string | undefined
+  twitter?: string | undefined
+  linkedin?: string | undefined
+  whatsapp?: string | undefined
+  telegram?: string | undefined
+  website?: string | undefined
+  foundingYear?: number | undefined
+  meetingSchedule?: string | undefined
+  membershipRequirements?: string | undefined
+  goals?: string | undefined
+  primaryColor?: string | undefined
 }

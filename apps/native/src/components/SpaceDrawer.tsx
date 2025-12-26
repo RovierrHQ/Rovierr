@@ -82,10 +82,12 @@ function CustomDrawerContent({
 
 export default function SpaceDrawer({
   spaceId,
-  items
+  items,
+  children
 }: {
   spaceId: string
   items?: DrawerItemType[]
+  children?: React.ReactNode
 }) {
   return (
     <Drawer
@@ -109,6 +111,7 @@ export default function SpaceDrawer({
           }}
         />
       ))}
+      {children}
     </Drawer>
   )
 }

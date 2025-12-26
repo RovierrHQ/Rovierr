@@ -72,6 +72,9 @@ interface ProfileHeroProps {
 - Shows user name and verification badge
 - Displays current university information
 - Shows join date and location
+- Displays action icons at top right corner of banner (Settings, Share, Edit Profile)
+- Action icons have semi-transparent background with backdrop blur
+- Tooltips on hover for each action icon
 
 #### ProfileTabs Component
 ```typescript
