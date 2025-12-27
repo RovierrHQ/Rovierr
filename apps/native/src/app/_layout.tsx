@@ -1,20 +1,21 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider
-} from '@react-navigation/native'
+import '@native/global.css'
+import 'expo-dev-client'
+
+import { ThemeProvider as NavThemeProvider } from '@react-navigation/native'
 import { Stack, useRouter, useSegments } from 'expo-router'
+import { getItemAsync } from 'expo-secure-store'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
-import { useColorScheme } from '@native/hooks/use-color-scheme'
-import { initLocalization } from '@rov/localization'
-import { ActivityIndicator, View } from 'react-native'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import '@native/global.css'
 import { authClient } from '@native/lib/auth-client'
+import { useColorScheme } from '@native/lib/use-color-scheme'
+import { NAV_THEME } from '@native/theme'
+import { initLocalization } from '@rov/localization'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { getLocales } from 'expo-localization'
 import { useEffect, useState } from 'react'
+import { ActivityIndicator, View } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import Toast from 'react-native-toast-message'
 
 export const unstable_settings = {
   initialRouteName: undefined // Don't set initial route, let auth state decide
@@ -37,7 +38,7 @@ const queryClient = new QueryClient({
 })
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme()
+  const { colorScheme, isDarkColorScheme } = useColorScheme()
   const { data: session, isPending } = authClient.useSession()
   const segments = useSegments()
   const router = useRouter()
@@ -74,13 +75,14 @@ function RootLayoutNav() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <NavThemeProvider value={NAV_THEME[colorScheme]}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="welcome" />
         <Stack.Screen
           name="auth"
           options={{
-            presentation: 'formSheet'
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.45, 0.7, 0.9]
           }}
         />
         <Stack.Screen name="(tabs)" />
@@ -92,8 +94,11 @@ function RootLayoutNav() {
           }}
         />
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+      <StatusBar
+        key={`root-status-bar-${isDarkColorScheme ? 'light' : 'dark'}`}
+        style={isDarkColorScheme ? 'light' : 'dark'}
+      />
+    </NavThemeProvider>
   )
 }
 
@@ -101,10 +106,22 @@ export default function RootLayout() {
   const [isI18nInitialized, setIsI18nInitialized] = useState(false)
 
   useEffect(() => {
-    const locale = getLocales()[0]?.languageTag
-    initLocalization(locale)
-      .then(() => setIsI18nInitialized(true))
-      .catch((e) => console.error('Failed to init localization', e))
+    const initApp = async () => {
+      try {
+        const savedLanguage = await getItemAsync('user-language')
+        const deviceLocale = getLocales()[0]?.languageTag
+        const localeByPriority = savedLanguage || deviceLocale
+
+        await initLocalization(localeByPriority)
+        setIsI18nInitialized(true)
+      } catch (e) {
+        console.error('Failed to init app', e)
+        // Fallback to basic init if something fails
+        initLocalization('en').then(() => setIsI18nInitialized(true))
+      }
+    }
+
+    initApp()
   }, [])
 
   if (!isI18nInitialized) {
@@ -120,6 +137,7 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <RootLayoutNav />
       </QueryClientProvider>
+      <Toast />
     </GestureHandlerRootView>
   )
 }

@@ -1,13 +1,10 @@
-import { ThemedText } from '@native/components/themed-text'
-import { ThemedView } from '@native/components/themed-view'
-
+import { Text } from '@native/components/ui/text'
+import { View } from 'react-native'
 export default function AcademicsScreen() {
   return (
-    <ThemedView
-      style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-    >
-      <ThemedText type="title">Academics Space</ThemedText>
-      <ThemedText>This is where your academic content goes.</ThemedText>
-    </ThemedView>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text variant="title1">Academics Space</Text>
+      <Text>This is where your academic content goes.</Text>
+    </View>
   )
 }

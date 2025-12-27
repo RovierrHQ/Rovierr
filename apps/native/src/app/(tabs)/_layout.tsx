@@ -1,13 +1,10 @@
-import { HapticTab } from '@native/components/haptic-tab'
 import { ProtectedRoute } from '@native/components/protected-route'
-import { IconSymbol } from '@native/components/ui/icon-symbol'
-import { Colors } from '@native/constants/theme'
-import { useColorScheme } from '@native/hooks/use-color-scheme'
+import { HapticTab } from '@native/components/ui/haptic-tab'
+import { Icon } from '@native/components/ui/icon'
 import { useTranslation } from '@rov/localization'
 import { Tabs, useRouter } from 'expo-router'
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme()
   const { t } = useTranslation()
   const router = useRouter()
 
@@ -15,7 +12,6 @@ export default function TabLayout() {
     <ProtectedRoute>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
           headerShown: false,
           tabBarButton: HapticTab
         }}
@@ -33,7 +29,12 @@ export default function TabLayout() {
           options={{
             title: t('common:spaces', 'Spaces'),
             tabBarIcon: ({ color }) => (
-              <IconSymbol color={color} name="square.grid.2x2.fill" size={28} />
+              <Icon
+                color={color}
+                materialIcon={{ name: 'dashboard' }}
+                sfSymbol={{ name: 'square.grid.2x2.fill' }}
+                size={28}
+              />
             ),
             headerShown: false
           }}
@@ -43,7 +44,7 @@ export default function TabLayout() {
           options={{
             title: t('common:notifications', 'Notifications'),
             tabBarIcon: ({ color }) => (
-              <IconSymbol color={color} name="bell.fill" size={28} />
+              <Icon color={color} name="bell.fill" size={28} />
             )
           }}
         />
@@ -52,7 +53,7 @@ export default function TabLayout() {
           options={{
             title: t('common:profile', 'Profile'),
             tabBarIcon: ({ color }) => (
-              <IconSymbol color={color} name="person.fill" size={28} />
+              <Icon color={color} name="person.fill" size={28} />
             )
           }}
         />

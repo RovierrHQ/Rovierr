@@ -1,20 +1,18 @@
-import { ThemedText } from '@native/components/themed-text'
-import { ThemedView } from '@native/components/themed-view'
-import {
-  IconSymbol,
-  type IconSymbolName
-} from '@native/components/ui/icon-symbol'
+import { Text } from '@native/components/ui/text'
 import {
   type DrawerContentComponentProps,
   DrawerContentScrollView,
   DrawerItem
 } from '@react-navigation/drawer'
 import { Drawer } from 'expo-router/drawer'
+import { View } from 'react-native'
+import { Icon } from './ui/icon'
+import type { IconProps } from './ui/icon/types'
 
 export type DrawerItemType = {
   name: string // Route name (filename)
   label: string
-  icon: IconSymbolName
+  icon: IconProps
 }
 
 type CustomDrawerContentProps = DrawerContentComponentProps & {
@@ -27,15 +25,12 @@ function CustomDrawerContent({
 }: CustomDrawerContentProps) {
   return (
     <DrawerContentScrollView {...props}>
-      <ThemedView style={{ padding: 20, paddingBottom: 10 }}>
-        <ThemedText type="subtitle">Current Space:</ThemedText>
-        <ThemedText
-          style={{ textTransform: 'capitalize' }}
-          type="defaultSemiBold"
-        >
+      <View style={{ padding: 20, paddingBottom: 10 }}>
+        <Text variant="title2">Current Space:</Text>
+        <Text style={{ textTransform: 'capitalize' }} variant="title1">
           {spaceName}
-        </ThemedText>
-      </ThemedView>
+        </Text>
+      </View>
       {props.state.routes.map((route, index) => {
         const { options } = props.descriptors[route.key]
         const label =
@@ -106,7 +101,7 @@ export default function SpaceDrawer({
             drawerLabel: item.label,
             title: item.label,
             drawerIcon: ({ color }) => (
-              <IconSymbol color={color} name={item.icon} size={22} />
+              <Icon color={color} size={22} {...item.icon} />
             )
           }}
         />

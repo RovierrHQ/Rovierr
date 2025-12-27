@@ -5,6 +5,10 @@
     "apps/*",
     "packages/*"
   ],
+  "resolutions": {
+    "react": "19.1.0",
+    "@types/react": "~19.1.0"
+  },
   "scripts": {
     "check": "biome check --write .",
     "ruler:apply": "bunx @intellectronica/ruler@latest apply --local-only",
@@ -16,7 +20,7 @@
     "db:generate": "turbo -F server db:generate",
     "db:migrate": "turbo -F server db:migrate",
     "doc": "cd apps/docs && mintlify dev --port 3333",
-    "cl-install": "find . -name 'node_modules' -type d -prune -exec rm -rf {} + && find . -name 'bun.lockb' -type f -delete && bun install",
+    "cl-install": "find . -name 'node_modules' -type d -prune -exec rm -rf {} + && find . -name 'bun.lock' -type f -delete && bun install",
     "prepare": "husky"
   },
   "devDependencies": {

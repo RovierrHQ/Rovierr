@@ -1,4 +1,4 @@
-import { IconSymbol } from '@native/components/ui/icon-symbol'
+import { Icon } from '@native/components/ui/icon'
 import { DrawerActions } from '@react-navigation/native'
 import { useLocalSearchParams } from 'expo-router'
 import { Drawer } from 'expo-router/drawer'
@@ -21,7 +21,7 @@ export default function SocietyLayout() {
             }}
             style={{ marginLeft: 16 }}
           >
-            <IconSymbol color="#007AFF" name="line.3.horizontal" size={24} />
+            <Icon color="#007AFF" name="line.3.horizontal" size={24} />
           </TouchableOpacity>
         )
       })}

@@ -11,6 +11,14 @@ export default function ProfileLayout() {
         }}
       />
       <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+      <Stack.Screen
+        name="share"
+        options={{
+          title: 'Share Profile',
+          headerShown: false,
+          presentation: 'formSheet'
+        }}
+      />
     </Stack>
   )
 }

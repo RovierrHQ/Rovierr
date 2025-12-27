@@ -1,6 +1,6 @@
-import { ThemedText } from '@native/components/themed-text'
-import { ThemedView } from '@native/components/themed-view'
+import { Text } from '@native/components/ui/text'
 import { usePathname } from 'expo-router'
+import { View } from 'react-native'
 
 export default function DemoScreen() {
   const pathname = usePathname()
@@ -11,11 +11,9 @@ export default function DemoScreen() {
     .replace(/\b\w/g, (l) => l.toUpperCase())
 
   return (
-    <ThemedView
-      style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-    >
-      <ThemedText type="title">{title}</ThemedText>
-      <ThemedText>This is a demo screen for {title}.</ThemedText>
-    </ThemedView>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text variant="title1">{title}</Text>
+      <Text>This is a demo screen for {title}.</Text>
+    </View>
   )
 }

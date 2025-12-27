@@ -1,13 +1,11 @@
-import { ThemedText } from '@native/components/themed-text'
-import { ThemedView } from '@native/components/themed-view'
+import { Text } from '@native/components/ui/text'
+import { View } from 'react-native'
 
 export default function SocietiesScreen() {
   return (
-    <ThemedView
-      style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-    >
-      <ThemedText type="title">Societies Space</ThemedText>
-      <ThemedText>This is where your societies content goes.</ThemedText>
-    </ThemedView>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text variant="title1">Societies Space</Text>
+      <Text>This is where your societies content goes.</Text>
+    </View>
   )
 }

@@ -1,18 +1,15 @@
 import { AntDesign } from '@expo/vector-icons'
+import { Text } from '@native/components/ui/text'
 import { authClient } from '@native/lib/auth-client'
+import { useColorScheme } from '@native/lib/use-color-scheme'
 import { useState } from 'react'
-import {
-  ActivityIndicator,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native'
+import { ActivityIndicator, Image, TouchableOpacity, View } from 'react-native'
 
 export default function AuthScreen() {
+  const { colors } = useColorScheme()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const foregroundColor = colors.foreground
 
   const handleGoogleSignIn = async () => {
     setError(null)
@@ -39,133 +36,54 @@ export default function AuthScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
+    <View className="flex-1" style={{ backgroundColor: colors.background }}>
+      <View className="flex-1 p-6 justify-center">
         {/* Logo */}
-        <View style={styles.logoContainer}>
+        <View className="items-center mb-8 border border-red-500">
           <Image
+            className="w-20 h-20 border border-red-500"
             source={require('../assets/images/icon.png')}
-            style={styles.logo}
+            style={{ resizeMode: 'contain', width: 50, height: 50 }}
           />
         </View>
 
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Welcome to Rovierr</Text>
-          <Text style={styles.subtitle}>
-            Sign in to access your student ecosystem
-          </Text>
+        <View className="items-center mb-12">
+          <Text>Welcome to Rovierr</Text>
+          <Text>Sign in to access your student ecosystem</Text>
         </View>
 
         {/* Error Message */}
         {error && (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{error}</Text>
+          <View className="bg-destructive/10 p-3 rounded-lg mb-4">
+            <Text>{error}</Text>
           </View>
         )}
 
         {/* Google Sign In Button */}
         <TouchableOpacity
+          className="flex-row items-center justify-center gap-3 p-4 rounded-xl bg-card border-2 border-foreground mb-6"
           disabled={isLoading}
           onPress={handleGoogleSignIn}
-          style={styles.googleButton}
         >
           {isLoading ? (
-            <ActivityIndicator color="#0C1824" />
+            <ActivityIndicator color={foregroundColor} />
           ) : (
             <>
-              <AntDesign color="#0C1824" name="google" size={24} />
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
+              <AntDesign color={foregroundColor} name="google" size={24} />
+              <Text>Continue with Google</Text>
             </>
           )}
         </TouchableOpacity>
 
         {/* Terms and Privacy */}
-        <View style={styles.termsContainer}>
-          <Text style={styles.termsText}>
-            By continuing, you agree to our{' '}
-            <Text style={styles.termsLink}>Terms of Service</Text> and{' '}
-            <Text style={styles.termsLink}>Privacy Policy</Text>.
+        <View className="mt-6 px-4">
+          <Text>
+            By continuing, you agree to our <Text>Terms of Service</Text> and{' '}
+            Text <Text>Privacy Policy</Text>.
           </Text>
         </View>
       </View>
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF'
-  },
-  content: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center'
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 32
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    resizeMode: 'contain'
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 48
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#0C1824',
-    marginBottom: 8
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center'
-  },
-  errorContainer: {
-    backgroundColor: '#FEE',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16
-  },
-  errorText: {
-    color: '#C00',
-    fontSize: 14,
-    textAlign: 'center'
-  },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#0C1824',
-    marginBottom: 24
-  },
-  googleButtonText: {
-    color: '#0C1824',
-    fontSize: 16,
-    fontWeight: '600'
-  },
-  termsContainer: {
-    marginTop: 24,
-    paddingHorizontal: 16
-  },
-  termsText: {
-    fontSize: 12,
-    color: '#999',
-    textAlign: 'center',
-    lineHeight: 18
-  },
-  termsLink: {
-    textDecorationLine: 'underline'
-  }
-})
