@@ -1,11 +1,13 @@
 import '@native/global.css'
-import 'expo-dev-client'
+// import 'expo-dev-client'
 
 import { ThemeProvider as NavThemeProvider } from '@react-navigation/native'
 import { Stack, useRouter, useSegments } from 'expo-router'
 import { getItemAsync } from 'expo-secure-store'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
+import { StripeDeepLinkHandler } from '@native/components/stripe-deep-link-handler'
+import { StripeProvider } from '@native/components/stripe-provider'
 import { authClient } from '@native/lib/auth-client'
 import { useColorScheme } from '@native/lib/use-color-scheme'
 import { NAV_THEME } from '@native/theme'
@@ -135,7 +137,12 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <RootLayoutNav />
+        <StripeProvider>
+          <View style={{ flex: 1 }}>
+            <StripeDeepLinkHandler />
+            <RootLayoutNav />
+          </View>
+        </StripeProvider>
       </QueryClientProvider>
       <Toast />
     </GestureHandlerRootView>

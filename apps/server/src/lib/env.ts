@@ -125,7 +125,17 @@ const envSchema = z.object({
     .describe('Cloudflare bucket name for storing images'),
   CLOUDFLARE_R2_ENDPOINT: z
     .url()
-    .describe('Cloudflare R2 endpoint for image storage')
+    .describe('Cloudflare R2 endpoint for image storage'),
+
+  // Stripe
+  STRIPE_PUBLISHABLE_KEY: z.string().min(1).describe('Stripe publishable key'),
+  STRIPE_SECRET_KEY: z.string().min(1).describe('Stripe secret key'),
+  STRIPE_WEBHOOK_SECRET: z
+    .string()
+    .min(1)
+    .describe(
+      'Stripe webhook secret (use the secret from "stripe listen" for local testing)'
+    )
 })
 
 /**

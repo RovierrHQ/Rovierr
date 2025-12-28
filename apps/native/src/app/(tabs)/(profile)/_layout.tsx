@@ -11,6 +11,21 @@ export default function ProfileLayout() {
         }}
       />
       <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+      <Stack.Screen name="pricing" options={{ title: 'Pricing' }} />
+      <Stack.Screen
+        name="checkout"
+        options={{
+          title: 'Checkout',
+          presentation: 'formSheet'
+        }}
+      />
+      <Stack.Screen
+        name="payment-success"
+        options={{
+          title: 'Payment Success',
+          presentation: 'formSheet'
+        }}
+      />
       <Stack.Screen
         name="share"
         options={{

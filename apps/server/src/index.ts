@@ -9,6 +9,7 @@ import { env } from '@api/lib/env'
 // import { discussionRouter } from '@api/routers/discussion'
 // import { form } from '@api/routers/form'
 import { realtime } from '@api/routers/realtime'
+import { stripeRouter } from '@api/routers/stripe'
 // import { resumeRouter } from '@api/routers/resume'
 // import { society } from '@api/routers/society'
 // import { tasks } from '@api/routers/tasks'
@@ -68,6 +69,7 @@ const app = new Elysia()
   // .use(resumeRouter)
   .use(universityRouter)
   .use(verifyStudentRouter)
+  .use(stripeRouter)
   // .use(societyRegistrationRouter)
   .listen(env.PORT)
 

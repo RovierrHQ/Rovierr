@@ -32,6 +32,95 @@ import {
 const BASE64_IMAGE_REGEX = /^data:image\/\w+;base64,/
 
 export const profile = new Elysia({ name: 'user-profile' })
+  // Public routes (no auth required)
+  .group('/profile', { detail: { tags: ['User'] } }, (app) =>
+    app
+      // GET /profile/public/:username - Get public profile by username
+      .get(
+        '/public/:username',
+        async ({ params }) => {
+          // Get user by username
+          const user = await db.query.user.findFirst({
+            where: eq(userTable.username, params.username)
+          })
+
+          if (!user?.username) {
+            throw new NOT_FOUND('User not found')
+          }
+
+          // Get institution enrollment info
+          const [enrollmentData] = await db
+            .select({
+              currentUniversity: {
+                id: institutionTable.id,
+                name: institutionTable.name,
+                logo: institutionTable.logo,
+                city: institutionTable.city,
+                country: institutionTable.country
+              },
+              studentStatusVerified:
+                institutionEnrollmentTable.studentStatusVerified
+            })
+            .from(institutionEnrollmentTable)
+            .leftJoin(
+              institutionTable,
+              eq(institutionTable.id, institutionEnrollmentTable.institutionId)
+            )
+            .where(eq(institutionEnrollmentTable.userId, user.id))
+            .limit(1)
+
+          // Generate presigned URLs for S3 images
+          const imageUrl =
+            user.image && isS3Url(user.image)
+              ? await getPresignedUrlFromFullUrl(user.image).catch(
+                  () => user.image
+                )
+              : user.image
+
+          const bannerImageUrl =
+            user.bannerImage && isS3Url(user.bannerImage)
+              ? await getPresignedUrlFromFullUrl(user.bannerImage).catch(
+                  () => user.bannerImage
+                )
+              : user.bannerImage
+
+          return {
+            id: user.id,
+            name: user.name,
+            username: user.username,
+            image: imageUrl,
+            bannerImage: bannerImageUrl,
+            bio: user.bio,
+            summary: user.summary,
+            website: user.website,
+            socialLinks: {
+              whatsapp: user.whatsapp,
+              telegram: user.telegram,
+              instagram: user.instagram,
+              facebook: user.facebook,
+              twitter: user.twitter,
+              linkedin: user.linkedin
+            },
+            currentUniversity: enrollmentData?.currentUniversity ?? null,
+            studentStatusVerified: Boolean(
+              enrollmentData?.studentStatusVerified ?? false
+            ),
+            createdAt: new Date(user.createdAt).toISOString(),
+            major: null,
+            yearOfStudy: null
+          }
+        },
+        {
+          params: z.object({ username: z.string() }),
+          response: publicProfileSchema,
+          detail: {
+            description: 'Gets the public profile for a user by username.',
+            summary: 'Get Public Profile'
+          }
+        }
+      )
+  )
+
   .use(betterAuth)
   .group('/profile', { auth: true, detail: { tags: ['User'] } }, (app) =>
     app
@@ -398,95 +487,6 @@ export const profile = new Elysia({ name: 'user-profile' })
           detail: {
             description: 'Gets the activity feed for the user.',
             summary: 'Get Activity Feed'
-          }
-        }
-      )
-  )
-
-  // Public routes (no auth required)
-  .group('/profile', { detail: { tags: ['User'] } }, (app) =>
-    app
-      // GET /profile/public/:username - Get public profile by username
-      .get(
-        '/public/:username',
-        async ({ params }) => {
-          // Get user by username
-          const user = await db.query.user.findFirst({
-            where: eq(userTable.username, params.username)
-          })
-
-          if (!user?.username) {
-            throw new NOT_FOUND('User not found')
-          }
-
-          // Get institution enrollment info
-          const [enrollmentData] = await db
-            .select({
-              currentUniversity: {
-                id: institutionTable.id,
-                name: institutionTable.name,
-                logo: institutionTable.logo,
-                city: institutionTable.city,
-                country: institutionTable.country
-              },
-              studentStatusVerified:
-                institutionEnrollmentTable.studentStatusVerified
-            })
-            .from(institutionEnrollmentTable)
-            .leftJoin(
-              institutionTable,
-              eq(institutionTable.id, institutionEnrollmentTable.institutionId)
-            )
-            .where(eq(institutionEnrollmentTable.userId, user.id))
-            .limit(1)
-
-          // Generate presigned URLs for S3 images
-          const imageUrl =
-            user.image && isS3Url(user.image)
-              ? await getPresignedUrlFromFullUrl(user.image).catch(
-                  () => user.image
-                )
-              : user.image
-
-          const bannerImageUrl =
-            user.bannerImage && isS3Url(user.bannerImage)
-              ? await getPresignedUrlFromFullUrl(user.bannerImage).catch(
-                  () => user.bannerImage
-                )
-              : user.bannerImage
-
-          return {
-            id: user.id,
-            name: user.name,
-            username: user.username,
-            image: imageUrl,
-            bannerImage: bannerImageUrl,
-            bio: user.bio,
-            summary: user.summary,
-            website: user.website,
-            socialLinks: {
-              whatsapp: user.whatsapp,
-              telegram: user.telegram,
-              instagram: user.instagram,
-              facebook: user.facebook,
-              twitter: user.twitter,
-              linkedin: user.linkedin
-            },
-            currentUniversity: enrollmentData?.currentUniversity ?? null,
-            studentStatusVerified: Boolean(
-              enrollmentData?.studentStatusVerified ?? false
-            ),
-            createdAt: new Date(user.createdAt).toISOString(),
-            major: null,
-            yearOfStudy: null
-          }
-        },
-        {
-          params: z.object({ username: z.string() }),
-          response: publicProfileSchema,
-          detail: {
-            description: 'Gets the public profile for a user by username.',
-            summary: 'Get Public Profile'
           }
         }
       )

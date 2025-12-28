@@ -23,6 +23,7 @@
   },
   "extends": ["ultracite/core", "ultracite/react", "ultracite/next"],
   "javascript": {
+    "globals": ["Bun"],
     "formatter": {
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
