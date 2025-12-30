@@ -27,6 +27,7 @@ export type NativeAuthClientConfig = {
     getItem: (key: string) => string | null
     setItem: (key: string, value: string) => void
   }
+  scheme: string
 }
 
 /**
@@ -39,7 +40,7 @@ export function createNativeAuthClient(config: NativeAuthClientConfig) {
     plugins: [
       expoClient({
         storagePrefix: config.storagePrefix || 'rovierr',
-        scheme: 'rovierr',
+        scheme: config.scheme,
         storage: config.storage
       }),
       emailOTPClient(),

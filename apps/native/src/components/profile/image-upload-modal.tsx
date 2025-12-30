@@ -220,11 +220,7 @@ export function ImageUploadModal({
             className="p-2"
             onPress={onClose}
           >
-            <Icon
-              color="#8E9297"
-              name="xmark"
-              size={24}
-            />
+            <Icon color="#8E9297" name="xmark" size={24} />
           </TouchableOpacity>
 
           <Text className="text-lg font-semibold text-[#060607] dark:text-white">
@@ -291,11 +287,7 @@ export function ImageUploadModal({
                 onPress={handleRemoveImage}
               >
                 <View className="w-10 h-10 rounded-full bg-white dark:bg-black justify-center items-center mr-3">
-                  <Icon
-                    color="#DC3545"
-                    name="trash.fill"
-                    size={24}
-                  />
+                  <Icon color="#DC3545" name="trash.fill" size={24} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-base font-semibold text-[#DC3545] mb-0.5">

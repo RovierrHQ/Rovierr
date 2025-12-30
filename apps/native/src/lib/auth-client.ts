@@ -21,7 +21,8 @@ if (!process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID) {
 export const authClient = createNativeAuthClient({
   baseURL: `${process.env.EXPO_PUBLIC_SERVER_URL}/auth`,
   storagePrefix: 'rovierr',
-  storage: SecureStore
+  storage: SecureStore,
+  scheme: 'rovierr'
 })
 
 export type AuthClient = typeof authClient
