@@ -25,9 +25,9 @@ const geistMono = Geist_Mono({
 // For a simple demo/fix in Next.js, calling it at module level or top of layout is a start.
 // But `apps/web` might be client-heavy.
 // Let's import it and call it.
-import { initLocalization } from '@rov/localization'
+// import { initLocalization } from '@rov/localization'
 
-initLocalization('en') // Default to 'en' for web for now
+// initLocalization('en') // Default to 'en' for web for now
 
 export const metadata: Metadata = {
   title: 'rovierr',
