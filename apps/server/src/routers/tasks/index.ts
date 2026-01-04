@@ -20,6 +20,16 @@ import {
   INVALID_USERS,
   TASK_NOT_FOUND
 } from './errors'
+import {
+  addCommentSchema,
+  assignUsersSchema,
+  createTaskSchema,
+  getClubTasksQuerySchema,
+  getMyTasksQuerySchema,
+  getTaskActivityQuerySchema,
+  getTaskDetailsParamsSchema,
+  updateTaskSchema
+} from './schemas'
 
 // Helper function to check if user can access a task
 async function canAccessTask(
@@ -257,21 +267,7 @@ export const tasks = new Elysia({ name: 'tasks' }).use(betterAuth).group(
           }
         },
         {
-          body: z.object({
-            title: z.string().min(1),
-            description: z.string().optional(),
-            contextType: z.enum(['personal', 'club']),
-            contextId: z.string(),
-            priority: z.enum(['low', 'medium', 'high']).default('medium'),
-            status: z.enum(['todo', 'in_progress', 'done']).default('todo'),
-            visibility: z
-              .enum(['private', 'club', 'assignees'])
-              .default('assignees'),
-            dueAt: z.string().optional(),
-            startAt: z.string().optional(),
-            isAllDay: z.boolean().default(false),
-            assigneeIds: z.array(z.string()).optional()
-          })
+          body: createTaskSchema
         }
       )
       .put(
@@ -380,17 +376,7 @@ export const tasks = new Elysia({ name: 'tasks' }).use(betterAuth).group(
           }
         },
         {
-          body: z.object({
-            taskId: z.string(),
-            title: z.string().min(1).optional(),
-            description: z.string().optional(),
-            priority: z.enum(['low', 'medium', 'high']).optional(),
-            status: z.enum(['todo', 'in_progress', 'done']).optional(),
-            visibility: z.enum(['private', 'club', 'assignees']).optional(),
-            dueAt: z.string().nullable().optional(),
-            startAt: z.string().nullable().optional(),
-            isAllDay: z.boolean().optional()
-          })
+          body: updateTaskSchema
         }
       )
       .post(
@@ -525,11 +511,7 @@ export const tasks = new Elysia({ name: 'tasks' }).use(betterAuth).group(
           }
         },
         {
-          body: z.object({
-            taskId: z.string(),
-            userIds: z.array(z.string()),
-            action: z.enum(['add', 'remove']).default('add')
-          })
+          body: assignUsersSchema
         }
       )
       .get(
@@ -640,13 +622,7 @@ export const tasks = new Elysia({ name: 'tasks' }).use(betterAuth).group(
           }
         },
         {
-          query: z.object({
-            status: z.enum(['todo', 'in_progress', 'done']).optional(),
-            priority: z.enum(['low', 'medium', 'high']).optional(),
-            contextType: z.enum(['personal', 'club']).optional(),
-            limit: z.number().optional(),
-            offset: z.number().optional()
-          })
+          query: getMyTasksQuerySchema
         }
       )
       .get(
@@ -745,13 +721,7 @@ export const tasks = new Elysia({ name: 'tasks' }).use(betterAuth).group(
           params: z.object({
             clubId: z.string()
           }),
-          query: z.object({
-            status: z.enum(['todo', 'in_progress', 'done']).optional(),
-            priority: z.enum(['low', 'medium', 'high']).optional(),
-            visibility: z.enum(['private', 'club', 'assignees']).optional(),
-            limit: z.number().optional(),
-            offset: z.number().optional()
-          })
+          query: getClubTasksQuerySchema
         }
       )
       .get(
@@ -809,9 +779,7 @@ export const tasks = new Elysia({ name: 'tasks' }).use(betterAuth).group(
           }
         },
         {
-          params: z.object({
-            taskId: z.string()
-          })
+          params: getTaskDetailsParamsSchema
         }
       )
       .post(
@@ -868,12 +836,8 @@ export const tasks = new Elysia({ name: 'tasks' }).use(betterAuth).group(
           return fullComment || comment
         },
         {
-          params: z.object({
-            taskId: z.string()
-          }),
-          body: z.object({
-            message: z.string().min(1)
-          })
+          params: getTaskDetailsParamsSchema,
+          body: addCommentSchema
         }
       )
       .get(
@@ -928,13 +892,8 @@ export const tasks = new Elysia({ name: 'tasks' }).use(betterAuth).group(
           }
         },
         {
-          params: z.object({
-            taskId: z.string()
-          }),
-          query: z.object({
-            limit: z.number().optional(),
-            offset: z.number().optional()
-          })
+          params: getTaskDetailsParamsSchema,
+          query: getTaskActivityQuerySchema
         }
       )
       .delete(
