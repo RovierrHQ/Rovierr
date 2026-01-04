@@ -13,6 +13,7 @@ import { stripeRouter } from '@api/routers/stripe'
 // import { resumeRouter } from '@api/routers/resume'
 // import { society } from '@api/routers/society'
 // import { tasks } from '@api/routers/tasks'
+import { people } from '@api/routers/people'
 import { universityRouter } from '@api/routers/university'
 import { user } from '@api/routers/user'
 import { verifyStudentRouter } from '@api/routers/verify-student'
@@ -60,6 +61,7 @@ const app = new Elysia()
   // .use(chat)
   .use(connection)
   .use(campusFeed)
+  .use(people)
   // .use(discussionRouter)
   // .use(society)
   // .use(form)

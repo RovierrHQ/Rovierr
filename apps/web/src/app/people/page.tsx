@@ -12,7 +12,7 @@ import {
   useQuery,
   useQueryClient
 } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api from '@web/lib/api-client'
 import { UserPlus, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -25,12 +25,17 @@ export default function PeoplePage() {
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ['people', 'list', searchQuery],
-      queryFn: async ({ pageParam = 0 }) =>
-        await orpc.people.list.call({
-          search: searchQuery || undefined,
-          limit: 50,
-          offset: pageParam
-        }),
+      queryFn: async ({ pageParam = 0 }) => {
+        const res = await api.people.list.get({
+          query: {
+            search: searchQuery || undefined,
+            limit: 50,
+            offset: pageParam
+          }
+        })
+        if (res.error) throw res.error
+        return res.data
+      },
       getNextPageParam: (lastPage, pages) => {
         if (lastPage.hasMore) {
           return pages.length * 50
@@ -40,35 +45,41 @@ export default function PeoplePage() {
       initialPageParam: 0
     })
 
-  const { data: pendingRequests } = useQuery(
-    orpc.connection.listPending.queryOptions({
-      input: {
-        type: 'received',
-        limit: 1,
-        offset: 0
-      }
-    })
-  )
-
-  const sendConnectionMutation = useMutation(
-    orpc.connection.send.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['people', 'list'] })
-        toast.success('Connection request sent')
-      },
-      onError: (error: Error) => {
-        if (error.message.includes('SELF_CONNECTION')) {
-          toast.error('Cannot connect with yourself')
-        } else if (error.message.includes('ALREADY_CONNECTED')) {
-          toast.error('Already connected with this user')
-        } else if (error.message.includes('PENDING_REQUEST')) {
-          toast.error('Connection request already pending')
-        } else {
-          toast.error('Failed to send connection request')
+  const { data: pendingRequests } = useQuery({
+    queryKey: ['connection', 'pending', 'received', 1],
+    queryFn: async () => {
+      const res = await api.connection.pending.get({
+        query: {
+          type: 'received',
+          limit: 1,
+          offset: 0
         }
+      })
+      if (res.error) throw res.error
+      return res.data
+    }
+  })
+
+  const sendConnectionMutation = useMutation({
+    mutationFn: ({ connectedUserId }: { connectedUserId: string }) =>
+      api.connection.send.post({ connectedUserId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['people', 'list'] })
+      toast.success('Connection request sent')
+    },
+    onError: (error: any) => {
+      const errorMessage = error.value?.message || error.message || ''
+      if (errorMessage.includes('SELF_CONNECTION')) {
+        toast.error('Cannot connect with yourself')
+      } else if (errorMessage.includes('ALREADY_CONNECTED')) {
+        toast.error('Already connected with this user')
+      } else if (errorMessage.includes('PENDING_REQUEST')) {
+        toast.error('Connection request already pending')
+      } else {
+        toast.error('Failed to send connection request')
       }
-    })
-  )
+    }
+  })
 
   const users = data?.pages.flatMap((page) => page.users) ?? []
 

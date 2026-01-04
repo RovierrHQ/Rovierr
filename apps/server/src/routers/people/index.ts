@@ -1,36 +1,31 @@
 import { db } from '@api/db'
-import { protectedProcedure } from '@api/lib/orpc'
+import { betterAuth } from '@api/middleware/auth'
 import { PeopleService } from '@api/services/people'
-import { ORPCError } from '@orpc/server'
+import Elysia, { t } from 'elysia'
+import { listUsersSchema, searchUsersSchema } from './schemas'
 
 const peopleService = new PeopleService(db)
 
-export const people = {
-  list: protectedProcedure.people.list.handler(async ({ input, context }) => {
-    try {
-      return await peopleService.listUsers(context.session.user.id, input)
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new ORPCError('INTERNAL_SERVER_ERROR', {
-          message: error.message
-        })
-      }
-      throw error
-    }
-  }),
-
-  search: protectedProcedure.people.search.handler(
-    async ({ input, context }) => {
-      try {
-        return await peopleService.searchUsers(context.session.user.id, input)
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new ORPCError('INTERNAL_SERVER_ERROR', {
-            message: error.message
-          })
+export const people = new Elysia({ name: 'people' })
+  .use(betterAuth)
+  .group('/people', { auth: true }, (app) =>
+    app
+      .get(
+        '/list',
+        async ({ query, user }) => {
+          return await peopleService.listUsers(user.id, query)
+        },
+        {
+          query: listUsersSchema
         }
-        throw error
-      }
-    }
+      )
+      .get(
+        '/search',
+        async ({ query, user }) => {
+          return await peopleService.searchUsers(user.id, query)
+        },
+        {
+          query: searchUsersSchema
+        }
+      )
   )
-}
