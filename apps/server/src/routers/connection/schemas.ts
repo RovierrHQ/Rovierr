@@ -63,7 +63,9 @@ export const publicUserSchema = z.object({
   id: z.string(),
   name: z.string(),
   username: z.string().nullable(),
-  image: z.string().nullable()
+  image: z.string().nullable(),
+  bio: z.string().nullable(),
+  isVerified: z.boolean()
 })
 
 /**
