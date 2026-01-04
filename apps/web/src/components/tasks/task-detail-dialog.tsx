@@ -20,8 +20,8 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { Skeleton } from '@rov/ui/components/skeleton'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
+import { useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
@@ -41,19 +41,18 @@ export function TaskDetailDialog({
 }: TaskDetailDialogProps) {
   const queryClient = useQueryClient()
 
-  const { data: taskDetails, isLoading } = useQuery({
-    ...orpc.tasks.getTaskDetails.queryOptions({
-      input: { taskId: taskId || '' }
-    }),
-    enabled: !!taskId
-  })
-
-  const updateTaskMutation = useMutation(
-    orpc.tasks.updateTask.mutationOptions()
+  const { data: taskDetails, isLoading } = useQuery(
+    ['task-details', taskId],
+    () => api.tasks({ taskId: taskId || '' }).get(),
+    {
+      enabled: !!taskId
+    }
   )
 
-  const addCommentMutation = useMutation(
-    orpc.tasks.addComment.mutationOptions()
+  const updateTaskMutation = useMutation((data: any) => api.tasks.update.put(data))
+
+  const addCommentMutation = useMutation((data: { taskId: string; message: string }) =>
+    api.tasks({ taskId: data.taskId }).comment.post({ message: data.message })
   )
 
   const handleUpdateStatus = async (newStatus: Task['status']) => {
@@ -66,18 +65,14 @@ export function TaskDetailDialog({
       })
       toast.success('Task status updated')
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getClubTasks.queryKey({
-          input: { clubId: organizationId }
-        })
+        queryKey: ['tasks', 'club', organizationId]
       })
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getTaskDetails.queryKey({
-          input: { taskId }
-        })
+        queryKey: ['task-details', taskId]
       })
-    } catch (error) {
+    } catch (error: any) {
       toast.error(
-        error instanceof Error ? error.message : 'Failed to update task'
+        error?.value?.message || error?.message || 'Failed to update task'
       )
     }
   }
@@ -92,18 +87,14 @@ export function TaskDetailDialog({
       })
       toast.success('Comment added')
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getTaskDetails.queryKey({
-          input: { taskId }
-        })
+        queryKey: ['task-details', taskId]
       })
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getClubTasks.queryKey({
-          input: { clubId: organizationId }
-        })
+        queryKey: ['tasks', 'club', organizationId]
       })
-    } catch (error) {
+    } catch (error: any) {
       toast.error(
-        error instanceof Error ? error.message : 'Failed to add comment'
+        error?.value?.message || error?.message || 'Failed to add comment'
       )
     }
   }

@@ -49,16 +49,16 @@ export const getMyTasksQuerySchema = z.object({
   status: taskStatusSchema.optional(),
   priority: taskPrioritySchema.optional(),
   contextType: contextTypeSchema.optional(),
-  limit: z.coerce.number().optional().default(50),
-  offset: z.coerce.number().optional().default(0)
+  limit: z.coerce.number().optional(),
+  offset: z.coerce.number().optional()
 })
 
 export const getClubTasksQuerySchema = z.object({
   status: taskStatusSchema.optional(),
   priority: taskPrioritySchema.optional(),
   visibility: taskVisibilitySchema.optional(),
-  limit: z.coerce.number().optional().default(50),
-  offset: z.coerce.number().optional().default(0)
+  limit: z.coerce.number().optional(),
+  offset: z.coerce.number().optional()
 })
 
 export const getTaskDetailsParamsSchema = z.object({
@@ -70,8 +70,8 @@ export const addCommentSchema = z.object({
 })
 
 export const getTaskActivityQuerySchema = z.object({
-  limit: z.coerce.number().optional().default(50),
-  offset: z.coerce.number().optional().default(0)
+  limit: z.coerce.number().optional(),
+  offset: z.coerce.number().optional()
 })
 
 // ============================================================================

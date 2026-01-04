@@ -20,9 +20,9 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation, useQuery } from '@tanstack/react-query'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation } from '@web/lib/api-client'
+import { useQuery } from '@tanstack/react-query'
 import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { AssigneeSelector } from './assignee-selector'
@@ -75,16 +75,17 @@ export function CreateTaskDialog({
   }, [membersData])
 
   const createTaskMutation = useMutation(
-    orpc.tasks.createTask.mutationOptions({
+    (data: any) => api.tasks.create.post(data),
+    {
       onSuccess: () => {
         toast.success('Task created successfully')
         handleClose()
         onSuccess()
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to create task')
+      onError: (error: any) => {
+        toast.error(error?.value?.message || error?.message || 'Failed to create task')
       }
-    })
+    }
   )
 
   const handleClose = () => {
