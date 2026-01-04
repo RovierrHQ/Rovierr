@@ -1,5 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery } from '@web/lib/api-client'
 import { useEffect, useRef, useState } from 'react'
 
 /**
@@ -52,23 +51,25 @@ export function useAutoSave<T>(
 
 /**
  * Hook to fetch resume data
- * Wraps the ORPC query with proper typing
+ * Wraps the Eden Query with proper typing
  */
 export function useResumeData(resumeId: string) {
-  return useQuery(orpc.resume.get.queryOptions({ input: { id: resumeId } }))
+  return useQuery(['resume', resumeId], () => api.resume({ id: resumeId }).get())
 }
 
 /**
  * Hook to fetch resume list
- * Wraps the ORPC query for listing resumes
+ * Wraps the Eden Query for listing resumes
  */
 export function useResumeList(limit = 50, offset = 0) {
   return useQuery(
-    orpc.resume.list.queryOptions({
-      input: {
-        limit,
-        offset
-      }
-    })
+    ['resume', 'list', limit, offset],
+    () =>
+      api.resume.get({
+        query: {
+          limit,
+          offset
+        }
+      })
   )
 }

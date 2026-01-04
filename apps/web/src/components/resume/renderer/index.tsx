@@ -2,9 +2,8 @@
 
 import type { ResumeData } from '@rov/orpc-contracts'
 import { Button } from '@rov/ui/components/button'
-import { useMutation } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { useMeasure } from '@uidotdev/usehooks'
-import { orpc } from '@web/utils/orpc'
 import { useAtomValue } from 'jotai'
 import { Download } from 'lucide-react'
 import { useRef } from 'react'
@@ -55,14 +54,16 @@ const ResumePreview = ({ resumeTitle, resumeId }: ResumePreviewProps) => {
 export const SaveResume = ({ resumeid }: { resumeid: string }) => {
   const resumeData = useAtomValue(resumeDataAtom)
   const saveMutation = useMutation(
-    orpc.resume.updateData.mutationOptions({
+    ({ resumeId, data }: { resumeId: string; data: any }) =>
+      api.resume.data.patch({ resumeId, data }),
+    {
       onSuccess: () => {
         toast.success('Resume saved successfully')
       },
       onError: (error) => {
-        toast.error(error.message || 'Failed to save resume')
+        toast.error(error?.value?.message || error?.message || 'Failed to save resume')
       }
-    })
+    }
   )
 
   return (

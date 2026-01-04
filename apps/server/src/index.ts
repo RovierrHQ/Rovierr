@@ -10,7 +10,7 @@ import { discussionRouter } from '@api/routers/discussion'
 // import { form } from '@api/routers/form'
 import { realtime } from '@api/routers/realtime'
 import { stripeRouter } from '@api/routers/stripe'
-// import { resumeRouter } from '@api/routers/resume'
+import { resumeRouter } from '@api/routers/resume'
 import { society } from '@api/routers/society'
 import { tasks } from '@api/routers/tasks'
 import { people } from '@api/routers/people'
@@ -70,7 +70,7 @@ const app = new Elysia()
   // .use(academicRouter)
   // .use(calendarRouter)
   // .use(careerRouter)
-  // .use(resumeRouter)
+  .use(resumeRouter)
   .use(universityRouter)
   .use(verifyStudentRouter)
   .use(stripeRouter)

@@ -12,8 +12,8 @@ import {
 } from '@rov/ui/components/alert-dialog'
 import { Button } from '@rov/ui/components/button'
 import { DataTable } from '@rov/ui/components/data-table'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { Plus, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -29,51 +29,52 @@ export default function ResumeListPage() {
     title: string
   } | null>(null)
 
-  // Fetch resumes using ORPC
+  // Fetch resumes using Elysia
   const { data } = useQuery(
-    orpc.resume.list.queryOptions({
-      input: {
-        limit: 50,
-        offset: 0
-      }
-    })
+    ['resume', 'list', 50, 0],
+    () =>
+      api.resume.get({
+        query: {
+          limit: 50,
+          offset: 0
+        }
+      })
   )
 
   // Create resume mutation
   const createMutation = useMutation(
-    orpc.resume.create.mutationOptions({
+    (input: { title: string; targetPosition: string; templateId: string }) =>
+      api.resume.post(input),
+    {
       onSuccess: (result) => {
         queryClient.invalidateQueries({
-          queryKey: orpc.resume.list.queryKey({
-            input: { limit: 50, offset: 0 }
-          })
+          queryKey: ['resume', 'list']
         })
         router.push(`/spaces/career/resume-builder/${result.id}`)
         toast.success('Resume created successfully')
       },
       onError: (error) => {
-        toast.error(error.message || 'Failed to create resume')
+        toast.error((error as any)?.value?.message || (error as any)?.message || 'Failed to create resume')
       }
-    })
+    }
   )
 
   // Delete resume mutation
   const deleteMutation = useMutation(
-    orpc.resume.delete.mutationOptions({
+    ({ id }: { id: string }) => api.resume({ id }).delete(),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.resume.list.queryKey({
-            input: { limit: 50, offset: 0 }
-          })
+          queryKey: ['resume', 'list']
         })
         toast.success('Resume deleted successfully')
         setDeleteDialogOpen(false)
         setResumeToDelete(null)
       },
       onError: (error) => {
-        toast.error(error.message || 'Failed to delete resume')
+        toast.error((error as any)?.value?.message || (error as any)?.message || 'Failed to delete resume')
       }
-    })
+    }
   )
 
   const handleCreateResume = () => {
