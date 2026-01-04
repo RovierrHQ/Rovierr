@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
-import { Button } from '@rov/ui/components/button'
+
 import { CreateThreadDialog } from '@web/components/discussions/create-thread-dialog'
 import { DiscussionFilters } from '@web/components/discussions/discussion-filters'
 import { DiscussionList } from '@web/components/discussions/discussion-list'
@@ -54,9 +54,11 @@ export default function DiscussionsPage({ params }: PageProps) {
     }
   )
 
+  const selectedThread = selectedThreadData as any
+
   // Map backend data to frontend types
   const discussions: Discussion[] =
-    (threadsData?.data as any)?.threads.map((thread: any) => ({
+    (threadsData as any)?.threads.map((thread: any) => ({
       id: thread.id,
       title: thread.title,
       content: thread.content,
@@ -89,28 +91,28 @@ export default function DiscussionsPage({ params }: PageProps) {
     return matchesFilter
   })
 
-  const currentDiscussion = (selectedThreadData?.data as any)
+  const currentDiscussion = selectedThread
     ? {
-        id: (selectedThreadData.data as any).id,
-        title: (selectedThreadData.data as any).title,
-        content: (selectedThreadData.data as any).content,
+        id: selectedThread.id,
+        title: selectedThread.title,
+        content: selectedThread.content,
         author: {
-          name: (selectedThreadData.data as any).author.isAnonymous
+          name: selectedThread.author.isAnonymous
             ? 'Anonymous'
-            : (selectedThreadData.data as any).author.name || 'Unknown',
-          avatar: (selectedThreadData.data as any).author.isAnonymous
+            : selectedThread.author.name || 'Unknown',
+          avatar: selectedThread.author.isAnonymous
             ? null
-            : (selectedThreadData.data as any).author.image,
+            : selectedThread.author.image,
           role: 'Student'
         },
-        isPinned: (selectedThreadData.data as any).isPinned,
+        isPinned: selectedThread.isPinned,
         isResolved: false,
-        replies: (selectedThreadData.data as any).replyCount,
+        replies: selectedThread.replyCount,
         upvotes:
-          (selectedThreadData.data as any).votes.upvotes - (selectedThreadData.data as any).votes.downvotes,
-        createdAt: new Date((selectedThreadData.data as any).createdAt).toLocaleString(),
-        tags: (selectedThreadData.data as any).tags || [],
-        userVote: (selectedThreadData.data as any).votes.userVote,
+          selectedThread.votes.upvotes - selectedThread.votes.downvotes,
+        createdAt: new Date(selectedThread.createdAt).toLocaleString(),
+        tags: selectedThread.tags || [],
+        userVote: selectedThread.votes.userVote,
         contextType: 'course' as const,
         contextId: discussionContextId
       }
@@ -146,8 +148,8 @@ export default function DiscussionsPage({ params }: PageProps) {
     userVote: reply.votes.userVote
   })
 
-  const currentReplies: Reply[] = (selectedThreadData?.data as any)?.replies
-    ? (selectedThreadData.data as any).replies.map(mapReplyToFrontend)
+  const currentReplies: Reply[] = selectedThread?.replies
+    ? selectedThread.replies.map(mapReplyToFrontend)
     : []
 
   if (isLoading) {
@@ -198,7 +200,7 @@ export default function DiscussionsPage({ params }: PageProps) {
             activeToday={
               discussions.filter((d) => d.createdAt.includes('hour')).length
             }
-            totalDiscussions={(threadsData?.data as any)?.total || 0}
+            totalDiscussions={(threadsData as any)?.total || 0}
             userContributions={8} // TODO: Get actual user contributions
           />
         )}

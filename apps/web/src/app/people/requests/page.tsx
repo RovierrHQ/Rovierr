@@ -51,8 +51,8 @@ export default function ConnectionRequestsPage() {
       })
   )
 
-  const receivedRequests = receivedData?.connections || []
-  const sentRequests = sentData?.connections || []
+  const receivedRequests = (receivedData as any)?.connections || []
+  const sentRequests = (sentData as any)?.connections || []
 
   const acceptMutation = useMutation(
     ({ connectionId }: { connectionId: string }) =>
@@ -92,7 +92,7 @@ export default function ConnectionRequestsPage() {
   }
 
   const renderRequestCard = (
-    connection: NonNullable<typeof receivedData>['connections'][0],
+    connection: any,
     type: 'received' | 'sent'
   ) => {
     const user = connection.user

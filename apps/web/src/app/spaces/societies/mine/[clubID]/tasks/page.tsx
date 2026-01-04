@@ -41,7 +41,7 @@ const TasksPage = () => {
     }
   )
 
-  const tasks = (tasksData?.data || []) as Task[]
+  const tasks = (tasksData || []) as Task[]
 
   const handleTaskCreated = () => {
     queryClient.invalidateQueries({

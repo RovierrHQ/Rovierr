@@ -201,7 +201,7 @@ export default function PeoplePage() {
                       <AvatarFallback>
                         {user.name
                           .split(' ')
-                          .map((n) => n[0])
+                          .map((n: string) => n[0])
                           .join('')
                           .toUpperCase()}
                       </AvatarFallback>
@@ -231,7 +231,7 @@ export default function PeoplePage() {
 
                   {user.interests && user.interests.length > 0 && (
                     <div className="mb-4 flex flex-wrap gap-1">
-                      {user.interests.slice(0, 3).map((interest) => (
+                      {user.interests.slice(0, 3).map((interest: string) => (
                         <Badge
                           className="text-xs"
                           key={interest}
