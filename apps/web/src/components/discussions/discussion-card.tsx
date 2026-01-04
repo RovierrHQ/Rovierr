@@ -3,8 +3,8 @@ import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent, CardHeader } from '@rov/ui/components/card'
 import { Separator } from '@rov/ui/components/separator'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation } from '@web/lib/api-client'
+import { useQueryClient } from '@tanstack/react-query'
 import { ArrowDown, ArrowUp, Check, MessageSquare, Pin } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Discussion } from './types'
@@ -25,39 +25,32 @@ export function DiscussionCard({
   const queryClient = useQueryClient()
 
   const voteMutation = useMutation(
-    orpc.discussion.vote.vote.mutationOptions({
+    (data: { threadId: string; voteType: 'up' | 'down' }) =>
+      api.discussion.vote.vote.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.list.queryKey({
-            input: {
-              contextType: discussion.contextType,
-              contextId: discussion.contextId
-            }
-          })
+          queryKey: ['discussion', 'threads', discussion.contextType, discussion.contextId]
         })
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to vote')
+      onError: (error: any) => {
+        toast.error(error?.value?.message || error?.message || 'Failed to vote')
       }
-    })
+    }
   )
 
   const unvoteMutation = useMutation(
-    orpc.discussion.vote.unvote.mutationOptions({
+    (data: { threadId: string }) => api.discussion.vote.unvote.delete(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.list.queryKey({
-            input: {
-              contextType: discussion.contextType,
-              contextId: discussion.contextId
-            }
-          })
+          queryKey: ['discussion', 'threads', discussion.contextType, discussion.contextId]
         })
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to remove vote')
+      onError: (error: any) => {
+        toast.error(error?.value?.message || error?.message || 'Failed to remove vote')
       }
-    })
+    }
   )
 
   const handleUpvote = (e: React.MouseEvent) => {

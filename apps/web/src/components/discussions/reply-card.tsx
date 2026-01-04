@@ -1,8 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation } from '@web/lib/api-client'
+import { useQueryClient } from '@tanstack/react-query'
 import { ArrowDown, ArrowUp, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Reply } from './types'
@@ -15,33 +15,32 @@ export function ReplyCard({ reply }: ReplyCardProps) {
   const queryClient = useQueryClient()
 
   const voteMutation = useMutation(
-    orpc.discussion.vote.vote.mutationOptions({
+    (data: { replyId: string; voteType: 'up' | 'down' }) =>
+      api.discussion.vote.vote.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.get.queryKey({
-            input: { id: reply.threadId }
-          })
+          queryKey: ['discussion', 'thread', reply.threadId]
         })
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to vote')
+      onError: (error: any) => {
+        toast.error(error?.value?.message || error?.message || 'Failed to vote')
       }
-    })
+    }
   )
 
   const unvoteMutation = useMutation(
-    orpc.discussion.vote.unvote.mutationOptions({
+    (data: { replyId: string }) => api.discussion.vote.unvote.delete(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.get.queryKey({
-            input: { id: reply.threadId }
-          })
+          queryKey: ['discussion', 'thread', reply.threadId]
         })
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to remove vote')
+      onError: (error: any) => {
+        toast.error(error?.value?.message || error?.message || 'Failed to remove vote')
       }
-    })
+    }
   )
 
   const handleUpvote = (e: React.MouseEvent) => {

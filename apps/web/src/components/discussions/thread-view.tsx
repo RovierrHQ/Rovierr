@@ -3,8 +3,8 @@ import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Separator } from '@rov/ui/components/separator'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation } from '@web/lib/api-client'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   ArrowDown,
   ArrowUp,
@@ -30,74 +30,58 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
   const queryClient = useQueryClient()
 
   const replyMutation = useMutation(
-    orpc.discussion.reply.create.mutationOptions({
+    (data: { threadId: string; content: string; isAnonymous: boolean }) =>
+      api.discussion.reply.create.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.get.queryKey({
-            input: { id: discussion.id }
-          })
+          queryKey: ['discussion', 'thread', discussion.id]
         })
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.list.queryKey({
-            input: {
-              contextType: discussion.contextType,
-              contextId: discussion.contextId
-            }
-          })
+          queryKey: ['discussion', 'threads', discussion.contextType, discussion.contextId]
         })
         toast.success('Reply posted successfully')
         setReplyText('')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to post reply')
+      onError: (error: any) => {
+        toast.error(error?.value?.message || error?.message || 'Failed to post reply')
       }
-    })
+    }
   )
 
   const voteMutation = useMutation(
-    orpc.discussion.vote.vote.mutationOptions({
+    (data: { threadId: string; voteType: 'up' | 'down' }) =>
+      api.discussion.vote.vote.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.get.queryKey({
-            input: { id: discussion.id }
-          })
+          queryKey: ['discussion', 'thread', discussion.id]
         })
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.list.queryKey({
-            input: {
-              contextType: discussion.contextType,
-              contextId: discussion.contextId
-            }
-          })
+          queryKey: ['discussion', 'threads', discussion.contextType, discussion.contextId]
         })
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to vote')
+      onError: (error: any) => {
+        toast.error(error?.value?.message || error?.message || 'Failed to vote')
       }
-    })
+    }
   )
 
   const unvoteMutation = useMutation(
-    orpc.discussion.vote.unvote.mutationOptions({
+    (data: { threadId: string }) => api.discussion.vote.unvote.delete(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.get.queryKey({
-            input: { id: discussion.id }
-          })
+          queryKey: ['discussion', 'thread', discussion.id]
         })
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.list.queryKey({
-            input: {
-              contextType: discussion.contextType,
-              contextId: discussion.contextId
-            }
-          })
+          queryKey: ['discussion', 'threads', discussion.contextType, discussion.contextId]
         })
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to remove vote')
+      onError: (error: any) => {
+        toast.error(error?.value?.message || error?.message || 'Failed to remove vote')
       }
-    })
+    }
   )
 
   const handleUpvote = () => {

@@ -9,8 +9,8 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation } from '@web/lib/api-client'
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -38,21 +38,20 @@ export function CreateThreadDialog({
   const queryClient = useQueryClient()
 
   const createMutation = useMutation(
-    orpc.discussion.thread.create.mutationOptions({
+    (data: any) => api.discussion.thread.create.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.list.queryKey({
-            input: { contextType, contextId }
-          })
+          queryKey: ['discussion', 'threads', contextType, contextId]
         })
         toast.success('Discussion created successfully')
         onOpenChange(false)
         form.reset()
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to create discussion')
+      onError: (error: any) => {
+        toast.error(error?.value?.message || error?.message || 'Failed to create discussion')
       }
-    })
+    }
   )
 
   const form = useAppForm({

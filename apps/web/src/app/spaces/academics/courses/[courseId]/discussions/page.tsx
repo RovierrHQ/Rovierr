@@ -1,14 +1,14 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
-import { useQuery } from '@tanstack/react-query'
+import { Button } from '@rov/ui/components/button'
 import { CreateThreadDialog } from '@web/components/discussions/create-thread-dialog'
 import { DiscussionFilters } from '@web/components/discussions/discussion-filters'
 import { DiscussionList } from '@web/components/discussions/discussion-list'
 import { DiscussionStats } from '@web/components/discussions/discussion-stats'
 import { ThreadView } from '@web/components/discussions/thread-view'
 import type { Discussion, Reply } from '@web/components/discussions/types'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery } from '@web/lib/api-client'
 import { MessageSquare } from 'lucide-react'
 import { use, useState } from 'react'
 
@@ -31,29 +31,32 @@ export default function DiscussionsPage({ params }: PageProps) {
 
   // Fetch discussions from the backend
   const { data: threadsData, isLoading } = useQuery(
-    orpc.discussion.thread.list.queryOptions({
-      input: {
-        contextType: 'course',
-        contextId: discussionContextId,
-        search: searchQuery || undefined,
-        sortBy: 'recent',
-        limit: 50,
-        offset: 0
-      }
-    })
+    ['discussion', 'threads', 'course', discussionContextId, searchQuery, selectedFilter],
+    () =>
+      api.discussion.thread.list.get({
+        query: {
+          contextType: 'course',
+          contextId: discussionContextId,
+          search: searchQuery || undefined,
+          sortBy: 'recent',
+          limit: 50,
+          offset: 0
+        }
+      })
   )
 
   // Fetch selected thread details with replies
-  const { data: selectedThreadData } = useQuery({
-    ...orpc.discussion.thread.get.queryOptions({
-      input: { id: selectedDiscussion || '' }
-    }),
-    enabled: !!selectedDiscussion
-  })
+  const { data: selectedThreadData } = useQuery(
+    ['discussion', 'thread', selectedDiscussion],
+    () => api.discussion.thread({ id: selectedDiscussion || '' }).get(),
+    {
+      enabled: !!selectedDiscussion
+    }
+  )
 
   // Map backend data to frontend types
   const discussions: Discussion[] =
-    threadsData?.threads.map((thread) => ({
+    (threadsData?.data as any)?.threads.map((thread: any) => ({
       id: thread.id,
       title: thread.title,
       content: thread.content,
@@ -86,28 +89,28 @@ export default function DiscussionsPage({ params }: PageProps) {
     return matchesFilter
   })
 
-  const currentDiscussion = selectedThreadData
+  const currentDiscussion = (selectedThreadData?.data as any)
     ? {
-        id: selectedThreadData.id,
-        title: selectedThreadData.title,
-        content: selectedThreadData.content,
+        id: (selectedThreadData.data as any).id,
+        title: (selectedThreadData.data as any).title,
+        content: (selectedThreadData.data as any).content,
         author: {
-          name: selectedThreadData.author.isAnonymous
+          name: (selectedThreadData.data as any).author.isAnonymous
             ? 'Anonymous'
-            : selectedThreadData.author.name || 'Unknown',
-          avatar: selectedThreadData.author.isAnonymous
+            : (selectedThreadData.data as any).author.name || 'Unknown',
+          avatar: (selectedThreadData.data as any).author.isAnonymous
             ? null
-            : selectedThreadData.author.image,
+            : (selectedThreadData.data as any).author.image,
           role: 'Student'
         },
-        isPinned: selectedThreadData.isPinned,
+        isPinned: (selectedThreadData.data as any).isPinned,
         isResolved: false,
-        replies: selectedThreadData.replyCount,
+        replies: (selectedThreadData.data as any).replyCount,
         upvotes:
-          selectedThreadData.votes.upvotes - selectedThreadData.votes.downvotes,
-        createdAt: new Date(selectedThreadData.createdAt).toLocaleString(),
-        tags: selectedThreadData.tags || [],
-        userVote: selectedThreadData.votes.userVote,
+          (selectedThreadData.data as any).votes.upvotes - (selectedThreadData.data as any).votes.downvotes,
+        createdAt: new Date((selectedThreadData.data as any).createdAt).toLocaleString(),
+        tags: (selectedThreadData.data as any).tags || [],
+        userVote: (selectedThreadData.data as any).votes.userVote,
         contextType: 'course' as const,
         contextId: discussionContextId
       }
@@ -143,8 +146,8 @@ export default function DiscussionsPage({ params }: PageProps) {
     userVote: reply.votes.userVote
   })
 
-  const currentReplies: Reply[] = selectedThreadData?.replies
-    ? selectedThreadData.replies.map(mapReplyToFrontend)
+  const currentReplies: Reply[] = (selectedThreadData?.data as any)?.replies
+    ? (selectedThreadData.data as any).replies.map(mapReplyToFrontend)
     : []
 
   if (isLoading) {
@@ -195,7 +198,7 @@ export default function DiscussionsPage({ params }: PageProps) {
             activeToday={
               discussions.filter((d) => d.createdAt.includes('hour')).length
             }
-            totalDiscussions={threadsData?.total || 0}
+            totalDiscussions={(threadsData?.data as any)?.total || 0}
             userContributions={8} // TODO: Get actual user contributions
           />
         )}
