@@ -2,7 +2,7 @@ import { auth } from '@api/lib/auth'
 import { env } from '@api/lib/env'
 // import { academicRouter } from '@api/routers/academic'
 // import { calendarRouter } from '@api/routers/calendar'
-// import { campusFeed } from '@api/routers/campus-feed'
+import { campusFeed } from '@api/routers/campus-feed'
 // import { careerRouter } from '@api/routers/career'
 // import { chat } from '@api/routers/chat'
 // import { connection } from '@api/routers/connection'
@@ -59,7 +59,7 @@ const app = new Elysia()
   .use(realtime)
   // .use(chat)
   // .use(connection)
-  // .use(campusFeed)
+  .use(campusFeed)
   // .use(discussionRouter)
   // .use(society)
   // .use(form)

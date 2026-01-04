@@ -129,8 +129,8 @@ export const rsvpSchema = z.object({
  * Schema for listing posts with filters and pagination
  */
 export const listPostsSchema = z.object({
-  limit: z.number().min(1).max(100).default(20),
-  offset: z.number().min(0).default(0),
+  limit: z.coerce.number().min(1).max(100).default(20),
+  offset: z.coerce.number().min(0).default(0),
   type: postTypeSchema.optional(),
   authorId: z.string().optional(),
   authorType: authorTypeSchema.optional()

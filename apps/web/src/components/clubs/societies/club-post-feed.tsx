@@ -10,12 +10,8 @@ import {
   DropdownMenuTrigger
 } from '@rov/ui/components/dropdown-menu'
 
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient
-} from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useQuery } from '@web/lib/api-client'
 import {
   Calendar,
   Check,
@@ -29,8 +25,7 @@ import {
   Star,
   X
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { useRef, useState } from 'react'
 import { PostCommentPanel } from './post-comment-panel'
 
 const ClubPostFeed = () => {
@@ -38,81 +33,67 @@ const ClubPostFeed = () => {
   const observerTarget = useRef<HTMLDivElement>(null)
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    error
-  } = useInfiniteQuery({
-    queryKey: ['campus-feed', 'posts'],
-    queryFn: async ({ pageParam = 0 }) =>
-      await orpc.campusFeed.list.call({ limit: 20, offset: pageParam }),
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.hasMore) {
-        return pages.length * 20
-      }
-      return
-    },
-    initialPageParam: 0
-  })
-
-  const likeMutation = useMutation(
-    orpc.campusFeed.like.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
-      },
-      onError: (err: Error) => {
-        toast.error(err.message || 'Failed to like post')
-      }
-    })
+  const { data, isLoading, error } = useQuery(
+    ['campus-feed', 'posts'],
+    async () =>
+      await api['campus-feed'].posts.get({ query: { limit: 20, offset: 0 } })
   )
 
-  const rsvpMutation = useMutation(
-    orpc.campusFeed.rsvp.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
-        toast.success('RSVP updated successfully')
-      },
-      onError: (err: Error) => {
-        toast.error(err.message || 'Failed to update RSVP')
-      }
-    })
-  )
+  // const likeMutation = useMutation(
+  //   orpc.campusFeed.like.mutationOptions({
+  //     onSuccess: () => {
+  //       queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
+  //     },
+  //     onError: (err: Error) => {
+  //       toast.error(err.message || 'Failed to like post')
+  //     }
+  //   })
+  // )
+
+  // const rsvpMutation = useMutation(
+  //   orpc.campusFeed.rsvp.mutationOptions({
+  //     onSuccess: () => {
+  //       queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
+  //       toast.success('RSVP updated successfully')
+  //     },
+  //     onError: (err: Error) => {
+  //       toast.error(err.message || 'Failed to update RSVP')
+  //     }
+  //   })
+  // )
 
   // Infinite scroll observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage()
-        }
-      },
-      { threshold: 0.1 }
-    )
+  // useEffect(() => {
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+  //         fetchNextPage()
+  //       }
+  //     },
+  //     { threshold: 0.1 }
+  //   )
 
-    const currentTarget = observerTarget.current
-    if (currentTarget) {
-      observer.observe(currentTarget)
-    }
+  //   const currentTarget = observerTarget.current
+  //   if (currentTarget) {
+  //     observer.observe(currentTarget)
+  //   }
 
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget)
-      }
-    }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+  //   return () => {
+  //     if (currentTarget) {
+  //       observer.unobserve(currentTarget)
+  //     }
+  //   }
+  // }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const handleLike = (postId: string) => {
-    likeMutation.mutate({ postId })
+    // likeMutation.mutate({ postId })
   }
 
   const handleRSVP = (
     eventPostId: string,
     status: 'going' | 'interested' | 'not_going'
   ) => {
-    rsvpMutation.mutate({ eventPostId, status })
+    // rsvpMutation.mutate({ eventPostId, status })
   }
 
   const getRSVPButtonContent = (
@@ -163,7 +144,7 @@ const ClubPostFeed = () => {
     )
   }
 
-  const posts = data?.pages.flatMap((page) => page.posts) || []
+  const posts = data?.posts || []
 
   if (posts.length === 0) {
     return (
@@ -268,7 +249,7 @@ const ClubPostFeed = () => {
                       <DropdownMenuTrigger asChild>
                         <Button
                           className="ml-auto gap-2"
-                          disabled={rsvpMutation.isPending}
+                          // disabled={rsvpMutation.isPending}
                           size="sm"
                           variant={
                             getRSVPButtonContent(post.currentUserRSVP).variant
@@ -327,9 +308,9 @@ const ClubPostFeed = () => {
 
         {/* Infinite scroll trigger */}
         <div className="py-4 text-center" ref={observerTarget}>
-          {isFetchingNextPage && (
+          {/* {isFetchingNextPage && (
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
-          )}
+          )} */}
         </div>
       </div>
 
