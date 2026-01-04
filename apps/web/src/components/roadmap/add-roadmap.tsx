@@ -8,9 +8,9 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { useMutation } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc, queryClient } from '@web/utils/orpc'
+import { useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { type ReactNode, useState } from 'react'
@@ -28,14 +28,17 @@ const roadmapSchema = z.object({
 const AddRoadmap = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false)
   const { data: session } = authClient.useSession()
-  const { mutateAsync } = useMutation(
-    orpc.roadmap.create.mutationOptions({
+  const queryClient = useQueryClient()
+
+  const { mutateAsync } = useMutation<any>(
+    (body: any) => api.roadmap.post(body),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.roadmap.list.key()
+          queryKey: ['roadmap', 'list']
         })
       }
-    })
+    }
   )
   const form = useAppForm({
     validators: {

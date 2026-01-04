@@ -15,8 +15,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@rov/ui/components/select'
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery } from '@web/lib/api-client'
 import { Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import UserInfo from '../profile/user-info'
@@ -41,19 +40,19 @@ const RoadmapFeed = () => {
       : undefined
 
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
-    orpc.roadmap.list.queryOptions({
-      input: {
+    ['roadmap', 'list', page, normalizedCategory],
+    () =>
+      api.roadmap.get({
         query: {
-          page,
+          page: page,
           limit: 10,
           category: normalizedCategory
         }
-      }
-    })
+      })
   )
 
-  const meta = data?.meta
-  const list = data?.data ?? []
+  const meta = (data as any)?.meta
+  const list = ((data as any)?.data as any[]) ?? []
 
   const handleCategoryChange = (value: string) => {
     setCategory(value)
@@ -127,7 +126,7 @@ const RoadmapFeed = () => {
 
       {!(isLoading || isError) && list.length > 0 && (
         <div className="space-y-4">
-          {list.map((item) => (
+          {list.map((item: any) => (
             <Card
               className="border border-muted transition hover:shadow-md"
               key={item.id}
@@ -207,7 +206,7 @@ const RoadmapFeed = () => {
         </div>
       )}
 
-      {list.map((item) => (
+      {list.map((item: any) => (
         <RoadmapComments
           comments={item.comments ?? []}
           key={`comments-${item.id}`}

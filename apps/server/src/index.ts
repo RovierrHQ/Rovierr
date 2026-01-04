@@ -11,9 +11,10 @@ import { connection } from '@api/routers/connection'
 import { realtime } from '@api/routers/realtime'
 import { stripeRouter } from '@api/routers/stripe'
 // import { resumeRouter } from '@api/routers/resume'
-// import { society } from '@api/routers/society'
-// import { tasks } from '@api/routers/tasks'
+import { society } from '@api/routers/society'
+import { tasks } from '@api/routers/tasks'
 import { people } from '@api/routers/people'
+import { roadmap } from '@api/routers/roadmap'
 import { universityRouter } from '@api/routers/university'
 import { user } from '@api/routers/user'
 import { verifyStudentRouter } from '@api/routers/verify-student'
@@ -56,12 +57,13 @@ const app = new Elysia()
     uptime: process.uptime()
   }))
   .use(user)
-  // .use(tasks)
+  .use(tasks)
   .use(realtime)
   // .use(chat)
   .use(connection)
   .use(campusFeed)
   .use(people)
+  .use(roadmap)
   // .use(discussionRouter)
   // .use(society)
   // .use(form)
