@@ -4,6 +4,7 @@ dist
 out
 .next
 .expo
+.history
 
 # TypeScript
 *.tsbuildinfo
