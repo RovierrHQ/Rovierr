@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
-import { Skeleton } from '@rov/ui/components/skeleton' 
+import { Skeleton } from '@rov/ui/components/skeleton'
 import {
   Tabs,
   TabsContent,
@@ -23,36 +23,32 @@ export default function ConnectionRequestsPage() {
     data: receivedData,
     isLoading: isLoadingReceived,
     error: receivedError
-  } = useQuery(
-    ['connection', 'pending', 'received'],
-    () =>
-      api.connection.pending.get({
-        query: {
-          type: 'received',
-          limit: 100,
-          offset: 0
-        }
-      })
+  } = useQuery(['connection', 'pending', 'received'], () =>
+    api.connection.pending.get({
+      query: {
+        type: 'received',
+        limit: 100,
+        offset: 0
+      }
+    })
   )
 
   const {
     data: sentData,
     isLoading: isLoadingSent,
     error: sentError
-  } = useQuery(
-    ['connection', 'pending', 'sent'],
-    () =>
-      api.connection.pending.get({
-        query: {
-          type: 'sent',
-          limit: 100,
-          offset: 0
-        }
-      })
+  } = useQuery(['connection', 'pending', 'sent'], () =>
+    api.connection.pending.get({
+      query: {
+        type: 'sent',
+        limit: 100,
+        offset: 0
+      }
+    })
   )
 
-  const receivedRequests = (receivedData as any)?.connections || []
-  const sentRequests = (sentData as any)?.connections || []
+  const receivedRequests = receivedData?.connections || []
+  const sentRequests = sentData?.connections || []
 
   const acceptMutation = useMutation(
     ({ connectionId }: { connectionId: string }) =>
@@ -63,8 +59,8 @@ export default function ConnectionRequestsPage() {
         queryClient.invalidateQueries({ queryKey: ['people', 'list'] })
         toast.success('Connection request accepted')
       },
-      onError: (error: any) => {
-        toast.error(error.message || 'Failed to accept request')
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to accept request')
       }
     }
   )
@@ -77,8 +73,8 @@ export default function ConnectionRequestsPage() {
         queryClient.invalidateQueries({ queryKey: ['connection', 'pending'] })
         toast.success('Connection request rejected')
       },
-      onError: (error: any) => {
-        toast.error(error.message || 'Failed to reject request')
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to reject request')
       }
     }
   )
@@ -92,7 +88,17 @@ export default function ConnectionRequestsPage() {
   }
 
   const renderRequestCard = (
-    connection: any,
+    connection: {
+      id: string
+      user: {
+        image: string | null
+        name: string
+        username: string | null
+        isVerified: boolean
+        bio: string | null
+        id: string
+      } | null
+    },
     type: 'received' | 'sent'
   ) => {
     const user = connection.user
@@ -234,9 +240,7 @@ export default function ConnectionRequestsPage() {
             <div className="py-12 text-center">
               <p className="text-destructive">
                 Error loading requests:{' '}
-                {(receivedError as any)?.value?.message ||
-                  (receivedError as any)?.message ||
-                  'Unknown error'}
+                {receivedError?.value?.message || 'Unknown error'}
               </p>
             </div>
           )}
@@ -247,7 +251,7 @@ export default function ConnectionRequestsPage() {
           {!(receivedError || isLoadingReceived) &&
             receivedRequests.length > 0 && (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {receivedRequests.map((connection: any) =>
+                {receivedRequests.map((connection) =>
                   renderRequestCard(connection, 'received')
                 )}
               </div>
@@ -259,9 +263,7 @@ export default function ConnectionRequestsPage() {
             <div className="py-12 text-center">
               <p className="text-destructive">
                 Error loading requests:{' '}
-                {(sentError as any)?.value?.message ||
-                  (sentError as any)?.message ||
-                  'Unknown error'}
+                {sentError?.value?.message || 'Unknown error'}
               </p>
             </div>
           )}
@@ -271,7 +273,7 @@ export default function ConnectionRequestsPage() {
             renderEmptyState('sent')}
           {!(sentError || isLoadingSent) && sentRequests.length > 0 && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {sentRequests.map((connection: any) =>
+              {sentRequests.map((connection) =>
                 renderRequestCard(connection, 'sent')
               )}
             </div>

@@ -20,9 +20,9 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { Textarea } from '@rov/ui/components/textarea'
-import { authClient } from '@web/lib/auth-client'
-import api, { useMutation } from '@web/lib/api-client'
 import { useQuery } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
+import { authClient } from '@web/lib/auth-client'
 import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { AssigneeSelector } from './assignee-selector'
@@ -75,15 +75,29 @@ export function CreateTaskDialog({
   }, [membersData])
 
   const createTaskMutation = useMutation(
-    (data: any) => api.tasks.create.post(data),
+    async (data: {
+      title: string
+      description?: string
+      contextType: 'club'
+      contextId: string
+      priority: TaskPriority
+      visibility: 'club'
+      status: 'todo'
+      dueAt?: string
+      startAt?: string
+      isAllDay: boolean
+      assigneeIds?: string[]
+    }) => {
+      return await api.tasks.create.post(data)
+    },
     {
       onSuccess: () => {
         toast.success('Task created successfully')
         handleClose()
         onSuccess()
       },
-      onError: (error: any) => {
-        toast.error(error?.value?.message || error?.message || 'Failed to create task')
+      onError: (error) => {
+        toast.error(error?.value?.message || 'Failed to create task')
       }
     }
   )
@@ -117,6 +131,7 @@ export function CreateTaskDialog({
         contextId: organizationId,
         priority,
         visibility: 'club',
+        status: 'todo',
         dueAt: dueAt || undefined,
         startAt: startAt || undefined,
         isAllDay,
