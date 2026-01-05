@@ -51,8 +51,9 @@ const RoadmapFeed = () => {
       })
   )
 
-  const meta = (data as any)?.meta
-  const list = ((data as any)?.data as any[]) ?? []
+  const response = data 
+  const meta = response?.meta
+  const list = response?.data ?? []
 
   const handleCategoryChange = (value: string) => {
     setCategory(value)
