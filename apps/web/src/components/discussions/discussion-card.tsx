@@ -3,8 +3,8 @@ import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent, CardHeader } from '@rov/ui/components/card'
 import { Separator } from '@rov/ui/components/separator'
-import api, { useMutation } from '@web/lib/api-client'
 import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { ArrowDown, ArrowUp, Check, MessageSquare, Pin } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Discussion } from './types'
@@ -30,7 +30,12 @@ export function DiscussionCard({
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'threads', discussion.contextType, discussion.contextId]
+          queryKey: [
+            'discussion',
+            'threads',
+            discussion.contextType,
+            discussion.contextId
+          ]
         })
       },
       onError: (error: any) => {
@@ -44,11 +49,18 @@ export function DiscussionCard({
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'threads', discussion.contextType, discussion.contextId]
+          queryKey: [
+            'discussion',
+            'threads',
+            discussion.contextType,
+            discussion.contextId
+          ]
         })
       },
       onError: (error: any) => {
-        toast.error(error?.value?.message || error?.message || 'Failed to remove vote')
+        toast.error(
+          error?.value?.message || error?.message || 'Failed to remove vote'
+        )
       }
     }
   )

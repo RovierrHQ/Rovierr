@@ -7,7 +7,7 @@ import {
   roadmapUpvote
 } from '@rov/db'
 import { and, eq, sql } from 'drizzle-orm'
-import Elysia, { t } from 'elysia'
+import Elysia from 'elysia'
 import {
   createCommentSchema,
   createRoadmapSchema,
@@ -172,14 +172,16 @@ export const roadmap = new Elysia({ name: 'roadmap' })
             .returning()
 
           // Fetch comment with relations
-          const commentWithRelations = await db.query.roadmapComments.findFirst({
-            where: (comment, { eq: eqFn }) =>
-              eqFn(comment.id, createdComment.id),
-            with: {
-              user: true,
-              upvotes: true
+          const commentWithRelations = await db.query.roadmapComments.findFirst(
+            {
+              where: (comment, { eq: eqFn }) =>
+                eqFn(comment.id, createdComment.id),
+              with: {
+                user: true,
+                upvotes: true
+              }
             }
-          })
+          )
 
           if (!commentWithRelations) {
             throw new Error('INTERNAL_SERVER_ERROR')

@@ -59,5 +59,8 @@
   },
   "tailwindCSS.suggestions": true,
   "tailwindCSS.experimental.configFile": "./packages/ui/src/styles/globals.css",
-  "typescript.autoClosingTags": false
+  "typescript.autoClosingTags": false,
+  "cSpell.words": [
+    "upvotes"
+  ]
 }

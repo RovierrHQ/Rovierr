@@ -9,8 +9,8 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import api, { useMutation } from '@web/lib/api-client'
 import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -49,7 +49,11 @@ export function CreateThreadDialog({
         form.reset()
       },
       onError: (error: any) => {
-        toast.error(error?.value?.message || error?.message || 'Failed to create discussion')
+        toast.error(
+          error?.value?.message ||
+            error?.message ||
+            'Failed to create discussion'
+        )
       }
     }
   )

@@ -1,8 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
-import api, { useMutation } from '@web/lib/api-client'
 import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { ArrowDown, ArrowUp, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Reply } from './types'
@@ -38,7 +38,9 @@ export function ReplyCard({ reply }: ReplyCardProps) {
         })
       },
       onError: (error: any) => {
-        toast.error(error?.value?.message || error?.message || 'Failed to remove vote')
+        toast.error(
+          error?.value?.message || error?.message || 'Failed to remove vote'
+        )
       }
     }
   )

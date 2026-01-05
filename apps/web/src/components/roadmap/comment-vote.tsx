@@ -1,9 +1,9 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
+import { useQueryClient } from '@tanstack/react-query'
 import api, { useMutation } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { useQueryClient } from '@tanstack/react-query'
 import { ThumbsUp } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import type { FC } from 'react'
@@ -58,7 +58,7 @@ const CommentVote: FC<CommentVoteProps> = ({
     return comment?.upvotes ?? []
   }, [upvotesProp, commentId, queryClient])
 
-  const { mutateAsync, isPending } = useMutation<{ commentId: string }>(
+  const { mutateAsync, isPending } = useMutation(
     (body: { commentId: string }) => api.roadmap.comment.vote.post(body),
     {
       onMutate: async () => {
@@ -136,14 +136,14 @@ const CommentVote: FC<CommentVoteProps> = ({
 
         return { previousData }
       },
-      onError: (error: any, _variables: any, context: any) => {
+      onError: (_error, _variables, context) => {
         // Rollback on error
         if (context?.previousData) {
           queryClient.setQueryData(['roadmap', 'list'], context.previousData)
         }
 
         const errorMessage =
-          error.value?.message || error.message || 'Failed to vote on comment'
+          (_error.value as { message?: string } | undefined)?.message || 'Failed to vote on comment'
         if (errorMessage.includes('cannot vote on your own')) {
           toast.error('You cannot vote on your own comment')
         } else {

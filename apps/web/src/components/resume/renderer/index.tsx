@@ -2,8 +2,8 @@
 
 import type { ResumeData } from '@rov/orpc-contracts'
 import { Button } from '@rov/ui/components/button'
-import api, { useMutation } from '@web/lib/api-client'
 import { useMeasure } from '@uidotdev/usehooks'
+import api, { useMutation } from '@web/lib/api-client'
 import { useAtomValue } from 'jotai'
 import { Download } from 'lucide-react'
 import { useRef } from 'react'
@@ -61,7 +61,9 @@ export const SaveResume = ({ resumeid }: { resumeid: string }) => {
         toast.success('Resume saved successfully')
       },
       onError: (error) => {
-        toast.error(error?.value?.message || error?.message || 'Failed to save resume')
+        toast.error(
+          error?.value?.message || error?.message || 'Failed to save resume'
+        )
       }
     }
   )

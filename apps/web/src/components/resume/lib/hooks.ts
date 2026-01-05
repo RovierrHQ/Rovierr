@@ -54,7 +54,9 @@ export function useAutoSave<T>(
  * Wraps the Eden Query with proper typing
  */
 export function useResumeData(resumeId: string) {
-  return useQuery(['resume', resumeId], () => api.resume({ id: resumeId }).get())
+  return useQuery(['resume', resumeId], () =>
+    api.resume({ id: resumeId }).get()
+  )
 }
 
 /**
@@ -62,14 +64,12 @@ export function useResumeData(resumeId: string) {
  * Wraps the Eden Query for listing resumes
  */
 export function useResumeList(limit = 50, offset = 0) {
-  return useQuery(
-    ['resume', 'list', limit, offset],
-    () =>
-      api.resume.get({
-        query: {
-          limit,
-          offset
-        }
-      })
+  return useQuery(['resume', 'list', limit, offset], () =>
+    api.resume.get({
+      query: {
+        limit,
+        offset
+      }
+    })
   )
 }

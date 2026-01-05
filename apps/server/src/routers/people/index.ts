@@ -1,7 +1,7 @@
 import { db } from '@api/db'
 import { betterAuth } from '@api/middleware/auth'
 import { PeopleService } from '@api/services/people'
-import Elysia, { t } from 'elysia'
+import Elysia from 'elysia'
 import { listUsersSchema, searchUsersSchema } from './schemas'
 
 const peopleService = new PeopleService(db)

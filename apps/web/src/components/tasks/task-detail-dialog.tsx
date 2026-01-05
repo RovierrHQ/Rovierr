@@ -20,8 +20,8 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { Skeleton } from '@rov/ui/components/skeleton'
-import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { format } from 'date-fns'
 import { MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
@@ -49,10 +49,13 @@ export function TaskDetailDialog({
     }
   )
 
-  const updateTaskMutation = useMutation((data: any) => api.tasks.update.put(data))
+  const updateTaskMutation = useMutation((data: any) =>
+    api.tasks.update.put(data)
+  )
 
-  const addCommentMutation = useMutation((data: { taskId: string; message: string }) =>
-    api.tasks({ taskId: data.taskId }).comment.post({ message: data.message })
+  const addCommentMutation = useMutation(
+    (data: { taskId: string; message: string }) =>
+      api.tasks({ taskId: data.taskId }).comment.post({ message: data.message })
   )
 
   const handleUpdateStatus = async (newStatus: Task['status']) => {

@@ -3,8 +3,8 @@ import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Separator } from '@rov/ui/components/separator'
 import { Textarea } from '@rov/ui/components/textarea'
-import api, { useMutation } from '@web/lib/api-client'
 import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import {
   ArrowDown,
   ArrowUp,
@@ -38,13 +38,20 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
           queryKey: ['discussion', 'thread', discussion.id]
         })
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'threads', discussion.contextType, discussion.contextId]
+          queryKey: [
+            'discussion',
+            'threads',
+            discussion.contextType,
+            discussion.contextId
+          ]
         })
         toast.success('Reply posted successfully')
         setReplyText('')
       },
       onError: (error: any) => {
-        toast.error(error?.value?.message || error?.message || 'Failed to post reply')
+        toast.error(
+          error?.value?.message || error?.message || 'Failed to post reply'
+        )
       }
     }
   )
@@ -58,7 +65,12 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
           queryKey: ['discussion', 'thread', discussion.id]
         })
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'threads', discussion.contextType, discussion.contextId]
+          queryKey: [
+            'discussion',
+            'threads',
+            discussion.contextType,
+            discussion.contextId
+          ]
         })
       },
       onError: (error: any) => {
@@ -75,11 +87,18 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
           queryKey: ['discussion', 'thread', discussion.id]
         })
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'threads', discussion.contextType, discussion.contextId]
+          queryKey: [
+            'discussion',
+            'threads',
+            discussion.contextType,
+            discussion.contextId
+          ]
         })
       },
       onError: (error: any) => {
-        toast.error(error?.value?.message || error?.message || 'Failed to remove vote')
+        toast.error(
+          error?.value?.message || error?.message || 'Failed to remove vote'
+        )
       }
     }
   )

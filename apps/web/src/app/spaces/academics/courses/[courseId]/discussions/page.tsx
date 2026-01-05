@@ -31,7 +31,14 @@ export default function DiscussionsPage({ params }: PageProps) {
 
   // Fetch discussions from the backend
   const { data: threadsData, isLoading } = useQuery(
-    ['discussion', 'threads', 'course', discussionContextId, searchQuery, selectedFilter],
+    [
+      'discussion',
+      'threads',
+      'course',
+      discussionContextId,
+      searchQuery,
+      selectedFilter
+    ],
     () =>
       api.discussion.thread.list.get({
         query: {
@@ -108,8 +115,7 @@ export default function DiscussionsPage({ params }: PageProps) {
         isPinned: selectedThread.isPinned,
         isResolved: false,
         replies: selectedThread.replyCount,
-        upvotes:
-          selectedThread.votes.upvotes - selectedThread.votes.downvotes,
+        upvotes: selectedThread.votes.upvotes - selectedThread.votes.downvotes,
         createdAt: new Date(selectedThread.createdAt).toLocaleString(),
         tags: selectedThread.tags || [],
         userVote: selectedThread.votes.userVote,

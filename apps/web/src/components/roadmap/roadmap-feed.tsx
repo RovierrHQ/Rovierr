@@ -44,7 +44,7 @@ const RoadmapFeed = () => {
     () =>
       api.roadmap.get({
         query: {
-          page: page,
+          page,
           limit: 10,
           category: normalizedCategory
         }

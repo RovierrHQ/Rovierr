@@ -30,15 +30,13 @@ export default function ResumeListPage() {
   } | null>(null)
 
   // Fetch resumes using Elysia
-  const { data } = useQuery(
-    ['resume', 'list', 50, 0],
-    () =>
-      api.resume.get({
-        query: {
-          limit: 50,
-          offset: 0
-        }
-      })
+  const { data } = useQuery(['resume', 'list', 50, 0], () =>
+    api.resume.get({
+      query: {
+        limit: 50,
+        offset: 0
+      }
+    })
   )
 
   // Create resume mutation
@@ -54,7 +52,11 @@ export default function ResumeListPage() {
         toast.success('Resume created successfully')
       },
       onError: (error) => {
-        toast.error((error as any)?.value?.message || (error as any)?.message || 'Failed to create resume')
+        toast.error(
+          (error as any)?.value?.message ||
+            (error as any)?.message ||
+            'Failed to create resume'
+        )
       }
     }
   )
@@ -72,7 +74,11 @@ export default function ResumeListPage() {
         setResumeToDelete(null)
       },
       onError: (error) => {
-        toast.error((error as any)?.value?.message || (error as any)?.message || 'Failed to delete resume')
+        toast.error(
+          (error as any)?.value?.message ||
+            (error as any)?.message ||
+            'Failed to delete resume'
+        )
       }
     }
   )

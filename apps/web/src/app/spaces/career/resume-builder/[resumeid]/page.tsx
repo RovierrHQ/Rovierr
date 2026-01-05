@@ -1,6 +1,5 @@
 'use client'
 
-import { useQueryClient } from '@tanstack/react-query'
 import {
   activeSectionAtom,
   basicInfoAtom,
@@ -22,7 +21,7 @@ import { LanguagesSection } from '@web/components/resume/sections/languages'
 import { ProjectsSection } from '@web/components/resume/sections/projects'
 import { VolunteerSection } from '@web/components/resume/sections/volunteer'
 import { LeftSidebar } from '@web/components/resume/side-nav'
-import api, { useMutation, useQuery } from '@web/lib/api-client'
+import api, { useQuery } from '@web/lib/api-client'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { use, useEffect } from 'react'
 
@@ -98,7 +97,9 @@ function ResumeEditorPage({
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <p className="mb-2 text-destructive">Failed to load resume</p>
-          <p className="text-muted-foreground text-sm">{(error as any)?.value?.message || (error as any)?.message}</p>
+          <p className="text-muted-foreground text-sm">
+            {(error as any)?.value?.message || (error as any)?.message}
+          </p>
         </div>
       </div>
     )
