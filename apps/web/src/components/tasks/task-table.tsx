@@ -25,6 +25,11 @@ import { toast } from 'sonner'
 import type { Task } from './types'
 import { getPriorityColor, getStatusIcon } from './utils'
 
+type UpdateTaskVariables = {
+  taskId: string
+  status: Task['status']
+}
+
 type TaskTableProps = {
   tasks: Task[]
   isLoading: boolean
@@ -42,8 +47,8 @@ export function TaskTable({
 }: TaskTableProps) {
   const queryClient = useQueryClient()
 
-  const updateTaskMutation = useMutation((data: any) =>
-    api.tasks.update.put(data)
+  const updateTaskMutation = useMutation<UpdateTaskVariables>(
+    (data) => api.tasks.update.put(data)
   )
 
   const handleStatusChange = async (
