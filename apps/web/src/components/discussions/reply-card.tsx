@@ -23,8 +23,12 @@ export function ReplyCard({ reply }: ReplyCardProps) {
           queryKey: ['discussion', 'thread', reply.threadId]
         })
       },
-      onError: (error: any) => {
-        toast.error(error?.value?.message || error?.message || 'Failed to vote')
+      onError: (error) => {
+        const errorMessage =
+          error?.value && typeof error.value === 'object' && 'message' in error.value
+            ? error.value.message || 'Failed to vote'
+            : 'Failed to vote'
+        toast.error(errorMessage)
       }
     }
   )
@@ -37,10 +41,12 @@ export function ReplyCard({ reply }: ReplyCardProps) {
           queryKey: ['discussion', 'thread', reply.threadId]
         })
       },
-      onError: (error: any) => {
-        toast.error(
-          error?.value?.message || error?.message || 'Failed to remove vote'
-        )
+      onError: (error) => {
+        const errorMessage =
+          error?.value && typeof error.value === 'object' && 'message' in error.value
+            ? error.value.message || 'Failed to remove vote'
+            : 'Failed to remove vote'
+        toast.error(errorMessage)
       }
     }
   )

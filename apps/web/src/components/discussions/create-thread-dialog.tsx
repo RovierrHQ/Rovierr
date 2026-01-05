@@ -38,7 +38,7 @@ export function CreateThreadDialog({
   const queryClient = useQueryClient()
 
   const createMutation = useMutation(
-    (data: any) => api.discussion.thread.create.post(data),
+    api.discussion.thread.create.post,
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
@@ -48,12 +48,14 @@ export function CreateThreadDialog({
         onOpenChange(false)
         form.reset()
       },
-      onError: (error: any) => {
-        toast.error(
-          error?.value?.message ||
-            error?.message ||
-            'Failed to create discussion'
-        )
+      onError: (error) => {
+        let errorMessage = 'Failed to create discussion'
+        
+        if (error?.value && typeof error.value === 'object' && 'message' in error.value) {
+          errorMessage = error.value.message || errorMessage
+        }
+        
+        toast.error(errorMessage)
       }
     }
   )
