@@ -8,9 +8,8 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
-import { useQuery } from '@tanstack/react-query'
 import { AddCoursesDialog } from '@web/components/academic/add-courses-dialog'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery as useApiQuery } from '@web/lib/api-client'
 import { BookOpen, Calendar, MessageSquare, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -18,11 +17,34 @@ import { useState } from 'react'
 export default function AcademicDashboardPage() {
   const [addCoursesOpen, setAddCoursesOpen] = useState(false)
   // Fetch enrollment data
-  const { data: enrollment, isLoading } = useQuery(
-    orpc.academic.enrollment.getEnrollment.queryOptions({
-      input: {}
-    })
+  const { data: enrollment, isLoading } = useApiQuery(
+    ['academic', 'enrollment', 'details'],
+    () => api.academic.enrollment[''].details.get()
   )
+
+  // Type assertion for enrollment data
+  const enrollmentData = enrollment as {
+    program: {
+      id: string
+      name: string
+      code: string | null
+      institutionId: string
+    }
+    term: {
+      id: string
+      termName: string
+      academicYear: string
+    }
+    courses: Array<{
+      id: string
+      courseId: string | null
+      code: string | null
+      title: string
+      instructor: string | null
+      section: string | null
+      schedule: string | null
+    }>
+  } | null
 
   if (isLoading) {
     return (
@@ -47,8 +69,8 @@ export default function AcademicDashboardPage() {
         <div>
           <h1 className="mb-2 font-bold text-3xl">Academic Dashboard</h1>
           <p className="text-muted-foreground">
-            {enrollment?.program.name} • {enrollment?.term.termName}{' '}
-            {enrollment?.term.academicYear}
+            {enrollmentData?.program?.name} • {enrollmentData?.term?.termName}{' '}
+            {enrollmentData?.term?.academicYear}
           </p>
         </div>
         <Button asChild variant="outline">
@@ -62,14 +84,25 @@ export default function AcademicDashboardPage() {
       {/* Course Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {(() => {
-          if (!enrollment) {
+          if (!enrollmentData) {
             return null
           }
 
           // Group courses by course code (like in sidebar)
-          const courseMap = new Map<string, (typeof enrollment.courses)[0][]>()
+          const courseMap = new Map<
+            string,
+            Array<{
+              id: string
+              courseId: string | null
+              code: string | null
+              title: string
+              instructor: string | null
+              section: string | null
+              schedule: string | null
+            }>
+          >()
 
-          for (const course of enrollment.courses ?? []) {
+          for (const course of enrollmentData?.courses ?? []) {
             const key = course.code || course.title
             if (!courseMap.has(key)) {
               courseMap.set(key, [])
@@ -85,7 +118,7 @@ export default function AcademicDashboardPage() {
             )
             const mainCourse = sortedCourses[0]
             // Concatenate course ID + term ID for discussion context
-            const discussionContextId = `${mainCourse.courseId ?? ''}-${enrollment.term.id}`
+            const discussionContextId = `${mainCourse.courseId ?? ''}-${enrollmentData.term.id}`
 
             return (
               <Card className="transition-shadow hover:shadow-lg" key={code}>
@@ -128,7 +161,7 @@ export default function AcademicDashboardPage() {
       </div>
 
       {/* Empty State */}
-      {enrollment?.courses.length === 0 && (
+      {enrollmentData?.courses?.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <BookOpen className="mb-4 h-12 w-12 text-muted-foreground/50" />

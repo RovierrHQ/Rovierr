@@ -47,8 +47,57 @@ export default function ConnectionRequestsPage() {
     })
   )
 
-  const receivedRequests = receivedData?.connections || []
-  const sentRequests = sentData?.connections || []
+  // Type assertions for connection data
+  const receivedDataTyped = receivedData as {
+    connections: Array<{
+      id: string
+      createdAt: string
+      updatedAt: string
+      userId: string
+      connectedUserId: string
+      status: 'pending' | 'accepted' | 'rejected' | 'blocked'
+      requestedAt: string
+      respondedAt: string | null
+      expiresAt: string | null
+      user: {
+        id: string
+        name: string
+        username: string | null
+        image: string | null
+        bio: string | null
+        isVerified: boolean
+      } | null
+    }>
+    total: number
+    hasMore: boolean
+  } | null
+
+  const sentDataTyped = sentData as {
+    connections: Array<{
+      id: string
+      createdAt: string
+      updatedAt: string
+      userId: string
+      connectedUserId: string
+      status: 'pending' | 'accepted' | 'rejected' | 'blocked'
+      requestedAt: string
+      respondedAt: string | null
+      expiresAt: string | null
+      user: {
+        id: string
+        name: string
+        username: string | null
+        image: string | null
+        bio: string | null
+        isVerified: boolean
+      } | null
+    }>
+    total: number
+    hasMore: boolean
+  } | null
+
+  const receivedRequests = receivedDataTyped?.connections || []
+  const sentRequests = sentDataTyped?.connections || []
 
   const acceptMutation = useMutation(
     ({ connectionId }: { connectionId: string }) =>
@@ -88,17 +137,7 @@ export default function ConnectionRequestsPage() {
   }
 
   const renderRequestCard = (
-    connection: {
-      id: string
-      user: {
-        image: string | null
-        name: string
-        username: string | null
-        isVerified: boolean
-        bio: string | null
-        id: string
-      } | null
-    },
+    connection: NonNullable<typeof receivedDataTyped>['connections'][number],
     type: 'received' | 'sent'
   ) => {
     const user = connection.user
@@ -113,7 +152,7 @@ export default function ConnectionRequestsPage() {
               <AvatarFallback>
                 {user.name
                   .split(' ')
-                  .map((n: string) => n[0])
+                  .map((n) => n[0])
                   .join('')
                   .toUpperCase()}
               </AvatarFallback>
@@ -195,7 +234,7 @@ export default function ConnectionRequestsPage() {
 
   const renderSkeletons = () => (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, i) => (
+      {Array.from({ length: 6 }).map((_: unknown, i: number) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton loaders
         <Card key={`skeleton-${i}`}>
           <CardContent className="p-6">
@@ -251,7 +290,7 @@ export default function ConnectionRequestsPage() {
           {!(receivedError || isLoadingReceived) &&
             receivedRequests.length > 0 && (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {receivedRequests.map((connection) =>
+                {receivedRequests.map((connection: NonNullable<typeof receivedDataTyped>['connections'][number]) =>
                   renderRequestCard(connection, 'received')
                 )}
               </div>
@@ -273,7 +312,7 @@ export default function ConnectionRequestsPage() {
             renderEmptyState('sent')}
           {!(sentError || isLoadingSent) && sentRequests.length > 0 && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {sentRequests.map((connection) =>
+              {sentRequests.map((connection: NonNullable<typeof sentDataTyped>['connections'][number]) =>
                 renderRequestCard(connection, 'sent')
               )}
             </div>

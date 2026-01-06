@@ -1,6 +1,6 @@
 import { auth } from '@api/lib/auth'
 import { env } from '@api/lib/env'
-// import { academicRouter } from '@api/routers/academic'
+import { academicRouter } from '@api/routers/academic'
 // import { calendarRouter } from '@api/routers/calendar'
 import { campusFeed } from '@api/routers/campus-feed'
 // import { careerRouter } from '@api/routers/career'
@@ -66,7 +66,7 @@ const app = new Elysia()
   .use(discussionRouter)
   // .use(society)
   // .use(form)
-  // .use(academicRouter)
+  .use(academicRouter)
   // .use(calendarRouter)
   // .use(careerRouter)
   .use(resumeRouter)
