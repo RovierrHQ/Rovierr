@@ -1,6 +1,6 @@
 'use client'
 
-import { client } from '@web/utils/orpc'
+import api from '@web/lib/api-client'
 import { type ReactNode, useEffect, useState } from 'react'
 import { VerificationPending } from './verification-pending'
 
@@ -17,9 +17,9 @@ export function FeatureGate({ children, fallback }: FeatureGateProps) {
   useEffect(() => {
     const checkVerificationStatus = async () => {
       try {
-        const status =
-          await client.user.profile.verifyStudent.getVerificationStatus()
-        setIsVerified(status.isVerified)
+        const { data, error } = await api['verify-student'].status.get()
+        if (error) throw error
+        if (data) setIsVerified(data.isVerified)
       } catch {
         setIsVerified(false)
       } finally {

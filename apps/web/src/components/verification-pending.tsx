@@ -1,6 +1,6 @@
 'use client'
 
-import { client } from '@web/utils/orpc'
+import api from '@web/lib/api-client'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -28,7 +28,8 @@ export function VerificationPending({
     setIsVerifying(true)
 
     try {
-      await client.user.profile.verifyStudent.verifyOTP({ otp })
+      const { error } = await api['verify-student']['verify-otp'].post({ otp })
+      if (error) throw error
       toast.success('Email verified successfully!')
       onVerified?.()
     } catch (error) {
@@ -44,7 +45,8 @@ export function VerificationPending({
     setIsResending(true)
 
     try {
-      await client.user.profile.verifyStudent.resendOTP({})
+      const { error } = await api['verify-student']['resend-otp'].post({})
+      if (error) throw error
       toast.success('New verification code sent!')
       setOtp('')
     } catch (error) {
