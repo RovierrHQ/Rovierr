@@ -32,12 +32,10 @@ const bulkSaveFormSchema = z.object({
 
 export const form = new Elysia({ prefix: '/form' })
   .use(betterAuth)
-  .group('', { auth: true }, (app) =>
-    app
-      // Form Management
-      .post(
-        '/create',
-        async ({ body, user }) => {
+  // Form Management
+  .post(
+    '/create',
+    async ({ body, user }) => {
           if (!user) throw new Error('User not authenticated')
           const createdForm = await formService.createForm(user.id, body)
           return {
@@ -434,4 +432,3 @@ export const form = new Elysia({ prefix: '/form' })
       .get('/analytics/:id', () => {
         throw new Error('Analytics not yet implemented')
       })
-  )

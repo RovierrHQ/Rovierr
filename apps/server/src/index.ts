@@ -1,14 +1,14 @@
 import { auth } from '@api/lib/auth'
 import { env } from '@api/lib/env'
 import { academicRouter } from '@api/routers/academic'
-// import { calendarRouter } from '@api/routers/calendar'
+import { calendarRouter } from '@api/routers/calendar'
 import { campusFeed } from '@api/routers/campus-feed'
 // import { careerRouter } from '@api/routers/career'
 // import { chat } from '@api/routers/chat'
 import { connection } from '@api/routers/connection'
 import { discussionRouter } from '@api/routers/discussion'
 import { people } from '@api/routers/people'
-// import { form } from '@api/routers/form'
+import { form } from '@api/routers/form'
 import { realtime } from '@api/routers/realtime'
 import { resumeRouter } from '@api/routers/resume'
 import { roadmap } from '@api/routers/roadmap'
@@ -23,7 +23,7 @@ import { logger } from '@tqman/nice-logger'
 import { Elysia } from 'elysia'
 import z from 'zod'
 
-// import { societyRegistrationRouter } from './routers/society-registration'
+import { societyRegistrationRouter } from '@api/routers/society-registration'
 
 const app = new Elysia()
   .use(
@@ -65,15 +65,15 @@ const app = new Elysia()
   .use(roadmap)
   .use(discussionRouter)
   // .use(society)
-  // .use(form)
+  .use(form)
   .use(academicRouter)
-  // .use(calendarRouter)
+  .use(calendarRouter)
   // .use(careerRouter)
   .use(resumeRouter)
   .use(universityRouter)
   .use(verifyStudentRouter)
   .use(stripeRouter)
-  // .use(societyRegistrationRouter)
+  .use(societyRegistrationRouter)
   .listen(env.PORT)
 
 export type App = typeof app

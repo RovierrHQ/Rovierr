@@ -5,8 +5,7 @@ import { Card } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation } from '@web/lib/api-client'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -44,14 +43,27 @@ export const RegistrationForm = ({
 
   // Submit form response mutation
   const submitFormMutation = useMutation(
-    orpc.form.response.submit.mutationOptions({
-      onSuccess: (response) => {
-        onSubmit(response.id)
-      },
-      onError: () => {
-        toast.error('Failed to submit form')
-      }
-    })
+    (data: { formId: string; answers: Record<string, string> }) => 
+        api.form.response.submit.post(data),
+    {
+        onSuccess: (response: any) => {
+            // Check if response has data and id, or if response IS data
+            // api-client un-wraps. So response is data.
+            // But form router says "Response submission not yet implemented".
+            // So this will likely fail until server is implemented.
+            // Assuming server returns { id: string } when implemented.
+            const id = response?.id
+            if (id) {
+                onSubmit(id)
+            } else {
+                toast.error('Submission ID missing')
+            }
+        },
+        onError: (error: any) => {
+            const message = error.value?.message || error.message || 'Failed to submit form'
+            toast.error(message)
+        }
+    }
   )
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -63,7 +75,7 @@ export const RegistrationForm = ({
       return
     }
 
-    submitFormMutation.mutate({
+    submitFormMutation.mutateAsync({
       formId: form.id,
       answers: formData
     })

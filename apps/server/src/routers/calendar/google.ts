@@ -183,12 +183,10 @@ export const googleCalendarRouter = new Elysia({ prefix: '/google' })
   )
 
   // Protected routes
-  .group('', { auth: true }, (app) =>
-    app
-      // POST /google/watch - Watch calendar for changes
-      .post(
-        '/watch',
-        async ({ user }) => {
+  // POST /google/watch - Watch calendar for changes
+  .post(
+    '/watch',
+    async ({ user }) => {
           const userAccount = await getUserGoogleAccount(user.id)
 
           if (!(userAccount && hasCalendarScopes(userAccount))) {
@@ -228,6 +226,7 @@ export const googleCalendarRouter = new Elysia({ prefix: '/google' })
           }
         },
         {
+          auth: true,
           response: watchCalendarResponseSchema,
           detail: {
             description:
@@ -269,6 +268,7 @@ export const googleCalendarRouter = new Elysia({ prefix: '/google' })
           }
         },
         {
+          auth: true,
           body: stopWatchCalendarSchema,
           response: stopWatchCalendarResponseSchema,
           detail: {
@@ -375,6 +375,7 @@ export const googleCalendarRouter = new Elysia({ prefix: '/google' })
           }
         },
         {
+          auth: true,
           query: getUpcomingEventsSchema,
           response: upcomingEventsResponseSchema,
           detail: {
@@ -385,4 +386,3 @@ export const googleCalendarRouter = new Elysia({ prefix: '/google' })
           }
         }
       )
-  )

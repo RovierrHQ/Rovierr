@@ -13,8 +13,8 @@ import {
 } from '@rov/ui/components/select'
 import { Switch } from '@rov/ui/components/switch'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
+import { useQueryClient } from '@tanstack/react-query'
 import { ExternalLink, Loader2, Plus, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -93,8 +93,9 @@ export const RegistrationSettingsForm = ({
 
   // Fetch available forms for this society
   const { data: formsData, isLoading: isLoadingForms } = useQuery(
-    orpc.form.list.queryOptions({
-      input: {
+    ['form', 'list', societyId],
+    () => api.form.list.get({
+      query: {
         entityType: 'society',
         entityId: societyId,
         status: 'published',
@@ -106,32 +107,36 @@ export const RegistrationSettingsForm = ({
 
   // Create settings mutation
   const createMutation = useMutation(
-    orpc.societyRegistration.settings.create.mutationOptions({
+    (data: any) => api['society-registration'].settings.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['societyRegistration', 'settings']
         })
         toast.success('Registration settings created successfully!')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to create settings')
+      onError: (error: any) => {
+        const message = error.value?.message || error.message || 'Failed to create settings'
+        toast.error(message)
       }
-    })
+    }
   )
 
   // Update settings mutation
   const updateMutation = useMutation(
-    orpc.societyRegistration.settings.update.mutationOptions({
+    (data: any) => api['society-registration'].settings.patch(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['societyRegistration', 'settings']
         })
         toast.success('Settings updated successfully!')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to update settings')
+      onError: (error: any) => {
+        const message = error.value?.message || error.message || 'Failed to update settings'
+        toast.error(message)
       }
-    })
+    }
   )
 
   const handleSave = () => {

@@ -7,8 +7,8 @@ import {
   TabsList,
   TabsTrigger
 } from '@rov/ui/components/tabs'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
+import { useQueryClient } from '@tanstack/react-query'
 import { Eye, FileText, Loader2, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -50,10 +50,13 @@ export default function FormBuilder({
   const [deletedQuestionIds, setDeletedQuestionIds] = useState<string[]>([])
 
   // Fetch existing form if formId is provided
-  const { data: existingForm, isLoading } = useQuery({
-    ...orpc.form.get.queryOptions({ input: { id: formId || '' } }),
-    enabled: !!formId
-  })
+  const { data: existingForm, isLoading } = useQuery(
+    ['form', formId],
+    () => api.form({ id: formId || '' }).get(),
+    {
+      enabled: !!formId
+    }
+  )
 
   const [formData, setFormData] = useState<Partial<FormData>>({
     title: 'Untitled Form',
@@ -99,46 +102,50 @@ export default function FormBuilder({
   }, [existingForm])
 
   // Create form mutation
-  const createFormMutation = useMutation(
-    orpc.form.create.mutationOptions({
-      onSuccess: async (data) => {
+  const createFormMutation = useMutation((data: any) => api.form.create.post(data), {
+      onSuccess: async (response) => {
         // Fetch the complete form with pages to get real page IDs
-        const completeForm = await orpc.form.get.call({ id: data.id })
-        setFormData(completeForm)
+        if (!response?.id) return
+        const { data: completeForm } = await api.form({ id: response.id }).get()
+        if (completeForm) setFormData(completeForm)
         queryClient.invalidateQueries({ queryKey: ['form', 'list'] })
         toast.success('Form created successfully')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to create form')
+      onError: (error: any) => {
+        const message = error.value?.message || error.message || 'Failed to create form'
+        toast.error(message)
       }
     })
-  )
 
   // Update form mutation
   const updateFormMutation = useMutation(
-    orpc.form.update.mutationOptions({
+    (data: any) => api.form.update.patch(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['form', formData.id] })
         toast.success('Form saved successfully')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to save form')
+      onError: (error: any) => {
+        const message = error.value?.message || error.message || 'Failed to save form'
+        toast.error(message)
       }
-    })
+    }
   )
 
   // Publish form mutation
   const publishFormMutation = useMutation(
-    orpc.form.publish.mutationOptions({
+    (variables: { id: string }) => api.form({ id: variables.id }).publish.post({}),
+    {
       onSuccess: () => {
         setFormData((prev) => ({ ...prev, status: 'published' }))
         queryClient.invalidateQueries({ queryKey: ['form', formData.id] })
         toast.success('Form published successfully')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to publish form')
+      onError: (error: any) => {
+        const message = error.value?.message || error.message || 'Failed to publish form'
+        toast.error(message)
       }
-    })
+    }
   )
 
   const handleSave = async () => {
@@ -201,16 +208,21 @@ export default function FormBuilder({
             formData.confirmationEmailContent
           )
         })
-        currentFormId = newForm.id
-        setFormData((prev) => ({ ...prev, id: currentFormId }))
+        
+        if (newForm) {
+            currentFormId = newForm.id
+            setFormData((prev) => ({ ...prev, id: currentFormId }))
+        }
       }
+
+      if (!currentFormId) throw new Error('Failed to get form ID')
 
       // Step 2: Delete removed pages
       for (const pageId of deletedPageIds) {
         // Only delete if it's a real ID (not temporary)
         if (!(pageId.startsWith('temp-') || pageId.startsWith('page-'))) {
           try {
-            await orpc.form.page.delete.call({ id: pageId })
+            await api.form.page({ id: pageId }).delete()
           } catch (_error) {
             // Continue with other operations even if delete fails
           }
@@ -223,7 +235,7 @@ export default function FormBuilder({
         // Only delete if it's a real ID (not temporary)
         if (!questionId.startsWith('q-')) {
           try {
-            await orpc.form.question.delete.call({ id: questionId })
+            await api.form.question({ id: questionId }).delete()
           } catch (_error) {
             // Continue with other operations even if delete fails
           }
@@ -240,8 +252,8 @@ export default function FormBuilder({
           page.id.startsWith('temp-') || page.id.startsWith('page-')
 
         if (isTemporaryId) {
-          // Create new pag
-          const result = await orpc.form.page.create.call({
+          // Create new page
+          const { data: result } = await api.form.page.create.post({
             formId: currentFormId,
             title: page.title,
             description: nullToUndefined(page.description),
@@ -251,11 +263,10 @@ export default function FormBuilder({
             condition: nullToUndefined(page.condition),
             conditionValue: nullToUndefined(page.conditionValue)
           })
-          pageIdMapping.set(page.id, result.id)
+          if (result) pageIdMapping.set(page.id, result.id)
         } else {
           // Update existing page
-          await orpc.form.page.update.call({
-            id: page.id,
+          await api.form.page({ id: page.id }).patch({
             title: page.title,
             description: nullToUndefined(page.description),
             order: page.order,
@@ -276,7 +287,7 @@ export default function FormBuilder({
         const realPageId = pageIdMapping.get(question.pageId) || question.pageId
 
         if (isTemporaryId) {
-          const result = await orpc.form.question.create.call({
+          const { data: result } = await api.form.question.create.post({
             formId: currentFormId,
             pageId: realPageId,
             type: question.type,
@@ -297,11 +308,10 @@ export default function FormBuilder({
             acceptedFileTypes: nullToUndefined(question.acceptedFileTypes),
             maxFileSize: nullToUndefined(question.maxFileSize)
           })
-          questionIdMapping.set(question.id, result.id)
+          if (result) questionIdMapping.set(question.id, result.id)
         } else {
           // Update existing question
-          await orpc.form.question.update.call({
-            id: question.id,
+          await api.form.question({ id: question.id }).patch({
             type: question.type,
             title: question.title,
             description: nullToUndefined(question.description),
@@ -330,13 +340,13 @@ export default function FormBuilder({
           pages: (prev.pages || []).map((p) => ({
             ...p,
             id: pageIdMapping.get(p.id) || p.id,
-            formId: currentFormId
+            formId: currentFormId!
           })),
           questions: (prev.questions || []).map((q) => ({
             ...q,
             id: questionIdMapping.get(q.id) || q.id,
             pageId: pageIdMapping.get(q.pageId) || q.pageId,
-            formId: currentFormId
+            formId: currentFormId!
           }))
         }))
       }
@@ -346,15 +356,15 @@ export default function FormBuilder({
         (p) => pageIdMapping.get(p.id) || p.id
       )
       if (finalPageIds.length > 0) {
-        await orpc.form.page.reorder.call({
+        await api.form.page.reorder.post({
           formId: currentFormId,
           pageIds: finalPageIds
         })
       }
 
       // Step 6: Refetch the complete form to get all real IDs
-      const updatedForm = await orpc.form.get.call({ id: currentFormId })
-      setFormData(updatedForm)
+      const { data: updatedForm } = await api.form({ id: currentFormId }).get()
+      if (updatedForm) setFormData(updatedForm)
 
       toast.success('Form saved successfully!')
     } catch (error) {

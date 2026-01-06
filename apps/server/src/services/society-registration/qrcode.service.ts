@@ -1,7 +1,4 @@
-/**
- * QR Code Service
- * Provides registration URL data for QR code generation on the frontend
- */
+import QRCode from 'qrcode'
 
 type SocietyInfo = {
   name: string
@@ -11,9 +8,30 @@ type SocietyInfo = {
 
 export class QRCodeService {
   /**
-   * Get registration URL for QR code generation
-   * The actual QR code will be generated on the frontend
+   * Generate QR Code as Buffer
    */
+  async generateQRCode(
+    text: string,
+    options: { format?: 'png' | 'svg'; width?: number } = {}
+  ): Promise<Buffer> {
+    const width = options.width || 512
+    
+    if (options.format === 'svg') {
+      const svgString = await QRCode.toString(text, {
+        type: 'svg',
+        width
+      })
+      return Buffer.from(svgString)
+    }
+
+    return QRCode.toBuffer(text, {
+      type: 'png',
+      width
+    })
+  }
+
+  /**
+   * Get registration URL for QR code generation
   getRegistrationUrl(url: string): string {
     return url
   }

@@ -7,10 +7,9 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
-import { useQuery } from '@tanstack/react-query'
+import api, { useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { useCentrifugo } from '@web/lib/centrifuge'
-import { orpc } from '@web/utils/orpc'
 import { format, isToday, isTomorrow, isYesterday } from 'date-fns'
 import { CalendarDays, ExternalLink, MapPin } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
@@ -20,16 +19,21 @@ export function NextEventWidget() {
 
   // Single query that handles everything
   const { data, isLoading, refetch } = useQuery(
-    orpc.calendar.google.getUpcomingEvents.queryOptions({
-      input: {
-        days: 1,
-        maxResults: 1
-      },
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
+    ['calendar', 'google', 'upcoming-events', { days: 1, maxResults: 1 }],
+    () =>
+      api.calendar.google['upcoming-events'].get({
+        query: {
+          days: 1,
+          maxResults: 1
+        }
+      }),
+    {
       // Only refetch on window focus (not every 30s)
       refetchOnWindowFocus: true,
       // Optionally refetch when network reconnects
       refetchOnReconnect: true
-    })
+    }
   )
 
   // Listen for OAuth callback completion
@@ -49,11 +53,13 @@ export function NextEventWidget() {
 
   // Fetch Centrifugo connection token for authenticated WebSocket
   const { data: centrifugoAuth } = useQuery(
-    orpc.realtime.getConnectionToken.queryOptions({
+    ['realtime', 'token'],
+    () => api.realtime.token.get(),
+    {
       enabled: false,
       staleTime: 55 * 60 * 1000, // 55 minutes (token expires in 1 hour)
       refetchInterval: 55 * 60 * 1000 // Refresh token before expiry
-    })
+    }
   )
 
   const handleCalendarUpdate = useCallback(
@@ -88,7 +94,7 @@ export function NextEventWidget() {
       setTimeout(async () => {
         try {
           // Setup Google Calendar push notifications for real-time sync
-          await orpc.calendar.google.watchCalendar.call()
+          await api.calendar.google.watch.post()
           refetch()
         } catch {
           // Watch setup failed, but calendar is still connected
