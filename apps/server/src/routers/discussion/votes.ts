@@ -8,6 +8,8 @@ const voteService = new VoteService(db)
 
 export const votesRouter = new Elysia({ prefix: '/vote' })
   .use(betterAuth)
+  .group('', { auth: true }, (app) =>
+    app
   .post(
     '/vote',
     async ({ body, user }) => {
@@ -26,7 +28,7 @@ export const votesRouter = new Elysia({ prefix: '/vote' })
       }
     },
     {
-      auth: true,
+
       body: voteSchema,
       detail: {
         tags: ['Discussion'],
@@ -53,7 +55,7 @@ export const votesRouter = new Elysia({ prefix: '/vote' })
       }
     },
     {
-      auth: true,
+
       body: unvoteSchema,
       detail: {
         tags: ['Discussion'],
@@ -62,3 +64,4 @@ export const votesRouter = new Elysia({ prefix: '/vote' })
       }
     }
   )
+)

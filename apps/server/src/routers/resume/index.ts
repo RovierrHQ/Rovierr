@@ -15,6 +15,8 @@ import {
 
 export const resumeRouter = new Elysia({ prefix: '/resume' })
   .use(betterAuth)
+  .group('', { auth: true }, (app) =>
+    app
   // ============================================================================
   // List Resumes
   // ============================================================================
@@ -85,7 +87,6 @@ export const resumeRouter = new Elysia({ prefix: '/resume' })
       }
     },
     {
-      auth: true,
       query: listResumesSchema,
       detail: {
         tags: ['Resume'],
@@ -130,7 +131,6 @@ export const resumeRouter = new Elysia({ prefix: '/resume' })
       }
     },
     {
-      auth: true,
       params: t.Object({
         id: t.String({ minLength: 1, description: 'Resume ID' })
       }),
@@ -181,7 +181,6 @@ export const resumeRouter = new Elysia({ prefix: '/resume' })
       }
     },
     {
-      auth: true,
       body: createResumeSchema,
       detail: {
         tags: ['Resume'],
@@ -236,7 +235,6 @@ export const resumeRouter = new Elysia({ prefix: '/resume' })
       }
     },
     {
-      auth: true,
       body: updateResumeMetadataSchema,
       detail: {
         tags: ['Resume'],
@@ -289,7 +287,6 @@ export const resumeRouter = new Elysia({ prefix: '/resume' })
       }
     },
     {
-      auth: true,
       body: updateResumeSectionSchema,
       detail: {
         tags: ['Resume'],
@@ -336,7 +333,7 @@ export const resumeRouter = new Elysia({ prefix: '/resume' })
       }
     },
     {
-      auth: true,
+
       body: updateResumeDataSchema,
       detail: {
         tags: ['Resume'],
@@ -371,7 +368,7 @@ export const resumeRouter = new Elysia({ prefix: '/resume' })
       return { success: true }
     },
     {
-      auth: true,
+
       params: t.Object({
         id: t.String({ minLength: 1, description: 'Resume ID' })
       }),
@@ -381,4 +378,5 @@ export const resumeRouter = new Elysia({ prefix: '/resume' })
         description: 'Delete a resume'
       }
     }
+  )
   )
