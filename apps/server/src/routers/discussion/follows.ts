@@ -12,6 +12,8 @@ const followService = new FollowService(db)
 
 export const followsRouter = new Elysia({ prefix: '/follow' })
   .use(betterAuth)
+  .group('',{auth:true},(app)=>
+  app
   .post(
     '/follow',
     async ({ body, user }) => {
@@ -23,14 +25,17 @@ export const followsRouter = new Elysia({ prefix: '/follow' })
         const userId = user.id
         return await followService.followThread(body.threadId, userId)
       } catch (error) {
-        if (error instanceof Error && error.message === 'Thread not found') {
+        if (
+          error instanceof Error &&
+          error.message === 'Thread not found'
+        )
+        {
           throw new Error('Thread not found')
         }
         throw error
       }
     },
     {
-      auth: true,
       body: followThreadSchema,
       detail: {
         tags: ['Discussion'],
@@ -57,7 +62,6 @@ export const followsRouter = new Elysia({ prefix: '/follow' })
       }
     },
     {
-      auth: true,
       body: unfollowThreadSchema,
       detail: {
         tags: ['Discussion'],
@@ -77,7 +81,6 @@ export const followsRouter = new Elysia({ prefix: '/follow' })
       return await followService.getFollowedThreads(query, userId)
     },
     {
-      auth: true,
       query: listFollowedThreadsSchema,
       detail: {
         tags: ['Discussion'],
@@ -85,4 +88,5 @@ export const followsRouter = new Elysia({ prefix: '/follow' })
         description: 'List threads the user is following'
       }
     }
+  )
   )
