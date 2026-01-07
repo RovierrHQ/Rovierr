@@ -49,9 +49,7 @@ export function TaskDetailDialog({
     }
   )
 
-  const updateTaskMutation = useMutation((data: any) =>
-    api.tasks.update.put(data)
-  )
+  const updateTaskMutation = useMutation(api.tasks.update.put)
 
   const addCommentMutation = useMutation(
     (data: { taskId: string; message: string }) =>
@@ -73,10 +71,8 @@ export function TaskDetailDialog({
       queryClient.invalidateQueries({
         queryKey: ['task-details', taskId]
       })
-    } catch (error: any) {
-      toast.error(
-        error?.value?.message || error?.message || 'Failed to update task'
-      )
+    } catch {
+      toast.error('Failed to update task')
     }
   }
 
@@ -95,10 +91,8 @@ export function TaskDetailDialog({
       queryClient.invalidateQueries({
         queryKey: ['tasks', 'club', organizationId]
       })
-    } catch (error: any) {
-      toast.error(
-        error?.value?.message || error?.message || 'Failed to add comment'
-      )
+    } catch {
+      toast.error('Failed to add comment')
     }
   }
 
