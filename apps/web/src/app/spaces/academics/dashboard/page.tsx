@@ -22,29 +22,6 @@ export default function AcademicDashboardPage() {
     () => api.academic.enrollment[''].details.get()
   )
 
-  // Type assertion for enrollment data
-  const enrollmentData = enrollment as {
-    program: {
-      id: string
-      name: string
-      code: string | null
-      institutionId: string
-    }
-    term: {
-      id: string
-      termName: string
-      academicYear: string
-    }
-    courses: Array<{
-      id: string
-      courseId: string | null
-      code: string | null
-      title: string
-      instructor: string | null
-      section: string | null
-      schedule: string | null
-    }>
-  } | null
 
   if (isLoading) {
     return (
@@ -69,8 +46,8 @@ export default function AcademicDashboardPage() {
         <div>
           <h1 className="mb-2 font-bold text-3xl">Academic Dashboard</h1>
           <p className="text-muted-foreground">
-            {enrollmentData?.program?.name} • {enrollmentData?.term?.termName}{' '}
-            {enrollmentData?.term?.academicYear}
+            {enrollment?.program?.name} • {enrollment?.term?.termName}{' '}
+            {enrollment?.term?.academicYear}
           </p>
         </div>
         <Button asChild variant="outline">
@@ -84,25 +61,15 @@ export default function AcademicDashboardPage() {
       {/* Course Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {(() => {
-          if (!enrollmentData) {
+          if (!enrollment) {
             return null
           }
 
           // Group courses by course code (like in sidebar)
-          const courseMap = new Map<
-            string,
-            Array<{
-              id: string
-              courseId: string | null
-              code: string | null
-              title: string
-              instructor: string | null
-              section: string | null
-              schedule: string | null
-            }>
-          >()
+          const courseMap = new Map<string, (typeof enrollment.courses)[0][]>()
+   
 
-          for (const course of enrollmentData?.courses ?? []) {
+          for (const course of enrollment?.courses ?? []) {
             const key = course.code || course.title
             if (!courseMap.has(key)) {
               courseMap.set(key, [])
@@ -118,7 +85,7 @@ export default function AcademicDashboardPage() {
             )
             const mainCourse = sortedCourses[0]
             // Concatenate course ID + term ID for discussion context
-            const discussionContextId = `${mainCourse.courseId ?? ''}-${enrollmentData.term.id}`
+            const discussionContextId = `${mainCourse.courseId ?? ''}-${enrollment.term.id}`
 
             return (
               <Card className="transition-shadow hover:shadow-lg" key={code}>
@@ -161,7 +128,7 @@ export default function AcademicDashboardPage() {
       </div>
 
       {/* Empty State */}
-      {enrollmentData?.courses?.length === 0 && (
+      {enrollment?.courses?.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <BookOpen className="mb-4 h-12 w-12 text-muted-foreground/50" />
