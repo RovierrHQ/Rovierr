@@ -16,6 +16,8 @@ const threadService = new ThreadService(db)
 
 export const threadsRouter = new Elysia({ prefix: '/thread' })
   .use(betterAuth)
+  .group('', { auth: true }, (app) =>
+    app
   // ============================================================================
   // Thread CRUD Operations
   // ============================================================================
@@ -30,14 +32,15 @@ export const threadsRouter = new Elysia({ prefix: '/thread' })
         const userId = user.id
         return await threadService.createThread(body, userId)
       } catch (error) {
-        if (error instanceof Error && error.message.includes('permission')) {
+        if (error instanceof Error &&
+          error.message.includes('permission')) {
           throw new Error(error.message)
         }
         throw error
       }
     },
     {
-      auth: true,
+
       body: createThreadSchema,
       detail: {
         tags: ['Discussion'],
@@ -57,14 +60,15 @@ export const threadsRouter = new Elysia({ prefix: '/thread' })
         const userId = user.id
         return await threadService.listThreads(query, userId)
       } catch (error) {
-        if (error instanceof Error && error.message.includes('permission')) {
+        if (error instanceof Error &&
+          error.message.includes('permission')) {
           throw new Error(error.message)
         }
         throw error
       }
     },
     {
-      auth: true,
+
       query: listThreadsSchema,
       detail: {
         tags: ['Discussion'],
@@ -107,7 +111,7 @@ export const threadsRouter = new Elysia({ prefix: '/thread' })
       }
     },
     {
-      auth: true,
+
       detail: {
         tags: ['Discussion'],
         summary: 'Get Thread',
@@ -140,7 +144,6 @@ export const threadsRouter = new Elysia({ prefix: '/thread' })
       }
     },
     {
-      auth: true,
       body: updateThreadSchema,
       detail: {
         tags: ['Discussion'],
@@ -174,7 +177,6 @@ export const threadsRouter = new Elysia({ prefix: '/thread' })
       }
     },
     {
-      auth: true,
       detail: {
         tags: ['Discussion'],
         summary: 'Delete Thread',
@@ -209,7 +211,7 @@ export const threadsRouter = new Elysia({ prefix: '/thread' })
       }
     },
     {
-      auth: true,
+
       body: pinThreadSchema,
       detail: {
         tags: ['Discussion'],
@@ -242,7 +244,7 @@ export const threadsRouter = new Elysia({ prefix: '/thread' })
       }
     },
     {
-      auth: true,
+
       body: lockThreadSchema,
       detail: {
         tags: ['Discussion'],
@@ -250,4 +252,5 @@ export const threadsRouter = new Elysia({ prefix: '/thread' })
         description: 'Lock or unlock a thread'
       }
     }
+  )
   )
