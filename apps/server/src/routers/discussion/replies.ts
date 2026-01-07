@@ -12,6 +12,8 @@ const replyService = new ReplyService(db)
 
 export const repliesRouter = new Elysia({ prefix: '/reply' })
   .use(betterAuth)
+  .group('',{auth:true},(app)=>
+  app
   .post(
     '/create',
     async ({ body, user }) => {
@@ -24,6 +26,7 @@ export const repliesRouter = new Elysia({ prefix: '/reply' })
         return await replyService.createReply(body, userId)
       } catch (error) {
         if (error instanceof Error) {
+
           if (error.message === 'Thread not found') {
             throw new Error('Thread or parent reply not found')
           }
@@ -37,7 +40,6 @@ export const repliesRouter = new Elysia({ prefix: '/reply' })
       }
     },
     {
-      auth: true,
       body: createReplySchema,
       detail: {
         tags: ['Discussion'],
@@ -71,7 +73,6 @@ export const repliesRouter = new Elysia({ prefix: '/reply' })
       }
     },
     {
-      auth: true,
       body: updateReplySchema,
       detail: {
         tags: ['Discussion'],
@@ -105,7 +106,6 @@ export const repliesRouter = new Elysia({ prefix: '/reply' })
       }
     },
     {
-      auth: true,
       detail: {
         tags: ['Discussion'],
         summary: 'Delete Reply',
@@ -137,7 +137,6 @@ export const repliesRouter = new Elysia({ prefix: '/reply' })
       }
     },
     {
-      auth: true,
       body: endorseReplySchema,
       detail: {
         tags: ['Discussion'],
@@ -145,4 +144,5 @@ export const repliesRouter = new Elysia({ prefix: '/reply' })
         description: 'Endorse or unendorse a reply'
       }
     }
+  )
   )
