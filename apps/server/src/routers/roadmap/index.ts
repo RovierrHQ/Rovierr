@@ -47,14 +47,17 @@ export const roadmap = new Elysia({ name: 'roadmap' })
           limit = limit || 10
 
           const offset = (page - 1) * limit
-
+        
+          
           const whereConditions = and(
             ...[
               eq(roadmapTable.status, 'publish'),
               category ? eq(roadmapTable.category, category) : undefined
             ].filter(Boolean)
           )
-
+           
+          // Single query using relational API with upvotes included
+      // Get count separately as it's needed for pagination metadata
           const [countResult, roadmaps] = await Promise.all([
             db
               .select({ count: sql<number>`count(*)` })

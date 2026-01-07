@@ -30,26 +30,54 @@ const bulkSaveFormSchema = z.object({
   questions: z.array(z.any()).optional()
 })
 
-// const reorderPagesSchema = z.object({
-//   formId: z.string(),
-//   pageIds: z.array(z.string())
-// })
+const reorderPagesSchema = z.object({
+  formId: z.string(),
+  pageIds: z.array(z.string())
+})
 
-// const reorderQuestionsSchema = z.object({
-//   pageId: z.string(),
-//   questionIds: z.array(z.string())
-// })
+const reorderQuestionsSchema = z.object({
+  pageId: z.string(),
+  questionIds: z.array(z.string())
+})
 
-// const createPageSchema = z.object({
-//   formId: z.string(),
-//   title: z.string().optional()
-// })
+const createPageSchema = z.object({
+  formId: z.string(),
+  title: z.string().optional()
+})
 
-// const createQuestionSchema = z.object({
-//   pageId: z.string(),
-//   title: z.string(),
-//   type: z.string()
-// })
+const updatePageSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  order: z.number().optional(),
+  conditionalLogicEnabled: z.boolean().optional(),
+  sourceQuestionId: z.string().optional().nullable(),
+  condition: z.enum(['equals', 'not_equals', 'contains', 'not_contains']).optional().nullable(),
+  conditionValue: z.string().optional()
+})
+
+const createQuestionSchema = z.object({
+  pageId: z.string(),
+  title: z.string(),
+  type: z.enum(['short-text', 'long-text', 'multiple-choice', 'checkboxes', 'dropdown', 'date', 'time', 'number', 'email', 'phone', 'rating', 'file-upload'])
+})
+
+const updateQuestionSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  required: z.boolean().optional(),
+  order: z.number().optional(),
+  type: z.enum(['short-text', 'long-text', 'multiple-choice', 'checkboxes', 'dropdown', 'date', 'time', 'number', 'email', 'phone', 'rating', 'file-upload']).optional(),
+  options: z.array(z.string()).optional(),
+  validation: z.any().optional(), // TODO: specialized validation schema
+  conditionalLogicEnabled: z.boolean().optional(),
+  sourceQuestionId: z.string().optional().nullable(),
+  condition: z.enum(['equals', 'not_equals', 'contains', 'not_contains']).optional().nullable(),
+  conditionValue: z.string().optional().nullable(),
+  enableAutoFill: z.boolean().optional(),
+  autoFillField: z.string().optional().nullable(),
+  enableBidirectionalSync: z.boolean().optional(),
+  maxFileSize: z.number().optional()
+})
 
 export const form = new Elysia({ prefix: '/form' })
   .use(betterAuth)
@@ -60,7 +88,10 @@ export const form = new Elysia({ prefix: '/form' })
         '/create',
         async ({ body, user }) => {
           if (!user) throw new Error('User not authenticated')
-          const createdForm = await formService.createForm(user.id, body)
+          const createdForm = await formService.createForm(user.id, {
+            ...body,
+            entityId: body.entityId ?? ''
+          })
           return {
             id: createdForm.id,
             title: createdForm.title,
@@ -85,7 +116,8 @@ export const form = new Elysia({ prefix: '/form' })
             }
             throw error
           }
-        }
+        },
+        { body: updateFormSchema }
       )
 
       .get('/:id', async ({ params }) => {
@@ -279,7 +311,8 @@ export const form = new Elysia({ prefix: '/form' })
             }
             throw error
           }
-        }
+        },
+        { body: createPageSchema }
       )
 
       .patch('/page/:id', async ({ params, body, user }) => {
@@ -409,7 +442,8 @@ export const form = new Elysia({ prefix: '/form' })
             }
             throw error
           }
-        }
+        },
+        { body: reorderQuestionsSchema }
       )
 
       // Response Management (Stubs)

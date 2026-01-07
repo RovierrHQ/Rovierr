@@ -16,8 +16,8 @@ const threadService = new ThreadService(db)
 
 export const threadsRouter = new Elysia({ prefix: '/thread' })
   .use(betterAuth)
-  .group('', { auth: true }, (app) =>
-    app
+  .guard({ auth: true })
+
   // ============================================================================
   // Thread CRUD Operations
   // ============================================================================
@@ -252,5 +252,4 @@ export const threadsRouter = new Elysia({ prefix: '/thread' })
         description: 'Lock or unlock a thread'
       }
     }
-  )
   )
