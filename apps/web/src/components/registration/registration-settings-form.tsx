@@ -13,8 +13,8 @@ import {
 } from '@rov/ui/components/select'
 import { Switch } from '@rov/ui/components/switch'
 import { Textarea } from '@rov/ui/components/textarea'
-import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { ExternalLink, Loader2, Plus, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -94,15 +94,16 @@ export const RegistrationSettingsForm = ({
   // Fetch available forms for this society
   const { data: formsData, isLoading: isLoadingForms } = useQuery(
     ['form', 'list', societyId],
-    () => api.form.list.get({
-      query: {
-        entityType: 'society',
-        entityId: societyId,
-        status: 'published',
-        limit: 100,
-        offset: 0
-      }
-    })
+    () =>
+      api.form.list.get({
+        query: {
+          entityType: 'society',
+          entityId: societyId,
+          status: 'published',
+          limit: 100,
+          offset: 0
+        }
+      })
   )
 
   // Create settings mutation
@@ -116,7 +117,8 @@ export const RegistrationSettingsForm = ({
         toast.success('Registration settings created successfully!')
       },
       onError: (error: any) => {
-        const message = error.value?.message || error.message || 'Failed to create settings'
+        const message =
+          error.value?.message || error.message || 'Failed to create settings'
         toast.error(message)
       }
     }
@@ -133,7 +135,8 @@ export const RegistrationSettingsForm = ({
         toast.success('Settings updated successfully!')
       },
       onError: (error: any) => {
-        const message = error.value?.message || error.message || 'Failed to update settings'
+        const message =
+          error.value?.message || error.message || 'Failed to update settings'
         toast.error(message)
       }
     }

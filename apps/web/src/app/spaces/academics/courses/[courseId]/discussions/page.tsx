@@ -61,11 +61,11 @@ export default function DiscussionsPage({ params }: PageProps) {
     }
   )
 
-  const selectedThread = selectedThreadData 
+  const selectedThread = selectedThreadData
 
   // Map backend data to frontend types
   const discussions: Discussion[] =
-    (threadsData)?.threads.map((thread) => ({
+    threadsData?.threads.map((thread) => ({
       id: thread.id,
       title: thread.title,
       content: thread.content,

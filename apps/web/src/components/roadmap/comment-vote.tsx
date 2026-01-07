@@ -143,7 +143,8 @@ const CommentVote: FC<CommentVoteProps> = ({
         }
 
         const errorMessage =
-          (_error.value as { message?: string } | undefined)?.message || 'Failed to vote on comment'
+          (_error.value as { message?: string } | undefined)?.message ||
+          'Failed to vote on comment'
         if (errorMessage.includes('cannot vote on your own')) {
           toast.error('You cannot vote on your own comment')
         } else {

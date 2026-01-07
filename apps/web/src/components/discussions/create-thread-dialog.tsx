@@ -37,28 +37,29 @@ export function CreateThreadDialog({
 }: CreateThreadDialogProps) {
   const queryClient = useQueryClient()
 
-  const createMutation = useMutation(
-    api.discussion.thread.create.post,
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['discussion', 'threads', contextType, contextId]
-        })
-        toast.success('Discussion created successfully')
-        onOpenChange(false)
-        form.reset()
-      },
-      onError: (error) => {
-        let errorMessage = 'Failed to create discussion'
-        
-        if (error?.value && typeof error.value === 'object' && 'message' in error.value) {
-          errorMessage = error.value.message || errorMessage
-        }
-        
-        toast.error(errorMessage)
+  const createMutation = useMutation(api.discussion.thread.create.post, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['discussion', 'threads', contextType, contextId]
+      })
+      toast.success('Discussion created successfully')
+      onOpenChange(false)
+      form.reset()
+    },
+    onError: (error) => {
+      let errorMessage = 'Failed to create discussion'
+
+      if (
+        error?.value &&
+        typeof error.value === 'object' &&
+        'message' in error.value
+      ) {
+        errorMessage = error.value.message || errorMessage
       }
+
+      toast.error(errorMessage)
     }
-  )
+  })
 
   const form = useAppForm({
     validators: { onSubmit: createThreadSchema },

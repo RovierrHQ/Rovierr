@@ -43,26 +43,27 @@ export const RegistrationForm = ({
 
   // Submit form response mutation
   const submitFormMutation = useMutation(
-    (data: { formId: string; answers: Record<string, string> }) => 
-        api.form.response.submit.post(data),
+    (data: { formId: string; answers: Record<string, string> }) =>
+      api.form.response.submit.post(data),
     {
-        onSuccess: (response: any) => {
-            // Check if response has data and id, or if response IS data
-            // api-client un-wraps. So response is data.
-            // But form router says "Response submission not yet implemented".
-            // So this will likely fail until server is implemented.
-            // Assuming server returns { id: string } when implemented.
-            const id = response?.id
-            if (id) {
-                onSubmit(id)
-            } else {
-                toast.error('Submission ID missing')
-            }
-        },
-        onError: (error: any) => {
-            const message = error.value?.message || error.message || 'Failed to submit form'
-            toast.error(message)
+      onSuccess: (response: any) => {
+        // Check if response has data and id, or if response IS data
+        // api-client un-wraps. So response is data.
+        // But form router says "Response submission not yet implemented".
+        // So this will likely fail until server is implemented.
+        // Assuming server returns { id: string } when implemented.
+        const id = response?.id
+        if (id) {
+          onSubmit(id)
+        } else {
+          toast.error('Submission ID missing')
         }
+      },
+      onError: (error: any) => {
+        const message =
+          error.value?.message || error.message || 'Failed to submit form'
+        toast.error(message)
+      }
     }
   )
 

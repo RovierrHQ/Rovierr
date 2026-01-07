@@ -50,7 +50,9 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
       },
       onError: (error) => {
         const errorMessage =
-          error?.value && typeof error.value === 'object' && 'message' in error.value
+          error?.value &&
+          typeof error.value === 'object' &&
+          'message' in error.value
             ? error.value.message || 'Failed to post reply'
             : 'Failed to post reply'
         toast.error(errorMessage)
@@ -77,7 +79,9 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
       },
       onError: (error) => {
         const errorMessage =
-          error?.value && typeof error.value === 'object' && 'message' in error.value
+          error?.value &&
+          typeof error.value === 'object' &&
+          'message' in error.value
             ? error.value.message || 'Failed to vote'
             : 'Failed to vote'
         toast.error(errorMessage)
@@ -103,7 +107,9 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
       },
       onError: (error) => {
         const errorMessage =
-          error?.value && typeof error.value === 'object' && 'message' in error.value
+          error?.value &&
+          typeof error.value === 'object' &&
+          'message' in error.value
             ? error.value.message || 'Failed to remove vote'
             : 'Failed to remove vote'
         toast.error(errorMessage)

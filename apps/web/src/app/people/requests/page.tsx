@@ -47,57 +47,8 @@ export default function ConnectionRequestsPage() {
     })
   )
 
-  // Type assertions for connection data
-  const receivedDataTyped = receivedData as {
-    connections: Array<{
-      id: string
-      createdAt: string
-      updatedAt: string
-      userId: string
-      connectedUserId: string
-      status: 'pending' | 'accepted' | 'rejected' | 'blocked'
-      requestedAt: string
-      respondedAt: string | null
-      expiresAt: string | null
-      user: {
-        id: string
-        name: string
-        username: string | null
-        image: string | null
-        bio: string | null
-        isVerified: boolean
-      } | null
-    }>
-    total: number
-    hasMore: boolean
-  } | null
-
-  const sentDataTyped = sentData as {
-    connections: Array<{
-      id: string
-      createdAt: string
-      updatedAt: string
-      userId: string
-      connectedUserId: string
-      status: 'pending' | 'accepted' | 'rejected' | 'blocked'
-      requestedAt: string
-      respondedAt: string | null
-      expiresAt: string | null
-      user: {
-        id: string
-        name: string
-        username: string | null
-        image: string | null
-        bio: string | null
-        isVerified: boolean
-      } | null
-    }>
-    total: number
-    hasMore: boolean
-  } | null
-
-  const receivedRequests = receivedDataTyped?.connections || []
-  const sentRequests = sentDataTyped?.connections || []
+  const receivedRequests = receivedData?.connections || []
+  const sentRequests = sentData?.connections || []
 
   const acceptMutation = useMutation(
     ({ connectionId }: { connectionId: string }) =>
@@ -137,7 +88,7 @@ export default function ConnectionRequestsPage() {
   }
 
   const renderRequestCard = (
-    connection: NonNullable<typeof receivedDataTyped>['connections'][number],
+    connection: NonNullable<typeof receivedData>['connections'][number],
     type: 'received' | 'sent'
   ) => {
     const user = connection.user
@@ -290,8 +241,12 @@ export default function ConnectionRequestsPage() {
           {!(receivedError || isLoadingReceived) &&
             receivedRequests.length > 0 && (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {receivedRequests.map((connection: NonNullable<typeof receivedDataTyped>['connections'][number]) =>
-                  renderRequestCard(connection, 'received')
+                {receivedRequests.map(
+                  (
+                    connection: NonNullable<
+                      typeof receivedData
+                    >['connections'][number]
+                  ) => renderRequestCard(connection, 'received')
                 )}
               </div>
             )}
@@ -312,8 +267,12 @@ export default function ConnectionRequestsPage() {
             renderEmptyState('sent')}
           {!(sentError || isLoadingSent) && sentRequests.length > 0 && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {sentRequests.map((connection: NonNullable<typeof sentDataTyped>['connections'][number]) =>
-                renderRequestCard(connection, 'sent')
+              {sentRequests.map(
+                (
+                  connection: NonNullable<
+                    typeof sentData
+                  >['connections'][number]
+                ) => renderRequestCard(connection, 'sent')
               )}
             </div>
           )}

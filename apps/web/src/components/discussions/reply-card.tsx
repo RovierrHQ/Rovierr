@@ -25,7 +25,9 @@ export function ReplyCard({ reply }: ReplyCardProps) {
       },
       onError: (error) => {
         const errorMessage =
-          error?.value && typeof error.value === 'object' && 'message' in error.value
+          error?.value &&
+          typeof error.value === 'object' &&
+          'message' in error.value
             ? error.value.message || 'Failed to vote'
             : 'Failed to vote'
         toast.error(errorMessage)
@@ -43,7 +45,9 @@ export function ReplyCard({ reply }: ReplyCardProps) {
       },
       onError: (error) => {
         const errorMessage =
-          error?.value && typeof error.value === 'object' && 'message' in error.value
+          error?.value &&
+          typeof error.value === 'object' &&
+          'message' in error.value
             ? error.value.message || 'Failed to remove vote'
             : 'Failed to remove vote'
         toast.error(errorMessage)

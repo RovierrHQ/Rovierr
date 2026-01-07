@@ -30,9 +30,8 @@ export const QRCodeDisplay = ({
   const qrCodeRef = useRef<HTMLDivElement>(null)
 
   // Fetch QR code data
-  const { data: qrData } = useQuery(
-    ['qr-code', societyId, size],
-    () => api['society-registration']['qr-code'].post({
+  const { data: qrData } = useQuery(['qr-code', societyId, size], () =>
+    api['society-registration']['qr-code'].post({
       societyId,
       format: 'png',
       size
@@ -43,8 +42,8 @@ export const QRCodeDisplay = ({
 
   // Generate printable QR code mutation
   const generatePrintableMutation = useMutation(
-    (data: { societyId: string }) => 
-        api['society-registration']['qr-code'].printable.post(data),
+    (data: { societyId: string }) =>
+      api['society-registration']['qr-code'].printable.post(data),
     {
       onSuccess: (data: any) => {
         // Open printable HTML in new window
@@ -61,7 +60,10 @@ export const QRCodeDisplay = ({
         toast.success('Opening print preview...')
       },
       onError: (error: any) => {
-        const message = error.value?.message || error.message || 'Failed to generate printable QR code'
+        const message =
+          error.value?.message ||
+          error.message ||
+          'Failed to generate printable QR code'
         toast.error(message)
       }
     }

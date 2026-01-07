@@ -7,11 +7,12 @@ import { campusFeed } from '@api/routers/campus-feed'
 // import { chat } from '@api/routers/chat'
 import { connection } from '@api/routers/connection'
 import { discussionRouter } from '@api/routers/discussion'
-import { people } from '@api/routers/people'
 import { form } from '@api/routers/form'
+import { people } from '@api/routers/people'
 import { realtime } from '@api/routers/realtime'
 import { resumeRouter } from '@api/routers/resume'
 import { roadmap } from '@api/routers/roadmap'
+import { societyRegistrationRouter } from '@api/routers/society-registration'
 import { stripeRouter } from '@api/routers/stripe'
 import { tasks } from '@api/routers/tasks'
 import { universityRouter } from '@api/routers/university'
@@ -22,8 +23,6 @@ import { openapi } from '@elysiajs/openapi'
 import { logger } from '@tqman/nice-logger'
 import { Elysia } from 'elysia'
 import z from 'zod'
-
-import { societyRegistrationRouter } from '@api/routers/society-registration'
 
 const app = new Elysia()
   .use(

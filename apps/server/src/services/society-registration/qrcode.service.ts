@@ -15,7 +15,7 @@ export class QRCodeService {
     options: { format?: 'png' | 'svg'; width?: number } = {}
   ): Promise<Buffer> {
     const width = options.width || 512
-    
+
     if (options.format === 'svg') {
       const svgString = await QRCode.toString(text, {
         type: 'svg',

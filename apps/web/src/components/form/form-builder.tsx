@@ -7,8 +7,8 @@ import {
   TabsList,
   TabsTrigger
 } from '@rov/ui/components/tabs'
-import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { Eye, FileText, Loader2, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -102,7 +102,9 @@ export default function FormBuilder({
   }, [existingForm])
 
   // Create form mutation
-  const createFormMutation = useMutation((data: any) => api.form.create.post(data), {
+  const createFormMutation = useMutation(
+    (data: any) => api.form.create.post(data),
+    {
       onSuccess: async (response) => {
         // Fetch the complete form with pages to get real page IDs
         if (!response?.id) return
@@ -112,10 +114,12 @@ export default function FormBuilder({
         toast.success('Form created successfully')
       },
       onError: (error: any) => {
-        const message = error.value?.message || error.message || 'Failed to create form'
+        const message =
+          error.value?.message || error.message || 'Failed to create form'
         toast.error(message)
       }
-    })
+    }
+  )
 
   // Update form mutation
   const updateFormMutation = useMutation(
@@ -126,7 +130,8 @@ export default function FormBuilder({
         toast.success('Form saved successfully')
       },
       onError: (error: any) => {
-        const message = error.value?.message || error.message || 'Failed to save form'
+        const message =
+          error.value?.message || error.message || 'Failed to save form'
         toast.error(message)
       }
     }
@@ -134,7 +139,8 @@ export default function FormBuilder({
 
   // Publish form mutation
   const publishFormMutation = useMutation(
-    (variables: { id: string }) => api.form({ id: variables.id }).publish.post({}),
+    (variables: { id: string }) =>
+      api.form({ id: variables.id }).publish.post({}),
     {
       onSuccess: () => {
         setFormData((prev) => ({ ...prev, status: 'published' }))
@@ -142,7 +148,8 @@ export default function FormBuilder({
         toast.success('Form published successfully')
       },
       onError: (error: any) => {
-        const message = error.value?.message || error.message || 'Failed to publish form'
+        const message =
+          error.value?.message || error.message || 'Failed to publish form'
         toast.error(message)
       }
     }
@@ -208,10 +215,10 @@ export default function FormBuilder({
             formData.confirmationEmailContent
           )
         })
-        
+
         if (newForm) {
-            currentFormId = newForm.id
-            setFormData((prev) => ({ ...prev, id: currentFormId }))
+          currentFormId = newForm.id
+          setFormData((prev) => ({ ...prev, id: currentFormId }))
         }
       }
 

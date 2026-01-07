@@ -25,11 +25,6 @@ import { toast } from 'sonner'
 import type { Task } from './types'
 import { getPriorityColor, getStatusIcon } from './utils'
 
-type UpdateTaskVariables = {
-  taskId: string
-  status: Task['status']
-}
-
 type TaskTableProps = {
   tasks: Task[]
   isLoading: boolean
@@ -47,9 +42,7 @@ export function TaskTable({
 }: TaskTableProps) {
   const queryClient = useQueryClient()
 
-  const updateTaskMutation = useMutation<UpdateTaskVariables>(
-    (data) => api.tasks.update.put(data)
-  )
+  const updateTaskMutation = useMutation(api.tasks.update.put)
 
   const handleStatusChange = async (
     taskId: string,
@@ -68,10 +61,8 @@ export function TaskTable({
         queryKey: ['task-details', taskId]
       })
       onStatusChange(taskId, newStatus)
-    } catch (error: any) {
-      toast.error(
-        error?.value?.message || error?.message || 'Failed to update task'
-      )
+    } catch {
+      toast.error('Failed to update task')
     }
   }
 

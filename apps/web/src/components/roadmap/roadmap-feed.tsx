@@ -51,7 +51,7 @@ const RoadmapFeed = () => {
       })
   )
 
-  const response = data 
+  const response = data
   const meta = response?.meta
   const list = response?.data ?? []
 
