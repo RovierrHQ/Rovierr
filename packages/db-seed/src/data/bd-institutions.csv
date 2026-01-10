@@ -1,0 +1,59 @@
+name,slug,type,country,city,address,website,validEmailDomains,logo
+"University of Dhaka",university-of-dhaka,university,Bangladesh,Dhaka,"Nilkhet Road, Dhaka 1000",https://www.du.ac.bd,du.ac.bd
+"University of Rajshahi",university-of-rajshahi,university,Bangladesh,Rajshahi,"Motihar, Rajshahi 6205",https://www.ru.ac.bd,ru.ac.bd
+"Bangladesh Agricultural University",bangladesh-agricultural-university,university,Bangladesh,Mymensingh,"Mymensingh 2202",https://www.bau.edu.bd,bau.edu.bd
+"Bangladesh University of Engineering & Technology",buet,university,Bangladesh,Dhaka,"Ramna, Dhaka 1000",https://www.buet.ac.bd,buet.ac.bd
+"University of Chittagong",university-of-chittagong,university,Bangladesh,Chattogram,"Hathazari, Chattogram 4331",https://www.cu.ac.bd,std.cu.ac.bd|cu.ac.bd
+"Jahangirnagar University",jahangirnagar-university,university,Bangladesh,Savar,"Savar, Dhaka 1342",https://www.juniv.edu,juniv.edu
+"Islamic University, Bangladesh",islamic-university,university,Bangladesh,Kushtia,"Kushtia 7003",https://www.iu.ac.bd,iu.ac.bd
+"Shahjalal University of Science & Technology",sust,university,Bangladesh,Sylhet,"Kumargaon, Sylhet 3114",https://www.sust.edu,student.sust.edu|sust.edu
+"Khulna University",khulna-university,university,Bangladesh,Khulna,"Gollamari, Khulna 9208",https://www.ku.ac.bd,ku.ac.bd
+"National University",national-university,university,Bangladesh,Gazipur,"Board Bazar, Gazipur 1704",https://www.nu.ac.bd,nu.ac.bd
+"Bangladesh Open University",bangladesh-open-university,university,Bangladesh,Gazipur,"Board Bazar, Gazipur 1705",https://www.bou.ac.bd,bou.ac.bd
+"Hajee Mohammad Danesh Science & Technology University",hstu,university,Bangladesh,Dinajpur,"Basherhat, Dinajpur 5200",https://www.hstu.ac.bd,hstu.ac.bd
+"Mawlana Bhashani Science & Technology University",mbstu,university,Bangladesh,Tangail,"Santosh, Tangail 1902",https://www.mbstu.ac.bd,mbstu.ac.bd
+"Sher-e-Bangla Agricultural University",sau-dhaka,university,Bangladesh,Dhaka,"Sher-e-Bangla Nagar, Dhaka 1207",https://www.sau.edu.bd,sau.edu.bd
+"Chittagong University of Engineering & Technology",cuet,university,Bangladesh,Chattogram,"Raozan, Chattogram 4349",https://www.cuet.ac.bd,cuet.ac.bd
+"Rajshahi University of Engineering & Technology",ruet,university,Bangladesh,Rajshahi,"Kazla, Rajshahi 6204",https://www.ruet.ac.bd,ruet.ac.bd
+"Khulna University of Engineering & Technology",kuet,university,Bangladesh,Khulna,"Fulbari, Khulna 9203",https://www.kuet.ac.bd,kuet.ac.bd
+"Jagannath University",jagannath-university,university,Bangladesh,Dhaka,"9-10 Chittaranjan Ave, Dhaka 1100",https://www.jnu.ac.bd,jnu.ac.bd
+"Jashore University of Science & Technology",just,university,Bangladesh,Jashore,"Churamankati, Jashore 7408",https://www.just.edu.bd,just.edu.bd
+"Bangladesh University of Professionals",bup,university,Bangladesh,Dhaka,"Mirpur Cantonment, Dhaka 1216",https://www.bup.edu.bd,bup.edu.bd
+"Begum Rokeya University, Rangpur",begum-rokeya-university,university,Bangladesh,Rangpur,"Rangpur 5400",https://www.brur.ac.bd,brur.ac.bd
+"Pabna University of Science and Technology",pust,university,Bangladesh,Pabna,"Rajapur, Pabna 6600",https://www.pust.ac.bd,pust.ac.bd
+"Bangladesh University of Textiles",butex,university,Bangladesh,Dhaka,"Tejgaon, Dhaka 1208",https://www.butex.edu.bd,butex.edu.bd
+"University of Barishal",university-of-barishal,university,Bangladesh,Barishal,"Kornokathi, Barishal 8200",https://www.bu.ac.bd,bu.ac.bd
+"Noakhali Science & Technology University",nstu,university,Bangladesh,Noakhali,"Sonapur, Noakhali 3814",https://www.nstu.edu.bd,nstu.edu.bd
+"Comilla University",comilla-university,university,Bangladesh,Cumilla,"Kotbari, Cumilla 3506",https://www.cou.ac.bd,cou.ac.bd
+"Jatiya Kabi Kazi Nazrul Islam University",jkkniu,university,Bangladesh,Mymensingh,"Trishal, Mymensingh 2220",https://www.jkkniu.edu.bd,jkkniu.edu.bd
+"Chittagong Veterinary and Animal Sciences University",cvasu,university,Bangladesh,Chattogram,"Khulshi, Chattogram 4225",https://www.cvasu.ac.bd,cvasu.ac.bd
+"Sylhet Agricultural University",sau-sylhet,university,Bangladesh,Sylhet,"Tilagarh, Sylhet 3100",https://www.sau.ac.bd,sau.ac.bd
+"Bangabandhu Sheikh Mujibur Rahman Science & Technology University",bsmrstu,university,Bangladesh,Gopalganj,"Gopalganj 8100",https://www.bsmrstu.edu.bd,bsmrstu.edu.bd
+"Sunamganj Science and Technology University",sstu,university,Bangladesh,Sunamganj,"Sunamganj 3000",https://www.sstu.ac.bd,sstu.ac.bd
+"Khulna Agricultural University",kau,university,Bangladesh,Khulna,"Khulna 9100",https://www.kau.edu.bd,kau.edu.bd
+
+"North South University",north-south-university,university,Bangladesh,Dhaka,"Bashundhara, Dhaka 1229",https://www.northsouth.edu,northsouth.edu
+"BRAC University",brac-university,university,Bangladesh,Dhaka,"66 Mohakhali, Dhaka 1212",https://www.bracu.ac.bd,g.bracu.ac.bd|bracu.ac.bd
+"Independent University, Bangladesh",iub,university,Bangladesh,Dhaka,"Bashundhara, Dhaka 1229",https://www.iub.edu.bd,iub.edu.bd
+"American International University-Bangladesh",aiub,university,Bangladesh,Dhaka,"Kuril, Dhaka 1229",https://www.aiub.edu,aiub.edu
+"Ahsanullah University of Science and Technology",aust,university,Bangladesh,Dhaka,"Tejgaon, Dhaka 1208",https://www.aust.edu,aust.edu
+"East West University",east-west-university,university,Bangladesh,Dhaka,"Aftabnagar, Dhaka 1212",https://www.ewubd.edu,ewubd.edu
+"Daffodil International University",diu,university,Bangladesh,Dhaka,"Daffodil Smart City, Ashulia",https://www.daffodilvarsity.edu.bd,diu.edu.bd
+"United International University",uiu,university,Bangladesh,Dhaka,"United City, Madani Avenue, Dhaka",https://www.uiu.ac.bd,uiu.ac.bd
+"University of Liberal Arts Bangladesh",ulab,university,Bangladesh,Dhaka,"Mohammadpur, Dhaka 1207",https://www.ulab.edu.bd,ulab.edu.bd
+"International University of Business Agriculture and Technology",iubat,university,Bangladesh,Dhaka,"Uttara, Dhaka 1230",https://iubat.edu,iubat.edu
+"University of Asia Pacific",uap,university,Bangladesh,Dhaka,"Farmgate, Dhaka 1215",https://www.uap-bd.edu,uap-bd.edu
+"Southwest University",southeast-university,university,Bangladesh,Dhaka,"Tejgaon, Dhaka 1208",https://www.seu.edu.bd,seu.edu.bd
+"Stamford University Bangladesh",stamford-university,university,Bangladesh,Dhaka,"Siddeswari, Dhaka 1217",https://www.stamforduniversity.edu.bd,stamforduniversity.edu.bd
+"Green University of Bangladesh",green-university,university,Bangladesh,Dhaka,"Purbachal American City",https://green.edu.bd,green.edu.bd
+"Varendra University",varendra-university,university,Bangladesh,Rajshahi,"Rajshahi 6204",https://www.vu.edu.bd,vu.edu.bd
+"Metropolitan University",metropolitan-university,university,Bangladesh,Sylhet,"Bateshwar, Sylhet 3103",https://metrouni.edu.bd,metrouni.edu.bd
+"Leading University",leading-university,university,Bangladesh,Sylhet,"Kamalbazar, Sylhet 3100",https://www.lus.ac.bd,lus.ac.bd
+"Bangladesh University of Business and Technology",bubt,university,Bangladesh,Dhaka,"Mirpur, Dhaka 1216",https://www.bubt.ac.bd,bubt.ac.bd
+"World University of Bangladesh",wub,university,Bangladesh,Dhaka,"Uttara, Dhaka 1230",https://wub.edu.bd,wub.edu.bd
+"Eastern University",eastern-university,university,Bangladesh,Dhaka,"Ashulia, Savar",https://www.easternuni.edu.bd,easternuni.edu.bd
+"Northern University Bangladesh",nub,university,Bangladesh,Dhaka,"Ashona, Dakshinkhan",https://www.nub.ac.bd,nub.ac.bd
+"Uttara University",uttara-university,university,Bangladesh,Dhaka,"Uttara, Dhaka 1230",https://uttarauniversity.edu.bd,uttarauniversity.edu.bd
+"Primeasia University",primeasia-university,university,Bangladesh,Dhaka,"Banani, Dhaka 1213",https://www.primeasia.edu.bd,primeasia.edu.bd
+"Canadian University of Bangladesh",cub,university,Bangladesh,Dhaka,"Pragati Sarani, Dhaka",https://cub.edu.bd,cub.edu.bd
+"Notre Dame University Bangladesh",ndub,university,Bangladesh,Dhaka,"Motijheel, Dhaka 1000",https://www.ndub.edu.bd,ndub.edu.bd
