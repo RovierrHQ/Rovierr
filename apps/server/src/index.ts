@@ -9,6 +9,7 @@ import { campusFeed } from '@api/routers/campus-feed'
 // import { discussionRouter } from '@api/routers/discussion'
 // import { form } from '@api/routers/form'
 import { realtime } from '@api/routers/realtime'
+import { roadmap } from '@api/routers/roadmap'
 import { stripeRouter } from '@api/routers/stripe'
 // import { resumeRouter } from '@api/routers/resume'
 // import { society } from '@api/routers/society'
@@ -55,6 +56,7 @@ const app = new Elysia()
     uptime: process.uptime()
   }))
   .use(user)
+  .use(roadmap)
   // .use(tasks)
   .use(realtime)
   // .use(chat)

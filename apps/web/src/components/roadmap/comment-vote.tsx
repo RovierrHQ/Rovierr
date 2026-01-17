@@ -1,9 +1,9 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import { ThumbsUp } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import type { FC } from 'react'
@@ -35,7 +35,7 @@ const CommentVote: FC<CommentVoteProps> = ({
     if (upvotesProp) return upvotesProp
 
     // Try to get from list query cache
-    const listData = queryClient.getQueryData(orpc.roadmap.list.key()) as
+    const listData = queryClient.getQueryData(['roadmap', 'list']) as
       | {
           data: Array<{
             comments: Array<{
@@ -59,18 +59,19 @@ const CommentVote: FC<CommentVoteProps> = ({
   }, [upvotesProp, commentId, queryClient])
 
   const { mutateAsync, isPending } = useMutation(
-    orpc.roadmap.voteComment.mutationOptions({
+    (data: { commentId: string }) => api.roadmap.voteComment.post(data),
+    {
       onMutate: async () => {
         // Cancel any outgoing refetches
         await queryClient.cancelQueries({
-          queryKey: orpc.roadmap.list.key()
+          queryKey: ['roadmap', 'list']
         })
 
         // Snapshot the previous value
-        const previousData = queryClient.getQueryData(orpc.roadmap.list.key())
+        const previousData = queryClient.getQueryData(['roadmap', 'list'])
 
         // Optimistically update the cache
-        queryClient.setQueryData(orpc.roadmap.list.key(), (old: unknown) => {
+        queryClient.setQueryData(['roadmap', 'list'], (old: unknown) => {
           const oldData = old as
             | {
                 data: Array<{
@@ -139,7 +140,7 @@ const CommentVote: FC<CommentVoteProps> = ({
         // Rollback on error
         if (context?.previousData) {
           queryClient.setQueryData(
-            orpc.roadmap.list.key(),
+            ['roadmap', 'list'],
             context.previousData
           )
         }
@@ -155,10 +156,10 @@ const CommentVote: FC<CommentVoteProps> = ({
       onSettled: () => {
         // Refetch to ensure consistency
         queryClient.invalidateQueries({
-          queryKey: orpc.roadmap.list.key()
+          queryKey: ['roadmap', 'list']
         })
       }
-    })
+    }
   )
 
   const handleVote = async () => {
