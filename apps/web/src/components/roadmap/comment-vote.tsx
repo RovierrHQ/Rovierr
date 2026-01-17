@@ -139,10 +139,7 @@ const CommentVote: FC<CommentVoteProps> = ({
       onError: (error, _variables, context) => {
         // Rollback on error
         if (context?.previousData) {
-          queryClient.setQueryData(
-            ['roadmap', 'list'],
-            context.previousData
-          )
+          queryClient.setQueryData(['roadmap', 'list'], context.previousData)
         }
 
         const errorMessage =

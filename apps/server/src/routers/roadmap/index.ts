@@ -10,14 +10,15 @@ import { and, eq, sql } from 'drizzle-orm'
 import { Elysia } from 'elysia'
 import { z } from 'zod'
 
-export const roadmap = new Elysia({ name: 'roadmap' })
-  .group('/roadmap', (app) =>
+export const roadmap = new Elysia({ name: 'roadmap' }).group(
+  '/roadmap',
+  (app) =>
     app
       .get(
         '/list',
         async ({ query }) => {
-          let page = Number(query.page) || 1
-          let limit = Number(query.limit) || 10
+          const page = Number(query.page) || 1
+          const limit = Number(query.limit) || 10
           const category = query.category as
             | 'feature-request'
             | 'bug-report'
@@ -304,4 +305,4 @@ export const roadmap = new Elysia({ name: 'roadmap' })
             }
           )
       )
-  )
+)
