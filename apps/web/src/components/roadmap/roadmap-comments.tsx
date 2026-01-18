@@ -87,8 +87,7 @@ const RoadmapComments: FC<RoadmapCommentsProps> = ({
   })
 
   const { mutateAsync, isPending } = useMutation(
-    (data: { roadmapId: string; text: string }) =>
-      api.roadmap.createComment.post(data),
+    api.roadmap.createComment.post,
     {
       onSuccess: () => {
         queryClient.invalidateQueries({

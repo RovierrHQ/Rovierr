@@ -3,7 +3,7 @@ import { env } from '@api/lib/env'
 // import { academicRouter } from '@api/routers/academic'
 // import { calendarRouter } from '@api/routers/calendar'
 import { campusFeed } from '@api/routers/campus-feed'
-// import { careerRouter } from '@api/routers/career'
+import { careerRouter } from '@api/routers/career'
 // import { chat } from '@api/routers/chat'
 // import { connection } from '@api/routers/connection'
 // import { discussionRouter } from '@api/routers/discussion'
@@ -67,7 +67,7 @@ const app = new Elysia()
   // .use(form)
   // .use(academicRouter)
   // .use(calendarRouter)
-  // .use(careerRouter)
+  .use(careerRouter)
   // .use(resumeRouter)
   .use(universityRouter)
   .use(verifyStudentRouter)

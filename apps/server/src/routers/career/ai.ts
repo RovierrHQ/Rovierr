@@ -15,7 +15,7 @@ import { URLParserService } from '@api/services/career/url-parser.service'
 import { resumeAnalysisResult } from '@rov/db'
 import { and, eq } from 'drizzle-orm'
 import { Elysia } from 'elysia'
-import { z } from 'zod'
+import type { z } from 'zod'
 import {
   AIAnalysisFailedError,
   AIGenerationFailedError,
@@ -44,7 +44,7 @@ const coverLetterService = new CoverLetterService(db)
 
 export const aiRouter = new Elysia({ prefix: '/ai' })
   .use(betterAuth)
-  .group('', { auth: true }, (app) =>
+  .group('', { auth: true, detail: { tags: ['Career', 'AI'] } }, (app) =>
     app
       // POST /ai/parse-job-description - Parse job description
       .post(
@@ -71,8 +71,7 @@ export const aiRouter = new Elysia({ prefix: '/ai' })
           response: extendedParsedJobDataSchema,
           detail: {
             description: 'Parse job description from text using AI',
-            summary: 'Parse Job Description',
-            tags: ['Career', 'AI']
+            summary: 'Parse Job Description'
           }
         }
       )
@@ -117,8 +116,7 @@ export const aiRouter = new Elysia({ prefix: '/ai' })
           response: extendedParsedJobDataSchema,
           detail: {
             description: 'Parse job description from URL using AI',
-            summary: 'Parse Job URL',
-            tags: ['Career', 'AI']
+            summary: 'Parse Job URL'
           }
         }
       )
@@ -206,8 +204,7 @@ export const aiRouter = new Elysia({ prefix: '/ai' })
           response: analyzeResumeResponseSchema,
           detail: {
             description: 'Analyze resume against job description using AI',
-            summary: 'Analyze Resume',
-            tags: ['Career', 'AI']
+            summary: 'Analyze Resume'
           }
         }
       )
@@ -260,8 +257,7 @@ export const aiRouter = new Elysia({ prefix: '/ai' })
           detail: {
             description:
               'Create optimized resume version with applied suggestions',
-            summary: 'Create Optimized Resume',
-            tags: ['Career', 'AI']
+            summary: 'Create Optimized Resume'
           }
         }
       )
@@ -319,8 +315,7 @@ export const aiRouter = new Elysia({ prefix: '/ai' })
           response: coverLetterSchema,
           detail: {
             description: 'Generate cover letter using AI',
-            summary: 'Generate Cover Letter',
-            tags: ['Career', 'AI']
+            summary: 'Generate Cover Letter'
           }
         }
       )
@@ -362,8 +357,7 @@ export const aiRouter = new Elysia({ prefix: '/ai' })
           response: coverLetterSchema,
           detail: {
             description: 'Get cover letter by ID',
-            summary: 'Get Cover Letter',
-            tags: ['Career', 'AI']
+            summary: 'Get Cover Letter'
           }
         }
       )
@@ -400,8 +394,7 @@ export const aiRouter = new Elysia({ prefix: '/ai' })
           response: coverLetterSchema,
           detail: {
             description: 'Update cover letter content',
-            summary: 'Update Cover Letter',
-            tags: ['Career', 'AI']
+            summary: 'Update Cover Letter'
           }
         }
       )
@@ -433,8 +426,7 @@ export const aiRouter = new Elysia({ prefix: '/ai' })
           response: deleteResponseSchema,
           detail: {
             description: 'Delete cover letter',
-            summary: 'Delete Cover Letter',
-            tags: ['Career', 'AI']
+            summary: 'Delete Cover Letter'
           }
         }
       )

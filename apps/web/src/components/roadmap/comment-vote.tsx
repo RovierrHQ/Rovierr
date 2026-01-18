@@ -58,106 +58,103 @@ const CommentVote: FC<CommentVoteProps> = ({
     return comment?.upvotes ?? []
   }, [upvotesProp, commentId, queryClient])
 
-  const { mutateAsync, isPending } = useMutation(
-    (data: { commentId: string }) => api.roadmap.voteComment.post(data),
-    {
-      onMutate: async () => {
-        // Cancel any outgoing refetches
-        await queryClient.cancelQueries({
-          queryKey: ['roadmap', 'list']
-        })
+  const { mutateAsync, isPending } = useMutation(api.roadmap.voteComment.post, {
+    onMutate: async () => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ['roadmap', 'list']
+      })
 
-        // Snapshot the previous value
-        const previousData = queryClient.getQueryData(['roadmap', 'list'])
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData(['roadmap', 'list'])
 
-        // Optimistically update the cache
-        queryClient.setQueryData(['roadmap', 'list'], (old: unknown) => {
-          const oldData = old as
-            | {
-                data: Array<{
+      // Optimistically update the cache
+      queryClient.setQueryData(['roadmap', 'list'], (old: unknown) => {
+        const oldData = old as
+          | {
+              data: Array<{
+                id: string
+                comments?: Array<{
                   id: string
-                  comments?: Array<{
+                  upvotes: Array<{
                     id: string
-                    upvotes: Array<{
-                      id: string
-                      userId: string
-                      createdAt: string
-                      updatedAt: string
-                    }>
+                    userId: string
+                    createdAt: string
+                    updatedAt: string
                   }>
                 }>
-                meta?: unknown
-              }
-            | undefined
+              }>
+              meta?: unknown
+            }
+          | undefined
 
-          if (!(oldData && userId)) return old
+        if (!(oldData && userId)) return old
 
-          return {
-            ...oldData,
-            data: oldData.data.map((roadmap) => {
-              if (!roadmap.comments) return roadmap
+        return {
+          ...oldData,
+          data: oldData.data.map((roadmap) => {
+            if (!roadmap.comments) return roadmap
 
-              return {
-                ...roadmap,
-                comments: roadmap.comments.map((comment) => {
-                  if (comment.id !== commentId) return comment
+            return {
+              ...roadmap,
+              comments: roadmap.comments.map((comment) => {
+                if (comment.id !== commentId) return comment
 
-                  const hasVote = comment.upvotes.some(
-                    (vote) => vote.userId === userId
-                  )
+                const hasVote = comment.upvotes.some(
+                  (vote) => vote.userId === userId
+                )
 
-                  if (hasVote) {
-                    // Remove vote
-                    return {
-                      ...comment,
-                      upvotes: comment.upvotes.filter(
-                        (vote) => vote.userId !== userId
-                      )
-                    }
-                  }
-                  // Add vote
+                if (hasVote) {
+                  // Remove vote
                   return {
                     ...comment,
-                    upvotes: [
-                      ...comment.upvotes,
-                      {
-                        id: `temp-${Date.now()}`,
-                        userId,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                      }
-                    ]
+                    upvotes: comment.upvotes.filter(
+                      (vote) => vote.userId !== userId
+                    )
                   }
-                })
-              }
-            })
-          }
-        })
-
-        return { previousData }
-      },
-      onError: (error, _variables, context) => {
-        // Rollback on error
-        if (context?.previousData) {
-          queryClient.setQueryData(['roadmap', 'list'], context.previousData)
+                }
+                // Add vote
+                return {
+                  ...comment,
+                  upvotes: [
+                    ...comment.upvotes,
+                    {
+                      id: `temp-${Date.now()}`,
+                      userId,
+                      createdAt: new Date().toISOString(),
+                      updatedAt: new Date().toISOString()
+                    }
+                  ]
+                }
+              })
+            }
+          })
         }
+      })
 
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to vote on comment'
-        if (errorMessage.includes('cannot vote on your own')) {
-          toast.error('You cannot vote on your own comment')
-        } else {
-          toast.error(errorMessage)
-        }
-      },
-      onSettled: () => {
-        // Refetch to ensure consistency
-        queryClient.invalidateQueries({
-          queryKey: ['roadmap', 'list']
-        })
+      return { previousData }
+    },
+    onError: (error, _variables, context) => {
+      // Rollback on error
+      if (context?.previousData) {
+        queryClient.setQueryData(['roadmap', 'list'], context.previousData)
       }
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to vote on comment'
+      if (errorMessage.includes('cannot vote on your own')) {
+        toast.error('You cannot vote on your own comment')
+      } else {
+        toast.error(errorMessage)
+      }
+    },
+    onSettled: () => {
+      // Refetch to ensure consistency
+      queryClient.invalidateQueries({
+        queryKey: ['roadmap', 'list']
+      })
     }
-  )
+  })
 
   const handleVote = async () => {
     if (!userId) return redirect('/login')

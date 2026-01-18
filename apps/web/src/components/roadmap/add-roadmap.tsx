@@ -29,21 +29,13 @@ const AddRoadmap = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
   const { data: session } = authClient.useSession()
-  const { mutateAsync } = useMutation(
-    (data: {
-      category: 'feature-request' | 'bug-report' | 'improvement'
-      title: string
-      description: string
-      status: 'preview'
-    }) => api.roadmap.create.post(data),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['roadmap', 'list']
-        })
-      }
+  const { mutateAsync } = useMutation(api.roadmap.create.post, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['roadmap', 'list']
+      })
     }
-  )
+  })
   const form = useAppForm({
     validators: {
       onSubmit: roadmapSchema
