@@ -12,8 +12,8 @@ import { Checkbox } from '@rov/ui/components/checkbox'
 import { useAppForm } from '@rov/ui/components/form/index'
 import { Input } from '@rov/ui/components/input'
 import { useStore } from '@tanstack/react-form'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import {
   ArrowLeft,
   ArrowRight,
@@ -48,62 +48,70 @@ export default function AcademicOnboardingPage() {
 
   // Fetch verified institution enrollments
   const { data: verifiedInstitutions } = useQuery(
-    orpc.academic.enrollment.getVerifiedInstitutions.queryOptions({
-      input: {}
-    })
+    ['academic', 'enrollment', 'verified-institutions'],
+    () =>
+      api.academic.enrollment['verified-institutions'].get({
+        query: {}
+      })
   )
 
   // Fetch programs for selected institution
   const { data: programs } = useQuery(
-    orpc.academic.enrollment.getPrograms.queryOptions({
-      input: { institutionId: selectedInstitutionId || '' },
+    ['academic', 'enrollment', 'programs', selectedInstitutionId],
+    () =>
+      api.academic.enrollment.programs.get({
+        query: { institutionId: selectedInstitutionId || '' }
+      }),
+    {
       enabled: !!selectedInstitutionId
-    })
+    }
   )
 
   // Fetch terms for selected institution
-  const { data: terms } = useQuery({
-    ...orpc.academic.enrollment.getTerms.queryOptions({
-      input: { institutionId: selectedInstitutionId || '' }
-    }),
-    enabled: step === 3 && !!selectedInstitutionId
-  })
+  const { data: terms } = useQuery(
+    ['academic', 'enrollment', 'terms', selectedInstitutionId],
+    () =>
+      api.academic.enrollment.terms.get({
+        query: { institutionId: selectedInstitutionId || '' }
+      }),
+    {
+      enabled: step === 3 && !!selectedInstitutionId
+    }
+  )
 
   // Enrollment mutation
   const enrollProgramMutation = useMutation(
-    orpc.academic.enrollment.enrollProgram.mutationOptions({
+    api.academic.enrollment.program.post,
+    {
       onSuccess: () => {
         toast.success('Program enrolled successfully!')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to enroll in program')
+      onError: (error) => {
+        toast.error(error.value.message || 'Failed to enroll in program')
       }
-    })
+    }
   )
 
   const enrollCoursesMutation = useMutation(
-    orpc.academic.enrollment.enrollCourses.mutationOptions({
+    api.academic.enrollment.courses.post,
+    {
       onSuccess: async () => {
         // Invalidate enrollment queries to refresh sidebar and dashboard
         await Promise.all([
           queryClient.invalidateQueries({
-            queryKey: orpc.academic.enrollment.getEnrollmentStatus.queryOptions(
-              { input: {} }
-            ).queryKey
+            queryKey: ['academic', 'enrollment', 'status']
           }),
           queryClient.invalidateQueries({
-            queryKey: orpc.academic.enrollment.getEnrollment.queryOptions({
-              input: {}
-            }).queryKey
+            queryKey: ['academic', 'enrollment', 'details']
           })
         ])
         toast.success('Enrollment completed successfully!')
         router.push('/spaces/academics/dashboard')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to enroll in courses')
+      onError: (error) => {
+        toast.error(error.value.message || 'Failed to enroll in courses')
       }
-    })
+    }
   )
 
   const form = useAppForm({
@@ -154,14 +162,24 @@ export default function AcademicOnboardingPage() {
 
   // Fetch courses for selected term with search
   const { data: courses, isLoading: isLoadingCourses } = useQuery(
-    orpc.academic.enrollment.getCourses.queryOptions({
-      input: {
-        termId: form.state.values.termId || '',
-        search: debouncedSearch
-      },
+    [
+      'academic',
+      'enrollment',
+      'courses',
+      form.state.values.termId,
+      debouncedSearch
+    ],
+    () =>
+      api.academic.enrollment.courses.get({
+        query: {
+          termId: form.state.values.termId || '',
+          search: debouncedSearch
+        }
+      }),
+    {
       enabled:
         step === 4 && !!form.state.values.termId && debouncedSearch.length >= 4
-    })
+    }
   )
 
   const handleNext = () => {

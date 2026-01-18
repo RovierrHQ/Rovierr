@@ -37,9 +37,9 @@ import {
   verifiedInstitutionsResponseSchema
 } from './schemas'
 
-export const enrollmentRouter = new Elysia({ prefix: '/enrollment' })
+export const enrollmentRouter = new Elysia({ name: 'Enrollment' })
   .use(betterAuth)
-  .group('', { auth: true }, (app) =>
+  .group('/enrollment', { auth: true }, (app) =>
     app
       // GET /enrollment/verified-institutions - Get verified institution enrollments
       .get(
