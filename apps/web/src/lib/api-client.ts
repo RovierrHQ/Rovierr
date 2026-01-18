@@ -62,14 +62,16 @@ export function useQuery<
  */
 export function useMutation<
   TVariables = void,
-  T extends Record<number, unknown> = Record<number, unknown>
+  T extends Record<number, unknown> = Record<number, unknown>,
+  TContext = unknown
 >(
   treatyFn: (variables: TVariables) => Promise<Treaty.TreatyResponse<T>>,
   options?: Omit<
     UseMutationOptions<
       Treaty.Data<Treaty.TreatyResponse<T>>,
       Treaty.Error<Treaty.TreatyResponse<T>>,
-      TVariables
+      TVariables,
+      TContext
     >,
     'mutationFn'
   >
@@ -77,7 +79,8 @@ export function useMutation<
   return useTanstackMutation<
     Treaty.Data<Treaty.TreatyResponse<T>>,
     Treaty.Error<Treaty.TreatyResponse<T>>,
-    TVariables
+    TVariables,
+    TContext
   >({
     mutationFn: async (variables: TVariables) => {
       const response = await treatyFn(variables)

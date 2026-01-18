@@ -3,12 +3,13 @@ import { env } from '@api/lib/env'
 // import { academicRouter } from '@api/routers/academic'
 // import { calendarRouter } from '@api/routers/calendar'
 import { campusFeed } from '@api/routers/campus-feed'
-// import { careerRouter } from '@api/routers/career'
+import { careerRouter } from '@api/routers/career'
 // import { chat } from '@api/routers/chat'
 // import { connection } from '@api/routers/connection'
 // import { discussionRouter } from '@api/routers/discussion'
 // import { form } from '@api/routers/form'
 import { realtime } from '@api/routers/realtime'
+import { roadmap } from '@api/routers/roadmap'
 import { stripeRouter } from '@api/routers/stripe'
 // import { resumeRouter } from '@api/routers/resume'
 // import { society } from '@api/routers/society'
@@ -55,6 +56,7 @@ const app = new Elysia()
     uptime: process.uptime()
   }))
   .use(user)
+  .use(roadmap)
   // .use(tasks)
   .use(realtime)
   // .use(chat)
@@ -65,7 +67,7 @@ const app = new Elysia()
   // .use(form)
   // .use(academicRouter)
   // .use(calendarRouter)
-  // .use(careerRouter)
+  .use(careerRouter)
   // .use(resumeRouter)
   .use(universityRouter)
   .use(verifyStudentRouter)

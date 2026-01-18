@@ -10,9 +10,9 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import { Loader2 } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import type { FC } from 'react'
@@ -87,13 +87,14 @@ const RoadmapComments: FC<RoadmapCommentsProps> = ({
   })
 
   const { mutateAsync, isPending } = useMutation(
-    orpc.roadmap.createComment.mutationOptions({
+    api.roadmap.createComment.post,
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.roadmap.list.key()
+          queryKey: ['roadmap', 'list']
         })
       }
-    })
+    }
   )
 
   return (

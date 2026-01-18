@@ -1,9 +1,9 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import { ThumbsUp } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import type { FC } from 'react'
@@ -33,7 +33,7 @@ const RoadmapVote: FC<RoadmapVoteProps> = ({
     if (upvotesProp) return upvotesProp
 
     // Try to get from list query cache
-    const listData = queryClient.getQueryData(orpc.roadmap.list.key()) as
+    const listData = queryClient.getQueryData(['roadmap', 'list']) as
       | {
           data: Array<{
             id: string
@@ -52,16 +52,14 @@ const RoadmapVote: FC<RoadmapVoteProps> = ({
     return roadmap?.upvotes ?? []
   }, [upvotesProp, roadmapId, queryClient])
 
-  const { mutateAsync, isPending } = useMutation(
-    orpc.roadmap.vote.mutationOptions({
-      onSuccess: () => {
-        // Invalidate list query to refresh upvotes
-        queryClient.invalidateQueries({
-          queryKey: orpc.roadmap.list.key()
-        })
-      }
-    })
-  )
+  const { mutateAsync, isPending } = useMutation(api.roadmap.vote.post, {
+    onSuccess: () => {
+      // Invalidate list query to refresh upvotes
+      queryClient.invalidateQueries({
+        queryKey: ['roadmap', 'list']
+      })
+    }
+  })
 
   const handleVote = async () => {
     if (!userId) return redirect('/login')

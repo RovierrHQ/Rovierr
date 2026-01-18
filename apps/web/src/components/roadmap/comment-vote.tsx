@@ -1,9 +1,9 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import { ThumbsUp } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import type { FC } from 'react'
@@ -35,7 +35,7 @@ const CommentVote: FC<CommentVoteProps> = ({
     if (upvotesProp) return upvotesProp
 
     // Try to get from list query cache
-    const listData = queryClient.getQueryData(orpc.roadmap.list.key()) as
+    const listData = queryClient.getQueryData(['roadmap', 'list']) as
       | {
           data: Array<{
             comments: Array<{
@@ -58,108 +58,103 @@ const CommentVote: FC<CommentVoteProps> = ({
     return comment?.upvotes ?? []
   }, [upvotesProp, commentId, queryClient])
 
-  const { mutateAsync, isPending } = useMutation(
-    orpc.roadmap.voteComment.mutationOptions({
-      onMutate: async () => {
-        // Cancel any outgoing refetches
-        await queryClient.cancelQueries({
-          queryKey: orpc.roadmap.list.key()
-        })
+  const { mutateAsync, isPending } = useMutation(api.roadmap.voteComment.post, {
+    onMutate: async () => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ['roadmap', 'list']
+      })
 
-        // Snapshot the previous value
-        const previousData = queryClient.getQueryData(orpc.roadmap.list.key())
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData(['roadmap', 'list'])
 
-        // Optimistically update the cache
-        queryClient.setQueryData(orpc.roadmap.list.key(), (old: unknown) => {
-          const oldData = old as
-            | {
-                data: Array<{
+      // Optimistically update the cache
+      queryClient.setQueryData(['roadmap', 'list'], (old: unknown) => {
+        const oldData = old as
+          | {
+              data: Array<{
+                id: string
+                comments?: Array<{
                   id: string
-                  comments?: Array<{
+                  upvotes: Array<{
                     id: string
-                    upvotes: Array<{
-                      id: string
-                      userId: string
-                      createdAt: string
-                      updatedAt: string
-                    }>
+                    userId: string
+                    createdAt: string
+                    updatedAt: string
                   }>
                 }>
-                meta?: unknown
-              }
-            | undefined
+              }>
+              meta?: unknown
+            }
+          | undefined
 
-          if (!(oldData && userId)) return old
+        if (!(oldData && userId)) return old
 
-          return {
-            ...oldData,
-            data: oldData.data.map((roadmap) => {
-              if (!roadmap.comments) return roadmap
+        return {
+          ...oldData,
+          data: oldData.data.map((roadmap) => {
+            if (!roadmap.comments) return roadmap
 
-              return {
-                ...roadmap,
-                comments: roadmap.comments.map((comment) => {
-                  if (comment.id !== commentId) return comment
+            return {
+              ...roadmap,
+              comments: roadmap.comments.map((comment) => {
+                if (comment.id !== commentId) return comment
 
-                  const hasVote = comment.upvotes.some(
-                    (vote) => vote.userId === userId
-                  )
+                const hasVote = comment.upvotes.some(
+                  (vote) => vote.userId === userId
+                )
 
-                  if (hasVote) {
-                    // Remove vote
-                    return {
-                      ...comment,
-                      upvotes: comment.upvotes.filter(
-                        (vote) => vote.userId !== userId
-                      )
-                    }
-                  }
-                  // Add vote
+                if (hasVote) {
+                  // Remove vote
                   return {
                     ...comment,
-                    upvotes: [
-                      ...comment.upvotes,
-                      {
-                        id: `temp-${Date.now()}`,
-                        userId,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                      }
-                    ]
+                    upvotes: comment.upvotes.filter(
+                      (vote) => vote.userId !== userId
+                    )
                   }
-                })
-              }
-            })
-          }
-        })
-
-        return { previousData }
-      },
-      onError: (error, _variables, context) => {
-        // Rollback on error
-        if (context?.previousData) {
-          queryClient.setQueryData(
-            orpc.roadmap.list.key(),
-            context.previousData
-          )
+                }
+                // Add vote
+                return {
+                  ...comment,
+                  upvotes: [
+                    ...comment.upvotes,
+                    {
+                      id: `temp-${Date.now()}`,
+                      userId,
+                      createdAt: new Date().toISOString(),
+                      updatedAt: new Date().toISOString()
+                    }
+                  ]
+                }
+              })
+            }
+          })
         }
+      })
 
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to vote on comment'
-        if (errorMessage.includes('cannot vote on your own')) {
-          toast.error('You cannot vote on your own comment')
-        } else {
-          toast.error(errorMessage)
-        }
-      },
-      onSettled: () => {
-        // Refetch to ensure consistency
-        queryClient.invalidateQueries({
-          queryKey: orpc.roadmap.list.key()
-        })
+      return { previousData }
+    },
+    onError: (error, _variables, context) => {
+      // Rollback on error
+      if (context?.previousData) {
+        queryClient.setQueryData(['roadmap', 'list'], context.previousData)
       }
-    })
-  )
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to vote on comment'
+      if (errorMessage.includes('cannot vote on your own')) {
+        toast.error('You cannot vote on your own comment')
+      } else {
+        toast.error(errorMessage)
+      }
+    },
+    onSettled: () => {
+      // Refetch to ensure consistency
+      queryClient.invalidateQueries({
+        queryKey: ['roadmap', 'list']
+      })
+    }
+  })
 
   const handleVote = async () => {
     if (!userId) return redirect('/login')
