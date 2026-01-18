@@ -1,201 +1,272 @@
+/**
+ * Career Applications Router
+ *
+ * Handles job application management endpoints
+ */
+
 import { db } from '@api/db'
-import { protectedProcedure } from '@api/lib/orpc'
+import { FORBIDDEN, NOT_FOUND } from '@api/lib/common-errors'
+import { betterAuth } from '@api/middleware/auth'
 import { AIService } from '@api/services/career/ai.service'
 import { ApplicationService } from '@api/services/career/application.service'
 import { URLParserService } from '@api/services/career/url-parser.service'
-import { ORPCError } from '@orpc/server'
+import { Elysia } from 'elysia'
+import { z } from 'zod'
+import {
+  AIParsingFailedError,
+  InvalidUrlError,
+  UrlFetchFailedError,
+  ValidationError
+} from './errors'
+import {
+  applicationSchema,
+  applicationsListSchema,
+  createApplicationSchema,
+  deleteResponseSchema,
+  listApplicationsSchema,
+  parsedJobDataSchema,
+  statisticsSchema,
+  updateApplicationSchema,
+  updateStatusSchema
+} from './schemas'
 
 const applicationService = new ApplicationService(db)
 const urlParserService = new URLParserService()
 const aiService = new AIService()
 
-export const applications = {
-  // ============================================================================
-  // Create Application
-  // ============================================================================
-
-  create: protectedProcedure.career.applications.create.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await applicationService.createApplication(input, userId)
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new ORPCError('VALIDATION_ERROR', {
-            message: error.message
-          })
-        }
-        throw error
-      }
-    }
-  ),
-
-  // ============================================================================
-  // Parse URL
-  // ============================================================================
-
-  parseUrl: protectedProcedure.career.applications.parseUrl.handler(
-    async ({ input }) => {
-      try {
-        // Fetch and extract text from URL
-        const textContent = await urlParserService.fetchAndExtractText(
-          input.url
-        )
-
-        // Parse job information using AI
-        const parsedData = await aiService.parseJobPosting(textContent)
-
-        return parsedData
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message.includes('Invalid URL')) {
-            throw new ORPCError('INVALID_URL', {
-              message: 'Invalid or inaccessible URL'
-            })
+export const applicationsRouter = new Elysia({ prefix: '/applications' })
+  .use(betterAuth)
+  .group('', { auth: true }, (app) =>
+    app
+      // POST /applications - Create application
+      .post(
+        '/',
+        async ({ body, user }) => {
+          try {
+            const userId = user.id
+            return await applicationService.createApplication(body, userId)
+          } catch (error) {
+            if (error instanceof Error) {
+              throw new ValidationError(error.message)
+            }
+            throw error
           }
-          if (error.message.includes('Failed to fetch')) {
-            throw new ORPCError('URL_FETCH_FAILED', {
-              message: error.message
-            })
-          }
-          if (error.message.includes('AI parsing failed')) {
-            throw new ORPCError('AI_PARSING_FAILED', {
-              message: 'Failed to parse job information from URL'
-            })
+        },
+        {
+          body: createApplicationSchema,
+          response: applicationSchema,
+          detail: {
+            description: 'Create a new job application',
+            summary: 'Create Application',
+            tags: ['Career']
           }
         }
-        throw error
-      }
-    }
-  ),
+      )
 
-  // ============================================================================
-  // List Applications
-  // ============================================================================
+      // POST /applications/parse-url - Parse job URL
+      .post(
+        '/parse-url',
+        async ({ body }) => {
+          try {
+            // Fetch and extract text from URL
+            const textContent = await urlParserService.fetchAndExtractText(
+              body.url
+            )
 
-  list: protectedProcedure.career.applications.list.handler(
-    async ({ input, context }) => {
-      const userId = context.session.user.id
-      return await applicationService.listApplications(input, userId)
-    }
-  ),
+            // Parse job information using AI
+            const parsedData = await aiService.parseJobPosting(textContent)
 
-  // ============================================================================
-  // Get Application
-  // ============================================================================
-
-  get: protectedProcedure.career.applications.get.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await applicationService.getApplication(input.id, userId)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Application not found') {
-            throw new ORPCError('NOT_FOUND', {
-              message: 'Application not found'
-            })
+            return parsedData
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message.includes('Invalid URL')) {
+                throw new InvalidUrlError()
+              }
+              if (error.message.includes('Failed to fetch')) {
+                throw new UrlFetchFailedError(error.message)
+              }
+              if (error.message.includes('AI parsing failed')) {
+                throw new AIParsingFailedError()
+              }
+            }
+            throw error
           }
-          if (error.message.includes('permission')) {
-            throw new ORPCError('FORBIDDEN', {
-              message: 'You do not have permission to view this application'
-            })
-          }
-        }
-        throw error
-      }
-    }
-  ),
-
-  // ============================================================================
-  // Update Application
-  // ============================================================================
-
-  update: protectedProcedure.career.applications.update.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await applicationService.updateApplication(input, userId)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Application not found') {
-            throw new ORPCError('NOT_FOUND', {
-              message: 'Application not found'
-            })
-          }
-          if (error.message.includes('permission')) {
-            throw new ORPCError('FORBIDDEN', {
-              message: 'You do not have permission to edit this application'
-            })
+        },
+        {
+          body: z.object({ url: z.string().url('Invalid URL') }),
+          response: parsedJobDataSchema,
+          detail: {
+            description: 'Parse job post URL and extract information using AI',
+            summary: 'Parse Job URL',
+            tags: ['Career']
           }
         }
-        throw error
-      }
-    }
-  ),
+      )
 
-  // ============================================================================
-  // Delete Application
-  // ============================================================================
-
-  delete: protectedProcedure.career.applications.delete.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await applicationService.deleteApplication(input.id, userId)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Application not found') {
-            throw new ORPCError('NOT_FOUND', {
-              message: 'Application not found'
-            })
-          }
-          if (error.message.includes('permission')) {
-            throw new ORPCError('FORBIDDEN', {
-              message: 'You do not have permission to delete this application'
-            })
+      // GET /applications - List applications
+      .get(
+        '/',
+        async ({ query, user }) => {
+          const userId = user.id
+          return await applicationService.listApplications(query, userId)
+        },
+        {
+          query: listApplicationsSchema,
+          response: applicationsListSchema,
+          detail: {
+            description: 'List job applications with filters',
+            summary: 'List Applications',
+            tags: ['Career']
           }
         }
-        throw error
-      }
-    }
-  ),
+      )
 
-  // ============================================================================
-  // Update Status
-  // ============================================================================
-
-  updateStatus: protectedProcedure.career.applications.updateStatus.handler(
-    async ({ input, context }) => {
-      try {
-        const userId = context.session.user.id
-        return await applicationService.updateStatus(input, userId)
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message === 'Application not found') {
-            throw new ORPCError('NOT_FOUND', {
-              message: 'Application not found'
-            })
+      // GET /applications/:id - Get application
+      .get(
+        '/:id',
+        async ({ params, user }) => {
+          try {
+            const userId = user.id
+            return await applicationService.getApplication(params.id, userId)
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Application not found') {
+                throw new NOT_FOUND('Application not found')
+              }
+              if (error.message.includes('permission')) {
+                throw new FORBIDDEN(
+                  'You do not have permission to view this application'
+                )
+              }
+            }
+            throw error
           }
-          if (error.message.includes('permission')) {
-            throw new ORPCError('FORBIDDEN', {
-              message: 'You do not have permission to edit this application'
-            })
+        },
+        {
+          response: applicationSchema,
+          detail: {
+            description: 'Get a single job application by ID',
+            summary: 'Get Application',
+            tags: ['Career']
           }
         }
-        throw error
-      }
-    }
-  ),
+      )
 
-  // ============================================================================
-  // Get Statistics
-  // ============================================================================
+      // PATCH /applications/:id - Update application
+      .patch(
+        '/:id',
+        async ({ params, body, user }) => {
+          try {
+            const userId = user.id
+            return await applicationService.updateApplication(
+              { ...body, id: params.id },
+              userId
+            )
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Application not found') {
+                throw new NOT_FOUND('Application not found')
+              }
+              if (error.message.includes('permission')) {
+                throw new FORBIDDEN(
+                  'You do not have permission to edit this application'
+                )
+              }
+            }
+            throw error
+          }
+        },
+        {
+          body: updateApplicationSchema.omit({ id: true }),
+          response: applicationSchema,
+          detail: {
+            description: 'Update a job application',
+            summary: 'Update Application',
+            tags: ['Career']
+          }
+        }
+      )
 
-  statistics: protectedProcedure.career.applications.statistics.handler(
-    async ({ context }) => {
-      const userId = context.session.user.id
-      return await applicationService.getStatistics(userId)
-    }
+      // DELETE /applications/:id - Delete application
+      .delete(
+        '/:id',
+        async ({ params, user }) => {
+          try {
+            const userId = user.id
+            return await applicationService.deleteApplication(params.id, userId)
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Application not found') {
+                throw new NOT_FOUND('Application not found')
+              }
+              if (error.message.includes('permission')) {
+                throw new FORBIDDEN(
+                  'You do not have permission to delete this application'
+                )
+              }
+            }
+            throw error
+          }
+        },
+        {
+          response: deleteResponseSchema,
+          detail: {
+            description: 'Delete a job application',
+            summary: 'Delete Application',
+            tags: ['Career']
+          }
+        }
+      )
+
+      // PATCH /applications/:id/status - Update status
+      .patch(
+        '/:id/status',
+        async ({ params, body, user }) => {
+          try {
+            const userId = user.id
+            return await applicationService.updateStatus(
+              { id: params.id, status: body.status },
+              userId
+            )
+          } catch (error) {
+            if (error instanceof Error) {
+              if (error.message === 'Application not found') {
+                throw new NOT_FOUND('Application not found')
+              }
+              if (error.message.includes('permission')) {
+                throw new FORBIDDEN(
+                  'You do not have permission to edit this application'
+                )
+              }
+            }
+            throw error
+          }
+        },
+        {
+          body: updateStatusSchema.omit({ id: true }),
+          response: applicationSchema,
+          detail: {
+            description: 'Update application status',
+            summary: 'Update Status',
+            tags: ['Career']
+          }
+        }
+      )
+
+      // GET /applications/statistics - Get statistics
+      .get(
+        '/statistics',
+        async ({ user }) => {
+          const userId = user.id
+          return await applicationService.getStatistics(userId)
+        },
+        {
+          response: statisticsSchema,
+          detail: {
+            description: 'Get application statistics for the current user',
+            summary: 'Get Statistics',
+            tags: ['Career']
+          }
+        }
+      )
   )
-}
