@@ -6,9 +6,9 @@ import { useAppForm } from '@rov/ui/components/form/index'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import { Separator } from '@rov/ui/components/separator'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import { Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -16,8 +16,9 @@ import type { z } from 'zod'
 
 export function ProfileSettings() {
   const queryClient = useQueryClient()
-  const { data: profileDetails } = useQuery(
-    orpc.user.profile.details.queryOptions()
+  const { data: profileDetails } = useTreatyQuery(
+    ['user', 'profile', 'details'],
+    () => api.user.profile.details.get()
   )
 
   const [phoneVerification, setPhoneVerification] = useState({
@@ -36,7 +37,7 @@ export function ProfileSettings() {
     } as z.infer<typeof profileUpdateSchema>,
     onSubmit: async ({ value }) => {
       try {
-        await orpc.user.profile.update.call(value)
+        await api.user.profile.update.put(value)
         queryClient.invalidateQueries({ queryKey: ['user', 'profile'] })
         toast.success('Profile updated successfully')
       } catch (error) {

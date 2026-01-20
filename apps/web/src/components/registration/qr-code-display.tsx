@@ -9,8 +9,11 @@ import {
   SelectTrigger,
   SelectValue
 } from '@rov/ui/components/select'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api from '@web/lib/api-client'
+import {
+  useMutation as useTreatyMutation,
+  useQuery as useTreatyQuery
+} from '@web/lib/api-client'
 import { Download, Loader2, Printer, QrCode } from 'lucide-react'
 import { useRef, useState } from 'react'
 import QRCodeReact from 'react-qr-code'
@@ -31,18 +34,26 @@ export const QRCodeDisplay = ({
   const qrCodeRef = useRef<HTMLDivElement>(null)
 
   // Fetch QR code data
-  const { data: qrData } = useQuery(
-    orpc.societyRegistration.qrCode.generate.queryOptions({
-      input: { societyId, format: 'png', size }
-    })
+  const { data: qrData } = useTreatyQuery(
+    ['society-qr-code', societyId, size],
+    () =>
+      api.society.registration['qr-code'].post({
+        societyId,
+        format: 'png',
+        size
+      })
   )
 
   const registrationUrl = qrData?.registrationUrl || null
 
   // Generate printable QR code mutation
-  const generatePrintableMutation = useMutation(
-    orpc.societyRegistration.qrCode.generatePrintable.mutationOptions({
+  const generatePrintableMutation = useTreatyMutation(
+    (variables: { societyId: string }) =>
+      api.society.registration['qr-code'].printable.post(variables),
+    {
       onSuccess: (data) => {
+        if (!data) return
+
         // Open printable HTML in new window
         const printWindow = window.open('', '_blank')
         if (printWindow) {
@@ -59,7 +70,7 @@ export const QRCodeDisplay = ({
       onError: () => {
         toast.error('Failed to generate printable QR code')
       }
-    })
+    }
   )
 
   const handleDownload = () => {
