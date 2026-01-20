@@ -2,8 +2,7 @@
 
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import {
   AlertCircle,
   Award,
@@ -20,10 +19,9 @@ import {
 
 export default function CareerPage() {
   // Fetch statistics
-  const { data: statistics } = useQuery(
-    orpc.career.applications.statistics.queryOptions({
-      input: {}
-    })
+  const { data: statistics } = useTreatyQuery(
+    ['career', 'applications', 'statistics'],
+    () => api.career.applications.statistics.get()
   )
 
   return (

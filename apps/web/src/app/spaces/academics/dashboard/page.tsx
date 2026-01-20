@@ -8,9 +8,8 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
-import { useQuery } from '@tanstack/react-query'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { AddCoursesDialog } from '@web/components/academic/add-courses-dialog'
-import { orpc } from '@web/utils/orpc'
 import { BookOpen, Calendar, MessageSquare, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -18,10 +17,9 @@ import { useState } from 'react'
 export default function AcademicDashboardPage() {
   const [addCoursesOpen, setAddCoursesOpen] = useState(false)
   // Fetch enrollment data
-  const { data: enrollment, isLoading } = useQuery(
-    orpc.academic.enrollment.getEnrollment.queryOptions({
-      input: {}
-    })
+  const { data: enrollment, isLoading } = useTreatyQuery(
+    ['academic', 'enrollment', 'details'],
+    () => api.academic.enrollment.details.get()
   )
 
   if (isLoading) {
