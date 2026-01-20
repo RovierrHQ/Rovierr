@@ -4,8 +4,10 @@ import type { societySchema } from '@rov/orpc-contracts'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { Progress } from '@rov/ui/components/progress'
+import api, {
+  useQuery as useTreatyQuery
+} from '@web/lib/api-client'
 import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
 import { ArrowLeft, ArrowRight, Check, Loader2, Save } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -24,8 +26,9 @@ const OnboardingWizard = () => {
   const [isSaving, setIsSaving] = useState(false)
 
   // Fetch society data
-  const { data: society, isLoading } = useQuery(
-    orpc.society.getById.queryOptions({ input: { id: societyId } })
+  const { data: society, isLoading } = useTreatyQuery(
+    ['society', societyId],
+    () => api.society({ id: societyId }).get()
   )
 
   const totalSteps = 3
@@ -61,7 +64,7 @@ const OnboardingWizard = () => {
   const handleComplete = async () => {
     try {
       setIsSaving(true)
-      await orpc.society.completeOnboarding.call({ organizationId: societyId })
+      await api.society({ id: societyId })['complete-onboarding'].post()
       toast.success('Onboarding completed!')
       router.push(`/spaces/societies/mine/${societyId}`)
     } catch (_error) {
@@ -240,9 +243,8 @@ const Step2ContactInfo = ({ society }: { society: Society }) => {
 
   const handleSave = async () => {
     try {
-      await orpc.society.updateFields.call({
-        organizationId: society.id,
-        data: formData
+      await api.society({ id: society.id }).fields.patch({
+        body: formData
       })
       toast.success('Contact information saved!')
     } catch (_error) {
@@ -469,9 +471,8 @@ const _Step3AdditionalDetailsUpdated = ({ society }: { society: Society }) => {
 
   const handleSave = async () => {
     try {
-      await orpc.society.updateFields.call({
-        organizationId: society.id,
-        data: formData
+      await api.society({ id: society.id }).fields.patch({
+        body: formData
       })
       toast.success('Additional details saved!')
     } catch (_error) {

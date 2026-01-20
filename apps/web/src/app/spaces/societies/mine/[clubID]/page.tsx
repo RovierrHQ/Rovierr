@@ -13,10 +13,10 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { useQuery } from '@tanstack/react-query'
 import { SocietyImageUploadDialog } from '@web/components/societies/society-image-upload-dialog'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import {
   AlertCircle,
   Calendar,
@@ -47,9 +47,10 @@ const ClubProfilePage = () => {
     return organizations.find((org) => org.id === clubID)
   }, [organizations, clubID])
 
-  // Fetch full society data with ORPC
-  const { data: society, isLoading: societyLoading } = useQuery(
-    orpc.society.getById.queryOptions({ input: { id: clubID } })
+  // Fetch full society data with API
+  const { data: society, isLoading: societyLoading } = useTreatyQuery(
+    ['society', clubID],
+    () => api.society({ id: clubID }).get()
   )
 
   // Check if user has permission to manage settings using hasPermission
@@ -313,10 +314,16 @@ const ClubProfilePage = () => {
             {/* Profile Completion Card - Only show for admins */}
             {canManageSettings &&
               society &&
-              society.profileCompletionPercentage < 100 && (
+              (society.profileCompletionPercentage ?? 0) < 100 && (
                 <ProfileCompletionCard
-                  completion={society.profileCompletionPercentage}
-                  society={society}
+                  completion={society.profileCompletionPercentage ?? 0}
+                  society={{
+                    ...society,
+                    profileCompletionPercentage: society.profileCompletionPercentage ?? 0,
+                    onboardingCompleted: society.onboardingCompleted ?? false,
+                    createdAt: new Date(society.createdAt),
+                    updatedAt: new Date(society.updatedAt),
+                  }}
                   societyId={clubID}
                 />
               )}
