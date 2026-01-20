@@ -5,8 +5,7 @@ import { Card } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation as useTreatyMutation } from '@web/lib/api-client'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -43,16 +42,15 @@ export const RegistrationForm = ({
   })
 
   // Submit form response mutation
-  const submitFormMutation = useMutation(
-    orpc.form.response.submit.mutationOptions({
-      onSuccess: (response) => {
-        onSubmit(response.id)
-      },
-      onError: () => {
-        toast.error('Failed to submit form')
-      }
-    })
-  )
+  const submitFormMutation = useTreatyMutation(api.form.response.submit.post, {
+    onSuccess: (data) => {
+      if (!data) return
+      onSubmit(data.id)
+    },
+    onError: () => {
+      toast.error('Failed to submit form')
+    }
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
