@@ -23,6 +23,8 @@ import {
   UploadFailedError
 } from './errors'
 import { societySchema, updateSocietyFieldsSchema } from './schemas'
+import { societyEmailRouter } from './society-email'
+import { societyRegistrationRouter } from './society-registration'
 
 const societyService = new SocietyService(db)
 
@@ -425,3 +427,5 @@ export const society = new Elysia({ prefix: '/society' })
         }
       )
   )
+  .use(societyEmailRouter)
+  .use(societyRegistrationRouter)
