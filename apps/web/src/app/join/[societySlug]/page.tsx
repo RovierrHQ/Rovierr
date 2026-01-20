@@ -2,8 +2,7 @@
 
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery } from '@web/lib/api-client'
 import {
   AlertCircle,
   Calendar,
@@ -26,9 +25,8 @@ const PublicJoinPage = () => {
 
   // Fetch public registration page data
   const { data, isLoading, error } = useQuery(
-    orpc.societyRegistration.public.getPageData.queryOptions({
-      input: { societySlug }
-    })
+    ['society', 'registration', 'public', societySlug],
+    () => api.society.registration.public['page-data'].get({ query: { societySlug } })
   )
 
   if (isLoading) {

@@ -4,9 +4,12 @@ import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import api, {
+  useMutation,
+  useQuery
+} from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import {
   AlertCircle,
   ArrowLeft,
@@ -32,25 +35,32 @@ const PaymentPage = () => {
 
   // Fetch public registration page data
   const { data, isLoading } = useQuery(
-    orpc.societyRegistration.public.getPageData.queryOptions({
-      input: { societySlug }
-    })
+    ['society', 'registration', 'public', societySlug],
+    () => api.society.registration.public['page-data'].get({ query: { societySlug } })
   )
 
   // Check user's join request status
-  const { data: userStatus } = useQuery({
-    ...orpc.societyRegistration.joinRequest.getUserStatus.queryOptions({
-      input: {
-        societyId: data?.society.id || '',
-        userId: session?.user.id || ''
-      }
-    }),
-    enabled: !!data?.society.id && !!session?.user.id
-  })
+  const { data: userStatus } = useQuery(
+    ['society', 'join-request', 'status', data?.society.id, session?.user.id],
+    () =>
+      api.society.registration['join-request']['user-status'].get({
+        query: {
+          societyId: data?.society.id || '',
+          userId: session?.user.id || ''
+        }
+      }),
+    {
+      enabled: !!data?.society.id && !!session?.user.id
+    }
+  )
 
   // Upload payment proof mutation
   const uploadProofMutation = useMutation(
-    orpc.societyRegistration.payment.uploadProof.mutationOptions({
+    (variables: { id: string; proofUrl: string }) =>
+      api.society.registration.payment({ id: variables.id }).proof.post({
+        proofUrl: variables.proofUrl
+      }),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['join-request-status', data?.society.id]
@@ -61,7 +71,7 @@ const PaymentPage = () => {
       onError: () => {
         toast.error('Failed to upload payment proof')
       }
-    })
+    }
   )
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
