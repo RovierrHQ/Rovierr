@@ -5,9 +5,11 @@ import { Button } from '@rov/ui/components/button'
 import { Separator } from '@rov/ui/components/separator'
 import { Textarea } from '@rov/ui/components/textarea'
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import api, {
+  useMutation as useTreatyMutation,
+  useQuery as useTreatyQuery
+} from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import { Heart, Loader2, Send, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -19,46 +21,49 @@ type PostCommentPanelProps = {
 
 export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
   const [commentText, setCommentText] = useState('')
-  const queryClient = useQueryClient()
   const { data: session } = authClient.useSession()
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['campus-feed', 'comments', postId],
-    queryFn: async () =>
-      await orpc.campusFeed.getComments.call({
-        postId,
-        limit: 50,
-        offset: 0
+  const { data, isLoading } = useTreatyQuery(
+    ['campus-feed', 'comments', postId],
+    () =>
+      api['campus-feed'].interactions.posts({ postId }).comments.get({
+        query: {
+          limit: 50,
+          offset: 0
+        }
       })
-  })
+  )
 
-  const commentMutation = useMutation(
-    orpc.campusFeed.comment.mutationOptions({
+  const commentMutation = useTreatyMutation(
+    api['campus-feed'].interactions.comments.post,
+    {
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['campus-feed', 'comments', postId]
-        })
-        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
+        // queryClient.invalidateQueries({
+        //   queryKey: ['campus-feed', 'comments', postId]
+        // })
+        // queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
         toast.success('Comment posted successfully')
         setCommentText('')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to post comment')
+      onError: (error) => {
+        toast.error(error.value.message || 'Failed to post comment')
       }
-    })
+    }
   )
 
-  const likeCommentMutation = useMutation(
-    orpc.campusFeed.likeComment.mutationOptions({
+  const likeCommentMutation = useTreatyMutation(
+    ({ commentId }: { commentId: string }) =>
+      api['campus-feed'].interactions.comments({ commentId }).like.post(),
+    {
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['campus-feed', 'comments', postId]
-        })
+        // queryClient.invalidateQueries({
+        //   queryKey: ['campus-feed', 'comments', postId]
+        // })
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to like comment')
+      onError: (error) => {
+        toast.error(error.value.message || 'Failed to like comment')
       }
-    })
+    }
   )
 
   const handleSubmit = () => {
