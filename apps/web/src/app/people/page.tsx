@@ -8,11 +8,10 @@ import { Input } from '@rov/ui/components/input'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import {
   useInfiniteQuery,
-  useMutation,
-  useQuery,
+  useMutation as useTanstackMutation,
   useQueryClient
 } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { UserPlus, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -25,14 +24,19 @@ export default function PeoplePage() {
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ['people', 'list', searchQuery],
-      queryFn: async ({ pageParam = 0 }) =>
-        await orpc.people.list.call({
-          search: searchQuery || undefined,
-          limit: 50,
-          offset: pageParam
-        }),
+      queryFn: async ({ pageParam = 0 }) => {
+        const { data, error } = await api.people.list.get({
+          query: {
+            search: searchQuery || undefined,
+            limit: 50,
+            offset: pageParam
+          }
+        })
+        if (error) throw error
+        return data
+      },
       getNextPageParam: (lastPage, pages) => {
-        if (lastPage.hasMore) {
+        if (lastPage && lastPage.users.length >= 50) {
           return pages.length * 50
         }
         return
@@ -41,22 +45,27 @@ export default function PeoplePage() {
     })
 
   const { data: pendingRequests } = useQuery(
-    orpc.connection.listPending.queryOptions({
-      input: {
-        type: 'received',
-        limit: 1,
-        offset: 0
-      }
-    })
+    ['connection', 'pending', 'received'],
+    () =>
+      api.connection.pending.get({
+        query: {
+          type: 'received',
+          limit: 1,
+          offset: 0
+        }
+      })
   )
 
   const sendConnectionMutation = useMutation(
-    orpc.connection.send.mutationOptions({
+    (variables: { connectedUserId: string }) =>
+      api.connection.send.post({ connectedUserId: variables.connectedUserId }),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['people', 'list'] })
         toast.success('Connection request sent')
       },
-      onError: (error: Error) => {
+      onError: (error) =>{ 
+
         if (error.message.includes('SELF_CONNECTION')) {
           toast.error('Cannot connect with yourself')
         } else if (error.message.includes('ALREADY_CONNECTED')) {
@@ -67,10 +76,10 @@ export default function PeoplePage() {
           toast.error('Failed to send connection request')
         }
       }
-    })
+    }
   )
 
-  const users = data?.pages.flatMap((page) => page.users) ?? []
+  const users = data?.pages.flatMap((page) => page?.users ?? []) ?? []
 
   const handleConnect = (userId: string) => {
     sendConnectionMutation.mutate({ connectedUserId: userId })
