@@ -2,8 +2,8 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ImageUploadDialog as SharedImageUploadDialog } from '@web/components/shared/image-upload-dialog'
+import api from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import { toast } from 'sonner'
 
 type SocietyImageUploadDialogProps = {
@@ -26,31 +26,23 @@ export function SocietyImageUploadDialog({
   const updateMutation = useMutation({
     mutationFn: async (croppedImage: string) => {
       if (type === 'banner') {
-        // Update banner using ORPC
-        await orpc.society.updateFields.call({
-          organizationId,
-          data: {
-            banner: croppedImage
-          }
+        // Update banner using Elysia
+        await api.society({ id: organizationId }).fields.patch({
+          banner: croppedImage
         })
       } else {
-        // Update logo using ORPC updateFields
-        await orpc.society.updateFields.call({
-          organizationId,
-          data: {
-            logo: croppedImage
-          }
+        // Update logo using Elysia
+        await api.society({ id: organizationId }).fields.patch({
+          logo: croppedImage
         })
       }
     },
     onSuccess: async () => {
-      // Invalidate and refetch society queries using ORPC query options
-      const queryOptions = orpc.society.getById.queryOptions({
-        input: { id: organizationId }
-      })
+      // Invalidate and refetch society queries
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryOptions.queryKey }),
-        queryClient.refetchQueries({ queryKey: queryOptions.queryKey }),
+        queryClient.invalidateQueries({
+          queryKey: ['society', organizationId]
+        }),
         queryClient.invalidateQueries({ queryKey: ['society'] }),
         // Invalidate Better-Auth organizations list (logo is stored there)
         authClient.getSession({ query: { disableCookieCache: true } })
@@ -68,30 +60,22 @@ export function SocietyImageUploadDialog({
   const removeMutation = useMutation({
     mutationFn: async () => {
       if (type === 'banner') {
-        await orpc.society.updateFields.call({
-          organizationId,
-          data: {
-            banner: ''
-          }
+        await api.society({ id: organizationId }).fields.patch({
+          banner: ''
         })
       } else {
         // Remove logo
-        await orpc.society.updateFields.call({
-          organizationId,
-          data: {
-            logo: ''
-          }
+        await api.society({ id: organizationId }).fields.patch({
+          logo: ''
         })
       }
     },
     onSuccess: async () => {
-      // Invalidate and refetch society queries using ORPC query options
-      const queryOptions = orpc.society.getById.queryOptions({
-        input: { id: organizationId }
-      })
+      // Invalidate and refetch society queries
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryOptions.queryKey }),
-        queryClient.refetchQueries({ queryKey: queryOptions.queryKey }),
+        queryClient.invalidateQueries({
+          queryKey: ['society', organizationId]
+        }),
         queryClient.invalidateQueries({ queryKey: ['society'] }),
         // Invalidate Better-Auth organizations list (logo is stored there)
         authClient.getSession({ query: { disableCookieCache: true } })
