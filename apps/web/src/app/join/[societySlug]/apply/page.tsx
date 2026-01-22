@@ -3,11 +3,8 @@
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { useQueryClient } from '@tanstack/react-query'
-import api, {
-  useMutation,
-  useQuery
-} from '@web/lib/api-client'
 import { RegistrationForm } from '@web/components/registration/registration-form'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { AlertCircle, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
@@ -29,7 +26,10 @@ const ApplyPage = () => {
   // Fetch public registration page data
   const { data, isLoading, error } = useQuery(
     ['society', 'registration', 'public', societySlug],
-    () => api.society.registration.public['page-data'].get({ query: { societySlug } })
+    () =>
+      api.society.registration.public['page-data'].get({
+        query: { societySlug }
+      })
   )
 
   // Check if user already has a join request
@@ -67,12 +67,9 @@ const ApplyPage = () => {
         })
         toast.success('Application submitted successfully!')
       },
-      onError: (err) => {
-        const errorMsg = (err).message || ''
-        if (errorMsg.includes('pending join request')) {
-          toast.error('You already have a pending application')
-        } else if (errorMsg.includes('already a member')) {
-          toast.error('You are already a member of this society')
+      onError: (error) => {
+        if (error.status === 422) {
+          toast.error(error.value.message)
         } else {
           toast.error('Failed to submit application')
         }
