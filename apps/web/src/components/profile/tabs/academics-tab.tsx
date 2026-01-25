@@ -8,13 +8,13 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { BookOpen, Calendar, CheckCircle, GraduationCap } from 'lucide-react'
 
 export function AcademicsTab() {
-  const { data: academicData, isLoading } = useQuery(
-    orpc.user.profile.academic.queryOptions()
+  const { data: academicData, isLoading } = useTreatyQuery(
+    ['user', 'profile', 'academic'],
+    () => api.user.profile.academic.get()
   )
 
   if (isLoading) {
@@ -123,7 +123,7 @@ export function AcademicsTab() {
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           <span>
-                            Started {enrollment.startedOn.toLocaleDateString()}
+                            Started {new Date(enrollment.startedOn).toLocaleDateString()}
                           </span>
                         </div>
                       )}

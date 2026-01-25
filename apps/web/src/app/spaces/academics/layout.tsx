@@ -5,14 +5,13 @@ import {
   InputGroupAddon,
   InputGroupInput
 } from '@rov/ui/components/input-group'
-import { useQuery } from '@tanstack/react-query'
+import api, { useQuery } from '@web/lib/api-client'
 import { AcademicHeader } from '@web/components/layout/academic-header'
 import type {
   SidebarNode,
   SidebarTree
 } from '@web/components/layout/use-space-sidebar-items'
 import { useSpaceSidebarItems } from '@web/components/layout/use-space-sidebar-items'
-import { orpc } from '@web/utils/orpc'
 import {
   BookOpen,
   Compass,
@@ -28,7 +27,8 @@ const AcademicsLayout = ({ children }: { children: ReactNode }) => {
   const { setSidebarTree } = useSpaceSidebarItems()
 
   const { data: enrollment, isLoading } = useQuery(
-    orpc.academic.enrollment.getEnrollment.queryOptions({ input: {} })
+    ['academic', 'enrollment'],
+    () => api.academic.enrollment.details.get()
   )
 
   const enrolledCourses = enrollment?.courses ?? []

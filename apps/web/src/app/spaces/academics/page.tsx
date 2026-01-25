@@ -1,7 +1,6 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
@@ -10,10 +9,9 @@ export default function AcademicsPage() {
   const router = useRouter()
 
   // Check enrollment status
-  const { data: enrollmentStatus, isLoading } = useQuery(
-    orpc.academic.enrollment.getEnrollmentStatus.queryOptions({
-      input: {}
-    })
+  const { data: enrollmentStatus, isLoading } = useTreatyQuery(
+    ['academic', 'enrollment', 'status'],
+    () => api.academic.enrollment.status.get()
   )
 
   useEffect(() => {

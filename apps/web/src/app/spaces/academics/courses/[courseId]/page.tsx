@@ -14,8 +14,7 @@ import {
   TabsList,
   TabsTrigger
 } from '@rov/ui/components/tabs'
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import {
   BookOpen,
   Calendar,
@@ -34,8 +33,9 @@ export default function CoursePage({
 }: {
   params: Promise<{ courseId: string }>
 }) {
-  const { data: enrollment, isLoading } = useQuery(
-    orpc.academic.enrollment.getEnrollment.queryOptions({ input: {} })
+  const { data: enrollment, isLoading } = useTreatyQuery(
+    ['academic', 'enrollment', 'details'],
+    () => api.academic.enrollment.details.get()
   )
   const courseId = use(params).courseId
 

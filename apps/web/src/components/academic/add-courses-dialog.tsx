@@ -13,8 +13,11 @@ import {
 import { useAppForm } from '@rov/ui/components/form/index'
 import { Input } from '@rov/ui/components/input'
 import { useStore } from '@tanstack/react-form'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import { useQueryClient } from '@tanstack/react-query'
+import api, {
+  useMutation as useTreatyMutation,
+  useQuery as useTreatyQuery
+} from '@web/lib/api-client'
 import { Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -54,20 +57,28 @@ export function AddCoursesDialog({
     }
   })
 
-  // Fetch current enrollment to pre-fill program and term
-  const { data: enrollment } = useQuery(
-    orpc.academic.enrollment.getEnrollment.queryOptions({
-      input: {}
-    })
+  // Fetch current enrollment details (includes institutionId)
+  const { data: enrollment } = useTreatyQuery(
+    ['academic', 'enrollment', 'details'],
+    () => api.academic.enrollment.details.get()
   )
 
   // Fetch terms for the institution
-  const { data: terms } = useQuery({
-    ...orpc.academic.enrollment.getTerms.queryOptions({
-      input: { institutionId: enrollment?.program.institutionId || '' }
-    }),
-    enabled: !!enrollment?.program.institutionId && open
-  })
+  const { data: terms } = useTreatyQuery(
+    [
+      'academic',
+      'enrollment',
+      'terms',
+      { institutionId: enrollment?.program.institutionId || '' }
+    ],
+    () =>
+      api.academic.enrollment.terms.get({
+        query: { institutionId: enrollment?.program.institutionId || '' }
+      }),
+    {
+      enabled: !!enrollment?.program.institutionId && open
+    }
+  )
 
   // Debounce search input
   useEffect(() => {
@@ -79,33 +90,41 @@ export function AddCoursesDialog({
   }, [courseSearch])
 
   // Fetch courses for selected term with search
-  const { data: courses, isLoading: isLoadingCourses } = useQuery(
-    orpc.academic.enrollment.getCourses.queryOptions({
-      input: {
+  const { data: courses, isLoading: isLoadingCourses } = useTreatyQuery(
+    [
+      'academic',
+      'enrollment',
+      'courses',
+      {
         termId: form.state.values.termId || '',
         search: debouncedSearch
-      },
+      }
+    ],
+    () =>
+      api.academic.enrollment.courses.get({
+        query: {
+          termId: form.state.values.termId || '',
+          search: debouncedSearch
+        }
+      }),
+    {
       enabled: !!form.state.values.termId && debouncedSearch.length >= 4 && open
-    })
+    }
   )
 
   // Enrollment mutation (only courses, no program enrollment)
-  const enrollCoursesMutation = useMutation(
-    orpc.academic.enrollment.enrollCourses.mutationOptions({
+  const enrollCoursesMutation = useTreatyMutation(
+    (variables: { termId: string; courseOfferingIds: string[] }) =>
+      api.academic.enrollment.courses.post(variables),
+    {
       onSuccess: async () => {
         // Invalidate enrollment queries to refresh sidebar and dashboard
         await Promise.all([
           queryClient.invalidateQueries({
-            queryKey: orpc.academic.enrollment.getEnrollmentStatus.queryOptions(
-              {
-                input: {}
-              }
-            ).queryKey
+            queryKey: ['academic', 'enrollment', 'status']
           }),
           queryClient.invalidateQueries({
-            queryKey: orpc.academic.enrollment.getEnrollment.queryOptions({
-              input: {}
-            }).queryKey
+            queryKey: ['academic', 'enrollment', 'details']
           })
         ])
         toast.success('Courses added successfully!')
@@ -114,10 +133,10 @@ export function AddCoursesDialog({
         form.setFieldValue('courseIds', [])
         setCourseSearch('')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to enroll in courses')
+      onError: (error) => {
+        toast.error(error.value.message || 'Failed to enroll in courses')
       }
-    })
+    }
   )
 
   // Pre-fill term with current term when enrollment data is available

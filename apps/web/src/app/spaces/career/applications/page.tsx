@@ -11,9 +11,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@rov/ui/components/select'
-import { useQuery } from '@tanstack/react-query'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { AddApplicationDialog } from '@web/components/career/add-application-dialog'
-import { orpc } from '@web/utils/orpc'
 import {
   Briefcase,
   Clock,
@@ -33,23 +32,34 @@ export default function ApplicationsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   // Fetch applications
-  const { data: applicationsData, isLoading } = useQuery(
-    orpc.career.applications.list.queryOptions({
-      input: {
+  const { data: applicationsData, isLoading } = useTreatyQuery(
+    [
+      'career',
+      'applications',
+      {
         search: searchQuery || undefined,
         status: statusFilter,
         sortBy: 'recent',
         limit: 50,
         offset: 0
       }
-    })
+    ],
+    () =>
+      api.career.applications.get({
+        query: {
+          search: searchQuery || undefined,
+          status: statusFilter,
+          sortBy: 'recent',
+          limit: 50,
+          offset: 0
+        }
+      })
   )
 
   // Fetch statistics
-  const { data: statistics } = useQuery(
-    orpc.career.applications.statistics.queryOptions({
-      input: {}
-    })
+  const { data: statistics } = useTreatyQuery(
+    ['career', 'applications', 'statistics'],
+    () => api.career.applications.statistics.get()
   )
 
   const applications = applicationsData?.applications ?? []

@@ -2,10 +2,10 @@
 
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { RegistrationForm } from '@web/components/registration/registration-form'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import { AlertCircle, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -25,25 +25,37 @@ const ApplyPage = () => {
 
   // Fetch public registration page data
   const { data, isLoading, error } = useQuery(
-    orpc.societyRegistration.public.getPageData.queryOptions({
-      input: { societySlug }
-    })
+    ['society', 'registration', 'public', societySlug],
+    () =>
+      api.society.registration.public['page-data'].get({
+        query: { societySlug }
+      })
   )
 
   // Check if user already has a join request
-  const { data: userStatus } = useQuery({
-    ...orpc.societyRegistration.joinRequest.getUserStatus.queryOptions({
-      input: {
-        societyId: data?.society.id || '',
-        userId: session?.user.id || ''
-      }
-    }),
-    enabled: !!data?.society.id && !!session?.user.id
-  })
+  const { data: userStatus } = useQuery(
+    ['society', 'join-request', 'status', data?.society.id, session?.user.id],
+    () =>
+      api.society.registration['join-request']['user-status'].get({
+        query: {
+          societyId: data?.society.id || '',
+          userId: session?.user.id || ''
+        }
+      }),
+    {
+      enabled: !!data?.society.id && !!session?.user.id
+    }
+  )
 
   // Submit join request mutation
   const submitMutation = useMutation(
-    orpc.societyRegistration.joinRequest.create.mutationOptions({
+    (variables: {
+      societyId: string
+      userId: string
+      formResponseId?: string
+      paymentAmount?: string
+    }) => api.society.registration['join-request'].post(variables),
+    {
       onSuccess: (result) => {
         setIsSubmitted(true)
         setRequiresPayment(result.requiresPayment)
@@ -55,16 +67,14 @@ const ApplyPage = () => {
         })
         toast.success('Application submitted successfully!')
       },
-      onError: (err: Error) => {
-        if (err.message.includes('pending join request')) {
-          toast.error('You already have a pending application')
-        } else if (err.message.includes('already a member')) {
-          toast.error('You are already a member of this society')
+      onError: (error) => {
+        if (error.status === 422) {
+          toast.error(error.value.message)
         } else {
           toast.error('Failed to submit application')
         }
       }
-    })
+    }
   )
 
   if (isLoading) {

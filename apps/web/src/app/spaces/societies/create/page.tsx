@@ -4,9 +4,8 @@ import { createSocietySchema } from '@rov/orpc-contracts'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { useQuery } from '@tanstack/react-query'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -16,7 +15,9 @@ import type { z } from 'zod'
 
 const CreateClubPage = () => {
   const router = useRouter()
-  const { data: universities } = useQuery(orpc.university.list.queryOptions())
+  const { data: universities } = useTreatyQuery(['universities'], () =>
+    api.university.get()
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useAppForm({

@@ -7,8 +7,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@rov/ui/components/select'
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { GraduationCap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -19,11 +18,11 @@ export const AcademicHeader = () => {
     data: enrollment,
     isLoading,
     error
-  } = useQuery(
-    orpc.academic.enrollment.getEnrollment.queryOptions({ input: {} })
+  } = useTreatyQuery(['academic', 'enrollment', 'status'], () =>
+    api.academic.enrollment.status.get()
   )
 
-  const [selectedTerm, setSelectedTerm] = useState(enrollment?.term.id ?? '')
+  const [selectedTerm, setSelectedTerm] = useState(enrollment?.term?.id ?? '')
 
   // Redirect to onboarding if not enrolled
   useEffect(() => {
@@ -69,10 +68,10 @@ export const AcademicHeader = () => {
         <GraduationCap className="h-5 w-5 text-muted-foreground" />
         <div className="flex flex-col">
           <span className="font-semibold text-sm">
-            {enrollment.program.code || enrollment.program.name}
+            {enrollment.program?.code || enrollment.program?.name || 'Unknown'}
           </span>
           <span className="text-muted-foreground text-xs">
-            {enrollment.program.name}
+            {enrollment.program?.name}
           </span>
         </div>
       </div>
@@ -84,9 +83,11 @@ export const AcademicHeader = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={enrollment.term.id}>
-              {enrollment.term.termName} {enrollment.term.academicYear}
-            </SelectItem>
+            {enrollment.term && (
+              <SelectItem value={enrollment.term.id}>
+                {enrollment.term.termName} {enrollment.term.academicYear}
+              </SelectItem>
+            )}
           </SelectContent>
         </Select>
       </div>
