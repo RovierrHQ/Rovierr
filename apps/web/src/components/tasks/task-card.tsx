@@ -9,8 +9,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@rov/ui/components/select'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+
+import api, { useMutation, useQueryClient } from '@web/lib/api-client'
 import { format } from 'date-fns'
 import { Calendar, MessageSquare, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
@@ -32,32 +32,29 @@ export function TaskCard({
 }: TaskCardProps) {
   const queryClient = useQueryClient()
 
-  const updateTaskMutation = useMutation(
-    orpc.tasks.updateTask.mutationOptions()
-  )
+  const updateTaskMutation = useMutation((data: {
+    id: string
+    status: 'todo' | 'in_progress' | 'done'
+  }) => api.tasks['update-task'].patch(data))
 
   const handleStatusChange = async (newStatus: Task['status']) => {
     try {
       await updateTaskMutation.mutateAsync({
-        taskId: task.id,
+        id: task.id,
         status: newStatus
       })
       toast.success('Task status updated')
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getClubTasks.queryKey({
-          input: { clubId: organizationId }
-        })
+        queryKey: ['tasks', 'getTaskDetails', task.id]
       })
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getTaskDetails.queryKey({
-          input: { taskId: task.id }
-        })
+        queryKey: ['tasks', 'getClubTasks']
       })
       onStatusChange(task.id, newStatus)
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to update task'
-      )
+      // The toast.error is handled by the mutation's onError callback
+      // This catch block can be used for other error handling or logging if needed
+      console.error('Error updating task status:', error);
     }
   }
 
