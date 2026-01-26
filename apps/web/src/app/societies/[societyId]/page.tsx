@@ -11,8 +11,8 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+
+import api, { useQuery } from '@web/lib/api-client'
 import {
   CheckCircle2,
   Facebook,
@@ -36,9 +36,15 @@ const SocietyProfilePage = () => {
   const params = useParams()
   const societyId = params.societyId as string
 
-  const { data: society, isLoading } = useQuery(
-    orpc.society.getById.queryOptions({ input: { id: societyId } })
+  const { data: societyResponse, isLoading } = useQuery(
+    ['society', 'getById', { id: societyId }],
+    async () => {
+      const response = await api.society({ id: societyId }).get()
+      return response.data ?? null
+    }
   )
+
+  const society = societyResponse as Society | null
 
   if (isLoading) {
     return (
