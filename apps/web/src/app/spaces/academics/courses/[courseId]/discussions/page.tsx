@@ -1,16 +1,45 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
-import { useQuery } from '@tanstack/react-query'
+
 import { CreateThreadDialog } from '@web/components/discussions/create-thread-dialog'
 import { DiscussionFilters } from '@web/components/discussions/discussion-filters'
 import { DiscussionList } from '@web/components/discussions/discussion-list'
 import { DiscussionStats } from '@web/components/discussions/discussion-stats'
 import { ThreadView } from '@web/components/discussions/thread-view'
 import type { Discussion, Reply } from '@web/components/discussions/types'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery } from '@web/lib/api-client'
 import { MessageSquare } from 'lucide-react'
 import { use, useState } from 'react'
+
+type ThreadAuthor = {
+  name: string | null
+  image: string | null
+  isAnonymous: boolean
+}
+
+type ThreadVotes = {
+  upvotes: number
+  downvotes: number
+  userVote: 'up' | 'down' | null
+}
+
+type Thread = {
+  id: string
+  title: string
+  content: string
+  author: ThreadAuthor
+  isPinned: boolean
+  replyCount: number
+  votes: ThreadVotes
+  createdAt: string
+  tags?: string[]
+}
+
+type ThreadListResponse = {
+  threads: Thread[]
+  total: number
+}
 
 type PageProps = {
   params: Promise<{ courseId: string }>
@@ -31,29 +60,39 @@ export default function DiscussionsPage({ params }: PageProps) {
 
   // Fetch discussions from the backend
   const { data: threadsData, isLoading } = useQuery(
-    orpc.discussion.thread.list.queryOptions({
-      input: {
-        contextType: 'course',
-        contextId: discussionContextId,
-        search: searchQuery || undefined,
-        sortBy: 'recent',
-        limit: 50,
-        offset: 0
-      }
-    })
+    [
+      'discussion',
+      'thread',
+      'list',
+      'course',
+      discussionContextId,
+      searchQuery
+    ],
+    () =>
+      api.discussion.thread.list.get({
+        query: {
+          contextType: 'course',
+          contextId: discussionContextId,
+          search: searchQuery || undefined,
+          sortBy: 'recent',
+          limit: 50,
+          offset: 0
+        }
+      })
   )
 
   // Fetch selected thread details with replies
-  const { data: selectedThreadData } = useQuery({
-    ...orpc.discussion.thread.get.queryOptions({
-      input: { id: selectedDiscussion || '' }
-    }),
-    enabled: !!selectedDiscussion
-  })
+  const { data: selectedThreadData } = useQuery(
+    ['discussion', 'thread', 'get', selectedDiscussion],
+    () => api.discussion.thread({ id: selectedDiscussion || '' }).get(),
+    {
+      enabled: !!selectedDiscussion
+    }
+  )
 
   // Map backend data to frontend types
   const discussions: Discussion[] =
-    threadsData?.threads.map((thread) => ({
+    threadsData?.threads?.map((thread: Thread) => ({
       id: thread.id,
       title: thread.title,
       content: thread.content,
@@ -73,7 +112,7 @@ export default function DiscussionsPage({ params }: PageProps) {
       userVote: thread.votes.userVote,
       contextType: 'course' as const,
       contextId: discussionContextId
-    })) || []
+    })) ?? []
 
   // Filter discussions based on selected filter
   const filteredDiscussions = discussions.filter((discussion) => {
@@ -86,7 +125,7 @@ export default function DiscussionsPage({ params }: PageProps) {
     return matchesFilter
   })
 
-  const currentDiscussion = selectedThreadData
+  const currentDiscussion: Discussion | undefined = selectedThreadData
     ? {
         id: selectedThreadData.id,
         title: selectedThreadData.title,
@@ -102,12 +141,13 @@ export default function DiscussionsPage({ params }: PageProps) {
         },
         isPinned: selectedThreadData.isPinned,
         isResolved: false,
-        replies: selectedThreadData.replyCount,
+        replies: selectedThreadData.replyCount || 0,
         upvotes:
-          selectedThreadData.votes.upvotes - selectedThreadData.votes.downvotes,
+          (selectedThreadData.votes?.upvotes || 0) -
+          (selectedThreadData.votes?.downvotes || 0),
         createdAt: new Date(selectedThreadData.createdAt).toLocaleString(),
         tags: selectedThreadData.tags || [],
-        userVote: selectedThreadData.votes.userVote,
+        userVote: selectedThreadData.votes?.userVote,
         contextType: 'course' as const,
         contextId: discussionContextId
       }
