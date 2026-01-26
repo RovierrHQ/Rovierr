@@ -20,9 +20,9 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation, useQuery } from '@tanstack/react-query'
+
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation, useQuery, useQueryClient } from '@web/lib/api-client'
 import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { AssigneeSelector } from './assignee-selector'
@@ -49,43 +49,78 @@ export function CreateTaskDialog({
   )
 
   // Fetch organization members (filtered to exclude 'member' role)
-  const { data: membersData, isLoading: isLoadingMembers } = useQuery({
-    queryKey: ['organization-members', organizationId],
-    queryFn: async () => {
+  const { data: membersData, isLoading: isLoadingMembers } = useQuery(
+    ['organization-members', organizationId],
+     async () => {
       const result = await authClient.organization.listMembers({
         query: {
           limit: 1000,
           offset: 0,
           organizationId
         }
-      })
-      return result
+      });
+  
+   return {
+        data: result.data,
+        error: result.error ? { status: 500, value: result.error } : null,
+        status: result.error ? 500 : 200,
+        response: (typeof Response !== 'undefined' ? new Response() : {}) as Response,
+        headers: (typeof Headers !== 'undefined' ? new Headers() : {}) as Headers,
+      }as any;
     },
+    {
     enabled: !!organizationId && open
-  })
+    }
+  );
 
   // Extract and filter members (exclude 'member' role)
-  const availableAssignees = useMemo(() => {
-    if (!membersData?.data) return []
-    const members = membersData.data.members || []
-    return members.filter((member: { role?: string | string[] }) => {
-      const role = Array.isArray(member.role) ? member.role[0] : member.role
-      return role && role !== 'member'
-    })
-  }, [membersData])
+ const availableAssignees = useMemo(() => {
+ 
+  const data = membersData as { 
+    members: { 
+      role?: string | string[]; 
+      user: { id: string; name: string; email: string; image?: string | null } 
+    }[] 
+  };
+  if (!data?.members) return [];
 
-  const createTaskMutation = useMutation(
-    orpc.tasks.createTask.mutationOptions({
-      onSuccess: () => {
-        toast.success('Task created successfully')
-        handleClose()
-        onSuccess()
-      },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to create task')
+  return data.members.filter((member) => {
+  
+    const role = Array.isArray(member.role) ? member.role[0] : member.role;
+    return role && role !== 'member';
+  });
+}, [membersData]);
+
+    const queryClient = useQueryClient()
+
+    const createMutation = useMutation((data: {
+      clubId: string
+      title: string
+      description?: string
+      assigneeId?: string
+      priority: 'low' | 'medium' | 'high'
+      dueDate?: Date
+    }) => api.tasks['create-task'].post({
+      ...data,
+      dueDate: data.dueDate ? data.dueDate.toISOString() : undefined
+    }), {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: ['tasks', 'getClubTasks']
+          })
+          onOpenChange(false)
+          onSuccess()
+          if (formRef.current) {
+            formRef.current.reset()
+          }
+          toast.success('Task created successfully')
+        },
+        onError: (error) => {
+          toast.error('Failed to create task')
+          console.error(error)
+        }
       }
-    })
-  )
+    )
 
   const handleClose = () => {
     setIsAllDay(false)
@@ -109,18 +144,16 @@ export function CreateTaskDialog({
     }
 
     try {
-      await createTaskMutation.mutateAsync({
+      await createMutation.mutateAsync({
+        clubId: organizationId, // Start with required fields that match the mutation definition above
         title,
         description,
-        contextType: 'club',
-        contextId: organizationId,
         priority,
-        visibility: 'club',
-        dueAt: dueAt || undefined,
-        startAt: startAt || undefined,
-        isAllDay,
-        assigneeIds:
-          selectedAssignees.size > 0 ? Array.from(selectedAssignees) : undefined
+        dueDate: dueAt ? new Date(dueAt) : undefined,
+        // startAt, // Not in mutation definition
+        // isAllDay, // Not in mutation definition
+        // assigneeIds: ... // Mutation expects assigneeId (string), not array
+        assigneeId: selectedAssignees.size > 0 ? Array.from(selectedAssignees)[0] : undefined
       })
       // Reset form if it still exists (before dialog closes)
       if (form) {
@@ -207,8 +240,8 @@ export function CreateTaskDialog({
             <Button onClick={handleClose} type="button" variant="outline">
               Cancel
             </Button>
-            <Button disabled={createTaskMutation.isPending} type="submit">
-              {createTaskMutation.isPending ? 'Creating...' : 'Create Task'}
+            <Button disabled={createMutation.isPending} type="submit">
+              {createMutation.isPending ? 'Creating...' : 'Create Task'}
             </Button>
           </DialogFooter>
         </form>
