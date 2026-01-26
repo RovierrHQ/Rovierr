@@ -2,8 +2,7 @@
 
 import { Button } from '@rov/ui/components/button'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation, useQueryClient } from '@web/lib/api-client'
 import { Loader2, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -30,8 +29,7 @@ export function ApplicationForm({ onSuccess, onCancel }: ApplicationFormProps) {
   const [isParsing, setIsParsing] = useState(false)
   const [urlToParse, setUrlToParse] = useState('')
 
-  const createMutation = useMutation(
-    orpc.career.applications.create.mutationOptions({
+  const createMutation = useMutation((data: ApplicationFormData) => api.career.applications.create.post(data), {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['career', 'applications', 'list']
@@ -45,7 +43,7 @@ export function ApplicationForm({ onSuccess, onCancel }: ApplicationFormProps) {
       onError: (error: Error) => {
         toast.error(error.message || 'Failed to add application')
       }
-    })
+    }
   )
 
   const form = useAppForm({
@@ -72,26 +70,30 @@ export function ApplicationForm({ onSuccess, onCancel }: ApplicationFormProps) {
 
     setIsParsing(true)
     try {
-      const result = await orpc.career.applications.parseUrl.call({
+      const { data: result, error } = await api.career.applications['parse-url'].post({
         url: urlToParse
       })
 
-      // Pre-fill form fields with parsed data
-      if (result.companyName) {
-        form.setFieldValue('companyName', result.companyName)
-      }
-      if (result.positionTitle) {
-        form.setFieldValue('positionTitle', result.positionTitle)
-      }
-      if (result.location) {
-        form.setFieldValue('location', result.location)
-      }
-      if (result.salaryRange) {
-        form.setFieldValue('salaryRange', result.salaryRange)
-      }
-      form.setFieldValue('jobPostUrl', urlToParse)
+      if (error) throw error
 
-      toast.success('Job information extracted successfully!')
+      if (result) {
+        // Pre-fill form fields with parsed data
+        if (result.companyName) {
+          form.setFieldValue('companyName', result.companyName)
+        }
+        if (result.positionTitle) {
+          form.setFieldValue('positionTitle', result.positionTitle)
+        }
+        if (result.location) {
+          form.setFieldValue('location', result.location)
+        }
+        if (result.salaryRange) {
+          form.setFieldValue('salaryRange', result.salaryRange)
+        }
+        form.setFieldValue('jobPostUrl', urlToParse)
+
+        toast.success('Job information extracted successfully!')
+      }
     } catch {
       toast.error(
         'Failed to parse job post. You can still fill in the details manually.'
