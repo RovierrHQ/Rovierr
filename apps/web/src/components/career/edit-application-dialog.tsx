@@ -9,8 +9,7 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation, useQueryClient } from '@web/lib/api-client'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -38,8 +37,15 @@ export function EditApplicationDialog({
 }: EditApplicationDialogProps) {
   const queryClient = useQueryClient()
 
-  const updateMutation = useMutation(
-    orpc.career.applications.update.mutationOptions({
+  const updateMutation = useMutation((data: {
+    id: string
+    companyName: string
+    positionTitle: string
+    jobPostUrl?: string
+    location?: string
+    salaryRange?: string
+    notes?: string
+  }) => api.career.applications.update.post(data), {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['career', 'applications', 'get', { id: application.id }]
@@ -56,7 +62,7 @@ export function EditApplicationDialog({
       onError: (error: Error) => {
         toast.error(error.message || 'Failed to update application')
       }
-    })
+    }
   )
 
   const form = useAppForm({
