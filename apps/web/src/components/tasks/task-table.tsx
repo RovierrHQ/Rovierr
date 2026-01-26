@@ -17,8 +17,8 @@ import {
   TableHeader,
   TableRow
 } from '@rov/ui/components/table'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+
+import api, { useMutation, useQueryClient } from '@web/lib/api-client'
 import { format } from 'date-fns'
 import { Calendar, MessageSquare, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
@@ -42,9 +42,10 @@ export function TaskTable({
 }: TaskTableProps) {
   const queryClient = useQueryClient()
 
-  const updateTaskMutation = useMutation(
-    orpc.tasks.updateTask.mutationOptions()
-  )
+  const updateTaskMutation = useMutation((data: {
+    id: string
+    status: 'todo' | 'in_progress' | 'done'
+  }) => api.tasks['update-task'].patch(data))
 
   const handleStatusChange = async (
     taskId: string,
@@ -52,22 +53,20 @@ export function TaskTable({
   ) => {
     try {
       await updateTaskMutation.mutateAsync({
-        taskId,
+        id: taskId,
         status: newStatus
       })
       toast.success('Task status updated')
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getClubTasks.queryKey({
-          input: { clubId: organizationId }
-        })
+        queryKey: ['tasks', 'getTaskDetails', taskId]
       })
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getTaskDetails.queryKey({
-          input: { taskId }
-        })
+        queryKey: ['tasks', 'getClubTasks']
       })
       onStatusChange(taskId, newStatus)
     } catch (error) {
+      // The error toast is handled by the mutation's onError, but we can add more specific handling here if needed
+      // For now, we'll keep the original error message structure if it's not handled by the mutation's onError
       toast.error(
         error instanceof Error ? error.message : 'Failed to update task'
       )
