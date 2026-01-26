@@ -68,8 +68,8 @@ const ApplyPage = () => {
         toast.success('Application submitted successfully!')
       },
       onError: (error) => {
-        if (error.status === 422) {
-          toast.error(error.value.message)
+        if ((error.status as unknown) === 422) {
+          toast.error(error.value?.message || 'Invalid form submission')
         } else {
           toast.error('Failed to submit application')
         }
