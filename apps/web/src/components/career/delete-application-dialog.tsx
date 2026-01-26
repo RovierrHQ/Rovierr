@@ -9,8 +9,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@rov/ui/components/dialog'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation, useQueryClient } from '@web/lib/api-client'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -32,8 +31,7 @@ export function DeleteApplicationDialog({
   const queryClient = useQueryClient()
   const router = useRouter()
 
-  const deleteMutation = useMutation(
-    orpc.career.applications.delete.mutationOptions({
+  const deleteMutation = useMutation((data: { id: string }) => api.career.applications({ id: data.id }).delete(), {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['career', 'applications', 'list']
@@ -45,10 +43,10 @@ export function DeleteApplicationDialog({
         onOpenChange(false)
         router.push('/spaces/career/applications')
       },
-      onError: (error: Error) => {
+      onError: (error) => {
         toast.error(error.message || 'Failed to delete application')
       }
-    })
+    }
   )
 
   const handleDelete = () => {
