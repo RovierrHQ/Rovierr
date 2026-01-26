@@ -23,7 +23,7 @@ export function SecuritySettings() {
       queryClient.invalidateQueries({ queryKey: ['active-sessions'] })
       toast.success('Session revoked successfully')
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast.error(error.message || 'Failed to revoke session')
     }
   })
