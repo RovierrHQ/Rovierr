@@ -1,6 +1,6 @@
 'use client'
 
-import type { Application } from '@rov/orpc-contracts'
+import type { Application, ResumeListItem } from '@rov/orpc-contracts'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import {
@@ -16,11 +16,11 @@ import {
   TabsList,
   TabsTrigger
 } from '@rov/ui/components/tabs'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { AIAssistant } from '@web/components/career/ai/ai-assistant'
 import { DeleteApplicationDialog } from '@web/components/career/delete-application-dialog'
 import { EditApplicationDialog } from '@web/components/career/edit-application-dialog'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import {
   ArrowLeft,
   Briefcase,
@@ -46,25 +46,23 @@ export default function ApplicationDetailPage() {
   const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null)
 
   // Fetch user's resumes for AI assistant
-  const { data: resumesData } = useQuery(
-    orpc.resume.list.queryOptions({
-      input: {
-        limit: 50,
-        offset: 0
-      }
-    })
+  const { data: resumesData } = useQuery(['resume', 'list'], () =>
+    api.resume.get({ query: { limit: 50, offset: 0 } })
   )
 
   // Fetch application details
   const { data: application, isLoading } = useQuery(
-    orpc.career.applications.get.queryOptions({
-      input: { id: applicationId }
-    })
+    ['career', 'applications', 'get', { id: applicationId }],
+    () => api.career.applications({ id: applicationId }).get()
   )
 
   // Update status mutation
   const updateStatusMutation = useMutation(
-    orpc.career.applications.updateStatus.mutationOptions({
+    (data: { id: string; status: Application['status'] }) =>
+      api.career
+        .applications({ id: data.id })
+        .status.patch({ status: data.status }),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['career', 'applications', 'get', { id: applicationId }]
@@ -77,10 +75,10 @@ export default function ApplicationDetailPage() {
         })
         toast.success('Status updated successfully')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to update status')
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to update status')
       }
-    })
+    }
   )
 
   const handleStatusChange = (newStatus: string) => {
@@ -348,7 +346,7 @@ export default function ApplicationDetailPage() {
 
         <TabsContent className="mt-6" value="ai-assistant">
           {/* Resume Selection */}
-          {resumesData && resumesData.resumes.length > 0 ? (
+          {resumesData?.resumes && resumesData.resumes.length > 0 ? (
             <>
               {!selectedResumeId && (
                 <Card className="mb-6 border-border bg-card p-6">
@@ -360,7 +358,7 @@ export default function ApplicationDetailPage() {
                     application.
                   </p>
                   <div className="grid gap-3">
-                    {resumesData.resumes.map((resume) => (
+                    {resumesData?.resumes?.map((resume: ResumeListItem) => (
                       <button
                         className="flex items-center justify-between rounded-lg border border-border p-4 text-left transition-colors hover:bg-accent"
                         key={resume.id}
