@@ -12,12 +12,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@rov/ui/components/sidebar'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@web/lib/api-client'
 import { usePresence } from '@web/hooks/use-presence'
 import api from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { useCentrifugo } from '@web/lib/centrifuge'
-import { orpc } from '@web/utils/orpc'
 import { MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { ConversationList } from './conversation-list'
@@ -35,28 +34,33 @@ export function ChatDrawer() {
   const { data: session } = authClient.useSession()
 
   const { data: unreadCount } = useQuery(
-    orpc.chat.getUnreadCount.queryOptions()
+    ['chat', 'getUnreadCount'],
+    () => api.chat['unread-count'].get(),
+    { enabled: !!session?.user?.id }
   )
 
   const { data: conversations } = useQuery(
-    orpc.chat.listConversations.queryOptions({ input: {}, enabled: isOpen })
+    ['chat', 'listConversations'],
+    () => api.chat.conversations.get(),
+    { enabled: isOpen && !!session?.user?.id }
   )
 
   const { data: connections } = useQuery(
-    orpc.connection.listConnections.queryOptions({
-      input: {
+    ['connection', 'listConnections', { limit: 100, offset: 0 }],
+    () => api.connection.list.get({
+      query: {
         limit: 100,
         offset: 0
-      },
-      enabled: isOpen
-    })
+      }
+    }),
+    { enabled: isOpen }
   )
 
   // Get Centrifugo connection token
-  const { data: centrifugoAuth } = useQuery({
-    queryKey: ['realtime', 'token'],
-    queryFn: () => api.realtime.token.get(),
-    enabled: !!session?.user?.id,
+  const { data: centrifugoAuth } = useQuery(
+    ['realtime','token'],
+    () => api.realtime.token.get(),
+    { enabled: !!session?.user?.id,
     staleTime: 55 * 60 * 1000 // 55 minutes (token expires in 1 hour)
   })
 
