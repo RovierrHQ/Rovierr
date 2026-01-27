@@ -9,8 +9,7 @@ import {
   CardTitle
 } from '@rov/ui/components/card'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation } from '@web/lib/api-client'
 import { Download, FileText, Loader2, RefreshCw, Save } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -34,29 +33,34 @@ export function CoverLetterGenerator({
   onContentChange
 }: CoverLetterGeneratorProps) {
   // Generate cover letter mutation
-  const generateMutation = useMutation(
-    orpc.career.ai.generateCoverLetter.mutationOptions({
+  const generateMutation = useMutation((data: {
+    resumeId: string
+    jobData: ExtendedParsedJobData
+    applicationId?: string
+  }) => api.career.ai['generate-cover-letter'].post(data), {
       onSuccess: (data) => {
         onCoverLetterGenerated(data)
         toast.success('Cover letter generated successfully')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to generate cover letter')
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to generate cover letter')
       }
-    })
+    }
   )
 
   // Update cover letter mutation
-  const updateMutation = useMutation(
-    orpc.career.ai.updateCoverLetter.mutationOptions({
+  const updateMutation = useMutation((data: {
+    id: string
+    content: string
+  }) => api.career.ai['update-cover-letter'].post(data), {
       onSuccess: (data) => {
         onCoverLetterGenerated(data)
         toast.success('Cover letter saved successfully')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to save cover letter')
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to save cover letter')
       }
-    })
+    }
   )
 
   const handleGenerate = () => {
