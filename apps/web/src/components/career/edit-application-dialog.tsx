@@ -59,8 +59,8 @@ export function EditApplicationDialog({
         toast.success('Application updated successfully')
         onOpenChange(false)
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to update application')
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to update application')
       }
     }
   )
