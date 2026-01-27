@@ -1,13 +1,13 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { CreateTaskDialog } from '@web/components/tasks/create-task-dialog'
 import { TaskDetailDialog } from '@web/components/tasks/task-detail-dialog'
 import { TaskFilters } from '@web/components/tasks/task-filters'
 import { TaskList } from '@web/components/tasks/task-list'
 import type { Task } from '@web/components/tasks/types'
-import { orpc } from '@web/utils/orpc'
+import api, { useQuery } from '@web/lib/api-client'
 import { Plus } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
@@ -27,14 +27,12 @@ const TasksPage = () => {
 
   // Fetch club tasks
   const { data: tasksData, isLoading: isLoadingTasks } = useQuery(
-    orpc.tasks.getClubTasks.queryOptions({
-      input: {
-        clubId: clubID,
-        query: {
-          status: statusFilter !== 'all' ? statusFilter : undefined,
-          priority: priorityFilter !== 'all' ? priorityFilter : undefined,
-          limit: 100
-        }
+    ['tasks', 'getClubTasks', { clubId: clubID, status: statusFilter, priority: priorityFilter }],
+    () => api.tasks.club({ clubId: clubID }).get({
+      query: {
+        limit: 100,
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        priority: priorityFilter !== 'all' ? priorityFilter : undefined,
       }
     })
   )
@@ -43,9 +41,7 @@ const TasksPage = () => {
 
   const handleTaskCreated = () => {
     queryClient.invalidateQueries({
-      queryKey: orpc.tasks.getClubTasks.queryKey({
-        input: { clubId: clubID }
-      })
+      queryKey: ['tasks', 'getClubTasks']
     })
   }
 
