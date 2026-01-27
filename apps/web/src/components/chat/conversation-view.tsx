@@ -5,15 +5,14 @@ import { Button } from '@rov/ui/components/button'
 import { Input } from '@rov/ui/components/input'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { cn } from '@rov/ui/lib/utils'
-import {
+import api, {
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient
-} from '@tanstack/react-query'
+} from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { useCentrifugo } from '@web/lib/centrifuge'
-import { orpc } from '@web/utils/orpc'
 import { formatDistanceToNow } from 'date-fns'
 import { ArrowLeft, Send } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -50,24 +49,37 @@ export function ConversationView({
 
   const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
     queryKey: ['chat', 'messages', conversationId],
-    queryFn: async ({ pageParam }: { pageParam: string | undefined }) =>
-      await orpc.chat.getMessages.call({
-        conversationId,
-        limit: 50,
-        before: pageParam
-      }),
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
+      const res = await api.chat.getMessages.get({
+        query: {
+          conversationId,
+          limit: 50,
+          before: pageParam
+        }
+      })
+      if (res.error) throw res.error
+      return res.data
+    },
     getNextPageParam: (lastPage) => {
       if (lastPage.hasMore && lastPage.messages.length > 0) {
         return lastPage.messages[0].id
       }
-      return
+      return undefined
     },
     initialPageParam: undefined as string | undefined
   })
 
   const sendMutation = useMutation(
-    orpc.chat.sendMessage.mutationOptions({
-      onSuccess: (newMessage) => {
+    (data: {
+      conversationId: string
+      content: string
+      type: 'text' | 'image' | 'file'
+    }) => api.chat.sendMessage.post(data),
+    {
+      onSuccess: (response) => {
+        const newMessage = response.data
+        if (!newMessage) return
+
         setMessageInput('')
         // Add message to the list optimistically
         queryClient.setQueryData(
@@ -92,15 +104,17 @@ export function ConversationView({
           messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
         }, 100)
       }
-    })
+    }
   )
 
   // Get Centrifugo connection token
   const { data: centrifugoAuth } = useQuery(
-    orpc.realtime.getConnectionToken.queryOptions({
+    ['realtime', 'getToken'],
+    () => api.realtime.getConnectionToken.get(),
+    {
       enabled: !!session?.user?.id,
       staleTime: 55 * 60 * 1000 // 55 minutes (token expires in 1 hour)
-    })
+    }
   )
 
   // Subscribe to real-time messages for this conversation
@@ -150,7 +164,7 @@ export function ConversationView({
 
   // Mark as read when opening conversation
   useEffect(() => {
-    orpc.chat.markAsRead.call({ conversationId })
+    api.chat.markAsRead.post({ conversationId })
     queryClient.invalidateQueries({ queryKey: ['chat', 'getUnreadCount'] })
   }, [conversationId, queryClient])
 

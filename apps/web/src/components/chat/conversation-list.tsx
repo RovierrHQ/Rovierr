@@ -6,8 +6,7 @@ import { Input } from '@rov/ui/components/input'
 import { ScrollArea } from '@rov/ui/components/scroll-area'
 import { Separator } from '@rov/ui/components/separator'
 import { cn } from '@rov/ui/lib/utils'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation, useQueryClient } from '@web/lib/api-client'
 import { formatDistanceToNow } from 'date-fns'
 import { MessageCircle, Search, UserPlus } from 'lucide-react'
 import { useState } from 'react'
@@ -36,17 +35,24 @@ export function ConversationList({
   const queryClient = useQueryClient()
 
   const createConversationMutation = useMutation(
-    orpc.chat.getOrCreateConversation.mutationOptions({
-      onSuccess: (data) => {
+    (data: { userId: string }) => api.chat.getOrCreateConversation.post(data),
+    {
+      onSuccess: (response) => {
+        const data = response.data
+        if (!data) return
         queryClient.invalidateQueries({
           queryKey: ['chat', 'listConversations']
         })
         onSelect(data.id)
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to start conversation')
+      onError: (error) => {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : 'Failed to start conversation'
+        )
       }
-    })
+    }
   )
 
   const filteredConversations = conversations.filter((conv) => {
