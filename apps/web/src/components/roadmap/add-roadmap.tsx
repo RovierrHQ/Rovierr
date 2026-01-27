@@ -8,8 +8,7 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { useQueryClient } from '@tanstack/react-query'
-import api, { useMutation } from '@web/lib/api-client'
+import api, { useMutation, useQueryClient } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { Loader2 } from 'lucide-react'
 import { redirect } from 'next/navigation'
@@ -29,7 +28,12 @@ const AddRoadmap = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
   const { data: session } = authClient.useSession()
-  const { mutateAsync } = useMutation(api.roadmap.create.post, {
+  const { mutateAsync } = useMutation<{
+    title: string
+    description: string
+    category: string
+    status: string
+  }>(api.roadmap.create.post, {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['roadmap', 'list']
