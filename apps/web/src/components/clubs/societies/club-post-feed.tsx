@@ -11,7 +11,7 @@ import {
 } from '@rov/ui/components/dropdown-menu'
 
 import { useQueryClient } from '@tanstack/react-query'
-import api, { useQuery } from '@web/lib/api-client'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import {
   Calendar,
   Check,
@@ -26,6 +26,7 @@ import {
   X
 } from 'lucide-react'
 import { useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { PostCommentPanel } from './post-comment-panel'
 
 const ClubPostFeed = () => {
@@ -39,28 +40,35 @@ const ClubPostFeed = () => {
       await api['campus-feed'].posts.get({ query: { limit: 20, offset: 0 } })
   )
 
-  // const likeMutation = useMutation(
-  //   orpc.campusFeed.like.mutationOptions({
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
-  //     },
-  //     onError: (err: Error) => {
-  //       toast.error(err.message || 'Failed to like post')
-  //     }
-  //   })
-  // )
+  const likeMutation = useMutation(
+    (data: { postId: string }) => api.campusFeed.like.post(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
+      },
+      onError: (err) => {
+        toast.error(err instanceof Error ? err.message : 'Failed to like post')
+      }
+    }
+  )
 
-  // const rsvpMutation = useMutation(
-  //   orpc.campusFeed.rsvp.mutationOptions({
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
-  //       toast.success('RSVP updated successfully')
-  //     },
-  //     onError: (err: Error) => {
-  //       toast.error(err.message || 'Failed to update RSVP')
-  //     }
-  //   })
-  // )
+  const rsvpMutation = useMutation(
+    (data: {
+      eventPostId: string
+      status: 'going' | 'interested' | 'not_going'
+    }) => api.campusFeed.rsvp.post(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
+        toast.success('RSVP updated successfully')
+      },
+      onError: (err) => {
+        toast.error(
+          err instanceof Error ? err.message : 'Failed to update RSVP'
+        )
+      }
+    }
+  )
 
   // Infinite scroll observer
   // useEffect(() => {
@@ -86,14 +94,14 @@ const ClubPostFeed = () => {
   // }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const handleLike = (postId: string) => {
-    // likeMutation.mutate({ postId })
+    likeMutation.mutate({ postId })
   }
 
   const handleRSVP = (
     eventPostId: string,
     status: 'going' | 'interested' | 'not_going'
   ) => {
-    // rsvpMutation.mutate({ eventPostId, status })
+    rsvpMutation.mutate({ eventPostId, status })
   }
 
   const getRSVPButtonContent = (
@@ -249,7 +257,7 @@ const ClubPostFeed = () => {
                       <DropdownMenuTrigger asChild>
                         <Button
                           className="ml-auto gap-2"
-                          // disabled={rsvpMutation.isPending}
+                          disabled={rsvpMutation.isPending}
                           size="sm"
                           variant={
                             getRSVPButtonContent(post.currentUserRSVP).variant
