@@ -44,7 +44,7 @@ export function DeleteApplicationDialog({
         router.push('/spaces/career/applications')
       },
       onError: (error) => {
-        toast.error(error.message || 'Failed to delete application')
+        toast.error(error.value?.message || 'Failed to delete application')
       }
     }
   )
