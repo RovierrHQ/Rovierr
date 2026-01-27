@@ -11,8 +11,7 @@ import {
   TabsTrigger
 } from '@rov/ui/components/tabs'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation } from '@web/lib/api-client'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -31,33 +30,31 @@ export function JobDescriptionInput({
   const [textValue, setTextValue] = useState('')
 
   // Parse job description from text
-  const parseTextMutation = useMutation(
-    orpc.career.ai.parseJobDescription.mutationOptions({
+  const parseTextMutation = useMutation((data: { text: string }) => api.career.ai['parse-job-description'].post(data), {
       onSuccess: (data) => {
         toast.success('Job description parsed successfully')
         onJobParsed(data)
         onError('')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to parse job description')
-        onError(error.message)
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to parse job description')
+        onError(error.value?.message)
       }
-    })
+    }
   )
 
   // Parse job description from URL
-  const parseUrlMutation = useMutation(
-    orpc.career.ai.parseJobUrl.mutationOptions({
+  const parseUrlMutation = useMutation((data: { url: string }) => api.career.ai['parse-job-url'].post(data), {
       onSuccess: (data) => {
         toast.success('Job URL parsed successfully')
         onJobParsed(data)
         onError('')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to parse job URL')
-        onError(error.message)
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to parse job URL')
+        onError(error.value?.message)
       }
-    })
+    }
   )
 
   const handleParse = () => {
