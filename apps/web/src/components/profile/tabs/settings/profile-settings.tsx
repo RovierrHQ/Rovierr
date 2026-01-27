@@ -6,8 +6,11 @@ import { useAppForm } from '@rov/ui/components/form/index'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import { Separator } from '@rov/ui/components/separator'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
+import { useMutation as useStandardMutation } from '@tanstack/react-query'
+import api, {
+  useQueryClient,
+  useQuery as useTreatyQuery
+} from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -60,37 +63,44 @@ export function ProfileSettings() {
     }
   }, [profileDetails, form])
 
-  const sendOtpMutation = useMutation({
-    mutationFn: (phoneNumber: string) =>
-      authClient.phoneNumber.sendOtp({ phoneNumber }),
+  const sendOtpMutation = useStandardMutation({
+    mutationFn: async (phoneNumber: string) => {
+      const { data, error } = await authClient.phoneNumber.sendOtp({
+        phoneNumber
+      })
+      if (error) throw error
+      return data
+    },
     onSuccess: () => {
       setPhoneVerification((prev) => ({ ...prev, codeSent: true }))
       toast.success('Verification code sent to your phone')
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast.error(error.message || 'Failed to send verification code')
     }
   })
-
-  const verifyPhoneMutation = useMutation({
-    mutationFn: ({
+  const verifyPhoneMutation = useStandardMutation({
+    mutationFn: async ({
       phoneNumber,
       code
     }: {
       phoneNumber: string
       code: string
-    }) =>
-      authClient.phoneNumber.verify({
+    }) => {
+      const { data, error } = await authClient.phoneNumber.verify({
         phoneNumber,
         code,
         updatePhoneNumber: true
-      }),
+      })
+      if (error) throw error
+      return data
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user', 'profile'] })
       setPhoneVerification({ codeSent: false, code: '', phoneNumber: '' })
       toast.success('Phone number verified successfully')
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast.error(error.message || 'Invalid verification code')
     }
   })
