@@ -58,7 +58,11 @@ const CommentVote: FC<CommentVoteProps> = ({
     return comment?.upvotes ?? []
   }, [upvotesProp, commentId, queryClient])
 
-  const { mutateAsync, isPending } = useMutation(api.roadmap.voteComment.post, {
+  const { mutateAsync, isPending } = useMutation<
+    { commentId: string },
+    any,
+    any
+  >(api.roadmap.voteComment.post, {
     onMutate: async () => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
