@@ -12,8 +12,7 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
-import { useMutation } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation } from '@web/lib/api-client'
 import { AlertCircle, Brain, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ResumeAnalysisView } from './resume-analysis-view'
@@ -43,15 +42,20 @@ export function ResumeAnalyzer({
 }: ResumeAnalyzerProps) {
   // Analyze resume mutation
   const analyzeMutation = useMutation(
-    orpc.career.ai.analyzeResume.mutationOptions({
+    (data: {
+      resumeId: string
+      jobApplicationId: string
+      jobData: ExtendedParsedJobData
+    }) => api.career.ai['analyze-resume'].post(data),
+    {
       onSuccess: (data) => {
         onAnalysisComplete(data.analysis, data.suggestions)
         toast.success('Resume analysis completed')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to analyze resume')
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to analyze resume')
       }
-    })
+    }
   )
 
   const handleAnalyze = () => {
@@ -122,7 +126,7 @@ export function ResumeAnalyzer({
             <AlertCircle className="mb-4 h-8 w-8 text-destructive" />
             <h3 className="mb-2 font-medium text-lg">Analysis Failed</h3>
             <p className="mb-4 text-center text-muted-foreground text-sm">
-              {analyzeMutation.error?.message ||
+              {analyzeMutation.error?.value?.message ||
                 'Something went wrong during analysis'}
             </p>
             <Button onClick={handleAnalyze} variant="outline">
