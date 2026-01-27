@@ -14,12 +14,12 @@ import {
   TabsList,
   TabsTrigger
 } from '@rov/ui/components/tabs'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { EmailComposer } from '@web/components/societies/email-composer'
 import { EmailDetailsModal } from '@web/components/societies/email-details-modal'
 import { EmailHistory } from '@web/components/societies/email-history'
 import { EmailPreviewModal } from '@web/components/societies/email-preview-modal'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { History, Mail } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
@@ -40,7 +40,11 @@ export default function EmailPage() {
 
   // Get organization details
   const { data: organization } = useQuery(
-    orpc.society.getById.queryOptions({ input: { id: clubID } })
+    ['society', 'getById', { id: clubID }],
+    async () => {
+      const response = await api.society({ id: clubID }).get()
+      return response.data ?? null
+    }
   )
 
   // Get member count - using a simple count query
@@ -48,54 +52,70 @@ export default function EmailPage() {
 
   // Get email history
   const { data: emailHistory, isLoading: isLoadingHistory } = useQuery(
-    orpc.societyEmail.list.queryOptions({
-      input: {
-        organizationId: clubID,
-        limit: 50,
-        offset: currentPage * 50
-      }
-    })
+    [
+      'societyEmail',
+      'list',
+      { organizationId: clubID, limit: 50, offset: currentPage * 50 }
+    ],
+    () =>
+      api.society.email.list.get({
+        query: {
+          organizationId: clubID,
+          limit: 50,
+          offset: currentPage * 50
+        }
+      })
   )
 
   // Get email details when selected
-  const { data: emailDetails, isLoading: isLoadingDetails } = useQuery({
-    ...orpc.societyEmail.get.queryOptions({
-      input: { emailId: selectedEmailId || '' }
-    }),
-    enabled: !!selectedEmailId && showDetails
-  })
+  const { data: emailDetails, isLoading: isLoadingDetails } = useQuery(
+    ['societyEmail', 'get', { emailId: selectedEmailId }],
+    () =>
+      api.society.email.get.get({
+        query: { emailId: selectedEmailId || '' }
+      }),
+    { enabled: !!selectedEmailId && showDetails }
+  )
 
   // Send email mutation
   const sendMutation = useMutation(
-    orpc.societyEmail.send.mutationOptions({
+    (data: {
+      organizationId: string
+      subject: string
+      bodyHtml: string
+      bodyText: string
+    }) => api.society.email.send.post(data),
+    {
       onSuccess: (data) => {
+        if (!data) return
         toast.success(
           `Email sent successfully to ${data.recipientCount} members!`
         )
         // Invalidate all email list queries to refresh the history
         queryClient.invalidateQueries({
-          predicate: (query) =>
-            query.queryKey[0] === 'orpc' &&
-            query.queryKey[1] === 'societyEmail.list'
+          queryKey: ['societyEmail', 'list']
         })
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to send email')
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to send email')
       }
-    })
+    }
   )
 
   // Preview email mutation
   const previewMutation = useMutation(
-    orpc.societyEmail.preview.mutationOptions({
+    (data: { organizationId: string; subject: string; bodyHtml: string }) =>
+      api.society.email.preview.post(data),
+    {
       onSuccess: (data) => {
+        if (!data) return
         setPreviewData(data)
         setShowPreview(true)
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to generate preview')
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to generate preview')
       }
-    })
+    }
   )
 
   const handleSend = async (data: {
