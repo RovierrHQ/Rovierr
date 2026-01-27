@@ -10,8 +10,7 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { useQueryClient } from '@tanstack/react-query'
-import api, { useMutation } from '@web/lib/api-client'
+import api, { useMutation, useQueryClient } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { Loader2 } from 'lucide-react'
 import { redirect } from 'next/navigation'
@@ -86,9 +85,9 @@ const RoadmapComments: FC<RoadmapCommentsProps> = ({
     }
   })
 
-  const { mutateAsync, isPending } = useMutation(
-    api.roadmap.createComment.post,
-    {
+  const { mutateAsync, isPending } = useMutation<
+    { roadmapId: string; text: string },
+  >(api.roadmap.createComment.post, {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['roadmap', 'list']
