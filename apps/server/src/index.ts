@@ -13,7 +13,7 @@ import { roadmap } from '@api/routers/roadmap'
 import { stripeRouter } from '@api/routers/stripe'
 // import { resumeRouter } from '@api/routers/resume'
 // import { society } from '@api/routers/society'
-// import { tasks } from '@api/routers/tasks'
+import { tasks } from '@api/routers/tasks'
 import { universityRouter } from '@api/routers/university'
 import { user } from '@api/routers/user'
 import { verifyStudentRouter } from '@api/routers/verify-student'
@@ -57,7 +57,7 @@ const app = new Elysia()
   }))
   .use(user)
   .use(roadmap)
-  // .use(tasks)
+  .use(tasks)
   .use(realtime)
   // .use(chat)
   // .use(connection)

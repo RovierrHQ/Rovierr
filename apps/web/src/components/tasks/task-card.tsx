@@ -9,8 +9,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@rov/ui/components/select'
-
-import api, { useMutation, useQueryClient } from '@web/lib/api-client'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { format } from 'date-fns'
 import { Calendar, MessageSquare, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
@@ -26,21 +26,18 @@ type TaskCardProps = {
 
 export function TaskCard({
   task,
-  organizationId,
+  organizationId: _,
   onStatusChange,
   onClick
 }: TaskCardProps) {
   const queryClient = useQueryClient()
 
-  const updateTaskMutation = useMutation(
-    (data: { id: string; status: 'todo' | 'in_progress' | 'done' }) =>
-      api.tasks['update-task'].patch(data)
-  )
+  const updateTaskMutation = useMutation(api.tasks.update.put)
 
   const handleStatusChange = async (newStatus: Task['status']) => {
     try {
       await updateTaskMutation.mutateAsync({
-        id: task.id,
+        taskId: task.id,
         status: newStatus
       })
       toast.success('Task status updated')
@@ -52,8 +49,6 @@ export function TaskCard({
       })
       onStatusChange(task.id, newStatus)
     } catch (error) {
-      // The toast.error is handled by the mutation's onError callback
-      // This catch block can be used for other error handling or logging if needed
       console.error('Error updating task status:', error)
     }
   }
