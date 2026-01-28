@@ -32,14 +32,8 @@ export function TaskCard({
 }: TaskCardProps) {
   const queryClient = useQueryClient()
 
-  const updateTaskMutation = useMutation(api.tasks.update.put)
-
-  const handleStatusChange = async (newStatus: Task['status']) => {
-    try {
-      await updateTaskMutation.mutateAsync({
-        taskId: task.id,
-        status: newStatus
-      })
+  const updateTaskMutation = useMutation(api.tasks.update.put, {
+    onSuccess: (data) => {
       toast.success('Task status updated')
       queryClient.invalidateQueries({
         queryKey: ['tasks', 'getTaskDetails', task.id]
@@ -47,10 +41,18 @@ export function TaskCard({
       queryClient.invalidateQueries({
         queryKey: ['tasks', 'getClubTasks']
       })
-      onStatusChange(task.id, newStatus)
-    } catch (error) {
-      console.error('Error updating task status:', error)
+      onStatusChange(task.id, data.status)
+    },
+    onError: (error) => {
+      toast.error(error.value.message)
     }
+  })
+
+  const handleStatusChange = (newStatus: Task['status']) => {
+    updateTaskMutation.mutate({
+      taskId: task.id,
+      status: newStatus
+    })
   }
 
   return (
