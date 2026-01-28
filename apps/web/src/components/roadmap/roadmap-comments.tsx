@@ -1,5 +1,6 @@
 'use client'
 
+import type { Treaty } from '@elysiajs/eden'
 import { Button } from '@rov/ui/components/button'
 import {
   Dialog,
@@ -10,7 +11,8 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import api, { useMutation, useQueryClient } from '@web/lib/api-client'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { Loader2 } from 'lucide-react'
 import { redirect } from 'next/navigation'
@@ -24,24 +26,9 @@ const commentSchema = z.object({
   text: z.string().min(1, 'Comment cannot be empty')
 })
 
-type Comment = {
-  id: string
-  text: string
-  createdAt: string
-  updatedAt: string
-  user: {
-    id: string
-    name: string
-    email: string
-    image: string | null
-  }
-  upvotes: Array<{
-    id: string
-    userId: string
-    createdAt: string
-    updatedAt: string
-  }>
-}
+type Comment = Treaty.Data<
+  typeof api.roadmap.list.get
+>['data'][0]['comments'][0]
 
 type RoadmapCommentsProps = {
   roadmapId: string
@@ -85,9 +72,9 @@ const RoadmapComments: FC<RoadmapCommentsProps> = ({
     }
   })
 
-  const { mutateAsync, isPending } = useMutation<
-    { roadmapId: string; text: string },
-  >(api.roadmap.createComment.post, {
+  const { mutateAsync, isPending } = useMutation(
+    api.roadmap.createComment.post,
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['roadmap', 'list']
