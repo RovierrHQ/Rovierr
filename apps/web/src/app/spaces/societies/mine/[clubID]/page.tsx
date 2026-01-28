@@ -13,9 +13,9 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
-import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { useQuery } from '@tanstack/react-query'
 import { SocietyImageUploadDialog } from '@web/components/societies/society-image-upload-dialog'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import {
   AlertCircle,
@@ -319,10 +319,11 @@ const ClubProfilePage = () => {
                   completion={society.profileCompletionPercentage ?? 0}
                   society={{
                     ...society,
-                    profileCompletionPercentage: society.profileCompletionPercentage ?? 0,
+                    profileCompletionPercentage:
+                      society.profileCompletionPercentage ?? 0,
                     onboardingCompleted: society.onboardingCompleted ?? false,
                     createdAt: new Date(society.createdAt),
-                    updatedAt: new Date(society.updatedAt),
+                    updatedAt: new Date(society.updatedAt)
                   }}
                   societyId={clubID}
                 />

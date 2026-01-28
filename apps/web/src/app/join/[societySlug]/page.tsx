@@ -26,7 +26,10 @@ const PublicJoinPage = () => {
   // Fetch public registration page data
   const { data, isLoading, error } = useQuery(
     ['society', 'registration', 'public', societySlug],
-    () => api.society.registration.public['page-data'].get({ query: { societySlug } })
+    () =>
+      api.society.registration.public['page-data'].get({
+        query: { societySlug }
+      })
   )
 
   if (isLoading) {

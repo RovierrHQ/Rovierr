@@ -11,8 +11,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@rov/ui/components/select'
-import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { AddApplicationDialog } from '@web/components/career/add-application-dialog'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import {
   Briefcase,
   Clock,

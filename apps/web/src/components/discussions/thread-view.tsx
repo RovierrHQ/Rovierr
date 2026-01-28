@@ -28,38 +28,50 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
   const [replyText, setReplyText] = useState('')
   const queryClient = useQueryClient()
 
-  const replyMutation = useMutation((data: {
-    threadId: string
-    content: string
-    isAnonymous: boolean
-  }) => api.discussion.reply.create.post(data), {
+  const replyMutation = useMutation(
+    (data: { threadId: string; content: string; isAnonymous: boolean }) =>
+      api.discussion.reply.create.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['discussion', 'thread', 'get', discussion.id]
         })
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'list', discussion.contextType, discussion.contextId]
+          queryKey: [
+            'discussion',
+            'thread',
+            'list',
+            discussion.contextType,
+            discussion.contextId
+          ]
         })
         toast.success('Reply posted successfully')
         setReplyText('')
       },
       onError: (error) => {
-        toast.error(error instanceof Error ? error.message : 'Failed to post reply')
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to post reply'
+        )
       }
     }
   )
 
-  const voteMutation = useMutation((data: {
-    threadId?: string
-    replyId?: string
-    voteType: 'up' | 'down'
-  }) => api.discussion.vote.vote.post(data), {
+  const voteMutation = useMutation(
+    (data: { threadId?: string; replyId?: string; voteType: 'up' | 'down' }) =>
+      api.discussion.vote.vote.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['discussion', 'thread', 'get', discussion.id]
         })
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'list', discussion.contextType, discussion.contextId]
+          queryKey: [
+            'discussion',
+            'thread',
+            'list',
+            discussion.contextType,
+            discussion.contextId
+          ]
         })
       },
       onError: (error) => {
@@ -68,20 +80,28 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
     }
   )
 
-  const unvoteMutation = useMutation((data: {
-    threadId?: string
-    replyId?: string
-  }) => api.discussion.vote.unvote.post(data), {
+  const unvoteMutation = useMutation(
+    (data: { threadId?: string; replyId?: string }) =>
+      api.discussion.vote.unvote.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['discussion', 'thread', 'get', discussion.id]
         })
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'list', discussion.contextType, discussion.contextId]
+          queryKey: [
+            'discussion',
+            'thread',
+            'list',
+            discussion.contextType,
+            discussion.contextId
+          ]
         })
       },
       onError: (error) => {
-        toast.error(error instanceof Error ? error.message : 'Failed to remove vote')
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to remove vote'
+        )
       }
     }
   )

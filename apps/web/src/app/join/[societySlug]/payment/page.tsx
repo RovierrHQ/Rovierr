@@ -5,10 +5,7 @@ import { Card } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import { useQueryClient } from '@tanstack/react-query'
-import api, {
-  useMutation,
-  useQuery
-} from '@web/lib/api-client'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import {
   AlertCircle,
@@ -36,7 +33,10 @@ const PaymentPage = () => {
   // Fetch public registration page data
   const { data, isLoading } = useQuery(
     ['society', 'registration', 'public', societySlug],
-    () => api.society.registration.public['page-data'].get({ query: { societySlug } })
+    () =>
+      api.society.registration.public['page-data'].get({
+        query: { societySlug }
+      })
   )
 
   // Check user's join request status

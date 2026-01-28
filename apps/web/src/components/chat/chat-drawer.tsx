@@ -12,9 +12,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@rov/ui/components/sidebar'
-import { useQuery, useQueryClient } from '@web/lib/api-client'
 import { usePresence } from '@web/hooks/use-presence'
-import api from '@web/lib/api-client'
+import api, { useQuery, useQueryClient } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { useCentrifugo } from '@web/lib/centrifuge'
 import { MessageCircle } from 'lucide-react'
@@ -47,22 +46,25 @@ export function ChatDrawer() {
 
   const { data: connections } = useQuery(
     ['connection', 'listConnections', { limit: 100, offset: 0 }],
-    () => api.connection.list.get({
-      query: {
-        limit: 100,
-        offset: 0
-      }
-    }),
+    () =>
+      api.connection.list.get({
+        query: {
+          limit: 100,
+          offset: 0
+        }
+      }),
     { enabled: isOpen }
   )
 
   // Get Centrifugo connection token
   const { data: centrifugoAuth } = useQuery(
-    ['realtime','token'],
+    ['realtime', 'token'],
     () => api.realtime.token.get(),
-    { enabled: !!session?.user?.id,
-    staleTime: 55 * 60 * 1000 // 55 minutes (token expires in 1 hour)
-  })
+    {
+      enabled: !!session?.user?.id,
+      staleTime: 55 * 60 * 1000 // 55 minutes (token expires in 1 hour)
+    }
+  )
 
   // Subscribe to user's personal chat channel for new messages and conversation updates
   useCentrifugo<{ type: string; conversationId?: string }>(

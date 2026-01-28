@@ -37,15 +37,17 @@ export function EditApplicationDialog({
 }: EditApplicationDialogProps) {
   const queryClient = useQueryClient()
 
-  const updateMutation = useMutation((data: {
-    id: string
-    companyName: string
-    positionTitle: string
-    jobPostUrl?: string
-    location?: string
-    salaryRange?: string
-    notes?: string
-  }) => api.career.applications.update.post(data), {
+  const updateMutation = useMutation(
+    (data: {
+      id: string
+      companyName: string
+      positionTitle: string
+      jobPostUrl?: string
+      location?: string
+      salaryRange?: string
+      notes?: string
+    }) => api.career.applications.update.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['career', 'applications', 'get', { id: application.id }]

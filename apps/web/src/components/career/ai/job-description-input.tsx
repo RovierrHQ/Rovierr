@@ -30,7 +30,10 @@ export function JobDescriptionInput({
   const [textValue, setTextValue] = useState('')
 
   // Parse job description from text
-  const parseTextMutation = useMutation((data: { text: string }) => api.career.ai['parse-job-description'].post(data), {
+  const parseTextMutation = useMutation(
+    (data: { text: string }) =>
+      api.career.ai['parse-job-description'].post(data),
+    {
       onSuccess: (data) => {
         toast.success('Job description parsed successfully')
         onJobParsed(data)
@@ -44,7 +47,9 @@ export function JobDescriptionInput({
   )
 
   // Parse job description from URL
-  const parseUrlMutation = useMutation((data: { url: string }) => api.career.ai['parse-job-url'].post(data), {
+  const parseUrlMutation = useMutation(
+    (data: { url: string }) => api.career.ai['parse-job-url'].post(data),
+    {
       onSuccess: (data) => {
         toast.success('Job URL parsed successfully')
         onJobParsed(data)

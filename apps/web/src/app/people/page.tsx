@@ -6,11 +6,7 @@ import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
 import { Skeleton } from '@rov/ui/components/skeleton'
-import {
-  useInfiniteQuery,
-  useMutation as useTanstackMutation,
-  useQueryClient
-} from '@tanstack/react-query'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { UserPlus, Users } from 'lucide-react'
 import Link from 'next/link'
@@ -64,8 +60,7 @@ export default function PeoplePage() {
         queryClient.invalidateQueries({ queryKey: ['people', 'list'] })
         toast.success('Connection request sent')
       },
-      onError: (error) =>{ 
-
+      onError: (error) => {
         if (error.message.includes('SELF_CONNECTION')) {
           toast.error('Cannot connect with yourself')
         } else if (error.message.includes('ALREADY_CONNECTED')) {

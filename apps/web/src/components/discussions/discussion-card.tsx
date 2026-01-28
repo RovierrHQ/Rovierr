@@ -23,14 +23,19 @@ export function DiscussionCard({
 }: DiscussionCardProps) {
   const queryClient = useQueryClient()
 
-  const voteMutation = useMutation((data: {
-    replyId?: string
-    threadId?: string
-    voteType: 'up' | 'down'
-  }) => api.discussion.vote.vote.post(data), {
+  const voteMutation = useMutation(
+    (data: { replyId?: string; threadId?: string; voteType: 'up' | 'down' }) =>
+      api.discussion.vote.vote.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'list', discussion.contextType, discussion.contextId]
+          queryKey: [
+            'discussion',
+            'thread',
+            'list',
+            discussion.contextType,
+            discussion.contextId
+          ]
         })
       },
       onError: (error) => {
@@ -39,17 +44,25 @@ export function DiscussionCard({
     }
   )
 
-  const unvoteMutation = useMutation((data: {
-    replyId?: string
-    threadId?: string
-  }) => api.discussion.vote.unvote.post(data), {
+  const unvoteMutation = useMutation(
+    (data: { replyId?: string; threadId?: string }) =>
+      api.discussion.vote.unvote.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['discussion', 'thread', 'list', discussion.contextType, discussion.contextId]
+          queryKey: [
+            'discussion',
+            'thread',
+            'list',
+            discussion.contextType,
+            discussion.contextId
+          ]
         })
       },
       onError: (error) => {
-        toast.error(error instanceof Error ? error.message : 'Failed to remove vote')
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to remove vote'
+        )
       }
     }
   )

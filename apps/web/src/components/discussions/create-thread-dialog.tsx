@@ -36,15 +36,17 @@ export function CreateThreadDialog({
 }: CreateThreadDialogProps) {
   const queryClient = useQueryClient()
 
-  const createMutation = useMutation((data: {
-    title: string
-    content: string
-    type: 'question' | 'announcement' | 'discussion'
-    isAnonymous: boolean
-    tags?: string[]
-    contextType: 'course' | 'society' | 'event' | 'project'
-    contextId: string
-  }) => api.discussion.thread.create.post(data), {
+  const createMutation = useMutation(
+    (data: {
+      title: string
+      content: string
+      type: 'question' | 'announcement' | 'discussion'
+      isAnonymous: boolean
+      tags?: string[]
+      contextType: 'course' | 'society' | 'event' | 'project'
+      contextId: string
+    }) => api.discussion.thread.create.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['discussion', 'thread', 'list', contextType, contextId]
@@ -54,7 +56,9 @@ export function CreateThreadDialog({
         form.reset()
       },
       onError: (error) => {
-        toast.error(error instanceof Error ? error.message : 'Failed to create discussion')
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to create discussion'
+        )
       }
     }
   )

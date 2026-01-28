@@ -27,14 +27,19 @@ const TasksPage = () => {
 
   // Fetch club tasks
   const { data: tasksData, isLoading: isLoadingTasks } = useQuery(
-    ['tasks', 'getClubTasks', { clubId: clubID, status: statusFilter, priority: priorityFilter }],
-    () => api.tasks.club({ clubId: clubID }).get({
-      query: {
-        limit: 100,
-        status: statusFilter !== 'all' ? statusFilter : undefined,
-        priority: priorityFilter !== 'all' ? priorityFilter : undefined,
-      }
-    })
+    [
+      'tasks',
+      'getClubTasks',
+      { clubId: clubID, status: statusFilter, priority: priorityFilter }
+    ],
+    () =>
+      api.tasks.club({ clubId: clubID }).get({
+        query: {
+          limit: 100,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          priority: priorityFilter !== 'all' ? priorityFilter : undefined
+        }
+      })
   )
 
   const tasks = (tasksData?.data || []) as Task[]

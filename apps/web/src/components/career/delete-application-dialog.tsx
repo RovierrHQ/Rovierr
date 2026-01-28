@@ -31,7 +31,9 @@ export function DeleteApplicationDialog({
   const queryClient = useQueryClient()
   const router = useRouter()
 
-  const deleteMutation = useMutation((data: { id: string }) => api.career.applications({ id: data.id }).delete(), {
+  const deleteMutation = useMutation(
+    (data: { id: string }) => api.career.applications({ id: data.id }).delete(),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['career', 'applications', 'list']

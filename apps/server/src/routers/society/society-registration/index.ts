@@ -17,7 +17,6 @@ import {
   user as userTable
 } from '@rov/db'
 import {
-  approveJoinRequestSchema,
   bulkApproveJoinRequestsSchema,
   bulkRejectJoinRequestsSchema,
   checkRegistrationAvailabilitySchema,
@@ -26,7 +25,6 @@ import {
   exportJoinRequestsSchema,
   generatePrintableQRCodeSchema,
   generateQRCodeSchema,
-  getJoinRequestSchema,
   getPublicRegistrationPageSchema,
   getRegistrationAnalyticsSchema,
   getRegistrationSettingsSchema,

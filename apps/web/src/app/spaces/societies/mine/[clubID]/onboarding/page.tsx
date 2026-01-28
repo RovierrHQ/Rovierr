@@ -4,10 +4,7 @@ import type { societySchema } from '@rov/orpc-contracts'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { Progress } from '@rov/ui/components/progress'
-import api, {
-  useQuery as useTreatyQuery
-} from '@web/lib/api-client'
-import { useQuery } from '@tanstack/react-query'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { ArrowLeft, ArrowRight, Check, Loader2, Save } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'

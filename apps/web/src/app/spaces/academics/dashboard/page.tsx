@@ -8,8 +8,8 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
-import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { AddCoursesDialog } from '@web/components/academic/add-courses-dialog'
+import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
 import { BookOpen, Calendar, MessageSquare, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'

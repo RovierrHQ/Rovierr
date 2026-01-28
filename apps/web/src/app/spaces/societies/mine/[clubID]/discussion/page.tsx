@@ -1,14 +1,13 @@
 'use client'
 
+import type { ThreadListItem } from '@api/routers/discussion/schemas'
 import { Button } from '@rov/ui/components/button'
-
 import { CreateThreadDialog } from '@web/components/discussions/create-thread-dialog'
 import { DiscussionFilters } from '@web/components/discussions/discussion-filters'
 import { DiscussionList } from '@web/components/discussions/discussion-list'
 import { DiscussionStats } from '@web/components/discussions/discussion-stats'
 import { ThreadView } from '@web/components/discussions/thread-view'
 import type { Discussion, Reply } from '@web/components/discussions/types'
-import type { ThreadListItem } from '@api/routers/discussion/schemas'
 import api, { useQuery } from '@web/lib/api-client'
 import { MessageSquare } from 'lucide-react'
 import { use, useState } from 'react'
@@ -31,25 +30,39 @@ export default function SocietyDiscussionsPage({ params }: PageProps) {
 
   // Fetch discussions from the backend
   const { data: threadsData, isLoading } = useQuery(
-    ['discussion', 'thread', 'list', { contextType: 'society', contextId: discussionContextId, search: searchQuery, sortBy: 'recent', limit: 50, offset: 0 }],
-    () => api.discussion.thread.list.get({
-      query: {
+    [
+      'discussion',
+      'thread',
+      'list',
+      {
         contextType: 'society',
         contextId: discussionContextId,
-        search: searchQuery || undefined,
+        search: searchQuery,
         sortBy: 'recent',
         limit: 50,
         offset: 0
       }
-    })
+    ],
+    () =>
+      api.discussion.thread.list.get({
+        query: {
+          contextType: 'society',
+          contextId: discussionContextId,
+          search: searchQuery || undefined,
+          sortBy: 'recent',
+          limit: 50,
+          offset: 0
+        }
+      })
   )
 
   // Fetch selected thread details with replies
   const { data: selectedThreadData } = useQuery(
     ['discussion', 'thread', 'get', { id: selectedDiscussion }],
-    () => api.discussion.thread.get.get({
-      query: { id: selectedDiscussion || '' }
-    }),
+    () =>
+      api.discussion.thread.get.get({
+        query: { id: selectedDiscussion || '' }
+      }),
     { enabled: !!selectedDiscussion }
   )
 

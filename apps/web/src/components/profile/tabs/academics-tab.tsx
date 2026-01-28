@@ -123,7 +123,10 @@ export function AcademicsTab() {
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           <span>
-                            Started {new Date(enrollment.startedOn).toLocaleDateString()}
+                            Started{' '}
+                            {new Date(
+                              enrollment.startedOn
+                            ).toLocaleDateString()}
                           </span>
                         </div>
                       )}

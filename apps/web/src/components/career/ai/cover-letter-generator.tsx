@@ -33,11 +33,13 @@ export function CoverLetterGenerator({
   onContentChange
 }: CoverLetterGeneratorProps) {
   // Generate cover letter mutation
-  const generateMutation = useMutation((data: {
-    resumeId: string
-    jobData: ExtendedParsedJobData
-    applicationId?: string
-  }) => api.career.ai['generate-cover-letter'].post(data), {
+  const generateMutation = useMutation(
+    (data: {
+      resumeId: string
+      jobData: ExtendedParsedJobData
+      applicationId?: string
+    }) => api.career.ai['generate-cover-letter'].post(data),
+    {
       onSuccess: (data) => {
         onCoverLetterGenerated(data)
         toast.success('Cover letter generated successfully')
@@ -49,10 +51,10 @@ export function CoverLetterGenerator({
   )
 
   // Update cover letter mutation
-  const updateMutation = useMutation((data: {
-    id: string
-    content: string
-  }) => api.career.ai['update-cover-letter'].post(data), {
+  const updateMutation = useMutation(
+    (data: { id: string; content: string }) =>
+      api.career.ai['update-cover-letter'].post(data),
+    {
       onSuccess: (data) => {
         onCoverLetterGenerated(data)
         toast.success('Cover letter saved successfully')

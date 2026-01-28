@@ -32,10 +32,10 @@ export function TaskCard({
 }: TaskCardProps) {
   const queryClient = useQueryClient()
 
-  const updateTaskMutation = useMutation((data: {
-    id: string
-    status: 'todo' | 'in_progress' | 'done'
-  }) => api.tasks['update-task'].patch(data))
+  const updateTaskMutation = useMutation(
+    (data: { id: string; status: 'todo' | 'in_progress' | 'done' }) =>
+      api.tasks['update-task'].patch(data)
+  )
 
   const handleStatusChange = async (newStatus: Task['status']) => {
     try {
@@ -54,7 +54,7 @@ export function TaskCard({
     } catch (error) {
       // The toast.error is handled by the mutation's onError callback
       // This catch block can be used for other error handling or logging if needed
-      console.error('Error updating task status:', error);
+      console.error('Error updating task status:', error)
     }
   }
 

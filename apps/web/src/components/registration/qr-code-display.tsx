@@ -9,8 +9,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@rov/ui/components/select'
-import api from '@web/lib/api-client'
-import {
+import api, {
   useMutation as useTreatyMutation,
   useQuery as useTreatyQuery
 } from '@web/lib/api-client'

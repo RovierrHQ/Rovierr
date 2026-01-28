@@ -42,10 +42,10 @@ export function TaskTable({
 }: TaskTableProps) {
   const queryClient = useQueryClient()
 
-  const updateTaskMutation = useMutation((data: {
-    id: string
-    status: 'todo' | 'in_progress' | 'done'
-  }) => api.tasks['update-task'].patch(data))
+  const updateTaskMutation = useMutation(
+    (data: { id: string; status: 'todo' | 'in_progress' | 'done' }) =>
+      api.tasks['update-task'].patch(data)
+  )
 
   const handleStatusChange = async (
     taskId: string,

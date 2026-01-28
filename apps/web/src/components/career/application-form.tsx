@@ -29,7 +29,9 @@ export function ApplicationForm({ onSuccess, onCancel }: ApplicationFormProps) {
   const [isParsing, setIsParsing] = useState(false)
   const [urlToParse, setUrlToParse] = useState('')
 
-  const createMutation = useMutation((data: ApplicationFormData) => api.career.applications.create.post(data), {
+  const createMutation = useMutation(
+    (data: ApplicationFormData) => api.career.applications.create.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['career', 'applications', 'list']
@@ -70,7 +72,9 @@ export function ApplicationForm({ onSuccess, onCancel }: ApplicationFormProps) {
 
     setIsParsing(true)
     try {
-      const { data: result, error } = await api.career.applications['parse-url'].post({
+      const { data: result, error } = await api.career.applications[
+        'parse-url'
+      ].post({
         url: urlToParse
       })
 
