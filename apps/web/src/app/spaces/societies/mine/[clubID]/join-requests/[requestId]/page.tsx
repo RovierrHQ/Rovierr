@@ -1,11 +1,18 @@
 'use client'
 
+import type { Treaty } from '@elysiajs/eden'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  useQueryClient,
+  useQuery as useTanstackQuery
+} from '@tanstack/react-query'
+import api, {
+  useMutation as useTreatyMutation,
+  useQuery as useTreatyQuery
+} from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import {
   ArrowLeft,
   CheckCircle,
@@ -19,6 +26,29 @@ import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+type JoinRequestData = {
+  id: string
+  status: 'pending' | 'approved' | 'rejected' | 'payment_completed'
+  paymentStatus: 'pending' | 'verified' | 'not_required' | 'not_verified'
+  paymentAmount?: number
+  user: {
+    name: string
+    email: string
+    phoneNumber?: string
+  }
+  formResponse?: {
+    answers: Record<string, unknown>
+  }
+  submittedAt: string
+  reviewedAt?: string
+  rejectionReason?: string
+}
+
+type JoinRequestTreatyResponse = Treaty.TreatyResponse<JoinRequestData>
+
+type JoinRequestTreatyRecord =
+  JoinRequestTreatyResponse extends Treaty.TreatyResponse<infer R> ? R : never
+
 const JoinRequestDetailPage = () => {
   const params = useParams()
   const router = useRouter()
@@ -30,7 +60,7 @@ const JoinRequestDetailPage = () => {
   const [verificationNotes, setVerificationNotes] = useState('')
 
   // Check if user has permission
-  const { data: canManage } = useQuery({
+  const { data: canManage } = useTanstackQuery({
     queryKey: ['user-permission-settings', societyId],
     queryFn: async () => {
       try {
@@ -49,16 +79,24 @@ const JoinRequestDetailPage = () => {
   })
 
   // Fetch join request details
-  const { data: request, isLoading } = useQuery({
-    ...orpc.societyRegistration.joinRequest.get.queryOptions({
-      input: { id: requestId }
-    }),
-    enabled: !!requestId && canManage === true
-  })
+  const { data: request, isLoading } = useTreatyQuery<JoinRequestTreatyRecord>(
+    ['registration', 'joinRequest', 'get', requestId],
+    () =>
+      api.society.registration['join-request']({
+        query: { id: requestId }
+      }),
+    {
+      enabled: !!requestId && canManage === true
+    }
+  )
 
   // Approve mutation
-  const approveMutation = useMutation(
-    orpc.societyRegistration.joinRequest.approve.mutationOptions({
+  const approveMutation = useTreatyMutation(
+    (variables: { id: string }) =>
+      api.society.registration['join-request']({
+        query: { id: variables.id }
+      }).approve.post(),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['join-request', requestId]
@@ -69,12 +107,18 @@ const JoinRequestDetailPage = () => {
       onError: () => {
         toast.error('Failed to approve join request')
       }
-    })
+    }
   )
 
   // Reject mutation
-  const rejectMutation = useMutation(
-    orpc.societyRegistration.joinRequest.reject.mutationOptions({
+  const rejectMutation = useTreatyMutation(
+    (variables: { id: string; reason: string }) =>
+      api.society.registration['join-request']({
+        query: { id: variables.id }
+      }).reject.post({
+        body: { reason: variables.reason }
+      }),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['join-request', requestId]
@@ -85,12 +129,20 @@ const JoinRequestDetailPage = () => {
       onError: () => {
         toast.error('Failed to reject join request')
       }
-    })
+    }
   )
 
   // Verify payment mutation
-  const verifyPaymentMutation = useMutation(
-    orpc.societyRegistration.payment.verify.mutationOptions({
+  const verifyPaymentMutation = useTreatyMutation(
+    (variables: { id: string; notes?: string }) =>
+      api.society.registration
+        .payment({
+          query: { id: variables.id }
+        })
+        .verify.post({
+          body: { notes: variables.notes }
+        }),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['join-request', requestId]
@@ -100,12 +152,20 @@ const JoinRequestDetailPage = () => {
       onError: () => {
         toast.error('Failed to verify payment')
       }
-    })
+    }
   )
 
   // Mark payment as not verified mutation
-  const markNotVerifiedMutation = useMutation(
-    orpc.societyRegistration.payment.markNotVerified.mutationOptions({
+  const markNotVerifiedMutation = useTreatyMutation(
+    (variables: { id: string; reason: string }) =>
+      api.society.registration
+        .payment({
+          query: { id: variables.id }
+        })
+        .unverify.post({
+          body: { reason: variables.reason }
+        }),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['join-request', requestId]
@@ -115,7 +175,7 @@ const JoinRequestDetailPage = () => {
       onError: () => {
         toast.error('Failed to mark payment as not verified')
       }
-    })
+    }
   )
 
   const handleApprove = () => {

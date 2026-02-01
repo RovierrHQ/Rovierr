@@ -1,15 +1,18 @@
 'use client'
 
 import { Badge } from '@rov/ui/components/badge'
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
 import { CheckCircle2, Shield, XCircle } from 'lucide-react'
 import Link from 'next/link'
+import api ,{useQuery}from '@web/lib/api-client'
 
-export function VerificationSettings() {
-  const { data: profileInfo } = useQuery(orpc.user.profile.info.queryOptions())
+export function VerificationSettings(){
+  const { data: profileInfo } = useQuery(
+    ['user', 'profile', 'info'],
+    () => api.user.profile.details.get()
+  )
   const { data: verificationStatus } = useQuery(
-    orpc.user.profile.verifyStudent.getVerificationStatus.queryOptions()
+    ['user', 'profile', 'verifyStudent', 'status'],
+    () => api.user.profile['verify-student']['get-verification-status'].get()
   )
 
   const studentVerified = profileInfo?.studentStatusVerified

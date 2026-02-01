@@ -13,8 +13,7 @@ import {
 } from '@rov/ui/components/select'
 import { Switch } from '@rov/ui/components/switch'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import { useQueryClient } from '@tanstack/react-query'
 import { ExternalLink, Loader2, Plus, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -92,21 +91,24 @@ export const RegistrationSettingsForm = ({
   }, [settings])
 
   // Fetch available forms for this society
-  const { data: formsData, isLoading: isLoadingForms } = useQuery(
-    orpc.form.list.queryOptions({
-      input: {
-        entityType: 'society',
-        entityId: societyId,
-        status: 'published',
-        limit: 100,
-        offset: 0
-      }
-    })
+  const { data: formsData, isLoading: isLoadingForms } = useTreatyQuery(
+    ['form', 'list', societyId],
+    () =>
+      api.form.list.get({
+        query: {
+          entityType: 'society',
+          entityId: societyId,
+          status: 'published',
+          limit: '100',
+          offset: '0'
+        }
+      })
   )
 
   // Create settings mutation
-  const createMutation = useMutation(
-    orpc.societyRegistration.settings.create.mutationOptions({
+  const createMutation = useTreatyMutation(
+    (variables: any) => api.societyRegistration.settings.create.post(variables),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['societyRegistration', 'settings']
@@ -116,12 +118,13 @@ export const RegistrationSettingsForm = ({
       onError: (error: Error) => {
         toast.error(error.message || 'Failed to create settings')
       }
-    })
+    }
   )
 
   // Update settings mutation
-  const updateMutation = useMutation(
-    orpc.societyRegistration.settings.update.mutationOptions({
+  const updateMutation = useTreatyMutation(
+    (variables: any) => api.societyRegistration.settings.update.post(variables),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['societyRegistration', 'settings']
@@ -131,7 +134,7 @@ export const RegistrationSettingsForm = ({
       onError: (error: Error) => {
         toast.error(error.message || 'Failed to update settings')
       }
-    })
+    }
   )
 
   const handleSave = () => {

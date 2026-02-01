@@ -9,7 +9,8 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import api, { useMutation, useQueryClient } from '@web/lib/api-client'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { toast } from 'sonner'
 import { z } from 'zod'
 

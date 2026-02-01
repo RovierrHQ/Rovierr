@@ -34,7 +34,7 @@ export function AboutTab() {
 
   const { data: profileDetails, isLoading } = useQuery(
     ['user', 'profile', 'details'],
-    api.user.profile.details.get
+    () => api.user.profile.details.get()
   )
 
   const form = useAppForm({

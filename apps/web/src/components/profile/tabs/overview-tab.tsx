@@ -8,27 +8,36 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
 import { Activity, BookOpen, Calendar, TrendingUp, Users } from 'lucide-react'
 import Link from 'next/link'
+import api,{useQuery} from '@web/lib/api-client'
 
 export function OverviewTab() {
-  const { data: profileInfo } = useQuery(orpc.user.profile.info.queryOptions())
-  const { data: academicData } = useQuery(
-    orpc.user.profile.academic.queryOptions()
+  const { data: profileInfo } = useQuery(
+    ['user', 'profile', 'info'],
+    () => api.user.profile.details.get()
   )
-  const { data: activityData } = useQuery({
-    ...orpc.user.profile.activity.queryOptions({ limit: 5, offset: 0 }),
-    queryKey: ['user', 'profile', 'activity', 'overview']
-  })
-  const { data: organizations } = useQuery({
-    queryFn: () => {
-      // TODO: Replace with proper organization list endpoint when available
-      return Promise.resolve([])
-    },
-    queryKey: ['organizations', 'list']
-  })
+  const { data: academicData } = useQuery(
+    ['user', 'profile', 'academic'],
+    () => api.user.profile.academic.get()
+  )
+  const { data: activityData } = useQuery(
+    ['user', 'profile', 'activity', 'overview', '5', '0'],
+    () =>
+      api.user.profile.activity.get({
+        query: {
+          limit: 5,
+          offset: 0
+        }
+      })
+  )
+ const { data: organizations } = useQuery(
+  ['organizations', 'list'], 
+  () =>
+  api.organizations.list.get()
+)
+
+
 
   const primaryEnrollment = academicData?.enrollments.find((e) => e.isPrimary)
   const clubCount = organizations?.length ?? 0

@@ -19,9 +19,9 @@ import {
 } from '@rov/ui/components/popover'
 import { Switch } from '@rov/ui/components/switch'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import api ,{useMutation} from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import {
   Calendar,
   Image as ImageIcon,
@@ -60,21 +60,21 @@ export const ClubPostPromptCard = () => {
     setPostDialogOpen(false)
   }
 
-  const createPostMutation = useMutation(
-    orpc.campusFeed.create.mutationOptions({
+  const createPostMutation = useMutation(api['campus-feed'].create.post,
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
         toast.success('Post created successfully!')
         resetForm()
       },
-      onError: (error: Error) => {
+      onError: (error) => {
         toast.error(error.message || 'Failed to create post')
       }
-    })
+    }
   )
 
-  const createEventMutation = useMutation(
-    orpc.campusFeed.createEvent.mutationOptions({
+  const createEventMutation = useMutation(api['campus-feed']['create-event'].post,
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
         toast.success('Event post created successfully!')
@@ -83,16 +83,17 @@ export const ClubPostPromptCard = () => {
       onError: (error: Error) => {
         toast.error(error.message || 'Failed to create event post')
       }
-    })
+    }
   )
 
-  const uploadMediaMutation = useMutation(
-    orpc.campusFeed.uploadMedia.mutationOptions({
+  const uploadMediaMutation = useTreatyMutation(
+    (variables: any) => api['campus-feed']['upload-media'].post(variables),
+    {
       onError: (error: Error) => {
         toast.error(error.message || 'Failed to upload image')
         setIsUploading(false)
       }
-    })
+    }
   )
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,14 +120,16 @@ export const ClubPostPromptCard = () => {
       const base64Data = reader.result as string
 
       try {
-        const result = await uploadMediaMutation.mutateAsync({
+        const res = await uploadMediaMutation.mutateAsync({
           base64Data,
           mediaType: 'image'
         })
+        if (res.error) throw res.error
+        const result = res.data
         // Use presigned URL for preview
-        setSelectedImagePreview(result.url)
+        setSelectedImagePreview(result?.url ?? null)
         // Store S3 key URL for posting
-        setSelectedImageS3Url(result.s3KeyUrl)
+        setSelectedImageS3Url(result?.s3KeyUrl ?? null)
         setIsUploading(false)
       } catch {
         // Error handled by mutation

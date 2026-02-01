@@ -3,10 +3,10 @@
  */
 'use client'
 
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { useCentrifugo } from '@web/lib/centrifuge'
-import { orpc } from '@web/utils/orpc'
 
 export function usePresence() {
   const queryClient = useQueryClient()
@@ -14,10 +14,12 @@ export function usePresence() {
 
   // Get Centrifugo connection token
   const { data: centrifugoAuth } = useQuery(
-    orpc.realtime.getConnectionToken.queryOptions({
+    ['realtime', 'token'],
+    () => api.realtime.getConnectionToken.get(),
+    {
       enabled: !!session?.user?.id,
       staleTime: 55 * 60 * 1000 // 55 minutes (token expires in 1 hour)
-    })
+    }
   )
 
   // Subscribe to presence updates

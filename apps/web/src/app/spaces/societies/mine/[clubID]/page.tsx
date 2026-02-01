@@ -1,6 +1,6 @@
 'use client'
 
-import type { societySchema } from '@rov/orpc-contracts'
+import type { Treaty } from '@elysiajs/eden'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
@@ -31,9 +31,10 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
-import type { z } from 'zod'
 
-type Society = z.infer<typeof societySchema>
+type Society = Treaty.Data<ReturnType<typeof api.society>['get']>['data']
+
+// Extracted Header Component to reduce complexity
 
 const ClubProfilePage = () => {
   const params = useParams()
@@ -48,10 +49,11 @@ const ClubProfilePage = () => {
   }, [organizations, clubID])
 
   // Fetch full society data with API
-  const { data: society, isLoading: societyLoading } = useTreatyQuery(
+  const { data: societyData, isLoading: societyLoading } = useTreatyQuery(
     ['society', clubID],
     () => api.society({ id: clubID }).get()
   )
+  const society = societyData as Society | undefined | null
 
   // Check if user has permission to manage settings using hasPermission
   const { data: canManageSettingsData } = useQuery({
@@ -159,7 +161,7 @@ const ClubProfilePage = () => {
                   <AvatarFallback className="bg-primary/10 text-3xl text-primary sm:text-4xl">
                     {(society?.name || club.name)
                       .split(' ')
-                      .map((w) => w[0])
+                      .map((w: string) => w[0])
                       .join('')
                       .toUpperCase()
                       .slice(0, 2)}

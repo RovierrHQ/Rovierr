@@ -1,5 +1,6 @@
 'use client'
 
+import type { Treaty } from '@elysiajs/eden'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
@@ -11,10 +12,53 @@ import {
   TabsList,
   TabsTrigger
 } from '@rov/ui/components/tabs'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { Check, UserPlus, Users, X } from 'lucide-react'
 import { toast } from 'sonner'
+
+type PendingConnectionsResponse = Awaited<
+  ReturnType<typeof api.connection.pending.get>
+>
+
+type PendingConnectionsRecord =
+  PendingConnectionsResponse extends Treaty.TreatyResponse<infer R> ? R : never
+
+type PendingConnectionsData = Treaty.Data<PendingConnectionsResponse>
+
+type ConnectionItem = PendingConnectionsData extends { connections: infer A }
+  ? A extends Array<infer C>
+    ? C
+    : never
+  : never
+
+type ConnectionUser = ConnectionItem extends { user: infer U }
+  ? U & { isVerified?: boolean; bio?: string | null }
+  : {
+      id: string
+      name: string
+      username?: string | null
+      image?: string | null
+    }
+
+function getErrorMessage(error: unknown) {
+  if (typeof error !== 'object' || error === null) return 'Unknown error'
+
+  const maybeMessage = (error as { message?: unknown }).message
+  if (typeof maybeMessage === 'string' && maybeMessage.trim().length > 0) {
+    return maybeMessage
+  }
+
+  const maybeValue = (error as { value?: unknown }).value
+  if (typeof maybeValue === 'object' && maybeValue !== null) {
+    const valueMessage = (maybeValue as { message?: unknown }).message
+    if (typeof valueMessage === 'string' && valueMessage.trim().length > 0) {
+      return valueMessage
+    }
+  }
+
+  return 'Unknown error'
+}
 
 export default function ConnectionRequestsPage() {
   const queryClient = useQueryClient()
@@ -23,57 +67,57 @@ export default function ConnectionRequestsPage() {
     data: receivedData,
     isLoading: isLoadingReceived,
     error: receivedError
-  } = useQuery(
-    orpc.connection.listPending.queryOptions({
-      input: {
-        type: 'received',
-        limit: 100,
-        offset: 0
-      }
-    })
+  } = useQuery<PendingConnectionsRecord>(
+    ['connection', 'pending', 'received'],
+    () =>
+      api.connection.pending.get({
+        query: {
+          type: 'received',
+          limit: Number(100),
+          offset: Number(0)
+        }
+      })
   )
 
   const {
     data: sentData,
     isLoading: isLoadingSent,
     error: sentError
-  } = useQuery(
-    orpc.connection.listPending.queryOptions({
-      input: {
-        type: 'sent',
-        limit: 100,
-        offset: 0
-      }
-    })
+  } = useQuery<PendingConnectionsRecord>(
+    ['connection', 'pending', 'sent'],
+    () =>
+      api.connection.pending.get({
+        query: {
+          type: 'sent',
+          limit: Number(100),
+          offset: Number(0)
+        }
+      })
   )
 
   const receivedRequests = receivedData?.connections || []
   const sentRequests = sentData?.connections || []
 
-  const acceptMutation = useMutation(
-    orpc.connection.accept.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['connection', 'pending'] })
-        queryClient.invalidateQueries({ queryKey: ['people', 'list'] })
-        toast.success('Connection request accepted')
-      },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to accept request')
-      }
-    })
-  )
+  const acceptMutation = useMutation(api.connection.accept.post, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['connection', 'pending'] })
+      queryClient.invalidateQueries({ queryKey: ['people', 'list'] })
+      toast.success('Connection request accepted')
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || 'Failed to accept request')
+    }
+  })
 
-  const rejectMutation = useMutation(
-    orpc.connection.reject.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['connection', 'pending'] })
-        toast.success('Connection request rejected')
-      },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to reject request')
-      }
-    })
-  )
+  const rejectMutation = useMutation(api.connection.reject.post, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['connection', 'pending'] })
+      toast.success('Connection request rejected')
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || 'Failed to reject request')
+    }
+  })
 
   const handleAccept = (connectionId: string) => {
     acceptMutation.mutate({ connectionId })
@@ -84,10 +128,10 @@ export default function ConnectionRequestsPage() {
   }
 
   const renderRequestCard = (
-    connection: NonNullable<typeof receivedData>['connections'][0],
+    connection: ConnectionItem,
     type: 'received' | 'sent'
   ) => {
-    const user = connection.user
+    const user = connection.user as ConnectionUser
     if (!user) return null
 
     return (
@@ -225,7 +269,7 @@ export default function ConnectionRequestsPage() {
           {receivedError && (
             <div className="py-12 text-center">
               <p className="text-destructive">
-                Error loading requests: {(receivedError as Error).message}
+                Error loading requests: {getErrorMessage(receivedError)}
               </p>
             </div>
           )}
@@ -247,7 +291,7 @@ export default function ConnectionRequestsPage() {
           {sentError && (
             <div className="py-12 text-center">
               <p className="text-destructive">
-                Error loading requests: {(sentError as Error).message}
+                Error loading requests: {getErrorMessage(sentError)}
               </p>
             </div>
           )}

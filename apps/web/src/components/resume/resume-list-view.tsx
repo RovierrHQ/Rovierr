@@ -12,8 +12,7 @@ import {
 } from '@rov/ui/components/alert-dialog'
 import { Button } from '@rov/ui/components/button'
 import { DataTable } from '@rov/ui/components/data-table'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import { useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -29,42 +28,44 @@ export default function ResumeListPage() {
     title: string
   } | null>(null)
 
-  // Fetch resumes using ORPC
-  const { data } = useQuery(
-    orpc.resume.list.queryOptions({
-      input: {
-        limit: 50,
-        offset: 0
+  // Fetch resumes using API
+  const { data } = useTreatyQuery(['resume', 'list', '50', '0'], () =>
+    api.resume.list.get({
+      query: {
+        limit: '50',
+        offset: '0'
       }
     })
   )
 
   // Create resume mutation
-  const createMutation = useMutation(
-    orpc.resume.create.mutationOptions({
+  const createMutation = useTreatyMutation(
+    (variables: {
+      title: string
+      targetPosition?: string
+      templateId: string
+    }) => api.resume.create.post(variables),
+    {
       onSuccess: (result) => {
         queryClient.invalidateQueries({
-          queryKey: orpc.resume.list.queryKey({
-            input: { limit: 50, offset: 0 }
-          })
+          queryKey: ['resume', 'list']
         })
-        router.push(`/spaces/career/resume-builder/${result.id}`)
+        router.push(`/spaces/career/resume-builder/${result?.id}`)
         toast.success('Resume created successfully')
       },
       onError: (error) => {
         toast.error(error.message || 'Failed to create resume')
       }
-    })
+    }
   )
 
   // Delete resume mutation
-  const deleteMutation = useMutation(
-    orpc.resume.delete.mutationOptions({
+  const deleteMutation = useTreatyMutation(
+    (variables: { id: string }) => api.resume.delete.post(variables),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.resume.list.queryKey({
-            input: { limit: 50, offset: 0 }
-          })
+          queryKey: ['resume', 'list']
         })
         toast.success('Resume deleted successfully')
         setDeleteDialogOpen(false)
@@ -73,7 +74,7 @@ export default function ResumeListPage() {
       onError: (error) => {
         toast.error(error.message || 'Failed to delete resume')
       }
-    })
+    }
   )
 
   const handleCreateResume = () => {

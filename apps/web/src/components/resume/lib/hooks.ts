@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
 import { useEffect, useRef, useState } from 'react'
+import api, {useQuery} from '@web/lib/api-client'
 
 /**
  * Auto-save hook with debouncing
@@ -55,7 +54,9 @@ export function useAutoSave<T>(
  * Wraps the ORPC query with proper typing
  */
 export function useResumeData(resumeId: string) {
-  return useQuery(orpc.resume.get.queryOptions({ input: { id: resumeId } }))
+  return useQuery(['resume', 'get', resumeId], () =>
+    api.resume.get({ query: { id: resumeId } })
+  )
 }
 
 /**
@@ -64,11 +65,13 @@ export function useResumeData(resumeId: string) {
  */
 export function useResumeList(limit = 50, offset = 0) {
   return useQuery(
-    orpc.resume.list.queryOptions({
-      input: {
-        limit,
-        offset
-      }
-    })
+    ['resume', 'list', limit.toString(), offset.toString()],
+    () =>
+      api.resume.list.get({
+        query: {
+          limit: limit.toString(),
+          offset: offset.toString()
+        }
+      })
   )
 }

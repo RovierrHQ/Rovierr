@@ -20,9 +20,15 @@ import {
   TableRow
 } from '@rov/ui/components/table'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  useQueryClient,
+  useQuery as useTanstackQuery
+} from '@tanstack/react-query'
+import api, {
+  useMutation as useTreatyMutation,
+  useQuery as useTreatyQuery
+} from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import {
   ArrowLeft,
   CheckCircle,
@@ -58,7 +64,7 @@ const JoinRequestsPage = () => {
   const queryClient = useQueryClient()
 
   // Check if user has permission
-  const { data: canManage } = useQuery({
+  const { data: canManage } = useTanstackQuery({
     queryKey: ['user-permission-settings', societyId],
     queryFn: async () => {
       try {
@@ -77,54 +83,57 @@ const JoinRequestsPage = () => {
   })
 
   // Fetch join requests
-  const { data, isLoading } = useQuery({
-    ...orpc.societyRegistration.joinRequest.list.queryOptions({
-      input: {
-        societyId,
-        status:
-          statusFilter === 'all'
-            ? undefined
-            : ([statusFilter] as Array<
-                | 'pending'
-                | 'approved'
-                | 'rejected'
-                | 'payment_pending'
-                | 'payment_completed'
-              >),
-        paymentStatus:
-          paymentFilter === 'all'
-            ? undefined
-            : ([paymentFilter] as Array<
-                'not_required' | 'pending' | 'verified' | 'not_verified'
-              >),
-        limit,
-        offset: page * limit
-      }
-    }),
-    enabled: !!societyId && canManage === true
-  })
+  const { data, isLoading } = useTreatyQuery(
+    [
+      'societyRegistration',
+      'joinRequest',
+      'list',
+      societyId,
+      statusFilter,
+      paymentFilter,
+      page.toString()
+    ],
+    () =>
+      api.societyRegistration.joinRequest.list.get({
+        query: {
+          societyId,
+          status: statusFilter === 'all' ? undefined : (statusFilter as any),
+          paymentStatus:
+            paymentFilter === 'all' ? undefined : (paymentFilter as any),
+          limit: limit.toString(),
+          offset: (page * limit).toString()
+        }
+      }),
+    {
+      enabled: !!societyId && canManage === true
+    }
+  )
 
   // Bulk approve mutation
-  const bulkApproveMutation = useMutation(
-    orpc.societyRegistration.joinRequest.bulkApprove.mutationOptions({
+  const bulkApproveMutation = useTreatyMutation(
+    (variables: { ids: string[] }) =>
+      api.societyRegistration.joinRequest.bulkApprove.post(variables),
+    {
       onSuccess: (result) => {
         queryClient.invalidateQueries({
           queryKey: ['societyRegistration', 'joinRequest', 'list']
         })
         setSelectedRequests(new Set())
         toast.success(
-          `Successfully approved ${result.successful} request(s)${result.failed > 0 ? `. ${result.failed} failed.` : ''}`
+          `Successfully approved ${result?.successful} request(s)${result?.failed > 0 ? `. ${result.failed} failed.` : ''}`
         )
       },
       onError: () => {
         toast.error('Failed to approve requests')
       }
-    })
+    }
   )
 
   // Bulk reject mutation
-  const bulkRejectMutation = useMutation(
-    orpc.societyRegistration.joinRequest.bulkReject.mutationOptions({
+  const bulkRejectMutation = useTreatyMutation(
+    (variables: { ids: string[]; reason: string }) =>
+      api.societyRegistration.joinRequest.bulkReject.post(variables),
+    {
       onSuccess: (result) => {
         queryClient.invalidateQueries({
           queryKey: ['societyRegistration', 'joinRequest', 'list']
@@ -133,13 +142,13 @@ const JoinRequestsPage = () => {
         setShowBulkRejectDialog(false)
         setBulkRejectionReason('')
         toast.success(
-          `Successfully rejected ${result.successful} request(s)${result.failed > 0 ? `. ${result.failed} failed.` : ''}`
+          `Successfully rejected ${result?.successful} request(s)${result?.failed > 0 ? `. ${result.failed} failed.` : ''}`
         )
       },
       onError: () => {
         toast.error('Failed to reject requests')
       }
-    })
+    }
   )
 
   const handleSelectAll = () => {

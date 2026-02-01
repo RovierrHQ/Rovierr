@@ -12,8 +12,7 @@ import {
 } from '@rov/ui/components/dialog'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
-import { useMutation } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api, { useMutation } from '@web/lib/api-client'
 import { AlertTriangle, FileText, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -38,20 +37,21 @@ export function ApplySuggestionsDialog({
   const [title, setTitle] = useState('')
 
   // Create optimized resume mutation
-  const createOptimizedMutation = useMutation(
-    orpc.career.ai.createOptimizedResume.mutationOptions({
+  const createOptimizedMutation = useMutation(api.career.ai['create-optimized-resume'].post,
+    {
       onSuccess: (data) => {
         toast.success('Optimized resume created successfully')
         onOpenChange(false)
         setTitle('')
         if (onSuccess) {
-          onSuccess(data.id)
+          // Assuming data has an id, safer than casting entire object to string
+          onSuccess(data?.id ?? (data))
         }
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to create optimized resume')
+      onError: (error) => {
+        toast.error(error.value?.message || 'Failed to create optimized resume')
       }
-    })
+    }
   )
 
   const handleCreate = () => {

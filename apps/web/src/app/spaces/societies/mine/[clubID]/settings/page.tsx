@@ -1,5 +1,6 @@
 'use client'
 
+import type { Treaty } from '@elysiajs/eden'
 import type { societySchema } from '@rov/orpc-contracts'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
@@ -14,8 +15,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { QRCodeDisplay } from '@web/components/registration/qr-code-display'
 import { RegistrationSettingsForm } from '@web/components/registration/registration-settings-form'
 import { ImageUploadDialog } from '@web/components/shared/image-upload-dialog'
+import api from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
-import { orpc } from '@web/utils/orpc'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
@@ -24,6 +25,10 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 type Society = z.infer<typeof societySchema>
+
+type RegistrationSettings = Treaty.Data<
+  typeof api.registration.settings.get
+>['data']
 
 const SocietySettingsPage = () => {
   const params = useParams()
@@ -56,7 +61,10 @@ const SocietySettingsPage = () => {
   // Fetch full society data
   const { data: society, isLoading } = useQuery({
     queryKey: ['society', societyId],
-    queryFn: async () => await orpc.society.getById.call({ id: societyId }),
+    queryFn: async () => {
+      const response = await api.society({ id: societyId }).get()
+      return (response.data ?? null) as Society | null
+    },
     enabled: !!societyId
   })
 
@@ -173,10 +181,7 @@ const GeneralTab = ({
     onSubmit: async ({ value }) => {
       try {
         setIsSaving(true)
-        await orpc.society.updateFields.call({
-          organizationId: societyId,
-          data: value
-        })
+        await api.society({ id: societyId }).fields.patch(value)
         queryClient.invalidateQueries({ queryKey: ['society', societyId] })
         toast.success('Settings saved successfully!')
       } catch (_error) {
@@ -275,12 +280,9 @@ const BrandingTab = ({
 
   const handleLogoSave = async (croppedImage: string) => {
     try {
-      // Update logo using ORPC (Better-Auth doesn't expose logo update directly)
-      await orpc.society.updateFields.call({
-        organizationId: societyId,
-        data: {
-          banner: croppedImage // Using banner field for now, will need logo field in schema
-        }
+      // Update logo using API
+      await api.society({ id: societyId }).fields.patch({
+        logo: croppedImage
       })
       queryClient.invalidateQueries({ queryKey: ['society', societyId] })
       toast.success('Logo updated successfully!')
@@ -292,11 +294,8 @@ const BrandingTab = ({
 
   const handleLogoRemove = async () => {
     try {
-      await orpc.society.updateFields.call({
-        organizationId: societyId,
-        data: {
-          banner: '' // Using banner field for now
-        }
+      await api.society({ id: societyId }).fields.patch({
+        logo: ''
       })
       queryClient.invalidateQueries({ queryKey: ['society', societyId] })
       toast.success('Logo removed successfully!')
@@ -308,12 +307,9 @@ const BrandingTab = ({
 
   const handleBannerSave = async (croppedImage: string) => {
     try {
-      // Update banner using ORPC
-      await orpc.society.updateFields.call({
-        organizationId: societyId,
-        data: {
-          banner: croppedImage
-        }
+      // Update banner using API
+      await api.society({ id: societyId }).fields.patch({
+        banner: croppedImage
       })
       queryClient.invalidateQueries({ queryKey: ['society', societyId] })
       toast.success('Banner updated successfully!')
@@ -325,11 +321,8 @@ const BrandingTab = ({
 
   const handleBannerRemove = async () => {
     try {
-      await orpc.society.updateFields.call({
-        organizationId: societyId,
-        data: {
-          banner: ''
-        }
+      await api.society({ id: societyId }).fields.patch({
+        banner: ''
       })
       queryClient.invalidateQueries({ queryKey: ['society', societyId] })
       toast.success('Banner removed successfully!')
@@ -470,10 +463,7 @@ const SocialLinksTab = ({
     onSubmit: async ({ value }) => {
       try {
         setIsSaving(true)
-        await orpc.society.updateFields.call({
-          organizationId: societyId,
-          data: value
-        })
+        await api.society({ id: societyId }).fields.patch(value)
         queryClient.invalidateQueries({ queryKey: ['society', societyId] })
         toast.success('Social links saved successfully!')
       } catch (_error) {
@@ -608,10 +598,7 @@ const DetailsTab = ({
     onSubmit: async ({ value }) => {
       try {
         setIsSaving(true)
-        await orpc.society.updateFields.call({
-          organizationId: societyId,
-          data: value
-        })
+        await api.society({ id: societyId }).fields.patch(value)
         queryClient.invalidateQueries({ queryKey: ['society', societyId] })
         toast.success('Details saved successfully!')
       } catch (_error) {
@@ -697,14 +684,23 @@ const RegistrationTab = ({
   society,
   societyId
 }: {
-  society: Society
+  society: Society | null
   societyId: string
 }) => {
   // Fetch registration settings
   const { data: settings, isLoading: isSettingsLoading } = useQuery({
-    ...orpc.societyRegistration.settings.get.queryOptions({
-      input: { societyId }
-    }),
+    queryKey: ['societyRegistration', 'settings', societyId],
+    queryFn: async () => {
+      const response = await api.societyRegistration.settings.get({
+        query: { societyId }
+      })
+
+      if (response.error) {
+        return null
+      }
+
+      return (response.data ?? null) as RegistrationSettings | null
+    },
     enabled: !!societyId
   })
 
@@ -766,7 +762,10 @@ const RegistrationTab = ({
       </Card>
 
       {/* Registration Settings Form */}
-      <RegistrationSettingsForm settings={settings} societyId={societyId} />
+      <RegistrationSettingsForm
+        settings={settings ?? null}
+        societyId={societyId}
+      />
 
       {/* Capacity Information */}
       {settings?.society && (
@@ -829,7 +828,7 @@ const RegistrationTab = ({
       )}
 
       {/* QR Code Section */}
-      {society.slug && settings && (
+      {society?.slug && settings && (
         <QRCodeDisplay societyId={societyId} societySlug={society.slug} />
       )}
     </div>

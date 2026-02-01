@@ -5,12 +5,8 @@ import { Button } from '@rov/ui/components/button'
 import { Input } from '@rov/ui/components/input'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { cn } from '@rov/ui/lib/utils'
-import api, {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient
-} from '@web/lib/api-client'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { useCentrifugo } from '@web/lib/centrifuge'
 import { formatDistanceToNow } from 'date-fns'

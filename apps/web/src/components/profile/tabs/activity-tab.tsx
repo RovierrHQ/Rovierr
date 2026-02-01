@@ -4,7 +4,7 @@ import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { orpc } from '@web/utils/orpc'
+import api from '@web/lib/api-client'
 import {
   Activity,
   Calendar,
@@ -33,16 +33,26 @@ export function ActivityTab() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
       queryKey: ['user', 'profile', 'activity'],
-      queryFn: async ({ pageParam = 0 }) =>
-        await orpc.user.profile.activity.call({
-          limit: 50,
-          offset: pageParam
-        }),
+      queryFn: async ({ pageParam = 0 }) => {
+        const res = await api.user.profile.activity.get({
+          query: {
+            limit: 50,
+            offset: pageParam
+          }
+        })
+        if (res.error) throw res.error
+        return res.data
+      },
       getNextPageParam: (lastPage, pages) => {
-        if (lastPage.hasMore) {
+        if (lastPage?.hasMore) {
+          // Calculate next offset based on current activities count + already loaded
+          // Simplified: just return current offset + limit if supported,
+          // or rely on server returning nextCursor if API supports it.
+          // Assuming simple offset based pagination here matching previous logic:
+          // The previous logic was: return pages.length * 50
           return pages.length * 50
         }
-        return
+        return 
       },
       initialPageParam: 0
     })

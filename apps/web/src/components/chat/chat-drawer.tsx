@@ -12,8 +12,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@rov/ui/components/sidebar'
+import { useQueryClient } from '@tanstack/react-query'
 import { usePresence } from '@web/hooks/use-presence'
-import api, { useQuery, useQueryClient } from '@web/lib/api-client'
+import api, { useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { useCentrifugo } from '@web/lib/centrifuge'
 import { MessageCircle } from 'lucide-react'
