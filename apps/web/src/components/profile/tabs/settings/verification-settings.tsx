@@ -1,14 +1,13 @@
 'use client'
 
 import { Badge } from '@rov/ui/components/badge'
+import api, { useQuery } from '@web/lib/api-client'
 import { CheckCircle2, Shield, XCircle } from 'lucide-react'
 import Link from 'next/link'
-import api ,{useQuery}from '@web/lib/api-client'
 
-export function VerificationSettings(){
-  const { data: profileInfo } = useQuery(
-    ['user', 'profile', 'info'],
-    () => api.user.profile.details.get()
+export function VerificationSettings() {
+  const { data: profileInfo } = useQuery(['user', 'profile', 'info'], () =>
+    api.user.profile.details.get()
   )
   const { data: verificationStatus } = useQuery(
     ['user', 'profile', 'verifyStudent', 'status'],

@@ -52,7 +52,7 @@ export function ActivityTab() {
           // The previous logic was: return pages.length * 50
           return pages.length * 50
         }
-        return 
+        return
       },
       initialPageParam: 0
     })

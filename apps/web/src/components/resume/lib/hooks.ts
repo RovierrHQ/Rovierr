@@ -1,5 +1,5 @@
+import api, { useQuery } from '@web/lib/api-client'
 import { useEffect, useRef, useState } from 'react'
-import api, {useQuery} from '@web/lib/api-client'
 
 /**
  * Auto-save hook with debouncing
@@ -64,14 +64,12 @@ export function useResumeData(resumeId: string) {
  * Wraps the ORPC query for listing resumes
  */
 export function useResumeList(limit = 50, offset = 0) {
-  return useQuery(
-    ['resume', 'list', limit.toString(), offset.toString()],
-    () =>
-      api.resume.list.get({
-        query: {
-          limit: limit.toString(),
-          offset: offset.toString()
-        }
-      })
+  return useQuery(['resume', 'list', limit.toString(), offset.toString()], () =>
+    api.resume.list.get({
+      query: {
+        limit: limit.toString(),
+        offset: offset.toString()
+      }
+    })
   )
 }

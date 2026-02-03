@@ -37,7 +37,8 @@ export function ApplySuggestionsDialog({
   const [title, setTitle] = useState('')
 
   // Create optimized resume mutation
-  const createOptimizedMutation = useMutation(api.career.ai['create-optimized-resume'].post,
+  const createOptimizedMutation = useMutation(
+    api.career.ai['create-optimized-resume'].post,
     {
       onSuccess: (data) => {
         toast.success('Optimized resume created successfully')
@@ -45,7 +46,7 @@ export function ApplySuggestionsDialog({
         setTitle('')
         if (onSuccess) {
           // Assuming data has an id, safer than casting entire object to string
-          onSuccess(data?.id ?? (data))
+          onSuccess(data?.id ?? data)
         }
       },
       onError: (error) => {

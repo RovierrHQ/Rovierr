@@ -7,12 +7,12 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
+import api, { useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { useCentrifugo } from '@web/lib/centrifuge'
 import { format, isToday, isTomorrow, isYesterday } from 'date-fns'
 import { CalendarDays, ExternalLink, MapPin } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-import api,{ useQuery } from '@web/lib/api-client'
 
 export function NextEventWidget() {
   const [isConnecting, setIsConnecting] = useState(false)

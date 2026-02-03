@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@rov/ui/components/dropdown-menu'
-
 import { useQueryClient } from '@tanstack/react-query'
 import api, { useMutation, useQuery } from '@web/lib/api-client'
 import {
@@ -41,7 +40,8 @@ const ClubPostFeed = () => {
   )
 
   const likeMutation = useMutation(
-    (data: { postId: string }) => api.campusFeed.like.post(data),
+    (postId: string) =>
+      api['campus-feed'].interactions.posts({ postId }).like.post(),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
@@ -52,23 +52,15 @@ const ClubPostFeed = () => {
     }
   )
 
-  const rsvpMutation = useMutation(
-    (data: {
-      eventPostId: string
-      status: 'going' | 'interested' | 'not_going'
-    }) => api.campusFeed.rsvp.post(data),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
-        toast.success('RSVP updated successfully')
-      },
-      onError: (err) => {
-        toast.error(
-          err instanceof Error ? err.message : 'Failed to update RSVP'
-        )
-      }
+  const rsvpMutation = useMutation(api['campus-feed'].events.rsvp.post, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
+      toast.success('RSVP updated successfully')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to update RSVP')
     }
-  )
+  })
 
   // Infinite scroll observer
   // useEffect(() => {
@@ -94,7 +86,7 @@ const ClubPostFeed = () => {
   // }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const handleLike = (postId: string) => {
-    likeMutation.mutate({ postId })
+    likeMutation.mutate(postId)
   }
 
   const handleRSVP = (
@@ -213,11 +205,32 @@ const ClubPostFeed = () => {
                     <div className="flex items-center gap-4 text-sm">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
-                        <span>{post.eventDetails.eventDate}</span>
+                        <span>
+                          {(() => {
+                            const d = post.eventDetails.eventDate as
+                              | string
+                              | Date
+                            return d instanceof Date
+                              ? d.toLocaleDateString()
+                              : String(d)
+                          })()}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
-                        <span>{post.eventDetails.eventTime}</span>
+                        <span>
+                          {(() => {
+                            const t = post.eventDetails.eventTime as
+                              | string
+                              | Date
+                            return t instanceof Date
+                              ? t.toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })
+                              : String(t)
+                          })()}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />

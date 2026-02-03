@@ -3,6 +3,7 @@ import { cn } from '@rov/ui/lib/utils'
 
 import {
   createContext,
+  type RefObject,
   useCallback,
   useContext,
   useId,
@@ -440,7 +441,7 @@ const DropZoneArea = ({
   children,
   ref: forwardedRef,
   ...props
-}: DropZoneAreaProps & { ref?: RefObject<HTMLDivElement | null> }) => {
+}: DropZoneAreaProps & { ref?: React.Ref<HTMLDivElement | null> }) => {
   const context = useDropzoneContext()
 
   if (!context) {

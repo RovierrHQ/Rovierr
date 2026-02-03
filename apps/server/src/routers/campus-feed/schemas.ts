@@ -140,9 +140,8 @@ export const listPostsSchema = z.object({
  * Schema for getting comments with pagination
  */
 export const getCommentsSchema = z.object({
-  postId: z.string().min(1, 'Post ID is required'),
-  limit: z.number().min(1).max(100).default(20),
-  offset: z.number().min(0).default(0)
+  limit: z.coerce.number().min(1).max(100).default(20),
+  offset: z.coerce.number().min(0).default(0)
 })
 
 // ============================================================================

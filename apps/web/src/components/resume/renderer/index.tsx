@@ -3,10 +3,10 @@
 import type { ResumeData } from '@rov/orpc-contracts'
 import { Button } from '@rov/ui/components/button'
 import { useMeasure } from '@uidotdev/usehooks'
+import api, { useMutation } from '@web/lib/api-client'
 import { useAtomValue } from 'jotai'
 import { Download } from 'lucide-react'
 import { useRef } from 'react'
-import api,{useMutation} from '@web/lib/api-client'
 import {
   type ReactZoomPanPinchRef,
   TransformComponent,
@@ -53,16 +53,14 @@ const ResumePreview = ({ resumeTitle, resumeId }: ResumePreviewProps) => {
 
 export const SaveResume = ({ resumeid }: { resumeid: string }) => {
   const resumeData = useAtomValue(resumeDataAtom)
-  const saveMutation = useMutation(api.resume.updateData.post,
-    {
-      onSuccess: () => {
-        toast.success('Resume saved successfully')
-      },
-      onError: (error) => {
-        toast.error(error.value.message|| 'Failed to save resume')
-      }
+  const saveMutation = useMutation(api.resume.updateData.post, {
+    onSuccess: () => {
+      toast.success('Resume saved successfully')
+    },
+    onError: (error) => {
+      toast.error(error.value.message || 'Failed to save resume')
     }
-  )
+  })
 
   return (
     <Button

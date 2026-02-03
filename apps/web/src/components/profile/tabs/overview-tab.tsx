@@ -8,18 +8,16 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
+import api, { useQuery } from '@web/lib/api-client'
 import { Activity, BookOpen, Calendar, TrendingUp, Users } from 'lucide-react'
 import Link from 'next/link'
-import api,{useQuery} from '@web/lib/api-client'
 
 export function OverviewTab() {
-  const { data: profileInfo } = useQuery(
-    ['user', 'profile', 'info'],
-    () => api.user.profile.details.get()
+  const { data: profileInfo } = useQuery(['user', 'profile', 'info'], () =>
+    api.user.profile.details.get()
   )
-  const { data: academicData } = useQuery(
-    ['user', 'profile', 'academic'],
-    () => api.user.profile.academic.get()
+  const { data: academicData } = useQuery(['user', 'profile', 'academic'], () =>
+    api.user.profile.academic.get()
   )
   const { data: activityData } = useQuery(
     ['user', 'profile', 'activity', 'overview', '5', '0'],
@@ -31,13 +29,9 @@ export function OverviewTab() {
         }
       })
   )
- const { data: organizations } = useQuery(
-  ['organizations', 'list'], 
-  () =>
-  api.organizations.list.get()
-)
-
-
+  const { data: organizations } = useQuery(['organizations', 'list'], () =>
+    api.organizations.list.get()
+  )
 
   const primaryEnrollment = academicData?.enrollments.find((e) => e.isPrimary)
   const clubCount = organizations?.length ?? 0
