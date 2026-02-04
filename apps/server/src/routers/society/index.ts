@@ -195,16 +195,16 @@ export const society = new Elysia({ prefix: '/society' })
 
       /**
        * Update society-specific fields
-       * PATCH /society/:organizationId/fields
+       * PATCH /society/:id/fields
        */
       .patch(
-        '/:organizationId/fields',
+        '/:id/fields',
         async ({ params, body, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
           }
 
-          const { organizationId } = params
+          const organizationId = params.id
 
           try {
             // Check if society exists
@@ -324,16 +324,16 @@ export const society = new Elysia({ prefix: '/society' })
 
       /**
        * Upload banner image for society
-       * POST /society/:organizationId/banner
+       * POST /society/:id/banner
        */
       .post(
-        '/:organizationId/banner',
+        '/:id/banner',
         async ({ params, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
           }
 
-          const { organizationId } = params
+          const organizationId = params.id
 
           try {
             // Check if user is president
@@ -373,16 +373,16 @@ export const society = new Elysia({ prefix: '/society' })
 
       /**
        * Mark society onboarding as complete
-       * POST /society/:organizationId/complete-onboarding
+       * POST /society/:id/complete-onboarding
        */
       .post(
-        '/:organizationId/complete-onboarding',
+        '/:id/complete-onboarding',
         async ({ params, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
           }
 
-          const { organizationId } = params
+          const organizationId = params.id
 
           try {
             // Check if society exists

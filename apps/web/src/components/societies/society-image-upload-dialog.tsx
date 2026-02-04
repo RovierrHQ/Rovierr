@@ -14,16 +14,6 @@ type SocietyImageUploadDialogProps = {
   organizationId: string
 }
 
-type SocietyAPI = {
-  [key: string]: {
-    fields: {
-      patch: (options: { body: Record<string, string> }) => Promise<unknown>
-    }
-  }
-} & {
-  [key: string]: unknown
-}
-
 export function SocietyImageUploadDialog({
   open,
   onOpenChange,
@@ -35,18 +25,10 @@ export function SocietyImageUploadDialog({
 
   const updateMutation = useMutation({
     mutationFn: async (croppedImage: string) => {
-      const societyAPI = api.society as SocietyAPI
-
-      if (type === 'banner') {
-        // Update banner using Elysia
-        const response = await societyAPI[organizationId].fields.patch({
-          body: { banner: croppedImage }
-        })
-        return response
-      }
-      // Update logo using Elysia
-      const response = await societyAPI[organizationId].fields.patch({
-        body: { logo: croppedImage }
+      const response = await api.society['']({
+        id: organizationId
+      }).fields.patch({
+        [type]: croppedImage
       })
       return response
     },
@@ -72,17 +54,10 @@ export function SocietyImageUploadDialog({
 
   const removeMutation = useMutation({
     mutationFn: async () => {
-      const societyAPI = api.society as SocietyAPI
-
-      if (type === 'banner') {
-        const response = await societyAPI[organizationId].fields.patch({
-          body: { banner: '' }
-        })
-        return response
-      }
-      // Remove logo
-      const response = await societyAPI[organizationId].fields.patch({
-        body: { logo: '' }
+      const response = await api.society['']({
+        id: organizationId
+      }).fields.patch({
+        [type]: ''
       })
       return response
     },

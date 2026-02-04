@@ -27,7 +27,7 @@ const Hero = ({
   actionsClassName,
   ref,
   ...props
-}: HeroProps & { ref?: RefObject<HTMLElement | null> }) => {
+}: HeroProps & { ref?: React.Ref<HTMLElement | null> }) => {
   return (
     <section
       className={cn(
