@@ -155,13 +155,15 @@ export const messageSchema = selectMessageSchema
     updatedAt: true,
     deliveredAt: true,
     editedAt: true,
-    deletedAt: true
+    deletedAt: true,
+    isEdited: true
   })
   .extend({
     createdAt: z.string(),
     updatedAt: z.string(),
     deliveredAt: z.string().nullable(),
     editedAt: z.string().nullable(),
+    isEdited: z.boolean().default(false),
     deletedAt: z.string().nullable()
   })
 
@@ -179,7 +181,17 @@ export const messageWithSenderSchema = messageSchema.extend({
 export const conversationWithLastMessageSchema = conversationSchema.extend({
   lastMessage: messageSchema.nullable(),
   unreadCount: z.number(),
-  otherParticipant: publicUserSchema.nullable() // For direct conversations
+  otherParticipant: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      username: z.string().nullable(),
+      displayUsername: z.string().nullable(),
+      image: z.string().nullable(),
+      bio: z.string().nullable(),
+      isVerified: z.boolean()
+    })
+    .nullable() // For direct conversations
 })
 
 /**
