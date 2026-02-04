@@ -52,14 +52,17 @@ const RoadmapVote: FC<RoadmapVoteProps> = ({
     return roadmap?.upvotes ?? []
   }, [upvotesProp, roadmapId, queryClient])
 
-  const { mutateAsync, isPending } = useMutation(api.roadmap.vote.post, {
-    onSuccess: () => {
-      // Invalidate list query to refresh upvotes
-      queryClient.invalidateQueries({
-        queryKey: ['roadmap', 'list']
-      })
+  const { mutateAsync, isPending } = useMutation<{ roadmapId: string }>(
+    api.roadmap.vote.post,
+    {
+      onSuccess: () => {
+        // Invalidate list query to refresh upvotes
+        queryClient.invalidateQueries({
+          queryKey: ['roadmap', 'list']
+        })
+      }
     }
-  })
+  )
 
   const handleVote = async () => {
     if (!userId) return redirect('/login')
