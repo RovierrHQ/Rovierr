@@ -19,6 +19,7 @@ import { authClient } from '@web/lib/auth-client'
 import { useCentrifugo } from '@web/lib/centrifuge'
 import { MessageCircle } from 'lucide-react'
 import { useState } from 'react'
+
 import { ConversationList } from './conversation-list'
 import { ConversationView } from './conversation-view'
 
@@ -41,7 +42,10 @@ export function ChatDrawer() {
 
   const { data: conversations } = useQuery(
     ['chat', 'listConversations'],
-    () => api.chat.conversations.get(),
+    () =>
+      api.chat.conversations.get({
+        query: { limit: 50, offset: 0 }
+      }),
     { enabled: isOpen && !!session?.user?.id }
   )
 
@@ -70,7 +74,7 @@ export function ChatDrawer() {
   // Subscribe to user's personal chat channel for new messages and conversation updates
   useCentrifugo<{ type: string; conversationId?: string }>(
     {
-      token: centrifugoAuth?.data?.token
+      token: centrifugoAuth?.token
     },
     `chat:${session?.user?.id}`,
     (data) => {
