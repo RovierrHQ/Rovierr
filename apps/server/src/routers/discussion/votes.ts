@@ -6,9 +6,9 @@ import { unvoteSchema, voteSchema } from './schemas'
 
 const voteService = new VoteService(db)
 
-export const votesRouter = new Elysia({ prefix: '/vote' })
+export const votesRouter = new Elysia()
   .use(betterAuth)
-  .group('', { auth: true }, (app) =>
+  .group('/vote', { auth: true }, (app) =>
     app
       .post(
         '/vote',
