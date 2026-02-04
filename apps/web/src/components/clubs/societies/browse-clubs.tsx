@@ -51,7 +51,7 @@ const BrowseClubs = () => {
   const { data: userOrganizations } = authClient.useListOrganizations()
 
   // Get join request statuses for all clubs
-  const allOrganizations = data? []
+  const allOrganizations = data?.data || []
   const userOrgIds = useMemo(
     () => new Set(userOrganizations?.map((org) => org.id) ?? []),
     [userOrganizations]
@@ -72,7 +72,14 @@ const BrowseClubs = () => {
   // Check if there is an endpoint like api.societyRegistration.joinRequest.list.get()
   const { data: userJoinRequests } = useQuery(
     ['user', 'join-requests'],
-    () => api.societyRegistration['join-request'].list.get(),
+    () =>
+      api.registration['']['join-request'].get({
+        query: {
+          societyId: session?.user?.id || '',
+          limit: 0,
+          offset: 0
+        }
+      }),
     { enabled: !!session?.user?.id }
   )
 
@@ -82,9 +89,6 @@ const BrowseClubs = () => {
   // Wait, the previous code used useQueries with `orpc.call`. `useTreatyQuery` is `useQuery`.
   // I can try to use `useQueries` with `api` but `useQueries` expects query options.
   // `api...get` returns a promise.
-
-  // Let's comment this out and rely on `userJoinRequests` if it exists, or just skip it for now to avoid compilation errors.
-  const joinRequestStatuses: [] = [] // Placeholder
 
   // Create a map of organization ID to join request status
   const joinRequestStatusMap = useMemo(() => {
@@ -97,22 +101,20 @@ const BrowseClubs = () => {
     >()
     // If we fetched userJoinRequests (list of requests user has made), we can map from there.
     // Assuming userJoinRequests.data is an array of requests with societyId and status.
-    const requests = userJoinRequests?.data || []
-    requests.forEach((req) => {
+    const requests = Array.isArray(userJoinRequests) ? userJoinRequests : []
+    for (const req of requests) {
       map.set(req.societyId, {
         hasRequest: true,
         status: req.status
       })
-    })
+    }
     return map
   }, [userJoinRequests])
 
   // Join request mutation
   const joinRequestMutation = useMutation(
     (variables: { societyId: string }) =>
-      api.societyRegistration['join-request']['simple-request-to-join'].post(
-        variables
-      ),
+      api.registration['']['join-request'].post(variables),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
@@ -123,10 +125,12 @@ const BrowseClubs = () => {
         })
         toast.success('Join request sent successfully!')
       },
-      onError: (error: Error) => {
-        if (error.message.includes('already a member')) {
+      onError: (error) => {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error'
+        if (errorMessage.includes('already a member')) {
           toast.error('You are already a member of this club')
-        } else if (error.message.includes('pending join request')) {
+        } else if (errorMessage.includes('pending join request')) {
           toast.error('You already have a pending join request')
         } else {
           toast.error('Failed to send join request')
