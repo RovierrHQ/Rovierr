@@ -187,7 +187,21 @@ export class ChatService {
       conversations.map(async (conv) => {
         // Get last message
         const [lastMsg] = await this.db
-          .select()
+          .select({
+            id: message.id,
+            conversationId: message.conversationId,
+            senderId: message.senderId,
+            content: message.content,
+            type: message.type,
+            metadata: message.metadata,
+            replyToMessageId: message.replyToMessageId,
+            createdAt: message.createdAt,
+            updatedAt: message.updatedAt,
+            deliveredAt: message.deliveredAt,
+            editedAt: message.editedAt,
+            isEdited: message.isEdited,
+            deletedAt: message.deletedAt
+          })
           .from(message)
           .where(eq(message.conversationId, conv.id))
           .orderBy(desc(message.createdAt))
