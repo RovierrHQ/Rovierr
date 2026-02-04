@@ -7,6 +7,7 @@ import { Skeleton } from '@rov/ui/components/skeleton'
 import { cn } from '@rov/ui/lib/utils'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import api, { useMutation, useQuery } from '@web/lib/api-client'
+
 import { authClient } from '@web/lib/auth-client'
 import { useCentrifugo } from '@web/lib/centrifuge'
 import { formatDistanceToNow } from 'date-fns'
@@ -46,7 +47,7 @@ export function ConversationView({
   const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
     queryKey: ['chat', 'messages', conversationId],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
-      const res = await api.chat.getMessages.get({
+      const res = await api.chat.messages.get({
         query: {
           conversationId,
           limit: 50,
@@ -70,10 +71,10 @@ export function ConversationView({
       conversationId: string
       content: string
       type: 'text' | 'image' | 'file'
-    }) => api.chat.sendMessage.post(data),
+    }) => api.chat.message.post(data),
     {
       onSuccess: (response) => {
-        const newMessage = response.data
+        const newMessage = response
         if (!newMessage) return
 
         setMessageInput('')
@@ -105,8 +106,8 @@ export function ConversationView({
 
   // Get Centrifugo connection token
   const { data: centrifugoAuth } = useQuery(
-    ['realtime', 'getToken'],
-    () => api.realtime.getConnectionToken.get(),
+    ['realtime', 'token'],
+    () => api.realtime.token.get(),
     {
       enabled: !!session?.user?.id,
       staleTime: 55 * 60 * 1000 // 55 minutes (token expires in 1 hour)
@@ -160,7 +161,7 @@ export function ConversationView({
 
   // Mark as read when opening conversation
   useEffect(() => {
-    api.chat.markAsRead.post({ conversationId })
+    api.chat['mark-read'].post({ conversationId })
     queryClient.invalidateQueries({ queryKey: ['chat', 'getUnreadCount'] })
   }, [conversationId, queryClient])
 
