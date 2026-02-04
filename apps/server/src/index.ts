@@ -4,9 +4,9 @@ import { academicRouter } from '@api/routers/academic'
 import { calendarRouter } from '@api/routers/calendar'
 import { campusFeed } from '@api/routers/campus-feed'
 import { careerRouter } from '@api/routers/career'
-// import { chat } from '@api/routers/chat'
+import { chat } from '@api/routers/chat'
 import { connection } from '@api/routers/connection'
-// import { discussionRouter } from '@api/routers/discussion'
+import { discussionRouter } from '@api/routers/discussion'
 import { form } from '@api/routers/form'
 import { realtime } from '@api/routers/realtime'
 import { resumeRouter } from '@api/routers/resume'
@@ -14,6 +14,7 @@ import { roadmap } from '@api/routers/roadmap'
 import { society } from '@api/routers/society'
 import { societyRegistrationRouter } from '@api/routers/society/society-registration'
 import { stripeRouter } from '@api/routers/stripe'
+import { studentOrganizationsRouter } from '@api/routers/student-organizations'
 import { tasks } from '@api/routers/tasks'
 import { universityRouter } from '@api/routers/university'
 import { user } from '@api/routers/user'
@@ -60,10 +61,10 @@ const app = new Elysia()
   .use(roadmap)
   .use(tasks)
   .use(realtime)
-  // .use(chat)
+  .use(chat)
   .use(connection)
   .use(campusFeed)
-  // .use(discussionRouter)
+  .use(discussionRouter)
   .use(society)
   .use(form)
   .use(academicRouter)
@@ -73,6 +74,7 @@ const app = new Elysia()
   .use(universityRouter)
   .use(verifyStudentRouter)
   .use(stripeRouter)
+  .use(studentOrganizationsRouter)
   .use(societyRegistrationRouter)
   .listen(env.PORT)
 
