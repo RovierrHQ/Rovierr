@@ -2,12 +2,20 @@ import { db } from '@api/db'
 import { env } from '@api/lib/env'
 import { replaceVariables } from '@api/lib/variable-replacement'
 import { member, organization, societyEmail, user } from '@rov/db/schema'
-import { logger } from '@tqman/nice-logger'
-import { eq } from 'drizzle-orm'
+import { count, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { UseSend } from 'usesend-js'
 
 const usesend = new UseSend(env.USESEND_API_KEY, 'https://usesend.rovierr.com')
+
+// Simple logging functions
+const logError = (message: string, data?: unknown) => {
+  console.error(`[ERROR] ${message}`, data)
+}
+
+const logInfo = (message: string, data?: unknown) => {
+  console.info(`[INFO] ${message}`, data)
+}
 
 type SendSocietyEmailParams = {
   organizationId: string
@@ -96,10 +104,11 @@ export async function sendSocietyEmail(
         await usesend.emails.send(email)
         successCount++
       } catch (error) {
-        logger.error(
-          { error, to: email.to, organizationId },
-          'Failed to send email to recipient'
-        )
+        logError('Failed to send email to recipient', {
+          error,
+          to: email.to,
+          organizationId
+        })
         failureCount++
       }
     })
@@ -123,16 +132,13 @@ export async function sendSocietyEmail(
       sentAt: new Date().toISOString()
     })
 
-    logger.info(
-      {
-        emailId,
-        organizationId,
-        recipientCount: members.length,
-        successCount,
-        failureCount
-      },
-      'Society email sent'
-    )
+    logInfo('Society email sent', {
+      emailId,
+      organizationId,
+      recipientCount: members.length,
+      successCount,
+      failureCount
+    })
 
     return {
       emailId,
@@ -140,10 +146,11 @@ export async function sendSocietyEmail(
       status: failureCount > 0 ? 'failed' : 'completed'
     }
   } catch (error) {
-    logger.error(
-      { error, organizationId, senderId },
-      'Failed to send society email'
-    )
+    logError('Failed to send society email', {
+      error,
+      organizationId,
+      senderId
+    })
 
     // Store failed email record
     const emailId = nanoid()
@@ -162,26 +169,29 @@ export async function sendSocietyEmail(
         sentAt: new Date().toISOString()
       })
     } catch (dbError) {
-      logger.error({ dbError }, 'Failed to store failed email record')
+      logError('Failed to store failed email record', { dbError })
     }
 
     throw error
   }
 }
 
-/**
- * Get organization members count
- *
- * @param organizationId - Organization ID
- * @returns Number of active members
- */
 export async function getOrganizationMemberCount(
   organizationId: string
 ): Promise<number> {
-  const result = await db
-    .select({ count: member.id })
-    .from(member)
-    .where(eq(member.organizationId, organizationId))
+  try {
+    const memberCount = await db
+      .select({ count: count() })
+      .from(member)
+      .where(eq(member.organizationId, organizationId))
+      .limit(1)
 
-  return result.length
+    return memberCount[0]?.count || 0
+  } catch (error) {
+    logError('Failed to get organization member count', {
+      error,
+      organizationId
+    })
+    return 0
+  }
 }
