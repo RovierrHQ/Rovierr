@@ -3,7 +3,8 @@ import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent, CardHeader } from '@rov/ui/components/card'
 import { Separator } from '@rov/ui/components/separator'
-import api, { useMutation, useQueryClient } from '@web/lib/api-client'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { ArrowDown, ArrowUp, Check, MessageSquare, Pin } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Discussion } from './types'
@@ -46,7 +47,7 @@ export function DiscussionCard({
 
   const unvoteMutation = useMutation(
     (data: { replyId?: string; threadId?: string }) =>
-      api.discussion.vote.unvote.post(data),
+      api.discussion.vote.unvote.delete(data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
