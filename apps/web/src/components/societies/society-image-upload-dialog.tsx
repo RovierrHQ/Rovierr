@@ -14,6 +14,16 @@ type SocietyImageUploadDialogProps = {
   organizationId: string
 }
 
+type SocietyAPI = {
+  [key: string]: {
+    fields: {
+      patch: (options: { body: Record<string, string> }) => Promise<unknown>
+    }
+  }
+} & {
+  [key: string]: unknown
+}
+
 export function SocietyImageUploadDialog({
   open,
   onOpenChange,
@@ -25,17 +35,20 @@ export function SocietyImageUploadDialog({
 
   const updateMutation = useMutation({
     mutationFn: async (croppedImage: string) => {
+      const societyAPI = api.society as SocietyAPI
+
       if (type === 'banner') {
         // Update banner using Elysia
-        await api.society({ id: organizationId }).fields.patch({
-          banner: croppedImage
+        const response = await societyAPI[organizationId].fields.patch({
+          body: { banner: croppedImage }
         })
-      } else {
-        // Update logo using Elysia
-        await api.society({ id: organizationId }).fields.patch({
-          logo: croppedImage
-        })
+        return response
       }
+      // Update logo using Elysia
+      const response = await societyAPI[organizationId].fields.patch({
+        body: { logo: croppedImage }
+      })
+      return response
     },
     onSuccess: async () => {
       // Invalidate and refetch society queries
@@ -59,16 +72,19 @@ export function SocietyImageUploadDialog({
 
   const removeMutation = useMutation({
     mutationFn: async () => {
+      const societyAPI = api.society as SocietyAPI
+
       if (type === 'banner') {
-        await api.society({ id: organizationId }).fields.patch({
-          banner: ''
+        const response = await societyAPI[organizationId].fields.patch({
+          body: { banner: '' }
         })
-      } else {
-        // Remove logo
-        await api.society({ id: organizationId }).fields.patch({
-          logo: ''
-        })
+        return response
       }
+      // Remove logo
+      const response = await societyAPI[organizationId].fields.patch({
+        body: { logo: '' }
+      })
+      return response
     },
     onSuccess: async () => {
       // Invalidate and refetch society queries
