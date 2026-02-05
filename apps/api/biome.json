@@ -1,0 +1,36 @@
+{
+  "root": false,
+  "extends": "//",
+  "linter": {
+    "rules": {
+      "performance": {
+        "noNamespaceImport": "off"
+      },
+      "style": {
+        "noProcessEnv": "error"
+      },
+      "suspicious": {
+        "noConsole": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["./src/lib/logger.ts", "./src/lib/env.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          },
+          "style": {
+            "noProcessEnv": "off"
+          },
+          "complexity": {
+            "useOptionalChain": "off",
+            "noForEach": "off"
+          }
+        }
+      }
+    }
+  ]
+}
