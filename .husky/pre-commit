@@ -1,3 +1,2 @@
-npx lint-staged
-npx ultracite format
-bun check-types
+#!/bin/sh
+bun run check

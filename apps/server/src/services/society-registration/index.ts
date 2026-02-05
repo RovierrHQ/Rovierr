@@ -1,5 +1,0 @@
-export * from './analytics.service'
-export * from './join-request.service'
-export * from './payment-verification.service'
-export * from './qrcode.service'
-export * from './registration.service'

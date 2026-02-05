@@ -1,25 +1,28 @@
-import { neon, neonConfig } from '@neondatabase/serverless'
+import { neon } from '@neondatabase/serverless'
 import { drizzle } from 'drizzle-orm/neon-http'
-import ws from 'ws'
-// biome-ignore lint/performance/noNamespaceImport: okay to import all schema
 import * as schema from './schema'
 
-neonConfig.webSocketConstructor = ws
-neonConfig.poolQueryViaFetch = true
-
-/**
- * Create a Drizzle database instance
- * @param url - Database connection URL
- * @returns Drizzle database instance
- */
-export const createDB = (url: string) => {
-  const sql = neon(url)
+export const createDB = (databaseUrl: string) => {
+  // use your own db, either neon or d1 planetscale etc
+  const sql = neon(databaseUrl)
   return drizzle(sql, { schema })
 }
 
-// Export types
 export type DB = ReturnType<typeof createDB>
 
-export * from './helper'
-// Re-export schema and helpers
+// Re-export drizzle-orm utilities
+export {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  lte,
+  or,
+  type SQL,
+  sql
+} from 'drizzle-orm'
+// Re-export schema for convenience - this makes tables and relations available
 export * from './schema'

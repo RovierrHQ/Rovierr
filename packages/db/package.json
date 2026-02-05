@@ -1,25 +1,33 @@
 {
   "name": "@rov/db",
-  "version": "0.0.0",
-  "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
     "./schema": "./src/schema/index.ts",
-    "./helper": "./src/helper.ts"
+    "./schema/auth": "./src/schema/auth.ts",
+    "./schema/issue": "./src/schema/issue.ts"
   },
   "scripts": {
-    "check-types": "tsc -b"
-  },
-  "dependencies": {
-    "@neondatabase/serverless": "1.0.1",
-    "drizzle-orm": "0.44.5",
-    "nanoid": "5.1.6",
-    "ws": "8.18.3"
+    "type-check": "tsc -b",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "devDependencies": {
-    "typescript": "5.9.2",
-    "@types/ws": "8.18.1"
+    "drizzle-kit": "0.31.8",
+    "@types/ws": "8.18.1",
+    "@rov/config": "workspace:*"
+  },
+  "peerDependencies": {
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "1.0.2",
+    "dotenv": "17.2.3",
+    "drizzle-orm": "0.45.1",
+    "nanoid": "^5.1.6",
+    "postgres": "3.4.8",
+    "ws": "8.19.0",
+    "zod": "4.3.6"
   }
 }
