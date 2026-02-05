@@ -1,0 +1,90 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/core", "ultracite/react", "ultracite/next"],
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "!**/.next",
+      "!**/dist",
+      "!**/.turbo",
+      "!**/dev-dist",
+      "!**/.zed",
+      "!**/.vscode",
+      "!**/routeTree.gen.ts",
+      "!**/src-tauri",
+      "!**/.nuxt",
+      "!bts.jsonc",
+      "!**/.expo",
+      "!**/.wrangler",
+      "!**/wrangler.jsonc",
+      "!**/.source",
+      "!**/worker-configuration.d.ts",
+      "!bun.lock"
+    ]
+  },
+  "linter": {
+    "rules": {
+      "performance": {
+        "noNamespaceImport": "warn",
+        "noBarrelFile": "off",
+        "useTopLevelRegex": "warn"
+      },
+      "nursery": "off",
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "warn",
+        "noForEach": "off"
+      },
+      "style": {
+        "useConsistentTypeDefinitions": {
+          "level": "warn",
+          "options": {
+            "style": "type"
+          }
+        },
+        "useFilenamingConvention": "off",
+        "noNestedTernary": "off",
+        "noParameterAssign": "off",
+        "noNonNullAssertion": "warn",
+        "useConsistentMemberAccessibility": "off",
+        "noParameterProperties": "info",
+        "useBlockStatements": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noUnknownAtRules": "off",
+        "noEmptyBlockStatements": "off",
+        "noBitwiseOperators": "warn",
+        "noEvolvingTypes": "off",
+        "noArrayIndexKey": "warn"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "warn"
+      },
+      "a11y": {
+        "useButtonType": "warn",
+        "useKeyWithClickEvents": "info",
+        "noNoninteractiveElementInteractions": "info",
+        "useSemanticElements": "info"
+      },
+      "correctness": {
+        "noNestedComponentDefinitions": "off",
+        "noUnusedFunctionParameters": "warn",
+        "noChildrenProp": "off"
+      }
+    }
+  },
+  "javascript": {
+    "globals": ["Bun"],
+    "formatter": {
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "none",
+      "semicolons": "asNeeded",
+      "arrowParentheses": "always",
+      "bracketSameLine": false,
+      "quoteStyle": "single",
+      "attributePosition": "auto",
+      "bracketSpacing": true
+    }
+  }
+}

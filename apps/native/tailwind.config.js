@@ -1,70 +1,32 @@
-const { hairlineWidth, platformSelect } = require('nativewind/theme')
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // NOTE: Update this to include the paths to all of your component files.
-  darkMode: 'class', // Enable manual toggling of dark mode
   content: [
-    './src/app/**/*.{js,jsx,ts,tsx}',
-    './src/components/**/*.{js,jsx,ts,tsx}'
+    './src/App.{js,ts,tsx}',
+    './src/components/**/*.{js,ts,tsx}',
+    './src/app/**/*.{js,ts,tsx}',
+    './src/global.css' // Include global.css
   ],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
-      colors: {
-        border: withOpacity('border'),
-        input: withOpacity('input'),
-        ring: withOpacity('ring'),
-        background: withOpacity('background'),
-        foreground: withOpacity('foreground'),
-        primary: {
-          DEFAULT: withOpacity('primary'),
-          foreground: withOpacity('primary-foreground')
-        },
-        secondary: {
-          DEFAULT: withOpacity('secondary'),
-          foreground: withOpacity('secondary-foreground')
-        },
-        destructive: {
-          DEFAULT: withOpacity('destructive'),
-          foreground: withOpacity('destructive-foreground')
-        },
-        muted: {
-          DEFAULT: withOpacity('muted'),
-          foreground: withOpacity('muted-foreground')
-        },
-        accent: {
-          DEFAULT: withOpacity('accent'),
-          foreground: withOpacity('accent-foreground')
-        },
-        popover: {
-          DEFAULT: withOpacity('popover'),
-          foreground: withOpacity('popover-foreground')
-        },
-        card: {
-          DEFAULT: withOpacity('card'),
-          foreground: withOpacity('card-foreground')
-        }
+      fontFamily: {
+        outfit: ['Outfit_400Regular'],
+        'outfit-bold': ['Outfit_700Bold']
       },
-      borderWidth: {
-        hairline: hairlineWidth()
+      spacing: {
+        global: '24px'
+      },
+      colors: {
+        primary: 'var(--color-primary)',
+        secondary: 'var(--color-secondary)',
+        background: 'var(--color-background)',
+        text: 'var(--color-text)',
+        highlight: 'var(--color-highlight)',
+        border: 'var(--color-border)',
+        invert: 'var(--color-invert)',
+        darker: 'var(--color-darker)'
       }
     }
   },
   plugins: []
-}
-
-function withOpacity(variableName) {
-  return ({ opacityValue }) => {
-    if (opacityValue !== undefined) {
-      return platformSelect({
-        ios: `rgb(var(--${variableName}) / ${opacityValue})`,
-        android: `rgb(var(--android-${variableName}) / ${opacityValue})`
-      })
-    }
-    return platformSelect({
-      ios: `rgb(var(--${variableName}))`,
-      android: `rgb(var(--android-${variableName}))`
-    })
-  }
 }

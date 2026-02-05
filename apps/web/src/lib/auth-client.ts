@@ -1,14 +1,8 @@
-import { createWebAuthClient } from '@rov/auth/client/web'
+import { createWebAuthClient } from '@rov/auth/client-web'
 
-if (!process.env.NEXT_PUBLIC_SERVER_URL) {
-  throw new Error('NEXT_PUBLIC_SERVER_URL is not set')
-}
-
-if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
-  throw new Error('NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set')
-}
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 export const authClient = createWebAuthClient({
-  baseURL: `${process.env.NEXT_PUBLIC_SERVER_URL}/auth`,
-  googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+  baseURL,
+  googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 })

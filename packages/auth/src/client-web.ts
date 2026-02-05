@@ -1,8 +1,3 @@
-/**
- * Web client-side auth utilities
- * Separate file to avoid bundling Expo modules in web apps
- */
-
 import {
   customSessionClient,
   emailOTPClient,

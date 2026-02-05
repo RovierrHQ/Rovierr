@@ -1,4 +1,4 @@
-import type { App } from '@api/index'
+import type { AppType } from '@api/export-types'
 import { type Treaty, treaty } from '@elysiajs/eden'
 import {
   type QueryKey,
@@ -17,7 +17,7 @@ const headers = () => {
   }
   return Object.fromEntries(headers)
 }
-const api = treaty<App>(process.env.EXPO_PUBLIC_SERVER_URL || '', {
+const api = treaty<AppType>(process.env.EXPO_PUBLIC_SERVER_URL || '', {
   fetch: {
     credentials: 'include',
     mode: 'cors'

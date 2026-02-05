@@ -1,4 +1,3 @@
-import type { App } from '@api/index'
 import { type Treaty, treaty } from '@elysiajs/eden'
 import {
   type QueryKey,
@@ -7,8 +6,9 @@ import {
   useMutation as useTanstackMutation,
   useQuery as useTanstackQuery
 } from '@tanstack/react-query'
+import type { AppType } from 'api'
 
-const api = treaty<App>(process.env.NEXT_PUBLIC_SERVER_URL || '', {
+const api = treaty<AppType>(process.env.NEXT_PUBLIC_SERVER_URL || '', {
   fetch: {
     credentials: 'include',
     mode: 'cors'

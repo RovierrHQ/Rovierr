@@ -43,7 +43,7 @@ function Slider({
           id={field.name}
           max={max}
           min={min}
-          onValueChange={field.handleChange}
+          onValueChange={(value) => field.handleChange(value as number[])}
           value={value}
           {...props}
         />

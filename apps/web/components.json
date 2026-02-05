@@ -5,17 +5,18 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "../../packages/ui/src/styles/globals.css",
+    "css": "src/styles.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "lucide",
   "aliases": {
-    "components": "@rov/ui",
-    "utils": "@rov/ui/lib/utils",
-    "ui": "@rov/ui",
-    "lib": "@rov/ui/lib",
-    "hooks": "@rov/ui/hooks"
+    "components": "@/components",
+    "utils": "@web/lib/utils",
+    "ui": "@web/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
   },
-  "iconLibrary": "lucide"
+  "registries": {}
 }

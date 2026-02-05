@@ -1,15 +1,13 @@
 {
-  "extends": "../typescript-config/base.json",
+  "extends": "@rov/config/base.json",
+  "include": ["src"],
   "compilerOptions": {
-    "rootDir": "src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "outDir": "dist",
+    "rootDir": "src",
     "composite": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
     "strictNullChecks": true
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist"]
+  }
 }

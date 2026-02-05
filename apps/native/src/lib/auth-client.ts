@@ -1,4 +1,4 @@
-import { createNativeAuthClient } from '@rov/auth/client/native'
+import { createNativeAuthClient } from '@rov/auth/client-native'
 import * as SecureStore from 'expo-secure-store'
 
 // Validate required environment variables

@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "newArchEnabled": true,
+    "name": "Rovierr",
+    "slug": "rovierr",
+    "version": "1.0.0",
+    "runtimeVersion": "1.0.0",
+    "scheme": "rovierr",
+    "platforms": ["ios", "android"],
+    "experiments": {
+      "tsconfigPaths": true,
+      "typedRoutes": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-asset",
+      "@react-native-community/datetimepicker",
+      "expo-secure-store"
+    ],
+    "orientation": "portrait",
+    "icon": "./src/assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./src/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.comrovierr.rovierr"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "softwareKeyboardLayoutMode": "pan",
+      "predictiveBackGestureEnabled": false,
+      "package": "com.comrovierr.rovierr"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "da376216-d29c-49c4-9d4e-b3f75f036b55"
+      }
+    },
+    "owner": "thomino",
+    "updates": {
+      "url": "https://u.expo.dev/da376216-d29c-49c4-9d4e-b3f75f036b55"
+    }
+  }
+}

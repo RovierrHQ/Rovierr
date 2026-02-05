@@ -1,27 +1,11 @@
 import { expo } from '@better-auth/expo'
 import type { DB } from '@rov/db'
-import {
-  account,
-  invitation,
-  member as memberTable,
-  organizationRole as organizationRoleTable,
-  organization as organizationTable,
-  session as sessionTable,
-  team,
-  teamMember,
-  twoFactor as twoFactorTable,
-  user as userTable,
-  verification
-} from '@rov/db'
-import type { BetterAuthOptions, User } from 'better-auth'
-import { betterAuth } from 'better-auth'
+import * as schema from '@rov/db/schema/auth'
+import { type BetterAuthPlugin, betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import {
   customSession,
   emailOTP,
-  type Invitation,
-  type Member,
-  type Organization as Org,
   oneTap,
   organization,
   phoneNumber,
@@ -36,59 +20,35 @@ import {
   defaultPresident,
   defaultVicePresident
 } from './permissions'
+// import { tanstackStartCookies } from "better-auth/tanstack-start";
 
 export type AuthConfig = {
-  appName: string
+  phoneNumber: {
+    sendOTP: (params: { phoneNumber: string }) => void
+  }
+  email: {
+    sendEmailVerificationOTP: (params: { email: string }) => Promise<void>
+    sendInvitationEmail: (params: { email: string }) => Promise<void>
+  }
   baseURL: string
   secret: string
-  trustedOrigins: string[]
+  googleClientId: string
+  googleClientSecret: string
+  trustedOrigins?: string[]
+  plugins?: BetterAuthPlugin[]
   db: DB
-  emails: {
-    sendEmailVerificationOTP: ({
-      email,
-      otp,
-      type
-    }: {
-      email: string
-      otp: string
-      type: 'sign-in' | 'email-verification' | 'forget-password'
-    }) => Promise<void>
-    sendPhoneNumberVerificationOTP: ({
-      phoneNumber,
-      code
-    }: {
-      phoneNumber: string
-      code: string
-    }) => Promise<void>
-    sendInvitationEmail: ({
-      email,
-      organization,
-      inviter
-    }: {
-      id: string
-      role: string
-      email: string
-      organization: Org
-      invitation: Invitation
-      inviter: Member & {
-        user: User
-      }
-    }) => Promise<void>
-  }
-  google: {
-    clientId: string
-    clientSecret: string
-  }
+  /**
+   * @example rovierr.com -> api.rovierr.com
+   * pass the value as '.rovierr.com'
+   */
+  subDomainPrefix?: string
 }
 
 /**
  * Create default roles for an organization
  * Maps Better Auth roles: owner -> president, admin -> vice-president, member -> member
  */
-export async function createDefaultOrganizationRoles(
-  db: DB,
-  organizationId: string
-) {
+async function createDefaultOrganizationRoles(db: DB, organizationId: string) {
   const defaultRoles = [
     {
       role: 'president',
@@ -104,7 +64,7 @@ export async function createDefaultOrganizationRoles(
     }
   ]
 
-  await db.insert(organizationRoleTable).values(
+  await db.insert(schema.organizationRole).values(
     defaultRoles.map((r) => ({
       id: nanoid(),
       organizationId,
@@ -115,21 +75,21 @@ export async function createDefaultOrganizationRoles(
 }
 
 /**
- * Create a configured Better Auth instance
- * @param config - Auth configuration
- * @returns Configured Better Auth instance
+ * Create a Better Auth instance with the provided configuration.
+ * For Cloudflare Workers, this creates a new DB connection per request.
+ *
+ * @param config - Auth configuration object
+ * @returns Better Auth instance
  */
 export function createAuth(config: AuthConfig) {
   // Define plugin types to avoid TypeScript serialization issues
   const expoPlugin = expo()
   const twoFactorPlugin = twoFactor()
   const phoneNumberPlugin = phoneNumber({
-    sendOTP: (params) => config.emails.sendPhoneNumberVerificationOTP(params)
+    sendOTP: config.phoneNumber.sendOTP
   })
   const emailOTPPlugin = emailOTP({
-    sendVerificationOTP(params) {
-      return config.emails.sendEmailVerificationOTP(params)
-    }
+    sendVerificationOTP: config.email.sendEmailVerificationOTP
   })
   const oneTapPlugin = oneTap()
   const organizationPlugin = organization({
@@ -139,10 +99,7 @@ export function createAuth(config: AuthConfig) {
     dynamicAccessControl: {
       enabled: true
     },
-    sendInvitationEmail(data) {
-      return config.emails.sendInvitationEmail(data)
-    },
-
+    sendInvitationEmail: config.email.sendInvitationEmail,
     schema: {
       organization: {
         additionalFields: {
@@ -264,7 +221,6 @@ export function createAuth(config: AuthConfig) {
       // Create default roles after organization is created
       afterCreateOrganization: async ({ organization: org }) => {
         if (!org?.id) return
-
         await createDefaultOrganizationRoles(config.db, org.id)
       }
     }
@@ -273,7 +229,7 @@ export function createAuth(config: AuthConfig) {
 
   const customSessionPlugin = customSession(async ({ user, session }) => {
     const userVerified = await config.db.query.user.findFirst({
-      where: eq(userTable.id, user.id),
+      where: eq(schema.user.id, user.id),
       columns: { isVerified: true }
     })
     // Add custom session data
@@ -309,41 +265,38 @@ export function createAuth(config: AuthConfig) {
   ]
 
   return betterAuth({
-    appName: config.appName,
+    appName: 'Rovierr',
     baseURL: config.baseURL,
     secret: config.secret,
-    trustedOrigins: config.trustedOrigins,
-    plugins: authPlugins,
-    database: drizzleAdapter(config.db, {
-      provider: 'pg',
-      schema: {
-        account,
-        invitation,
-        member: memberTable,
-        organization: organizationTable,
-        session: sessionTable,
-        team,
-        teamMember,
-        twoFactor: twoFactorTable,
-        user: userTable,
-        verification,
-        organizationRole: organizationRoleTable
-      }
-    }),
-    emailAndPassword: {
-      enabled: true,
-      requireEmailVerification: false,
-      minPasswordLength: 8,
-      maxPasswordLength: 128
-    },
     socialProviders: {
       google: {
-        clientId: config.google.clientId,
-        clientSecret: config.google.clientSecret,
-        accessType: 'offline',
-        prompt: 'select_account consent'
+        clientId: config.googleClientId,
+        clientSecret: config.googleClientSecret
       }
     },
+    emailAndPassword: { enabled: false },
+    database: drizzleAdapter(config.db, {
+      provider: 'pg',
+      schema
+    }),
+
+    trustedOrigins: [...(config.trustedOrigins || [])].filter(Boolean),
+    session: {
+      expiresIn: 60 * 60 * 24 * 7, // 7 days
+      updateAge: 60 * 60 * 24 // 1 day
+    },
+    advanced: {
+      defaultCookieAttributes: {
+        sameSite: config.baseURL.includes('localhost') ? 'lax' : 'none',
+        secure: !config.baseURL.includes('localhost'),
+        httpOnly: true
+      },
+      crossSubDomainCookies: {
+        enabled: !config.baseURL.includes('localhost'),
+        domain: config.subDomainPrefix || undefined
+      }
+    },
+    plugins: [...authPlugins, ...(config.plugins || [])],
     databaseHooks: {
       user: {
         create: {
@@ -351,25 +304,20 @@ export function createAuth(config: AuthConfig) {
             if (!(user?.id && user?.email)) return
 
             await config.db
-              .update(userTable)
+              .update(schema.user)
               .set({
                 username:
                   (user.username as string) ||
                   `${user?.email?.split('@')[0]?.toLowerCase()}${nanoid(5)}`,
                 isVerified: false
               })
-              .where(eq(userTable.id, user.id))
+              .where(eq(schema.user.id, user.id))
               .execute()
           }
         }
       }
-    },
-    advanced: {
-      crossSubDomainCookies: {
-        enabled: true
-      }
     }
-  } satisfies BetterAuthOptions)
+  })
 }
 
 // Export types
@@ -400,6 +348,17 @@ export type Session = {
     username: string | null
     displayUsername: string | null
     isVerified: boolean
+    bannerImage: string | null
+    interests: string[]
+    bio: string | null
+    summary: string | null
+    website: string | null
+    whatsapp: string | null
+    telegram: string | null
+    instagram: string | null
+    facebook: string | null
+    twitter: string | null
+    linkedin: string | null
   }
 }
 
@@ -411,6 +370,7 @@ export type Organization = {
   createdAt: Date
   // biome-ignore lint/suspicious/noExplicitAny: no strict reason for now
   metadata?: any
+  // aditional fields if any
   type?: string | undefined
   visibility?: string | undefined
   institutionId?: string | undefined
@@ -429,4 +389,34 @@ export type Organization = {
   membershipRequirements?: string | undefined
   goals?: string | undefined
   primaryColor?: string | undefined
+  onboardingCompleted?: boolean | undefined
+  profileCompletionPercentage?: number | undefined
 }
+
+// ========================================================
+// Mock auth instance for schema generation
+// ========================================================
+// import { createDb } from "@rov/db";
+/**
+ * Mock auth instance for schema generation
+ * @returns Auth instance
+ *
+ * @example `bun run auth:generate-schema` from the root
+ */
+// mock auth instance for schema generation:
+// export const auth = createAuth({
+//   db: createDb("postgresql://postgres:postgres@localhost:5432/postgres"),
+//   baseURL: "http://localhost:3000",
+//   secret: "secret",
+//   googleClientId: "googleClientId",
+//   googleClientSecret: "googleClientSecret",
+//   trustedOrigins: ["http://localhost:3000"],
+//   plugins: [],
+//   phoneNumber: {
+//     sendOTP: () => {},
+//   },
+//   email: {
+//     sendEmailVerificationOTP: () => Promise.resolve(),
+//     sendInvitationEmail: () => Promise.resolve(),
+//   },
+// });
