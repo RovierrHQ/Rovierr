@@ -19,7 +19,12 @@
       "!**/wrangler.jsonc",
       "!**/.source",
       "!**/worker-configuration.d.ts",
-      "!bun.lock"
+      "!bun.lock",
+
+      // remove legacy once migrated
+      "!apps/native-legacy",
+      "!apps/legacy-nextjs",
+      "!packages/legacy-ui"
     ]
   },
   "linter": {

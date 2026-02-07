@@ -25,7 +25,7 @@ export default function DrawerLayout() {
   return (
     <DrawerProvider>
       <Drawer
-        drawerContent={(_props) => <CustomDrawerContent />}
+        drawerContent={CustomDrawerContent}
         ref={drawerRef}
         screenOptions={{
           headerShown: false,

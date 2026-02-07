@@ -27,7 +27,7 @@ export const Step: React.FC<StepProps> = ({ children }) => {
 
 // Add this to help with type checking
 const isStepComponent = (
-  child: any
+  child: unknown
 ): child is React.ReactElement<StepProps> => {
   return (
     isValidElement(child) &&
@@ -104,7 +104,7 @@ export default function MultiStep({
   const progressAnims = useRef(steps.map(() => new Animated.Value(0))).current
 
   useEffect(() => {
-    // Reset and start fade/slide animations
+    // Reset and start fade/slide animations (only when step changes, not on every input)
     fadeAnim.setValue(0)
     slideAnim.setValue(50)
 
@@ -123,19 +123,20 @@ export default function MultiStep({
     ]).start()
 
     // Animate progress indicators
-    steps.forEach((_, index) => {
+    const stepCount = validChildren.length
+    for (let index = 0; index < stepCount; index++) {
       Animated.timing(progressAnims[index], {
         toValue: index <= currentStepIndex ? 1 : 0,
         duration: 300,
         useNativeDriver: false
       }).start()
-    })
+    }
   }, [
     currentStepIndex,
     progressAnims,
     fadeAnim,
-    slideAnim, // Animate progress indicators
-    steps.forEach
+    slideAnim,
+    validChildren.length
   ])
 
   const handleNext = () => {
