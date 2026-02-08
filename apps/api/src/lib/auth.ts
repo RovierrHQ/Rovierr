@@ -15,6 +15,7 @@ export const auth = createAuth({
   trustedOrigins: [...(env.CORS_ORIGIN.split(',').map((o) => o.trim()) || [])],
   subDomainPrefix: '.rovierr.com',
   plugins: [openAPI()],
+  emailPasswordEnabled: env.NODE_ENV === 'development',
   phoneNumber: {
     sendOTP: (params) => {
       console.log('sendOTP', params)

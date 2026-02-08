@@ -16,6 +16,8 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export default function ForgotPasswordScreen() {
   const insets = useSafeAreaInsets()
   const [email, setEmail] = useState('')
@@ -23,7 +25,6 @@ export default function ForgotPasswordScreen() {
   const [isLoading, setIsLoading] = useState(false)
 
   const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!email) {
       setEmailError('Email is required')
       return false
@@ -121,7 +122,7 @@ export default function ForgotPasswordScreen() {
 
                 <Link
                   className="underline text-center text-text text-sm mb-4"
-                  href="/screens/login"
+                  href="/login"
                 >
                   Back to Login
                 </Link>

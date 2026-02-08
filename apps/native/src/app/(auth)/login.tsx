@@ -4,7 +4,7 @@ import Input from '@rov/components/forms/Input'
 import ThemedText from '@rov/components/ThemedText'
 import useThemeColors from '@rov/contexts/ThemeColors'
 import { LinearGradient } from 'expo-linear-gradient'
-import { Link, router, Stack } from 'expo-router'
+import { Link, Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useState } from 'react'
 import {
@@ -16,6 +16,7 @@ import {
   View
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { authClient } from '../../lib/auth-client'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -54,24 +55,47 @@ export default function LoginScreen() {
     return true
   }
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const isEmailValid = validateEmail(email)
     const isPasswordValid = validatePassword(password)
 
     if (isEmailValid && isPasswordValid) {
       setIsLoading(true)
-      // Simulate API call
-      setTimeout(() => {
+      try {
+        const result = await authClient.signIn.email({
+          email,
+          password
+        })
+
+        if (result.error) {
+          console.error('Login error:', result.error)
+          setPasswordError(result.error.message || 'Failed to sign in')
+          return
+        }
+
         setIsLoading(false)
-        // Navigate to home screen after successful login
-        router.replace('/societies')
-      }, 1500)
+      } catch (error) {
+        console.error('Login error:', error)
+        setPasswordError('An error occurred during sign in')
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
-  const _handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`)
-    // Implement social login logic here
+  const _handleSocialLogin = async (provider: 'google' | 'apple') => {
+    try {
+      const result = await authClient.signIn.social({
+        provider
+      })
+
+      if (result.error) {
+        setPasswordError(result.error.message || 'Social login failed')
+      }
+    } catch (error) {
+      console.error('Social login error:', error)
+      setPasswordError('An error occurred during social login')
+    }
   }
 
   return (
@@ -121,14 +145,14 @@ export default function LoginScreen() {
                   style={{ paddingBottom: insets.bottom }}
                 >
                   <View className="flex-row gap-4 bg-secondary p-1.5 rounded-2xl mb-8">
-                    <Link asChild href="/screens/login">
+                    <Link asChild href="/login">
                       <Pressable className="flex-1 bg-background p-3 rounded-xl">
                         <ThemedText className="text-sm text-center">
                           Login
                         </ThemedText>
                       </Pressable>
                     </Link>
-                    <Link asChild href="/screens/signup">
+                    <Link asChild href="/signup">
                       <Pressable className="flex-1 bg-secondary p-3 rounded-2xl">
                         <ThemedText className="text-sm text-center">
                           Signup
@@ -174,7 +198,7 @@ export default function LoginScreen() {
                   />
                   <Link
                     className="underline text-center text-text text-sm mb-4"
-                    href="/screens/forgot-password"
+                    href="/forgot-password"
                   >
                     Forgot Password?
                   </Link>
@@ -182,14 +206,14 @@ export default function LoginScreen() {
                   <View className="flex flex-row items-center justify-center gap-2">
                     <Pressable
                       className="flex-1 border border-white rounded-full flex flex-row items-center justify-center py-4"
-                      onPress={() => router.push('/screens/onboarding-start')}
+                      onPress={() => _handleSocialLogin('google')}
                     >
                       <AntDesign color="white" name="google" size={22} />
                     </Pressable>
 
                     <Pressable
                       className="flex-1 border border-white rounded-full flex flex-row items-center justify-center py-4"
-                      onPress={() => router.push('/screens/onboarding-start')}
+                      onPress={() => _handleSocialLogin('apple')}
                     >
                       <AntDesign color="white" name="apple" size={22} />
                     </Pressable>

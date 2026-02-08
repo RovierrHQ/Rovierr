@@ -42,6 +42,7 @@ export type AuthConfig = {
    * pass the value as '.rovierr.com'
    */
   subDomainPrefix?: string
+  emailPasswordEnabled?: boolean
 }
 
 /**
@@ -274,7 +275,7 @@ export function createAuth(config: AuthConfig) {
         clientSecret: config.googleClientSecret
       }
     },
-    emailAndPassword: { enabled: false },
+    emailAndPassword: { enabled: config.emailPasswordEnabled ?? false },
     database: drizzleAdapter(config.db, {
       provider: 'pg',
       schema

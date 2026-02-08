@@ -19,7 +19,7 @@ if (!process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID) {
  * Uses AsyncStorage for secure session persistence
  */
 export const authClient = createNativeAuthClient({
-  baseURL: `${process.env.EXPO_PUBLIC_SERVER_URL}/auth`,
+  baseURL: `${process.env.EXPO_PUBLIC_SERVER_URL}/api/auth`,
   storagePrefix: 'rovierr',
   storage: SecureStore,
   scheme: 'rovierr'

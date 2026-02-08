@@ -4,7 +4,7 @@ import Input from '@rov/components/forms/Input'
 import ThemedText from '@rov/components/ThemedText'
 import useThemeColors from '@rov/contexts/ThemeColors'
 import { LinearGradient } from 'expo-linear-gradient'
-import { Link, router, Stack } from 'expo-router'
+import { Link, Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useState } from 'react'
 import {
@@ -16,6 +16,12 @@ import {
   View
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { authClient } from '../../lib/auth-client'
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const uppercaseRegex = /[A-Z]/
+const lowercaseRegex = /[a-z]/
+const numberOrSpecialRegex = /[0-9!@#$%^&*(),.?":{}|<>]/
 
 export default function SignupScreen() {
   const insets = useSafeAreaInsets()
@@ -31,7 +37,6 @@ export default function SignupScreen() {
   const [strengthText, setStrengthText] = useState('')
 
   const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!email) {
       setEmailError('Email is required')
       return false
@@ -56,21 +61,21 @@ export default function SignupScreen() {
     }
 
     // Uppercase check
-    if (/[A-Z]/.test(password)) {
+    if (uppercaseRegex.test(password)) {
       strength += 25
     } else {
       feedback.push('Add uppercase letter')
     }
 
     // Lowercase check
-    if (/[a-z]/.test(password)) {
+    if (lowercaseRegex.test(password)) {
       strength += 25
     } else {
       feedback.push('Add lowercase letter')
     }
 
     // Numbers or special characters check
-    if (/[0-9!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    if (numberOrSpecialRegex.test(password)) {
       strength += 25
     } else {
       feedback.push('Add number or special character')
@@ -112,25 +117,48 @@ export default function SignupScreen() {
     return true
   }
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     const isEmailValid = validateEmail(email)
     const isPasswordValid = validatePassword(password)
     const isConfirmPasswordValid = validateConfirmPassword(confirmPassword)
 
     if (isEmailValid && isPasswordValid && isConfirmPasswordValid) {
       setIsLoading(true)
-      // Simulate API call
-      setTimeout(() => {
+      try {
+        const nameFromEmail = email.split('@')[0] || 'User'
+        const result = await authClient.signUp.email({
+          name: nameFromEmail,
+          email,
+          password
+        })
+
+        if (result.error) {
+          console.error('Signup error:', result.error)
+          setPasswordError(result.error.message || 'Failed to create account')
+          return
+        }
+      } catch (error) {
+        console.error('Signup error:', error)
+        setPasswordError('An error occurred during sign up')
+      } finally {
         setIsLoading(false)
-        // Navigate to home screen after successful login
-        router.replace('/screens/login-flow/welcome')
-      }, 1500)
+      }
     }
   }
 
-  const _handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`)
-    // Implement social login logic here
+  const _handleSocialLogin = async (provider: 'google' | 'apple') => {
+    try {
+      const result = await authClient.signIn.social({
+        provider
+      })
+
+      if (result.error) {
+        setPasswordError(result.error.message || 'Social signup failed')
+      }
+    } catch (error) {
+      console.error('Social signup error:', error)
+      setPasswordError('An error occurred during social signup')
+    }
   }
 
   return (
@@ -180,14 +208,14 @@ export default function SignupScreen() {
                   style={{ paddingBottom: insets.bottom }}
                 >
                   <View className="flex-row gap-4 bg-secondary p-1.5 rounded-2xl mb-8">
-                    <Link asChild href="/screens/login">
+                    <Link asChild href="/login">
                       <Pressable className="flex-1 bg-secondary p-3 rounded-2xl">
                         <ThemedText className="text-sm text-center">
                           Login
                         </ThemedText>
                       </Pressable>
                     </Link>
-                    <Link asChild href="/screens/signup">
+                    <Link asChild href="/signup">
                       <Pressable className="flex-1 bg-background p-3 rounded-xl">
                         <ThemedText className="text-sm text-center">
                           Signup
@@ -264,14 +292,14 @@ export default function SignupScreen() {
                   <View className="flex-row gap-4  p-1.5 rounded-2xl mb-4">
                     <Pressable
                       className="flex-1 border border-white rounded-full flex flex-row items-center justify-center py-4"
-                      onPress={() => router.push('/screens/onboarding-start')}
+                      onPress={() => _handleSocialLogin('google')}
                     >
                       <AntDesign color="white" name="google" size={22} />
                     </Pressable>
 
                     <Pressable
                       className="flex-1 border border-white rounded-full flex flex-row items-center justify-center py-4"
-                      onPress={() => router.push('/screens/onboarding-start')}
+                      onPress={() => _handleSocialLogin('apple')}
                     >
                       <AntDesign color="white" name="apple" size={22} />
                     </Pressable>

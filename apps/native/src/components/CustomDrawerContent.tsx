@@ -3,6 +3,7 @@ import { type Href, router } from 'expo-router'
 import { Pressable, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSpace } from '../contexts/SpaceContext'
+import { authClient } from '../lib/auth-client'
 import Avatar from './Avatar'
 import Icon, { type IconName } from './Icon'
 import ThemedText from './ThemedText'
@@ -10,6 +11,9 @@ import ThemedScroller from './ThemeScroller'
 
 export default function CustomDrawerContent() {
   const insets = useSafeAreaInsets()
+  const handleLogout = async () => {
+    await authClient.signOut()
+  }
   const {
     space,
     openSocietySwitcher,
@@ -169,7 +173,12 @@ export default function CustomDrawerContent() {
               icon="ChartBar"
               label="Analytics"
             />
-            <NavItem href="/screens/login" icon="LogOut" label="Logout" />
+            <NavItem
+              href="/login"
+              icon="LogOut"
+              label="Logout"
+              onPress={handleLogout}
+            />
           </View>
 
           <View className="flex-row justify-between items-center">
@@ -212,12 +221,19 @@ type NavItemProps = {
   label: string
   className?: string
   description?: string
+  onPress?: () => void
 }
 
-export const NavItem = ({ href, icon, label, description }: NavItemProps) => (
+export const NavItem = ({
+  href,
+  icon,
+  label,
+  description,
+  onPress
+}: NavItemProps) => (
   <TouchableOpacity
     className={'flex-row items-center py-4'}
-    onPress={() => router.push(href)}
+    onPress={onPress ?? (() => router.push(href))}
   >
     <Icon className="" name={icon} size={24} strokeWidth={1.8} />
 
