@@ -1,9 +1,6 @@
-import Icon from '@rov/components/Icon'
 import { TabButton } from '@rov/components/TabButton'
 import { useThemeColors } from '@rov/contexts/ThemeColors'
-import { router } from 'expo-router'
 import { TabList, TabSlot, Tabs, TabTrigger } from 'expo-router/ui'
-import { Pressable, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function Layout() {
@@ -32,7 +29,7 @@ export default function Layout() {
           </TabButton>
         </TabTrigger>
 
-        <View className="w-1/5 items-center justify-center">
+        {/* <View className="w-1/5 items-center justify-center">
           <Pressable
             className="w-full"
             onPress={() => router.push('/screens/add-post')}
@@ -44,7 +41,7 @@ export default function Layout() {
               size={24}
             />
           </Pressable>
-        </View>
+        </View> */}
 
         <TabTrigger asChild href="/notifications" name="notifications">
           <TabButton hasBadge icon="Bell" labelAnimated={true}>

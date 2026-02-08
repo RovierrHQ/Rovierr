@@ -154,12 +154,6 @@ export default function SearchScreen() {
               </ThemedText>
             </Pressable>
           </Link>
-          {/*<Link href="/screens/search" asChild>
-                        <Pressable className="bg-secondary rounded-2xl p-4 flex-row items-center mt-2 mb-8">
-                            <Icon name="Search" size={20} className="opacity-40" />
-                            <ThemedText className="text-text text-base ml-2 opacity-40">Search</ThemedText>
-                        </Pressable>
-                    </Link>*/}
         </View>
         <MasonryGrid images={masonryImages} />
       </ThemedScroller>

@@ -40,13 +40,13 @@ export default function DrawerLayout() {
           swipeEdgeWidth: 100
         }}
       >
-        <Drawer.Screen
+        {/* <Drawer.Screen
           name="(tabs)"
           options={{
-            title: 'Caloria',
+            title: 'Feedysdfgsdfghsdfg',
             drawerLabel: 'Home'
           }}
-        />
+        /> */}
       </Drawer>
     </DrawerProvider>
   )

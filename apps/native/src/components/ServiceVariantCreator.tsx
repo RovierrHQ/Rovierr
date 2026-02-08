@@ -7,11 +7,11 @@ import {
   Keyboard,
   Modal,
   Pressable,
-  SafeAreaView,
   Text,
   TextInput,
   View
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button } from './Button'
 import Input from './forms/Input'
 import Icon from './Icon'

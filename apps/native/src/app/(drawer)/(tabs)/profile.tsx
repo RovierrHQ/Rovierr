@@ -23,7 +23,7 @@ export default function ProfileScreen() {
         ]}
       />
       <AnimatedView
-        animation="scaleIn"
+        animation="fadeIn"
         className="flex-1 bg-background"
         duration={300}
       >
