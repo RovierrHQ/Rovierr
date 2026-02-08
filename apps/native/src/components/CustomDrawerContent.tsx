@@ -1,9 +1,8 @@
+import AnimatedView from '@rov/components/AnimatedView'
 import { type Href, router } from 'expo-router'
-import React, { useRef } from 'react'
 import { Pressable, TouchableOpacity, View } from 'react-native'
-import type { ActionSheetRef } from 'react-native-actions-sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import ActionSheetThemed from './ActionSheetThemed'
+import { useSpace } from '../contexts/SpaceContext'
 import Avatar from './Avatar'
 import Icon, { type IconName } from './Icon'
 import ThemedText from './ThemedText'
@@ -11,25 +10,22 @@ import ThemedScroller from './ThemeScroller'
 
 export default function CustomDrawerContent() {
   const insets = useSafeAreaInsets()
-  const switchAccountRef = useRef<ActionSheetRef>(null)
+  const {
+    space,
+    openSocietySwitcher,
+    openSpaceSwitcher,
+    activeSociety,
+    societies
+  } = useSpace()
   return (
-    <>
-      <ThemedScroller
-        className="flex-1 !px-10 bg-background "
-        style={{ paddingTop: insets.top }}
-      >
-        {/* User Profile Section */}
-        <View className=" mb-8 py-10 border-b border-border   rounded-xl">
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+      {/* User Profile Section */}
+      <View className="px-10 pb-6 mb-2 border-b border-border">
+        <Pressable onPress={() => router.push('/societies/profile')}>
           <View className="flex-row items-center justify-between">
             <Avatar size="md" src={require('@rov/assets/img/thomino.jpg')} />
             <View className="flex-row items-center">
               <Avatar bgColor="bg-slate-500" name="Thomino" size="xxs" />
-              <Icon
-                className="ml-2"
-                name="CircleEllipsis"
-                onPress={() => switchAccountRef.current?.show()}
-                size={27}
-              />
             </View>
           </View>
           <View className="mt-4">
@@ -47,43 +43,166 @@ export default function CustomDrawerContent() {
               ThominoDesign
             </ThemedText>
           </View>
-        </View>
+        </Pressable>
 
-        <View className="flex-col pb-6 mb-6 border-b border-border">
-          <NavItem
-            href="/(drawer)/(tabs)/profile"
-            icon="User"
-            label="Profile"
-          />
-          <NavItem href="/screens/subscription" icon="Trophy" label="Premium" />
-          <NavItem href="/screens/chat/list" icon="Mail" label="Inbox" />
-          <NavItem
-            href="/(drawer)/(tabs)/search"
-            icon="Search"
-            label="Discover"
-          />
-          <NavItem
-            href="/(drawer)/(tabs)/notifications"
-            icon="Bell"
-            label="Notifications"
-          />
-          <NavItem href="/screens/settings" icon="Settings" label="Settings" />
-          <NavItem
-            href="/screens/analytics"
-            icon="ChartBar"
-            label="Analytics"
-          />
-          <NavItem href="/screens/login" icon="LogOut" label="Logout" />
-        </View>
+        {space === 'societies' && (
+          <View className="mt-6">
+            <ThemedText className="text-sm opacity-60">
+              Current society
+            </ThemedText>
+            {societies.length > 0 ? (
+              <Pressable
+                className="mt-3 rounded-2xl border border-border bg-card px-4 py-3"
+                onPress={openSocietySwitcher}
+              >
+                <View className="flex-row items-center justify-between">
+                  <View>
+                    <ThemedText className="text-base font-semibold">
+                      {activeSociety?.name}
+                    </ThemedText>
+                    <ThemedText className="text-text/60 text-sm">
+                      Tap to switch societies
+                    </ThemedText>
+                  </View>
+                  <Icon name="ChevronDown" size={18} />
+                </View>
+              </Pressable>
+            ) : (
+              <View className="mt-3">
+                <NavItem
+                  href="/societies/search"
+                  icon="Search"
+                  label="Find a society"
+                />
+              </View>
+            )}
+          </View>
+        )}
+      </View>
 
-        <View className="flex-row justify-between items-center">
-          <ThemedText className="text-sm text-light-subtext dark:text-dark-subtext">
-            Version 1.0.0
-          </ThemedText>
-        </View>
+      <ThemedScroller className="flex-1 !px-10">
+        <AnimatedView
+          animation="slideInRight"
+          className="pb-6"
+          duration={220}
+          key={space}
+        >
+          {space === 'societies' && (
+            <>
+              <View className="flex-col pb-6 mb-6 border-b border-border">
+                <NavItem
+                  href="/societies/members"
+                  icon="Users"
+                  label="Members"
+                />
+                <NavItem
+                  href="/societies/announcements"
+                  icon="Megaphone"
+                  label="Announcements"
+                />
+                <NavItem
+                  href="/societies/settings"
+                  icon="Settings"
+                  label="Society settings"
+                />
+              </View>
+
+              <View className="flex-col pb-6 mb-6 border-b border-border">
+                <NavItem href="/societies/store" icon="Store" label="Store" />
+                <NavItem
+                  href="/societies/tuition"
+                  icon="GraduationCap"
+                  label="Tuition"
+                />
+                <NavItem
+                  href="/societies/internships"
+                  icon="Briefcase"
+                  label="Internships"
+                />
+                <NavItem href="/societies/fun" icon="Gamepad2" label="Fun" />
+              </View>
+            </>
+          )}
+
+          {space === 'academics' && (
+            <View className="flex-col pb-6 mb-6 border-b border-border">
+              <NavItem href="/academics" icon="Home" label="Today" />
+              <NavItem
+                href="/academics/courses"
+                icon="BookOpen"
+                label="Courses"
+              />
+              <NavItem
+                href="/academics/texts"
+                icon="MessageCircle"
+                label="Texts"
+              />
+            </View>
+          )}
+
+          {space === 'personal' && (
+            <View className="flex-col pb-6 mb-6 border-b border-border">
+              <NavItem href="/personal" icon="User" label="Personal home" />
+            </View>
+          )}
+
+          {space === 'career' && (
+            <View className="flex-col pb-6 mb-6 border-b border-border">
+              <NavItem href="/career" icon="Briefcase" label="Career home" />
+            </View>
+          )}
+
+          <View className="flex-col pb-6 mb-6 border-b border-border">
+            <NavItem
+              href="/screens/subscription"
+              icon="Trophy"
+              label="Premium"
+            />
+            <NavItem href="/screens/chat/list" icon="Mail" label="Inbox" />
+            <NavItem
+              href="/screens/settings"
+              icon="Settings"
+              label="Settings"
+            />
+            <NavItem
+              href="/screens/analytics"
+              icon="ChartBar"
+              label="Analytics"
+            />
+            <NavItem href="/screens/login" icon="LogOut" label="Logout" />
+          </View>
+
+          <View className="flex-row justify-between items-center">
+            <ThemedText className="text-sm text-light-subtext dark:text-dark-subtext">
+              Version 1.0.0
+            </ThemedText>
+          </View>
+        </AnimatedView>
       </ThemedScroller>
-      <SwitchAccountDrawer ref={switchAccountRef} />
-    </>
+
+      <View
+        className="px-10 pt-2 border-t border-border"
+        style={{ paddingBottom: insets.bottom || 12 }}
+      >
+        <ThemedText className="text-sm opacity-60 mb-2">
+          Switch space
+        </ThemedText>
+        <Pressable
+          className="flex-row items-center bg-secondary rounded-2xl py-3 px-4"
+          onPress={openSpaceSwitcher}
+        >
+          <View className="flex-1">
+            <ThemedText className="font-semibold text-xl">
+              {space.charAt(0).toUpperCase() + space.slice(1)}
+            </ThemedText>
+            <ThemedText className="text-sm">Space</ThemedText>
+          </View>
+          <View className="relative flex-row items-center">
+            <Icon name="ChevronDown" size={16} />
+          </View>
+        </Pressable>
+      </View>
+    </View>
   )
 }
 
@@ -112,51 +231,3 @@ export const NavItem = ({ href, icon, label, description }: NavItemProps) => (
     </View>
   </TouchableOpacity>
 )
-
-const SwitchAccountDrawer = React.forwardRef<ActionSheetRef>((_props, ref) => {
-  return (
-    <ActionSheetThemed gestureEnabled id="switch-account-drawer" ref={ref}>
-      <View className="p-global">
-        <ProfileItem
-          isSelected
-          label="Personal account"
-          name="Thomino"
-          src={require('@rov/assets/img/thomino.jpg')}
-        />
-        <ProfileItem label="Business account" name="TZ Studios" />
-        <Pressable className="items-center justify-center pt-6 mt-6 border-t border-border">
-          <ThemedText className="text-lg font-semibold">Add Account</ThemedText>
-        </Pressable>
-      </View>
-    </ActionSheetThemed>
-  )
-})
-
-const ProfileItem = (props: any) => {
-  return (
-    <Pressable className="flex-row items-center  bg-secondary rounded-2xl py-4">
-      <View className="flex-1">
-        <ThemedText className="font-semibold text-xl">{props.name}</ThemedText>
-        <ThemedText className="text-sm">{props.label}</ThemedText>
-      </View>
-      <View className="relative mr-4 flex-row items-center">
-        {props.isSelected && (
-          <Icon
-            className=" w-7 mr-2 h-7 bg-highlight rounded-full border-2 border-secondary"
-            color="white"
-            name="Check"
-            size={14}
-            strokeWidth={2}
-          />
-        )}
-        <Avatar
-          bgColor="bg-slate-500"
-          className="border border-border"
-          name={props.name}
-          size="sm"
-          src={props.src}
-        />
-      </View>
-    </Pressable>
-  )
-}

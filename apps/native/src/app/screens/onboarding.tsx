@@ -15,10 +15,10 @@ export default function OnboardingStart() {
   return (
     <View className="flex-1 bg-secondary">
       <MultiStep
-        onClose={() => router.push('/(drawer)/(tabs)/')}
+        onClose={() => router.push('/societies')}
         onComplete={() => {
           router.push({
-            pathname: '/(drawer)/(tabs)',
+            pathname: '/societies',
             params: {}
           })
         }}

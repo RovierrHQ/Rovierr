@@ -43,7 +43,7 @@ const Favorite: React.FC<FavoriteProps> = ({
   const handleViewFavorites = () => {
     actionSheetRef.current?.hide()
     // Navigate to favorites screen
-    router.push('/(drawer)/(tabs)/favorites')
+    router.push('/societies/favorites')
   }
 
   return (
