@@ -1,4 +1,4 @@
-import { useThemeColors } from '@rov/app/contexts/ThemeColors'
+import { useThemeColors } from '@rov/contexts/ThemeColors'
 import { type Href, Link } from 'expo-router'
 import type { LucideProps } from 'lucide-react-native'
 import * as LucideIcons from 'lucide-react-native'

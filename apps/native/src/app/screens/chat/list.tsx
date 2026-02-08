@@ -1,7 +1,7 @@
-import useThemeColors from '@rov/app/contexts/ThemeColors'
 import Avatar from '@rov/components/Avatar'
 import Icon from '@rov/components/Icon'
 import ThemedText from '@rov/components/ThemedText'
+import useThemeColors from '@rov/contexts/ThemeColors'
 import { Link, router } from 'expo-router'
 import { FlatList, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

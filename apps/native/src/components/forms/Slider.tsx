@@ -1,4 +1,4 @@
-import useThemeColors from '@rov/app/contexts/ThemeColors'
+import useThemeColors from '@rov/contexts/ThemeColors'
 import { useCallback, useEffect } from 'react'
 import {
   type LayoutChangeEvent,

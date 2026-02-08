@@ -6,7 +6,7 @@ import { Link, router } from 'expo-router'
 import { useState } from 'react'
 import { Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import useThemeColors from '../contexts/ThemeColors'
+import useThemeColors from '../../contexts/ThemeColors'
 
 export default function SearchScreen() {
   const mockUsers = [

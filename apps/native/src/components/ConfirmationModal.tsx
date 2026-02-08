@@ -1,6 +1,6 @@
-import useThemeColors from '@rov/app/contexts/ThemeColors'
-import { useTheme } from '@rov/app/contexts/ThemeContext'
 import ThemedText from '@rov/components/ThemedText'
+import useThemeColors from '@rov/contexts/ThemeColors'
+import { useTheme } from '@rov/contexts/ThemeContext'
 import * as NavigationBar from 'expo-navigation-bar'
 import React from 'react'
 import { Platform, Pressable, Text, View } from 'react-native'

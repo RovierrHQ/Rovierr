@@ -1,4 +1,4 @@
-import useThemeColors from '@rov/app/contexts/ThemeColors'
+import useThemeColors from '@rov/contexts/ThemeColors'
 import React from 'react'
 import { Animated, Dimensions, Easing, View } from 'react-native'
 

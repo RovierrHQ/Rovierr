@@ -1,6 +1,6 @@
 // components/Button.tsx
 
-import useThemeColors from '@rov/app/contexts/ThemeColors'
+import useThemeColors from '@rov/contexts/ThemeColors'
 import { type Href, router } from 'expo-router'
 import type React from 'react'
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'

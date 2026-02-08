@@ -18,7 +18,7 @@ import {
 } from 'react-native'
 import type { ActionSheetRef } from 'react-native-actions-sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import useThemeColors from '../contexts/ThemeColors'
+import useThemeColors from '../../contexts/ThemeColors'
 
 export default function PostScreen() {
   const [following, setFollowing] = useState(false)

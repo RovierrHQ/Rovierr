@@ -1,4 +1,4 @@
-import useThemeColors from '@rov/app/contexts/ThemeColors'
+import useThemeColors from '@rov/contexts/ThemeColors'
 import { forwardRef } from 'react'
 import { View } from 'react-native'
 import ActionSheet, {

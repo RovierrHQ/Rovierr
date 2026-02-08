@@ -1,5 +1,5 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
-import useThemeColors from '@rov/app/contexts/ThemeColors'
+import useThemeColors from '@rov/contexts/ThemeColors'
 import { shadowPresets } from '@rov/utils/useShadow'
 import { LinearGradient } from 'expo-linear-gradient'
 import { type Href, router } from 'expo-router'

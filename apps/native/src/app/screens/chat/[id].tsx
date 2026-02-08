@@ -1,10 +1,10 @@
-import { useThemeColors } from '@rov/app/contexts/ThemeColors'
 import ActionSheetThemed from '@rov/components/ActionSheetThemed'
 import Avatar from '@rov/components/Avatar'
 import Header, { HeaderIcon } from '@rov/components/Header'
 import Icon from '@rov/components/Icon'
 import PageLoader from '@rov/components/PageLoader'
 import ThemedText from '@rov/components/ThemedText'
+import { useThemeColors } from '@rov/contexts/ThemeColors'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {

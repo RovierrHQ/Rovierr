@@ -1,6 +1,6 @@
 import { AntDesign } from '@expo/vector-icons'
-import { useThemeColors } from '@rov/app/contexts/ThemeColors'
 import ThemedText from '@rov/components/ThemedText'
+import { useThemeColors } from '@rov/contexts/ThemeColors'
 import { Link } from 'expo-router'
 import { Image, type ImageSourcePropType, Pressable, View } from 'react-native'
 

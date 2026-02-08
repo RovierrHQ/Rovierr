@@ -6,8 +6,8 @@ import {
 import CustomDrawerContent from '@rov/components/CustomDrawerContent'
 import { Drawer } from 'expo-router/drawer'
 import React from 'react'
-import { DrawerProvider } from '../contexts/DrawerContext'
-import { useThemeColors } from '../contexts/ThemeColors'
+import { DrawerProvider } from '../../contexts/DrawerContext'
+import { useThemeColors } from '../../contexts/ThemeColors'
 // Create a ref to the drawer instance that can be used across the app
 export const drawerRef = React.createRef()
 

@@ -1,5 +1,5 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
-import useThemeColors from '@rov/app/contexts/ThemeColors'
+import useThemeColors from '@rov/contexts/ThemeColors'
 import { type Href, Link } from 'expo-router'
 import { Dimensions, Text, TouchableOpacity, View } from 'react-native'
 import ImageCarousel from './ImageCarousel'

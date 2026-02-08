@@ -1,4 +1,4 @@
-import { useThemeColors } from '@rov/app/contexts/ThemeColors'
+import { useThemeColors } from '@rov/contexts/ThemeColors'
 import { router } from 'expo-router'
 import type React from 'react'
 import { useRef, useState } from 'react'

@@ -1,5 +1,5 @@
 import Feather from '@expo/vector-icons/Feather'
-import { useTheme } from '@rov/app/contexts/ThemeContext'
+import { useTheme } from '@rov/contexts/ThemeContext'
 import { useEffect } from 'react'
 import { Pressable, View } from 'react-native'
 import Animated, {

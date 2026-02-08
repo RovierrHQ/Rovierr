@@ -1,5 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native'
-import useThemeColors from '@rov/app/contexts/ThemeColors'
+import useThemeColors from '@rov/contexts/ThemeColors'
 import type React from 'react'
 import { useCallback, useRef } from 'react'
 import { Animated, View } from 'react-native'

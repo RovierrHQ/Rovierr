@@ -1,6 +1,6 @@
-import { useThemeColors } from '@rov/app/contexts/ThemeColors'
 import Icon from '@rov/components/Icon'
 import { TabButton } from '@rov/components/TabButton'
+import { useThemeColors } from '@rov/contexts/ThemeColors'
 import { router } from 'expo-router'
 import { TabList, TabSlot, Tabs, TabTrigger } from 'expo-router/ui'
 import { Pressable, View } from 'react-native'

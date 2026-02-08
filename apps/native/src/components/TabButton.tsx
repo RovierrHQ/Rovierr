@@ -1,5 +1,5 @@
-import { useThemeColors } from '@rov/app/contexts/ThemeColors'
 import Icon, { type IconName } from '@rov/components/Icon'
+import { useThemeColors } from '@rov/contexts/ThemeColors'
 import type { TabTriggerSlotProps } from 'expo-router/ui'
 import { forwardRef, type ReactNode, useEffect, useState } from 'react'
 import { Animated, Pressable, Text, View } from 'react-native'

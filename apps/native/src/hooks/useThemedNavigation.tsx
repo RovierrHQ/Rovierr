@@ -1,5 +1,5 @@
-import useThemeColors from '@rov/app/contexts/ThemeColors'
-import { useTheme } from '@rov/app/contexts/ThemeContext'
+import useThemeColors from '@rov/contexts/ThemeColors'
+import { useTheme } from '@rov/contexts/ThemeContext'
 import * as NavigationBar from 'expo-navigation-bar'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'

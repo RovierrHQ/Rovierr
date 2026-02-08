@@ -1,4 +1,4 @@
-import useThemeColors from '@rov/app/contexts/ThemeColors'
+import useThemeColors from '@rov/contexts/ThemeColors'
 import { type Href, Link } from 'expo-router'
 import React, { type ReactNode } from 'react'
 import {

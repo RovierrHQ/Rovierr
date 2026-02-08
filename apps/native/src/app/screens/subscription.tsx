@@ -9,7 +9,7 @@ import ThemedScroller from '@rov/components/ThemeScroller'
 import { useRef, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import type { ActionSheetRef } from 'react-native-actions-sheet'
-import useThemeColors from '../contexts/ThemeColors'
+import useThemeColors from '../../contexts/ThemeColors'
 
 export default function EditProfileScreen() {
   const [selectedPlan, setSelectedPlan] = useState('Monthly')

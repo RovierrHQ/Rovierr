@@ -1,4 +1,4 @@
-import { useThemeColors } from '@rov/app/contexts/ThemeColors'
+import { useThemeColors } from '@rov/contexts/ThemeColors'
 import { BlurView } from 'expo-blur'
 import { LinearGradient } from 'expo-linear-gradient'
 import { type Href, Link, router } from 'expo-router'

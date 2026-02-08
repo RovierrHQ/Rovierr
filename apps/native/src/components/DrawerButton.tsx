@@ -3,7 +3,7 @@ import {
   type NavigationProp,
   useNavigation
 } from '@react-navigation/native'
-import { useThemeColors } from '@rov/app/contexts/ThemeColors'
+import { useThemeColors } from '@rov/contexts/ThemeColors'
 import { Pressable, View, type ViewStyle } from 'react-native'
 import Avatar from './Avatar'
 import Icon from './Icon'
