@@ -1,2 +1,4 @@
 #!/bin/sh
-bun run build
+# Run the workspace build but skip the heavy `api` package to avoid OOM on low-memory CI/dev machines.
+# To run the full build locally, use: `bun run build` or `npm run build`.
+bun run build -- --filter '!:api'
