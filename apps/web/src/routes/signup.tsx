@@ -39,7 +39,7 @@ function SignupPage() {
         toast.success('Account created successfully!')
         router.navigate({ to: '/profile' })
       }
-    } catch (_error) {
+    } catch {
       toast.dismiss(loadingToast)
       toast.error('An error occurred during sign up')
     }
@@ -51,7 +51,7 @@ function SignupPage() {
         provider: 'google',
         callbackURL: `${window.location.origin}/profile`
       })
-    } catch (error) {
+    } catch {
       toast.error('Failed to start Google signup')
     }
   }
@@ -59,7 +59,7 @@ function SignupPage() {
   return (
     <div className="relative isolate h-svh overflow-hidden bg-muted">
       <Topnav loginButton={false} />
-      <div className="flex h-full items-center justify-center border">
+      <div className="flex h-[calc(100svh-80px)] items-center justify-center px-4">
         <SignupForm
           handleEmailSignup={handleEmailSignup}
           handleGoogleSignup={handleGoogleSignup}
