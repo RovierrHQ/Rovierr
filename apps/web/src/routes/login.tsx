@@ -54,7 +54,7 @@ function LoginPage() {
         provider: 'google',
         callbackURL: `${window.location.origin}/spaces/societies`
       })
-    } catch (error) {
+    } catch {
       toast.error('Failed to start Google login')
     }
   }
@@ -62,7 +62,7 @@ function LoginPage() {
   return (
     <div className="relative isolate h-svh overflow-hidden bg-muted">
       <Topnav loginButton={false} />
-      <div className="flex h-full items-center justify-center border">
+      <div className="flex h-[calc(100svh-80px)] items-center justify-center px-4">
         <LoginForm
           handleEmailLogin={handleEmailLogin}
           handleGoogleLogin={handleGoogleLogin}
