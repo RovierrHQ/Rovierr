@@ -1,4 +1,5 @@
 #!/bin/sh
-# Run the workspace build but skip the heavy `api` package to avoid OOM on low-memory CI/dev machines.
-# To run the full build locally, use: `bun run build` or `npm run build`.
-bun run build -- --filter '!:api'
+# Run the workspace build but skip the heavy `apps/api` package to avoid OOM on low-memory machines.
+# To run the full build locally, use: `bun run build`.
+# Exclude the package by workspace path using Turbo's filter syntax.
+bun run build -- --filter '!apps/api'
