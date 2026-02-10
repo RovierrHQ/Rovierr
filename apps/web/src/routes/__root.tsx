@@ -9,6 +9,8 @@ import {
   useRouteContext
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+import { CommandMenu } from '@web/components/command-menu'
+import { ThemeProvider } from '@web/components/providers/theme-provider'
 import i18n, { setSSRLanguage } from '@web/lib/i18n'
 import { getUserSession } from '@web/services/auth'
 import { NuqsAdapter } from 'nuqs/adapters/tanstack-router'
@@ -42,33 +44,29 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1'
       },
       {
-        title: 'Starter Template'
+        title: 'Rovierr - Global Student Ecosystem'
       },
       {
         name: 'description',
         content:
-          'Bun monorepo starter with TanStack Router, Hono API, and Better Auth.'
+          'Rovierr unifies essential tools into a single platform—designed for students, driven by simplicity, and built to scale with you.'
       },
       {
         name: 'keywords',
-        content: 'monorepo, bun, tanstack, hono, better auth, starter template'
+        content: 'student, university, education, campus, societies, clubs'
       },
       {
         property: 'og:title',
-        content: 'Starter Template'
+        content: 'Rovierr - Global Student Ecosystem'
       },
       {
         property: 'og:description',
         content:
-          'Bun monorepo starter with TanStack Router, Hono API, and Better Auth.'
+          'Rovierr unifies essential tools into a single platform—designed for students, driven by simplicity, and built to scale with you.'
       },
       {
         property: 'og:type',
         content: 'website'
-      },
-      {
-        property: 'og:url',
-        content: 'https://starter.rejoanahmed.com'
       },
       {
         name: 'twitter:card',
@@ -76,12 +74,12 @@ export const Route = createRootRouteWithContext<{
       },
       {
         name: 'twitter:title',
-        content: 'Starter Template'
+        content: 'Rovierr - Global Student Ecosystem'
       },
       {
         name: 'twitter:description',
         content:
-          'Bun monorepo starter with TanStack Router, Hono API, and Better Auth.'
+          'Rovierr unifies essential tools into a single platform—designed for students, driven by simplicity, and built to scale with you.'
       }
     ],
     links: [
@@ -126,27 +124,37 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const queryClient = context.queryClient
 
   return (
-    <html lang={language}>
+    <html lang={language} suppressHydrationWarning>
       {/** biome-ignore lint/style/noHeadElement: re */}
       <head>
         <HeadContent />
       </head>
-      <body className="pb-16 lg:pb-0">
-        <QueryClientProvider client={queryClient}>
-          <NuqsAdapter>{children}</NuqsAdapter>
-          <TanStackDevtools
-            config={{
-              position: 'bottom-right'
-            }}
-            plugins={[
-              {
-                name: 'Starter Template',
-                render: <TanStackRouterDevtoolsPanel />
-              }
-            ]}
-          />
-          <Toaster />
-        </QueryClientProvider>
+      <body className="pb-16 lg:pb-0 antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          disableTransitionOnChange
+          enableSystem
+        >
+          <QueryClientProvider client={queryClient}>
+            <NuqsAdapter>
+              {children}
+              <CommandMenu />
+            </NuqsAdapter>
+            <TanStackDevtools
+              config={{
+                position: 'bottom-right'
+              }}
+              plugins={[
+                {
+                  name: 'Rovierr',
+                  render: <TanStackRouterDevtoolsPanel />
+                }
+              ]}
+            />
+            <Toaster />
+          </QueryClientProvider>
+        </ThemeProvider>
         <Scripts />
       </body>
     </html>

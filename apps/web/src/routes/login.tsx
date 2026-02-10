@@ -1,83 +1,83 @@
-import { Button } from '@rov/ui/components/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@rov/ui/components/card'
-import { createFileRoute, useRouter, useSearch } from '@tanstack/react-router'
+import { cn } from '@rov/ui/lib/utils'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
+import LoginForm from '@web/components/auth/login-form'
+import AnimatedGridPattern from '@web/components/backgrounds/AnimatedGridPattern'
+import Topnav from '@web/components/layout/top-nav'
 import { authClient } from '@web/lib/auth-client'
-import { extractRedirectURL } from '@web/lib/util'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/login')({
-  component: RouteComponent,
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      redirect: (search.redirect as string) || '/'
-    }
-  }
+  component: LoginPage
 })
 
-function RouteComponent() {
-  const [isLoading, setIsLoading] = useState(false)
+function LoginPage() {
   const router = useRouter()
-  const { redirect } = useSearch({ from: '/login' })
-  const { data: session } = authClient.useSession()
-  const isAuthenticated = !!session?.user
+  const { data: session, isPending } = authClient.useSession()
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.navigate({ to: redirect || '/' })
+    if (!isPending && session) {
+      router.navigate({ to: '/spaces/societies' })
     }
-  }, [isAuthenticated, redirect, router])
+  }, [session, isPending, router])
 
-  const handleGoogleSignIn = async () => {
+  const handleEmailLogin = async (email: string, password: string) => {
+    const loadingToast = toast.loading('Signing in...')
+
     try {
-      setIsLoading(true)
-      const callbackURL = extractRedirectURL(redirect)
-      const { error } = await authClient.signIn.social({
-        provider: 'google',
-        callbackURL
+      const result = await authClient.signIn.email({
+        email,
+        password,
+
+        callbackURL: `${window.location.origin}/spaces/societies`
       })
-      if (error) throw new Error(error.message)
-      // signIn.social redirects to Google; no need to navigate
-    } catch (err) {
-      const msg =
-        err instanceof Error
-          ? err.message
-          : 'Something went wrong. Please try again.'
-      console.error('[Login] Error:', err)
-      toast.error(msg)
-    } finally {
-      setIsLoading(false)
+
+      if (result.error) {
+        toast.dismiss(loadingToast)
+        toast.error(result.error.message || 'Failed to sign in')
+        return
+      }
+
+      toast.dismiss(loadingToast)
+      toast.success('Login successful')
+      router.navigate({ to: '/spaces/societies' })
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error('An error occurred during sign in')
+      console.error('Login error:', error)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    try {
+      await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: `${window.location.origin}/spaces/societies`
+      })
+    } catch (error) {
+      toast.error('Failed to start Google login')
     }
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
-          <CardDescription>
-            Sign in with your Google account to continue
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button
-            className="w-full"
-            disabled={isLoading}
-            onClick={handleGoogleSignIn}
-            size="lg"
-            type="button"
-            variant="outline"
-          >
-            {isLoading ? 'Please wait…' : 'Sign in with Google'}
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="relative isolate h-svh overflow-hidden bg-muted">
+      <Topnav loginButton={false} />
+      <div className="flex h-full items-center justify-center border">
+        <LoginForm
+          handleEmailLogin={handleEmailLogin}
+          handleGoogleLogin={handleGoogleLogin}
+        />
+      </div>
+      <AnimatedGridPattern
+        className={cn(
+          '[mask-image:radial-gradient(1500px_circle_at_center,white,transparent)]',
+          '-z-1 inset-x-0 inset-y-[-30%] h-[200%] skew-y-12'
+        )}
+        duration={3}
+        maxOpacity={0.1}
+        numSquares={30}
+        repeatDelay={1}
+      />
     </div>
   )
 }
