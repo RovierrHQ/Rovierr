@@ -13,7 +13,6 @@ export const Route = createFileRoute('/')({
   component: RovierrLandingPage
 })
 
-// ২. মেইন ফাংশন (আগে যেটা export default ছিল)
 function RovierrLandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -58,7 +57,7 @@ function RovierrLandingPage() {
             }}
             whileInView={{ opacity: 1, y: 0 }}
           >
-            <Link to="/login" search={{}}>
+            <Link search={{}} to="/login">
               <Button
                 className="transition-transform hover:scale-105"
                 size="lg"
