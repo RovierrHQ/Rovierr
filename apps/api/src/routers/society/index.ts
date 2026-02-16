@@ -10,7 +10,7 @@ import {
 import {
   institution as institutionTable,
   member as memberTable,
-  type organization as organizationTable
+  organization as organizationTable
 } from '@rov/db'
 import type { InferSelectModel } from 'drizzle-orm'
 import { eq, sql } from 'drizzle-orm'
@@ -141,6 +141,45 @@ async function transformSociety(soc: Society) {
 
 export const society = new Elysia({ prefix: '/society' })
   .use(betterAuth)
+  /**
+   * List all societies with pagination (public endpoint)
+   * GET /society/list
+   */
+  .get(
+    '/list',
+    async ({ query }) => {
+      const page = Number(query.page) || 1
+      const limit = Number(query.limit) || 50
+      const offset = (page - 1) * limit
+
+      const societies = await db
+        .select()
+        .from(organizationTable)
+        .limit(limit)
+        .offset(offset)
+        .orderBy(organizationTable.createdAt)
+
+      const transformed = await Promise.all(
+        societies.map((society) => transformSociety(society))
+      )
+
+      return {
+        data: transformed,
+        pagination: {
+          page,
+          limit,
+          total: societies.length
+        }
+      }
+    },
+    {
+      detail: {
+        tags: ['Societies'],
+        summary: 'List Societies',
+        description: 'List all societies with pagination'
+      }
+    }
+  )
   .group('', { auth: true }, (app) =>
     app
       /**

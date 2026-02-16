@@ -25,6 +25,45 @@ const postService = new PostService(db)
 
 export const postsRouter = new Elysia({ name: 'posts' })
   .use(betterAuth)
+  /**
+   * List public posts with pagination and filters (no auth required)
+   * GET /campus-feed/posts
+   */
+  .get(
+    '/',
+    async ({ query }) => {
+      console.log('[campusFeed.publicList] Starting with input:', { query })
+
+      try {
+        // For public access, we'll use a null userId to get public posts only
+        const result = await postService.listPosts(query, null)
+        console.log('[campusFeed.publicList] Successfully fetched posts:', {
+          count: result.posts.length,
+          total: result.total,
+          hasMore: result.hasMore
+        })
+        return result
+      } catch (error) {
+        console.error('[campusFeed.publicList] Error fetching posts:', error)
+        if (error instanceof Error) {
+          console.error('[campusFeed.publicList] Error details:', {
+            message: error.message,
+            stack: error.stack
+          })
+        }
+        throw error
+      }
+    },
+    {
+      query: listPostsSchema,
+      response: paginatedPostsSchema,
+      detail: {
+        summary: 'List Public Posts',
+        description: 'List posts with pagination and filters (public access)',
+        tags: ['Campus Feed']
+      }
+    }
+  )
   .group('/posts', { auth: true }, (app) =>
     /**
      * Create a new post
