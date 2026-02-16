@@ -1,10 +1,9 @@
-'use client'
-
 import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import { cn } from '@rov/ui/lib/utils'
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
 export default function SignupForm({
@@ -166,12 +165,12 @@ export default function SignupForm({
 
               <div className="text-center text-sm">
                 Already have an account?{' '}
-                <a
+                <Link
                   className="font-medium underline underline-offset-4 hover:text-primary"
-                  href="/login"
+                  to="/login"
                 >
                   Sign in
-                </a>
+                </Link>
               </div>
             </div>
           </form>
@@ -193,8 +192,14 @@ export default function SignupForm({
       </Card>
       <div className="text-balance text-center text-muted-foreground text-xs *:[a]:underline *:[a]:underline-offset-4 *:[a]:hover:text-primary">
         By clicking continue, you agree to our{' '}
-        <a href="/terms-and-service">Terms of Service</a> and{' '}
-        <a href="/privacy-policy">Privacy Policy</a>.
+        <Link className="hover:text-primary" to="/terms-and-service">
+          Terms of Service
+        </Link>{' '}
+        and{' '}
+        <Link className="hover:text-primary" to="/privacy-policy">
+          Privacy Policy
+        </Link>
+        .
       </div>
     </div>
   )
