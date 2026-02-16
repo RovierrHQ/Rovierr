@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-query'
 import type { AppType } from 'api'
 
-const api = treaty<AppType>(process.env.NEXT_PUBLIC_SERVER_URL || '', {
+const api = treaty<AppType>(process.env.VITE_API_URL || 'http://localhost:3001', {
   fetch: {
     credentials: 'include',
     mode: 'cors'
@@ -18,14 +18,15 @@ const api = treaty<AppType>(process.env.NEXT_PUBLIC_SERVER_URL || '', {
 /**
  * Typed useQuery hook for Eden Treaty endpoints
  * Automatically infers data and error types from the Treaty response
- * Usage: const { data, error } = useQuery(['user', 'profile'], () => api.user.profile.get())
+ * Usage: const { data, error } = useQuery({ queryKey: ['user', 'profile'], queryFn: () => api.user.profile.get() })
  */
 export function useQuery<
   T extends Record<number, unknown> = Record<number, unknown>
 >(
-  queryKey: QueryKey,
-  treatyFn: () => Promise<Treaty.TreatyResponse<T>>,
-  options?: Omit<
+  options: {
+    queryKey: QueryKey
+    queryFn: () => Promise<Treaty.TreatyResponse<T>>
+  } & Omit<
     UseQueryOptions<
       Treaty.Data<Treaty.TreatyResponse<T>>,
       Treaty.Error<Treaty.TreatyResponse<T>>
@@ -37,9 +38,9 @@ export function useQuery<
     Treaty.Data<Treaty.TreatyResponse<T>>,
     Treaty.Error<Treaty.TreatyResponse<T>>
   >({
-    queryKey,
+    ...options,
     queryFn: async () => {
-      const response = await treatyFn()
+      const response = await options.queryFn()
 
       if (response.error) {
         throw response.error
@@ -50,8 +51,7 @@ export function useQuery<
       }
 
       throw new Error('No data returned from API')
-    },
-    ...options
+    }
   })
 }
 
