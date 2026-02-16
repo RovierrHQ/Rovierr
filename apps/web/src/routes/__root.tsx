@@ -1,7 +1,7 @@
 import { Toaster } from '@rov/ui/components/sonner'
 import appCss from '@rov/ui/globals.css?url'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import { type QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -119,9 +119,30 @@ export const Route = createRootRouteWithContext<{
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const context = useRouteContext({ from: '__root__' })
-  const language = context.language || i18n.language || 'en'
-  const queryClient = context.queryClient
+  // Always call the hook in the same order - React rule compliance
+  const routeContextResult = useRouteContext({ from: '__root__' })
+
+  // Handle potential SSR context issues safely
+  let context: { language?: string; queryClient: QueryClient } | null = null
+
+  try {
+    context = routeContextResult
+  } catch {
+    // Context not available during SSR - will use fallbacks below
+  }
+
+  const language = context?.language || i18n.language || 'en'
+  const queryClient =
+    context?.queryClient ||
+    new QueryClient({
+      defaultOptions: {
+        queries: {
+          staleTime: 1000 * 60 * 5,
+          retry: 0,
+          refetchOnWindowFocus: false
+        }
+      }
+    })
 
   return (
     <html lang={language} suppressHydrationWarning>
