@@ -76,6 +76,7 @@ import { Route as SpacesSocietiesMineClubIDFormsRouteImport } from './routes/spa
 import { Route as SpacesSocietiesMineClubIDExpensesRouteImport } from './routes/spaces/societies/mine/$clubID/expenses'
 import { Route as SpacesSocietiesMineClubIDEmailRouteImport } from './routes/spaces/societies/mine/$clubID/email'
 import { Route as SpacesSocietiesMineClubIDDiscussionRouteImport } from './routes/spaces/societies/mine/$clubID/discussion'
+import { Route as SpacesSocietiesCampusFeedPostsPostIdRouteImport } from './routes/spaces/societies/campus-feed/posts/$postId'
 import { Route as SpacesAcademicsCoursesCourseIdDiscussionsRouteImport } from './routes/spaces/academics/courses/$courseId/discussions'
 import { Route as SpacesSocietiesMineClubIDFormsIndexRouteImport } from './routes/spaces/societies/mine/$clubID/forms/index'
 import { Route as SpacesSocietiesMineClubIDJoinRequestsRequestIdRouteImport } from './routes/spaces/societies/mine/$clubID/join-requests/$requestId'
@@ -445,6 +446,12 @@ const SpacesSocietiesMineClubIDDiscussionRoute =
     path: '/discussion',
     getParentRoute: () => SpacesSocietiesMineClubIDRoute,
   } as any)
+const SpacesSocietiesCampusFeedPostsPostIdRoute =
+  SpacesSocietiesCampusFeedPostsPostIdRouteImport.update({
+    id: '/posts/$postId',
+    path: '/posts/$postId',
+    getParentRoute: () => SpacesSocietiesCampusFeedRoute,
+  } as any)
 const SpacesAcademicsCoursesCourseIdDiscussionsRoute =
   SpacesAcademicsCoursesCourseIdDiscussionsRouteImport.update({
     id: '/discussions',
@@ -513,7 +520,7 @@ export interface FileRoutesByFullPath {
   '/spaces/career/internship': typeof SpacesCareerInternshipRoute
   '/spaces/career/resume-builder': typeof SpacesCareerResumeBuilderRouteWithChildren
   '/spaces/career/tuition': typeof SpacesCareerTuitionRoute
-  '/spaces/societies/campus-feed': typeof SpacesSocietiesCampusFeedRoute
+  '/spaces/societies/campus-feed': typeof SpacesSocietiesCampusFeedRouteWithChildren
   '/spaces/societies/create': typeof SpacesSocietiesCreateRoute
   '/spaces/societies/mine': typeof SpacesSocietiesMineRouteWithChildren
   '/apps/quera/': typeof AppsQueraIndexRoute
@@ -533,6 +540,7 @@ export interface FileRoutesByFullPath {
   '/spaces/societies/mine/$clubID': typeof SpacesSocietiesMineClubIDRouteWithChildren
   '/spaces/societies/mine/': typeof SpacesSocietiesMineIndexRoute
   '/spaces/academics/courses/$courseId/discussions': typeof SpacesAcademicsCoursesCourseIdDiscussionsRoute
+  '/spaces/societies/campus-feed/posts/$postId': typeof SpacesSocietiesCampusFeedPostsPostIdRoute
   '/spaces/societies/mine/$clubID/discussion': typeof SpacesSocietiesMineClubIDDiscussionRoute
   '/spaces/societies/mine/$clubID/email': typeof SpacesSocietiesMineClubIDEmailRoute
   '/spaces/societies/mine/$clubID/expenses': typeof SpacesSocietiesMineClubIDExpensesRoute
@@ -578,7 +586,7 @@ export interface FileRoutesByTo {
   '/spaces/career/internship': typeof SpacesCareerInternshipRoute
   '/spaces/career/resume-builder': typeof SpacesCareerResumeBuilderRouteWithChildren
   '/spaces/career/tuition': typeof SpacesCareerTuitionRoute
-  '/spaces/societies/campus-feed': typeof SpacesSocietiesCampusFeedRoute
+  '/spaces/societies/campus-feed': typeof SpacesSocietiesCampusFeedRouteWithChildren
   '/spaces/societies/create': typeof SpacesSocietiesCreateRoute
   '/apps/quera': typeof AppsQueraIndexRoute
   '/join/$societySlug': typeof JoinSocietySlugIndexRoute
@@ -595,6 +603,7 @@ export interface FileRoutesByTo {
   '/spaces/societies/discover/network': typeof SpacesSocietiesDiscoverNetworkRoute
   '/spaces/societies/mine': typeof SpacesSocietiesMineIndexRoute
   '/spaces/academics/courses/$courseId/discussions': typeof SpacesAcademicsCoursesCourseIdDiscussionsRoute
+  '/spaces/societies/campus-feed/posts/$postId': typeof SpacesSocietiesCampusFeedPostsPostIdRoute
   '/spaces/societies/mine/$clubID/discussion': typeof SpacesSocietiesMineClubIDDiscussionRoute
   '/spaces/societies/mine/$clubID/email': typeof SpacesSocietiesMineClubIDEmailRoute
   '/spaces/societies/mine/$clubID/expenses': typeof SpacesSocietiesMineClubIDExpensesRoute
@@ -649,7 +658,7 @@ export interface FileRoutesById {
   '/spaces/career/internship': typeof SpacesCareerInternshipRoute
   '/spaces/career/resume-builder': typeof SpacesCareerResumeBuilderRouteWithChildren
   '/spaces/career/tuition': typeof SpacesCareerTuitionRoute
-  '/spaces/societies/campus-feed': typeof SpacesSocietiesCampusFeedRoute
+  '/spaces/societies/campus-feed': typeof SpacesSocietiesCampusFeedRouteWithChildren
   '/spaces/societies/create': typeof SpacesSocietiesCreateRoute
   '/spaces/societies/mine': typeof SpacesSocietiesMineRouteWithChildren
   '/apps/quera/': typeof AppsQueraIndexRoute
@@ -669,6 +678,7 @@ export interface FileRoutesById {
   '/spaces/societies/mine/$clubID': typeof SpacesSocietiesMineClubIDRouteWithChildren
   '/spaces/societies/mine/': typeof SpacesSocietiesMineIndexRoute
   '/spaces/academics/courses/$courseId/discussions': typeof SpacesAcademicsCoursesCourseIdDiscussionsRoute
+  '/spaces/societies/campus-feed/posts/$postId': typeof SpacesSocietiesCampusFeedPostsPostIdRoute
   '/spaces/societies/mine/$clubID/discussion': typeof SpacesSocietiesMineClubIDDiscussionRoute
   '/spaces/societies/mine/$clubID/email': typeof SpacesSocietiesMineClubIDEmailRoute
   '/spaces/societies/mine/$clubID/expenses': typeof SpacesSocietiesMineClubIDExpensesRoute
@@ -745,6 +755,7 @@ export interface FileRouteTypes {
     | '/spaces/societies/mine/$clubID'
     | '/spaces/societies/mine/'
     | '/spaces/academics/courses/$courseId/discussions'
+    | '/spaces/societies/campus-feed/posts/$postId'
     | '/spaces/societies/mine/$clubID/discussion'
     | '/spaces/societies/mine/$clubID/email'
     | '/spaces/societies/mine/$clubID/expenses'
@@ -807,6 +818,7 @@ export interface FileRouteTypes {
     | '/spaces/societies/discover/network'
     | '/spaces/societies/mine'
     | '/spaces/academics/courses/$courseId/discussions'
+    | '/spaces/societies/campus-feed/posts/$postId'
     | '/spaces/societies/mine/$clubID/discussion'
     | '/spaces/societies/mine/$clubID/email'
     | '/spaces/societies/mine/$clubID/expenses'
@@ -880,6 +892,7 @@ export interface FileRouteTypes {
     | '/spaces/societies/mine/$clubID'
     | '/spaces/societies/mine/'
     | '/spaces/academics/courses/$courseId/discussions'
+    | '/spaces/societies/campus-feed/posts/$postId'
     | '/spaces/societies/mine/$clubID/discussion'
     | '/spaces/societies/mine/$clubID/email'
     | '/spaces/societies/mine/$clubID/expenses'
@@ -1386,6 +1399,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SpacesSocietiesMineClubIDDiscussionRouteImport
       parentRoute: typeof SpacesSocietiesMineClubIDRoute
     }
+    '/spaces/societies/campus-feed/posts/$postId': {
+      id: '/spaces/societies/campus-feed/posts/$postId'
+      path: '/posts/$postId'
+      fullPath: '/spaces/societies/campus-feed/posts/$postId'
+      preLoaderRoute: typeof SpacesSocietiesCampusFeedPostsPostIdRouteImport
+      parentRoute: typeof SpacesSocietiesCampusFeedRoute
+    }
     '/spaces/academics/courses/$courseId/discussions': {
       id: '/spaces/academics/courses/$courseId/discussions'
       path: '/discussions'
@@ -1606,6 +1626,21 @@ const SpacesCareerRouteWithChildren = SpacesCareerRoute._addFileChildren(
   SpacesCareerRouteChildren,
 )
 
+interface SpacesSocietiesCampusFeedRouteChildren {
+  SpacesSocietiesCampusFeedPostsPostIdRoute: typeof SpacesSocietiesCampusFeedPostsPostIdRoute
+}
+
+const SpacesSocietiesCampusFeedRouteChildren: SpacesSocietiesCampusFeedRouteChildren =
+  {
+    SpacesSocietiesCampusFeedPostsPostIdRoute:
+      SpacesSocietiesCampusFeedPostsPostIdRoute,
+  }
+
+const SpacesSocietiesCampusFeedRouteWithChildren =
+  SpacesSocietiesCampusFeedRoute._addFileChildren(
+    SpacesSocietiesCampusFeedRouteChildren,
+  )
+
 interface SpacesSocietiesMineClubIDFormsRouteChildren {
   SpacesSocietiesMineClubIDFormsFormIdRoute: typeof SpacesSocietiesMineClubIDFormsFormIdRoute
   SpacesSocietiesMineClubIDFormsCreateRoute: typeof SpacesSocietiesMineClubIDFormsCreateRoute
@@ -1697,7 +1732,7 @@ const SpacesSocietiesMineRouteWithChildren =
   SpacesSocietiesMineRoute._addFileChildren(SpacesSocietiesMineRouteChildren)
 
 interface SpacesSocietiesRouteChildren {
-  SpacesSocietiesCampusFeedRoute: typeof SpacesSocietiesCampusFeedRoute
+  SpacesSocietiesCampusFeedRoute: typeof SpacesSocietiesCampusFeedRouteWithChildren
   SpacesSocietiesCreateRoute: typeof SpacesSocietiesCreateRoute
   SpacesSocietiesMineRoute: typeof SpacesSocietiesMineRouteWithChildren
   SpacesSocietiesIndexRoute: typeof SpacesSocietiesIndexRoute
@@ -1707,7 +1742,7 @@ interface SpacesSocietiesRouteChildren {
 }
 
 const SpacesSocietiesRouteChildren: SpacesSocietiesRouteChildren = {
-  SpacesSocietiesCampusFeedRoute: SpacesSocietiesCampusFeedRoute,
+  SpacesSocietiesCampusFeedRoute: SpacesSocietiesCampusFeedRouteWithChildren,
   SpacesSocietiesCreateRoute: SpacesSocietiesCreateRoute,
   SpacesSocietiesMineRoute: SpacesSocietiesMineRouteWithChildren,
   SpacesSocietiesIndexRoute: SpacesSocietiesIndexRoute,
