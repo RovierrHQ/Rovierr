@@ -1,4 +1,4 @@
-import type { societySchema } from '@rov/orpc-contracts'
+import type { Treaty } from '@elysiajs/eden'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
@@ -10,7 +10,7 @@ import {
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { Image } from '@unpic/react'
 import api from '@web/lib/api-client'
 import {
@@ -25,14 +25,13 @@ import {
   Twitter,
   Users
 } from 'lucide-react'
-import type { z } from 'zod'
 
-type Society = z.infer<typeof societySchema>
-
-// 1. Define the Route with Type-Safe Params
 export const Route = createFileRoute('/societies/$societyId')({
   component: SocietyProfilePage
 })
+
+type SocietyRoute = ReturnType<typeof api.society>
+type Society = Treaty.Data<Awaited<ReturnType<SocietyRoute['get']>>>
 
 function SocietyProfilePage() {
   const { societyId } = Route.useParams()
@@ -43,7 +42,7 @@ function SocietyProfilePage() {
     queryFn: async () => {
       const response = await api.society({ id: societyId }).get()
       if (!response.data) throw new Error('Society not found')
-      return response.data as Society
+      return response.data
     }
   })
 
@@ -94,7 +93,7 @@ function SocietyProfilePage() {
                     {society.isVerified && (
                       <TooltipProvider>
                         <Tooltip>
-                          <TooltipTrigger asChild>
+                          <TooltipTrigger>
                             <div className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-emerald-500 transition-colors hover:bg-emerald-500/15">
                               <CheckCircle2 className="h-3.5 w-3.5" />
                               <span className="font-medium text-xs">
@@ -152,13 +151,13 @@ function SocietyProfilePage() {
                   {society.institutionName && (
                     <div className="flex items-center justify-center gap-1 md:justify-start">
                       <MapPin className="h-4 w-4 flex-shrink-0" />
-                      <Link
+                      {/* <Link
                         className="transition-colors hover:text-primary"
                         params={{ universityId: society.institutionId! }}
                         to="/universities/$universityId"
                       >
                         {society.institutionName}
-                      </Link>
+                      </Link> */}
                     </div>
                   )}
                 </div>

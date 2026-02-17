@@ -24,6 +24,7 @@
     "@hugeicons/react": "^1.1.4",
     "@rov/auth": "workspace:*",
     "@rov/db": "workspace:*",
+    "@rov/realtime": "workspace:*",
     "@rov/ui": "workspace:*",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "^0.9.4",

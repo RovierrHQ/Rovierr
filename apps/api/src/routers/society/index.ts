@@ -180,32 +180,32 @@ export const society = new Elysia({ prefix: '/society' })
       }
     }
   )
+  /**
+   * Get society by ID (enriched with society fields)
+   * GET /society/:id
+   */
+  .get(
+    '/:id',
+    async ({ params }) => {
+      const soc = await societyService.getById(params.id)
+
+      if (!soc) {
+        return null
+      }
+
+      return await transformSociety(soc)
+    },
+    {
+      response: societySchema.nullable(),
+      detail: {
+        tags: ['Societies'],
+        summary: 'Get Society',
+        description: 'Get society by ID with all fields'
+      }
+    }
+  )
   .group('', { auth: true }, (app) =>
     app
-      /**
-       * Get society by ID (enriched with society fields)
-       * GET /society/:id
-       */
-      .get(
-        '/:id',
-        async ({ params }) => {
-          const soc = await societyService.getById(params.id)
-
-          if (!soc) {
-            return null
-          }
-
-          return await transformSociety(soc)
-        },
-        {
-          response: societySchema.nullable(),
-          detail: {
-            tags: ['Societies'],
-            summary: 'Get Society',
-            description: 'Get society by ID with all fields'
-          }
-        }
-      )
 
       /**
        * Get society by slug (enriched with society fields)

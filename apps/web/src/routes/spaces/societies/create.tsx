@@ -3,7 +3,7 @@ import { Card } from '@rov/ui/components/card'
 import { useAppForm } from '@rov/ui/components/form/index'
 import { cn } from '@rov/ui/lib/utils'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
+import api, { useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useState } from 'react'
@@ -16,7 +16,7 @@ const createSocietySchema = z.object({
   description: z.string().min(1, 'Description is required').max(1000),
   type: z.enum(['student', 'university']),
   institutionId: z.string().optional().or(z.literal('')),
-  visibility: z.enum(['public', 'private']).default('public'),
+  visibility: z.enum(['public', 'private']),
   tags: z.string().optional().or(z.literal('')),
   instagram: z.string().optional().or(z.literal('')),
   facebook: z.string().optional().or(z.literal('')),
@@ -33,9 +33,10 @@ export const Route = createFileRoute('/spaces/societies/create')({
 
 function CreateSocietyPage() {
   const router = useRouter()
-  const { data: universities } = useTreatyQuery(['universities'], () =>
-    api.university.get()
-  )
+  const { data: universities } = useQuery({
+    queryKey: ['universities'],
+    queryFn: () => api.university.get()
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useAppForm({
