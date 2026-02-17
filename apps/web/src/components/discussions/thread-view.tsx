@@ -17,10 +17,10 @@ import {
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ReplyCard } from './reply-card'
-import type { Discussion, Reply } from './types'
+import type { Reply, ThreadViewDiscussion } from './types'
 
 type ThreadViewProps = {
-  discussion: Discussion
+  discussion: ThreadViewDiscussion
   replies: Reply[]
   onClose: () => void
 }
@@ -108,7 +108,7 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
   )
 
   const handleUpvote = () => {
-    if (discussion.userVote === 'up') {
+    if (discussion.votes.userVote === 'up') {
       unvoteMutation.mutate({ threadId: discussion.id })
     } else {
       voteMutation.mutate({ threadId: discussion.id, voteType: 'up' })
@@ -116,7 +116,7 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
   }
 
   const handleDownvote = () => {
-    if (discussion.userVote === 'down') {
+    if (discussion.votes.userVote === 'down') {
       unvoteMutation.mutate({ threadId: discussion.id })
     } else {
       voteMutation.mutate({ threadId: discussion.id, voteType: 'down' })
@@ -143,12 +143,12 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
             <h2 className="font-bold text-xl">{discussion.title}</h2>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {discussion.tags.map((tag) => (
+            {(discussion.tags ?? []).map((tag) => (
               <Badge key={tag} variant="secondary">
                 {tag}
               </Badge>
             ))}
-            {discussion.isResolved && (
+            {'isResolved' in discussion && Boolean(discussion.isResolved) && (
               <Badge className="bg-green-500/10 text-green-700 dark:text-green-400">
                 <Check className="mr-1 h-3 w-3" />
                 Resolved
@@ -168,22 +168,19 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
           <div className="rounded-lg border bg-card p-4">
             <div className="mb-3 flex items-start gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={discussion.author.avatar || undefined} />
+                <AvatarImage src={discussion.author.image ?? undefined} />
                 <AvatarFallback>
                   {discussion.author.name
-                    .split(' ')
+                    ?.split(' ')
                     .map((n) => n[0])
-                    .join('')}
+                    .join('') ?? '?'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <div className="mb-1 flex items-center gap-2">
                   <span className="font-semibold">
-                    {discussion.author.name}
+                    {discussion.author.name ?? 'Anonymous'}
                   </span>
-                  <Badge className="text-xs" variant="outline">
-                    {discussion.author.role}
-                  </Badge>
                   <span className="text-muted-foreground text-xs">
                     {discussion.createdAt}
                   </span>
@@ -200,18 +197,22 @@ export function ThreadView({ discussion, replies, onClose }: ThreadViewProps) {
                   disabled={voteMutation.isPending || unvoteMutation.isPending}
                   onClick={handleUpvote}
                   size="sm"
-                  variant={discussion.userVote === 'up' ? 'default' : 'ghost'}
+                  variant={
+                    discussion.votes.userVote === 'up' ? 'default' : 'ghost'
+                  }
                 >
                   <ArrowUp className="h-3 w-3" />
                 </Button>
                 <span className="font-semibold text-xs">
-                  {discussion.upvotes}
+                  {discussion.votes.upvotes}
                 </span>
                 <Button
                   disabled={voteMutation.isPending || unvoteMutation.isPending}
                   onClick={handleDownvote}
                   size="sm"
-                  variant={discussion.userVote === 'down' ? 'default' : 'ghost'}
+                  variant={
+                    discussion.votes.userVote === 'down' ? 'default' : 'ghost'
+                  }
                 >
                   <ArrowDown className="h-3 w-3" />
                 </Button>

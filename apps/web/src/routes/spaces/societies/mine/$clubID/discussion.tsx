@@ -1,4 +1,3 @@
-import type { ThreadListItem } from '@api/routers/discussion/schemas'
 import { Button } from '@rov/ui/components/button'
 import {
   SidebarInset,
@@ -11,12 +10,10 @@ import { DiscussionFilters } from '@web/components/discussions/discussion-filter
 import { DiscussionList } from '@web/components/discussions/discussion-list'
 import { DiscussionStats } from '@web/components/discussions/discussion-stats'
 import { ThreadView } from '@web/components/discussions/thread-view'
-import type { Discussion } from '@web/components/discussions/types'
 import { SpacesSidebar } from '@web/components/layout/spaces-sidebar'
-import api, { useMutation, useQuery } from '@web/lib/api-client'
+import api, { useQuery } from '@web/lib/api-client'
 import { MessageSquare } from 'lucide-react'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 export const Route = createFileRoute(
   '/spaces/societies/mine/$clubID/discussion'
@@ -33,50 +30,22 @@ function DiscussionPage() {
   >('all')
 
   // Get threads for this club
-  const {
-    data: threadsData,
-    isLoading,
-    refetch
-  } = useQuery({
+  const { data: threadsData, isLoading } = useQuery({
     queryKey: ['discussion', 'threads', clubID],
     queryFn: () =>
       api.discussion.thread.list.get({
-        query: { organizationId: clubID }
+        query: { contextType: 'society', contextId: clubID }
       }),
     enabled: !!clubID
   })
 
-  // Create thread mutation
-  const createThreadMutation = useMutation(
-    (thread: { title: string; content: string; tags: string[] }) =>
-      api.discussion.thread.create.post({
-        ...thread,
-        organizationId: clubID
-      }),
-    {
-      onSuccess: () => {
-        toast.success('Discussion created successfully!')
-        refetch()
-      },
-      onError: (error) => {
-        toast.error(
-          error instanceof Error ? error.message : 'Failed to create discussion'
-        )
-      }
-    }
-  )
-
-  const handleCreateThread = (thread: {
-    title: string
-    content: string
-    tags: string[]
-  }) => {
-    createThreadMutation.mutate(thread)
-  }
-
-  const selectedThreadData = threadsData?.find(
-    (thread: ThreadListItem) => thread.id === selectedThread
-  )
+  // Fetch full thread with replies when one is selected
+  const { data: fullThreadData, isLoading: isThreadLoading } = useQuery({
+    queryKey: ['discussion', 'thread', 'get', selectedThread],
+    queryFn: () =>
+      api.discussion.thread({ id: selectedThread as string }).get(),
+    enabled: !!selectedThread
+  })
 
   if (isLoading) {
     return (
@@ -118,8 +87,10 @@ function DiscussionPage() {
                   <MessageSquare className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <CreateThreadDialog
-                  disabled={createThreadMutation.isPending}
-                  onCreateThread={handleCreateThread}
+                  contextId={clubID}
+                  contextType="society"
+                  onOpenChange={() => {}}
+                  open={true}
                 />
               </div>
             </div>
@@ -133,24 +104,38 @@ function DiscussionPage() {
                 >
                   ← Back to all discussions
                 </Button>
-                <ThreadView
-                  onReply={() => {
-                    // Handle reply logic here
-                    toast.success('Reply posted successfully!')
-                  }}
-                  onVote={() => {
-                    // Handle vote logic here
-                    toast.success('Vote recorded!')
-                  }}
-                  thread={selectedThreadData as Discussion}
-                />
+                {isThreadLoading ? (
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-8 bg-muted rounded w-3/4" />
+                    <div className="h-4 bg-muted rounded w-1/2" />
+                    <div className="space-y-2">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div
+                          className="h-16 bg-muted rounded"
+                          key={`thread-skeleton-${i}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : fullThreadData ? (
+                  <ThreadView
+                    discussion={fullThreadData}
+                    onClose={() => setSelectedThread(null)}
+                    replies={fullThreadData.replies ?? []}
+                  />
+                ) : null}
               </div>
             ) : (
               <div>
                 <DiscussionStats
-                  activeUsers={0}
-                  totalReplies={0} // This would come from API
-                  totalThreads={threadsData?.length || 0} // This would come from API
+                  activeUsers={threadsData?.threads.length ?? 0}
+                  totalReplies={
+                    threadsData?.threads.reduce(
+                      (acc, thread) => acc + (thread.replyCount ?? 0),
+                      0
+                    ) ?? 0
+                  }
+                  totalThreads={threadsData?.total ?? 0}
                 />
 
                 <DiscussionFilters
@@ -163,7 +148,7 @@ function DiscussionPage() {
                 <DiscussionList
                   loading={isLoading}
                   onThreadClick={(threadId) => setSelectedThread(threadId)}
-                  threads={threadsData || []}
+                  threads={threadsData?.threads ?? []}
                 />
               </div>
             )}

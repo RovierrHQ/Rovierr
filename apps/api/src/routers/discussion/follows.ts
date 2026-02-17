@@ -10,9 +10,9 @@ import { FollowService } from './service'
 
 const followService = new FollowService(db)
 
-export const followsRouter = new Elysia({ prefix: '/follow' })
+export const followsRouter = new Elysia({ name: 'follow' })
   .use(betterAuth)
-  .group('', { auth: true }, (app) =>
+  .group('/follow', { auth: true }, (app) =>
     app
       .post(
         '/follow',

@@ -49,8 +49,8 @@ export function DiscussionList({
         <Card className="p-6 hover:shadow-md transition-shadow" key={thread.id}>
           <div className="flex items-start gap-4">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={thread.author.avatar} />
-              <AvatarFallback>{thread.author.name[0]}</AvatarFallback>
+              <AvatarImage src={thread.author.image ?? undefined} />
+              <AvatarFallback>{thread.author.name?.[0] ?? '?'}</AvatarFallback>
             </Avatar>
 
             <div className="flex-1 min-w-0">
@@ -73,7 +73,7 @@ export function DiscussionList({
                   </div>
 
                   <div className="text-sm text-muted-foreground mb-2">
-                    by {thread.author.name} •{' '}
+                    by {thread.author.name ?? 'Anonymous'} •{' '}
                     {new Date(thread.createdAt).toLocaleDateString()}
                   </div>
 
@@ -81,9 +81,9 @@ export function DiscussionList({
                     {thread.content}
                   </div>
 
-                  {thread.tags.length > 0 && (
+                  {(thread.tags ?? []).length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-3">
-                      {thread.tags.map((tag) => (
+                      {(thread.tags ?? []).map((tag) => (
                         <Badge
                           className="text-xs"
                           key={tag}
@@ -100,7 +100,7 @@ export function DiscussionList({
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <TrendingUp className="h-4 w-4" />
-                  {thread.votes}
+                  {thread.votes.upvotes - thread.votes.downvotes}
                 </div>
                 <div className="flex items-center gap-1">
                   <MessageSquare className="h-4 w-4" />

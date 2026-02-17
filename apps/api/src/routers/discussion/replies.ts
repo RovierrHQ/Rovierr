@@ -10,9 +10,9 @@ import { ReplyService } from './service'
 
 const replyService = new ReplyService(db)
 
-export const repliesRouter = new Elysia({ prefix: '/reply' })
+export const repliesRouter = new Elysia({ name: 'reply' })
   .use(betterAuth)
-  .group('', { auth: true }, (app) =>
+  .group('/reply', { auth: true }, (app) =>
     app
       .post(
         '/create',

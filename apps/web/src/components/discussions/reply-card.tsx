@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
-import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
 import { useQueryClient } from '@tanstack/react-query'
 import api, { useMutation } from '@web/lib/api-client'
@@ -49,7 +48,7 @@ export function ReplyCard({ reply }: ReplyCardProps) {
   )
 
   const handleUpvote = () => {
-    if (reply.userVote === 'up') {
+    if (reply.votes.userVote === 'up') {
       unvoteMutation.mutate({ replyId: reply.id })
     } else {
       voteMutation.mutate({ replyId: reply.id, voteType: 'up' })
@@ -57,7 +56,7 @@ export function ReplyCard({ reply }: ReplyCardProps) {
   }
 
   const handleDownvote = () => {
-    if (reply.userVote === 'down') {
+    if (reply.votes.userVote === 'down') {
       unvoteMutation.mutate({ replyId: reply.id })
     } else {
       voteMutation.mutate({ replyId: reply.id, voteType: 'down' })
@@ -68,28 +67,25 @@ export function ReplyCard({ reply }: ReplyCardProps) {
     <div className="rounded-lg border bg-card p-4">
       <div className="mb-3 flex items-start gap-3">
         <Avatar className="h-8 w-8">
-          <AvatarImage src={reply.author.avatar || undefined} />
+          <AvatarImage src={reply.author.image ?? undefined} />
           <AvatarFallback>
             {reply.author.name
-              .split(' ')
+              ?.split(' ')
               .map((n) => n[0])
-              .join('')}
+              .join('') ?? '?'}
           </AvatarFallback>
         </Avatar>
 
         <div className="flex-1">
           <div className="mb-1 flex items-center gap-2">
-            <span className="font-semibold text-sm">{reply.author.name}</span>
-            {reply.author.role && (
-              <Badge className="text-xs" variant="outline">
-                {reply.author.role}
-              </Badge>
-            )}
+            <span className="font-semibold text-sm">
+              {reply.author.name ?? 'Anonymous'}
+            </span>
             <span className="text-muted-foreground text-xs">
               {reply.createdAt}
             </span>
-            {reply.isEdited && (
-              <span className="text-muted-foreground text-xs">(edited)</span>
+            {'isEndorsed' in reply && reply.isEndorsed && (
+              <span className="text-muted-foreground text-xs">(endorsed)</span>
             )}
           </div>
 
@@ -113,16 +109,16 @@ export function ReplyCard({ reply }: ReplyCardProps) {
             disabled={voteMutation.isPending || unvoteMutation.isPending}
             onClick={handleUpvote}
             size="sm"
-            variant={reply.userVote === 'up' ? 'default' : 'ghost'}
+            variant={reply.votes.userVote === 'up' ? 'default' : 'ghost'}
           >
             <ArrowUp className="h-3 w-3" />
           </Button>
-          <span className="font-semibold text-xs">{reply.upvotes}</span>
+          <span className="font-semibold text-xs">{reply.votes.upvotes}</span>
           <Button
             disabled={voteMutation.isPending || unvoteMutation.isPending}
             onClick={handleDownvote}
             size="sm"
-            variant={reply.userVote === 'down' ? 'default' : 'ghost'}
+            variant={reply.votes.userVote === 'down' ? 'default' : 'ghost'}
           >
             <ArrowDown className="h-3 w-3" />
           </Button>
