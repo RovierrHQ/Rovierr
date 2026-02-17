@@ -9,7 +9,6 @@ import {
 } from '@rov/ui/components/dropdown-menu'
 import { useQueryClient } from '@tanstack/react-query'
 import { Image } from '@unpic/react'
-import { mockPosts } from '@web/data/space-club-data'
 import api, { useMutation, useQuery } from '@web/lib/api-client'
 import {
   Calendar,
@@ -35,8 +34,9 @@ const ClubPostFeed = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['campus-feed', 'posts'],
     queryFn: () =>
-      api['campus-feed'].posts.get({ query: { limit: 20, offset: 0 } }),
-    select: (res) => res?.posts || []
+      api['campus-feed'].posts.get({
+        query: { limit: 20, offset: 0, type: 'post' }
+      })
   })
 
   const likeMutation = useMutation(
@@ -112,7 +112,7 @@ const ClubPostFeed = () => {
   }
 
   // Use mock data if API fails
-  const posts = error ? mockPosts : data || []
+  const posts = data?.posts ?? []
 
   if (posts.length === 0) {
     return (
@@ -154,19 +154,19 @@ const ClubPostFeed = () => {
                     </div>
                   </div>
                   <div className="text-muted-foreground text-sm">
-                    {post.timestamp}
+                    {post.createdAt}
                   </div>
                 </div>
 
                 <div className="prose prose-sm mb-4 max-w-none leading-relaxed">
                   {post.content}
                 </div>
-                {post.image && (
+                {post.imageUrl && (
                   <Image
                     alt="Post content"
                     className="mb-4 w-full rounded-lg"
                     layout="fullWidth"
-                    src={post.image}
+                    src={post.imageUrl}
                   />
                 )}
                 {post.type === 'event' && post.eventDetails && (
@@ -174,11 +174,11 @@ const ClubPostFeed = () => {
                     <div className="flex items-center gap-4 text-sm">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
-                        <span>{post.eventDetails.date}</span>
+                        <span>{post.eventDetails.eventDate}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
-                        <span>{post.eventDetails.time}</span>
+                        <span>{post.eventDetails.eventTime}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />
@@ -194,7 +194,7 @@ const ClubPostFeed = () => {
                     variant="secondary"
                   >
                     <Heart className="h-4 w-4" />
-                    <span className="text-sm">{post.likes}</span>
+                    <span className="text-sm">{post.likeCount}</span>
                   </Button>
                   <Button
                     className="flex items-center gap-2 transition-colors hover:text-foreground"
@@ -202,7 +202,7 @@ const ClubPostFeed = () => {
                     variant="secondary"
                   >
                     <MessageCircle className="h-4 w-4" />
-                    <span className="text-sm">{post.comments}</span>
+                    <span className="text-sm">{post.commentCount}</span>
                   </Button>
                   <Button
                     className="flex items-center gap-2 transition-colors hover:text-foreground"
@@ -213,18 +213,20 @@ const ClubPostFeed = () => {
                   </Button>
                   {post.type === 'event' && (
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          className="ml-auto gap-2"
-                          disabled={rsvpMutation.isPending}
-                          size="sm"
-                          variant="default"
-                        >
-                          <Calendar className="h-4 w-4" />
-                          RSVP ({post.eventDetails?.attendees || 0})
-                          <ChevronDown className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
+                      <DropdownMenuTrigger
+                        render={() => (
+                          <Button
+                            className="ml-auto gap-2"
+                            disabled={rsvpMutation.isPending}
+                            size="sm"
+                            variant="default"
+                          >
+                            <Calendar className="h-4 w-4" />
+                            RSVP ({post.rsvpCount || 0})
+                            <ChevronDown className="h-3 w-3" />
+                          </Button>
+                        )}
+                      />
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() =>

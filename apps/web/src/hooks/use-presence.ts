@@ -1,5 +1,5 @@
+import { useCentrifugo } from '@rov/realtime/client'
 import { authClient } from '@web/lib/auth-client'
-import { useCentrifugo } from '@web/lib/centrifuge'
 
 export function usePresence() {
   const { data: session } = authClient.useSession()
@@ -7,7 +7,7 @@ export function usePresence() {
   // Subscribe to presence updates for the current user
   useCentrifugo(
     {
-      // Token will be handled by the centrifuge hook
+      url: import.meta.env.VITE_CENTRIFUGO_URL
     },
     `presence:${session?.user?.id}`,
     (data) => {

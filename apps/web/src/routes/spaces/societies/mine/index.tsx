@@ -179,9 +179,8 @@ function MySocietiesPage() {
                   <CardContent>
                     <Button className="w-full" variant="outline">
                       <Link
-                        to={
-                          `/spaces/societies/mine/${society.id}` as `/spaces/societies/mine/${string}`
-                        }
+                        params={{ clubID: society.id }}
+                        to="/spaces/societies/mine/$clubID"
                       >
                         View Society
                       </Link>

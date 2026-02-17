@@ -72,7 +72,7 @@ const BrowseClubs = () => {
   const { data: userJoinRequests } = useQuery({
     queryKey: ['user', 'join-requests'],
     queryFn: () =>
-      api.registration['']['join-request'].get({
+      api.registration['join-request'].list.get({
         query: {
           societyId: session?.user?.id || '',
           limit: 0,
@@ -113,7 +113,7 @@ const BrowseClubs = () => {
   // Join request mutation
   const joinRequestMutation = useMutation(
     (variables: { societyId: string }) =>
-      api.registration['']['join-request'].post(variables),
+      api.registration['join-request'].post(variables),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
@@ -291,7 +291,8 @@ const BrowseClubs = () => {
                     buttonVariants({ variant: 'outline', size: 'sm' }),
                     'w-full'
                   )}
-                  to={`/spaces/societies/mine/${club.id}`}
+                  params={{ clubID: club.id }}
+                  to="/spaces/societies/mine/$clubID"
                 >
                   <Users className="mr-2 h-4 w-4" />
                   View Club

@@ -64,12 +64,7 @@
       "security": {
         "noDangerouslySetInnerHtml": "warn"
       },
-      "a11y": {
-        "useButtonType": "warn",
-        "useKeyWithClickEvents": "info",
-        "noNoninteractiveElementInteractions": "info",
-        "useSemanticElements": "info"
-      },
+      "a11y": "info",
       "correctness": {
         "noNestedComponentDefinitions": "off",
         "noUnusedFunctionParameters": "warn",

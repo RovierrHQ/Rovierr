@@ -68,11 +68,18 @@ const BrowseClubs = () => {
 
   // Replacing with a placeholder implementation or better yet, fetch all user requests once.
   // Check if there is an endpoint like api.societyRegistration.joinRequest.list.get()
-  const { data: userJoinRequests } = useQuery(
-    ['user', 'join-requests'],
-    () => api.registration['join-request'].get(),
-    { enabled: !!session?.user?.id }
-  )
+  const { data: userJoinRequests } = useQuery({
+    queryKey: ['user', 'join-requests'],
+    queryFn: () =>
+      api.registration['join-request'].list.get({
+        query: {
+          societyId: session?.user?.id || '',
+          limit: 0,
+          offset: 0
+        }
+      }),
+    enabled: !!session?.user?.id
+  })
 
   // We'll need to adapt the mapping logic below if we change the data source.
   // Let's stick to the map logic but using the bulk fetched data if available, or just ignore for a moment while I check the endpoint.
@@ -277,7 +284,10 @@ const BrowseClubs = () => {
             if (isMember) {
               return (
                 <Button className="w-full" size="sm" variant="outline">
-                  <Link to={`/spaces/societies/mine/${club.id}`}>
+                  <Link
+                    params={{ clubID: club.id }}
+                    to="/spaces/societies/mine/$clubID"
+                  >
                     <Users className="mr-2 h-4 w-4" />
                     View Club
                   </Link>

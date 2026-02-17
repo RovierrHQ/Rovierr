@@ -198,7 +198,8 @@ export default function SidebarNodeRenderer({
                 <Link
                   className={cn(buttonVariants({}))}
                   onClick={() => setSneakPeekOpen(false)}
-                  to="/pricing"
+                  // to="/pricing"
+                  to="/"
                 >
                   Upgrade Now
                 </Link>

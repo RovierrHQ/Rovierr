@@ -42,9 +42,9 @@ function PeoplePage() {
       initialPageParam: 0
     })
 
-  const { data: pendingRequests } = useQuery(
-    ['connection', 'pending', 'received'],
-    () =>
+  const { data: pendingRequests } = useQuery({
+    queryKey: ['connection', 'pending', 'received'],
+    queryFn: () =>
       api.connection.pending.get({
         query: {
           type: 'received',
@@ -52,7 +52,7 @@ function PeoplePage() {
           offset: 0
         }
       })
-  )
+  })
 
   const sendConnectionMutation = useMutation(
     (variables: { connectedUserId: string }) =>
@@ -134,11 +134,13 @@ function PeoplePage() {
             <Link to="/people/requests">
               <UserPlus className="mr-2 h-4 w-4" />
               Requests
-              {pendingRequests && pendingRequests.total > 0 && (
-                <Badge className="ml-2" variant="destructive">
-                  {pendingRequests.total}
-                </Badge>
-              )}
+              {pendingRequests &&
+                'total' in pendingRequests &&
+                pendingRequests.total > 0 && (
+                  <Badge className="ml-2" variant="destructive">
+                    {'total' in pendingRequests ? pendingRequests.total : 0}
+                  </Badge>
+                )}
             </Link>
           </Button>
         </div>

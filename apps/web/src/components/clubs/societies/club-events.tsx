@@ -1,54 +1,20 @@
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { Skeleton } from '@rov/ui/components/skeleton'
-import { useQuery } from '@tanstack/react-query'
-import { mockEvents } from '@web/data/space-club-data'
-import api from '@web/lib/api-client'
+import api, { useQuery } from '@web/lib/api-client'
 import { Calendar, Clock, MapPin, Users } from 'lucide-react'
 
-// Define regex outside function to avoid performance issues
-const TIME_REGEX = /(\d{1,2}):(\d{2})\s*(AM|PM)/i
-
 const ClubEvents = () => {
-  const { isLoading, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['events', 'list'],
     queryFn: () =>
-      api.campusFeed.posts.get({ query: { type: 'event', limit: 20 } }),
-    select: (res) => res?.posts?.filter((post) => post.type === 'event') || []
-  })
-
-  // Transform space-club-data events to match the expected format
-  const transformedMockEvents = mockEvents.map((event, index) => {
-    // Parse time like "10:00 AM" or "6:00 PM" and convert to 24-hour format
-    const timeMatch = event.time.match(TIME_REGEX)
-    let hours = 12
-    let minutes = 0
-
-    if (timeMatch) {
-      hours = Number.parseInt(timeMatch[1], 10)
-      minutes = Number.parseInt(timeMatch[2], 10)
-      const period = timeMatch[3].toUpperCase()
-
-      if (period === 'AM' && hours === 12) hours = 0
-      if (period === 'PM' && hours !== 12) hours += 12
-    }
-
-    // Create a proper date in February 2026
-    const eventDate = new Date(2026, 1, 15 + index, hours, minutes, 0, 0)
-
-    return {
-      id: (index + 1).toString(),
-      title: event.title,
-      eventDetails: {
-        startTime: eventDate.toISOString(),
-        location: event.location,
-        rsvpCount: event.attendees
-      }
-    }
+      api['campus-feed'].posts.get({
+        query: { type: 'event', limit: 20, offset: 0 }
+      })
   })
 
   // Always show mock events for now to ensure the page works
-  const displayEvents = transformedMockEvents
+  const displayEvents = data?.posts || []
   const shouldShowMockData = true // Force show mock data
 
   if (isLoading) {
@@ -114,14 +80,14 @@ const ClubEvents = () => {
           <Card className="p-6" key={event.id}>
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h3 className="mb-2 font-semibold text-lg">{event.title}</h3>
+                <h3 className="mb-2 font-semibold text-lg">{event.content}</h3>
                 <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span>
-                      {event.eventDetails?.startTime
+                      {event.eventDetails?.eventDate
                         ? new Date(
-                            event.eventDetails.startTime
+                            event.eventDetails.eventDate
                           ).toLocaleDateString()
                         : 'Date TBD'}
                     </span>
@@ -129,9 +95,9 @@ const ClubEvents = () => {
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     <span>
-                      {event.eventDetails?.startTime
+                      {event.eventDetails?.eventTime
                         ? new Date(
-                            event.eventDetails.startTime
+                            event.eventDetails.eventTime
                           ).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit'
@@ -148,7 +114,7 @@ const ClubEvents = () => {
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <Users className="h-4 w-4" />
-                  <span>{event.eventDetails?.rsvpCount || 0} attending</span>
+                  <span>{event.rsvpCount || 0} attending</span>
                 </div>
               </div>
               <div className="flex flex-col gap-2">

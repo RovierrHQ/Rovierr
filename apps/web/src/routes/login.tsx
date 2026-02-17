@@ -1,7 +1,7 @@
+import AnimatedGridPattern from '@rov/ui/components/backgrounds/AnimatedGridPattern'
 import { cn } from '@rov/ui/lib/utils'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import LoginForm from '@web/components/auth/login-form'
-import AnimatedGridPattern from '@web/components/backgrounds/AnimatedGridPattern'
 import Topnav from '@web/components/layout/top-nav'
 import { authClient } from '@web/lib/auth-client'
 import { useEffect } from 'react'

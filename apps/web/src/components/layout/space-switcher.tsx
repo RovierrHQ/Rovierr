@@ -47,7 +47,7 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
     setActiveSpace(spaces[nextIndex])
   }
 
-  useHotkey('shift+tab', cycleToNextSpace, { preventDefault: true })
+  useHotkey('Shift+Tab', cycleToNextSpace, { preventDefault: true })
 
   // Sync activeSpace with current route when route changes (but don't redirect)
   useEffect(() => {

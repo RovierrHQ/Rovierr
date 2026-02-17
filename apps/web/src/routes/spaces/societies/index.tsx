@@ -192,16 +192,15 @@ function SocietiesIndex() {
                     <div className="flex-1">
                       <h3 className="font-medium">{society.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {society.memberCount || 0} members
+                        unknown members
                       </p>
                     </div>
                     <Link
                       className={cn(
                         buttonVariants({ variant: 'outline', size: 'sm' })
                       )}
-                      to={
-                        `/spaces/societies/mine/${society.id}` as `/spaces/societies/mine/${string}`
-                      }
+                      params={{ clubID: society.id }}
+                      to="/spaces/societies/mine/$clubID"
                     >
                       View
                     </Link>

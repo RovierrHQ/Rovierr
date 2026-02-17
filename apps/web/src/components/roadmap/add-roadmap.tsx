@@ -13,7 +13,7 @@ import { useRouter } from '@tanstack/react-router'
 import api, { useMutation } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { Loader2 } from 'lucide-react'
-import { cloneElement, type ReactElement, useCallback, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -25,17 +25,12 @@ const roadmapSchema = z.object({
   category: z.enum(['feature-request', 'bug-report', 'improvement'])
 })
 
-const AddRoadmap = ({ children }: { children: ReactElement }) => {
+const AddRoadmap = ({ children }: { children: ReactNode }) => {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
   const { data: session } = authClient.useSession()
-  const router = useRouter()
-  const { mutateAsync } = useMutation<{
-    title: string
-    description: string
-    category: string
-    status: string
-  }>(api.roadmap.create.post, {
+  const { mutateAsync } = useMutation(api.roadmap.create.post, {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['roadmap', 'list']
@@ -56,10 +51,7 @@ const AddRoadmap = ({ children }: { children: ReactElement }) => {
     },
     onSubmit: async ({ value }) => {
       try {
-        if (!session?.user.id) {
-          router.navigate({ to: '/login' })
-          return
-        }
+        if (!session?.user.id) return
 
         await mutateAsync({
           ...value,
@@ -75,27 +67,22 @@ const AddRoadmap = ({ children }: { children: ReactElement }) => {
     }
   })
 
-  const handleTriggerClick = useCallback(() => {
-    session?.user.id ? setOpen(true) : router.navigate({ to: '/login' })
-  }, [router, session?.user.id])
-
   return (
     <div>
-      {cloneElement(children, {
-        onClick: (event: unknown) => {
-          if (typeof children.props.onClick === 'function') {
-            children.props.onClick(event)
-          }
-          handleTriggerClick()
+      <div
+        onClick={() =>
+          session?.user.id ? setOpen(true) : router.navigate({ to: '/login' })
         }
-      })}
+      >
+        {children}
+      </div>
 
       <Dialog onOpenChange={setOpen} open={open}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Submit a Feature Request</DialogTitle>
             <DialogDescription>
-              Tell us what feature, improvement, or bug fix you'd like to
+              Tell us what feature, improvement, or bug fix you’d like to
               suggest.
             </DialogDescription>
           </DialogHeader>
