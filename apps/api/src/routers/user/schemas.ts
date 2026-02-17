@@ -157,8 +157,8 @@ export const academicResponseSchema = z.object({
 // ============================================================================
 
 export const activityQuerySchema = z.object({
-  limit: z.number().min(1).max(100).default(50),
-  offset: z.number().min(0).default(0)
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0)
 })
 
 export const activityItemSchema = z.object({
@@ -172,7 +172,7 @@ export const activityItemSchema = z.object({
 
 export const activityResponseSchema = z.object({
   activities: z.array(activityItemSchema),
-  total: z.number(),
+  total: z.coerce.number(),
   hasMore: z.boolean()
 })
 

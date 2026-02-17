@@ -38,8 +38,8 @@ export const extendedPublicUserSchema = publicUserSchema.extend({
  */
 export const listUsersSchema = z.object({
   search: z.string().optional(),
-  limit: z.number().min(1).max(100).default(50),
-  offset: z.number().min(0).default(0)
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0)
 })
 
 /**
@@ -47,7 +47,7 @@ export const listUsersSchema = z.object({
  */
 export const searchUsersSchema = z.object({
   query: z.string().min(1, 'Search query is required'),
-  limit: z.number().min(1).max(100).default(50)
+  limit: z.coerce.number().min(1).max(100).default(50)
 })
 
 // ============================================================================

@@ -39,8 +39,8 @@ export const connectionIdSchema = z.object({
  * Schema for listing connections with filters
  */
 export const listConnectionsSchema = z.object({
-  limit: z.number().min(1).max(100).default(50),
-  offset: z.number().min(0).default(0)
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0)
 })
 
 /**
@@ -48,8 +48,8 @@ export const listConnectionsSchema = z.object({
  */
 export const listPendingRequestsSchema = z.object({
   type: z.enum(['received', 'sent']),
-  limit: z.number().min(1).max(100).default(50),
-  offset: z.number().min(0).default(0)
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0)
 })
 
 // ============================================================================

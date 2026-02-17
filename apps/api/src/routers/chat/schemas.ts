@@ -30,8 +30,8 @@ export const getOrCreateConversationSchema = z.object({
  * Schema for listing conversations
  */
 export const listConversationsSchema = z.object({
-  limit: z.number().min(1).max(100).default(50),
-  offset: z.number().min(0).default(0)
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0)
 })
 
 /**
@@ -50,7 +50,7 @@ export const sendMessageSchema = z.object({
  */
 export const getMessagesSchema = z.object({
   conversationId: z.string().min(1, 'Conversation ID is required'),
-  limit: z.number().min(1).max(100).default(50),
+  limit: z.coerce.number().min(1).max(100).default(50),
   before: z.string().optional() // Message ID to load messages before
 })
 
@@ -66,7 +66,7 @@ export const markAsReadSchema = z.object({
  */
 export const searchMessagesSchema = z.object({
   query: z.string().min(1, 'Search query is required'),
-  limit: z.number().min(1).max(100).default(20)
+  limit: z.coerce.number().min(1).max(100).default(20)
 })
 
 /**

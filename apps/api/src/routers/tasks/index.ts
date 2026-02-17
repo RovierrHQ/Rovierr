@@ -932,8 +932,8 @@ export const tasks = new Elysia({ name: 'tasks' }).use(betterAuth).group(
             taskId: z.string()
           }),
           query: z.object({
-            limit: z.number().optional(),
-            offset: z.number().optional()
+            limit: z.coerce.number().optional(),
+            offset: z.coerce.number().optional()
           })
         }
       )
