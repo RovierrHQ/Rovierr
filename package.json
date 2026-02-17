@@ -12,7 +12,7 @@
     "setup": "bun run setup-project.ts",
     "dev": "turbo dev",
     "build": "turbo build",
-    "check": "ultracite check && bun run syncpack:check && bun run check-types",
+    "check": "ultracite check --diagnostic-level error && bun run syncpack:check && bun run check-types",
     "fix": "ultracite fix && bun run syncpack:fix",
     "check-types": "turbo type-check",
     "dev:native": "turbo -F native dev",
