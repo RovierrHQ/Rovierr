@@ -19,7 +19,11 @@
       "!**/wrangler.jsonc",
       "!**/.source",
       "!**/worker-configuration.d.ts",
-      "!bun.lock"
+      "!bun.lock",
+
+      "!apps/legacy-nextjs",
+      "!apps/native-legacy",
+      "!packages/legacy-ui"
     ]
   },
   "linter": {
