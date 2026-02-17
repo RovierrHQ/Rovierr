@@ -81,8 +81,8 @@ export const listThreadsSchema = z.object({
     .enum(['recent', 'popular', 'unanswered'])
     .default('recent')
     .optional(),
-  limit: z.number().min(1).max(100).default(50).optional(),
-  offset: z.number().min(0).default(0).optional()
+  limit: z.coerce.number().min(1).max(100).default(50).optional(),
+  offset: z.coerce.number().min(0).default(0).optional()
 })
 
 /**
@@ -197,8 +197,8 @@ export const unfollowThreadSchema = z.object({
  * Schema for listing followed threads
  */
 export const listFollowedThreadsSchema = z.object({
-  limit: z.number().min(1).max(100).default(50),
-  offset: z.number().min(0).default(0)
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0)
 })
 
 // ============================================================================
