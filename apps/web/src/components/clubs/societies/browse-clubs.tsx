@@ -4,10 +4,10 @@ import { Card } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useQueryClient } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { CheckCircle2, Clock, GraduationCap, Plus, Users } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { toast } from 'sonner'
 
@@ -70,8 +70,7 @@ const BrowseClubs = () => {
   // Check if there is an endpoint like api.societyRegistration.joinRequest.list.get()
   const { data: userJoinRequests } = useQuery(
     ['user', 'join-requests'],
-    () =>
-      api.registration['join-request'].get(),
+    () => api.registration['join-request'].get(),
     { enabled: !!session?.user?.id }
   )
 

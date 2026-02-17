@@ -8,12 +8,15 @@ import {
 } from '@tanstack/react-query'
 import type { AppType } from 'api'
 
-const api = treaty<AppType>(process.env.VITE_API_URL || 'http://localhost:3001', {
-  fetch: {
-    credentials: 'include',
-    mode: 'cors'
+const api = treaty<AppType>(
+  process.env.VITE_API_URL || 'http://localhost:3001',
+  {
+    fetch: {
+      credentials: 'include',
+      mode: 'cors'
+    }
   }
-})
+)
 
 /**
  * Typed useQuery hook for Eden Treaty endpoints

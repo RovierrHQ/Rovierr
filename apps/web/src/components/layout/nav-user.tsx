@@ -14,9 +14,9 @@ import {
   useSidebar
 } from '@rov/ui/components/sidebar'
 import { useRouter } from '@tanstack/react-router'
-import { AnimatedThemeToggler } from '@web/components/theme-toggle'
 import { authClient } from '@web/lib/auth-client'
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react'
+import { ThemeToggle } from '../theme/switch'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
@@ -38,7 +38,6 @@ export function NavUser() {
                   ?.split(' ')
                   .map((name) => name[0])
                   .join('')}
-                
               </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
@@ -76,7 +75,9 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.navigate({ to: '/profile' })}>
+              <DropdownMenuItem
+                onClick={() => router.navigate({ to: '/profile' })}
+              >
                 <BadgeCheck />
                 Profile
               </DropdownMenuItem>
@@ -86,7 +87,7 @@ export function NavUser() {
               <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                 <div className="flex w-full items-center justify-between">
                   <span>Theme</span>
-                  <AnimatedThemeToggler />
+                  <ThemeToggle />
                 </div>
               </DropdownMenuItem>
             </DropdownMenuGroup>

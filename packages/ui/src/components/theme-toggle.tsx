@@ -1,7 +1,8 @@
 'use client'
 
+import { Moon01Icon, Sun01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { Button } from '@rov/ui/components/button'
-import { Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export function AnimatedThemeToggler() {
@@ -30,8 +31,14 @@ export function AnimatedThemeToggler() {
 
   return (
     <Button onClick={toggleTheme} size="sm" variant="ghost">
-      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <HugeiconsIcon
+        className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+        icon={Sun01Icon}
+      />
+      <HugeiconsIcon
+        className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+        icon={Moon01Icon}
+      />
       <span className="sr-only">Toggle theme</span>
     </Button>
   )

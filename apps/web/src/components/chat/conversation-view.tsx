@@ -2,8 +2,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import { Input } from '@rov/ui/components/input'
 import { ArrowLeft, Send } from 'lucide-react'
-import { useState } from 'react'
 import type { FC } from 'react'
+import { useState } from 'react'
 
 type Message = {
   id: string
@@ -22,9 +22,7 @@ type ConversationViewProps = {
   onBack: () => void
 }
 
-export const ConversationView: FC<ConversationViewProps> = ({
-  onBack
-}) => {
+export const ConversationView: FC<ConversationViewProps> = ({ onBack }) => {
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -43,7 +41,7 @@ export const ConversationView: FC<ConversationViewProps> = ({
     },
     {
       id: '2',
-      content: 'I\'m doing great! Just working on some projects. How about you?',
+      content: "I'm doing great! Just working on some projects. How about you?",
       sender: {
         id: 'me',
         name: 'Me',
@@ -97,19 +95,19 @@ export const ConversationView: FC<ConversationViewProps> = ({
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b">
         <Button
-          variant="ghost"
-          size="sm"
-          onClick={onBack}
           className="md:hidden"
+          onClick={onBack}
+          size="sm"
+          variant="ghost"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        
+
         <Avatar className="h-8 w-8">
           <AvatarImage src={undefined} />
           <AvatarFallback>JD</AvatarFallback>
         </Avatar>
-        
+
         <div className="flex-1">
           <p className="font-medium text-sm">John Doe</p>
           <p className="text-xs text-muted-foreground">Active now</p>
@@ -120,24 +118,25 @@ export const ConversationView: FC<ConversationViewProps> = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {mockMessages.map((msg) => (
           <div
-            key={msg.id}
             className={`flex gap-3 ${msg.isOwn ? 'flex-row-reverse' : ''}`}
+            key={msg.id}
           >
             {!msg.isOwn && (
               <Avatar className="h-8 w-8 flex-shrink-0">
                 <AvatarImage src={msg.sender.avatar} />
                 <AvatarFallback>
-                  {msg.sender.name.split(' ').map(n => n[0]).join('')}
+                  {msg.sender.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')}
                 </AvatarFallback>
               </Avatar>
             )}
-            
+
             <div className={`max-w-[70%] ${msg.isOwn ? 'text-right' : ''}`}>
               <div
                 className={`inline-block rounded-lg px-3 py-2 text-sm ${
-                  msg.isOwn
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
+                  msg.isOwn ? 'bg-primary text-primary-foreground' : 'bg-muted'
                 }`}
               >
                 {msg.content}
@@ -154,16 +153,16 @@ export const ConversationView: FC<ConversationViewProps> = ({
       <div className="border-t p-4">
         <div className="flex gap-2">
           <Input
-            value={message}
+            className="flex-1"
+            disabled={isLoading}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type a message..."
-            className="flex-1"
-            disabled={isLoading}
+            value={message}
           />
           <Button
-            onClick={handleSendMessage}
             disabled={!message.trim() || isLoading}
+            onClick={handleSendMessage}
             size="sm"
           >
             <Send className="h-4 w-4" />

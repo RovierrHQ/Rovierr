@@ -1,5 +1,5 @@
-import { useCentrifugo } from '@web/lib/centrifuge'
 import { authClient } from '@web/lib/auth-client'
+import { useCentrifugo } from '@web/lib/centrifuge'
 
 export function usePresence() {
   const { data: session } = authClient.useSession()

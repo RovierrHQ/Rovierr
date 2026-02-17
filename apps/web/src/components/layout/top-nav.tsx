@@ -2,9 +2,9 @@ import { Avatar, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import { Link } from '@tanstack/react-router'
 import Logo from '@web/components/icons/logo'
-import { AnimatedThemeToggler } from '@web/components/theme-toggle'
 import { authClient } from '@web/lib/auth-client'
 import { LogInIcon } from 'lucide-react'
+import { ThemeToggle } from '../theme/switch'
 
 function Topnav({
   enableThemeToggle = true,
@@ -28,7 +28,7 @@ function Topnav({
         </Link>
 
         <div className="flex items-center gap-2">
-          {enableThemeToggle && <AnimatedThemeToggler />}
+          {enableThemeToggle && <ThemeToggle />}
           {loginButton && (
             <>
               {isPending && (

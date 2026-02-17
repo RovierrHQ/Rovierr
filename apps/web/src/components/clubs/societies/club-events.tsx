@@ -1,10 +1,10 @@
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { Skeleton } from '@rov/ui/components/skeleton'
-import { Calendar, Clock, MapPin, Users } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import api from '@web/lib/api-client'
 import { mockEvents } from '@web/data/space-club-data'
+import api from '@web/lib/api-client'
+import { Calendar, Clock, MapPin, Users } from 'lucide-react'
 
 // Define regex outside function to avoid performance issues
 const TIME_REGEX = /(\d{1,2}):(\d{2})\s*(AM|PM)/i
@@ -12,7 +12,8 @@ const TIME_REGEX = /(\d{1,2}):(\d{2})\s*(AM|PM)/i
 const ClubEvents = () => {
   const { isLoading, isError } = useQuery({
     queryKey: ['events', 'list'],
-    queryFn: () => api.campusFeed.posts.get({ query: { type: 'event', limit: 20 } }),
+    queryFn: () =>
+      api.campusFeed.posts.get({ query: { type: 'event', limit: 20 } }),
     select: (res) => res?.posts?.filter((post) => post.type === 'event') || []
   })
 
@@ -22,19 +23,19 @@ const ClubEvents = () => {
     const timeMatch = event.time.match(TIME_REGEX)
     let hours = 12
     let minutes = 0
-    
+
     if (timeMatch) {
       hours = Number.parseInt(timeMatch[1], 10)
       minutes = Number.parseInt(timeMatch[2], 10)
       const period = timeMatch[3].toUpperCase()
-      
+
       if (period === 'AM' && hours === 12) hours = 0
       if (period === 'PM' && hours !== 12) hours += 12
     }
-    
+
     // Create a proper date in February 2026
     const eventDate = new Date(2026, 1, 15 + index, hours, minutes, 0, 0)
-    
+
     return {
       id: (index + 1).toString(),
       title: event.title,
@@ -70,10 +71,9 @@ const ClubEvents = () => {
         <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
         <h3 className="mb-2 font-semibold text-lg">No events available</h3>
         <p className="text-muted-foreground">
-          {shouldShowMockData 
+          {shouldShowMockData
             ? 'Sample events could not be loaded'
-            : 'Check back later for upcoming events'
-          }
+            : 'Check back later for upcoming events'}
         </p>
       </div>
     )
@@ -88,12 +88,14 @@ const ClubEvents = () => {
         </p>
         {shouldShowMockData && (
           <div className="mb-4 rounded-md bg-blue-50 p-4 text-sm text-blue-800">
-            <strong>Sample Events:</strong> Showing sample events from the campus data.
+            <strong>Sample Events:</strong> Showing sample events from the
+            campus data.
           </div>
         )}
         {isError && (
           <div className="mb-4 rounded-md bg-gray-50 p-4 text-sm text-gray-800">
-            <strong>Note:</strong> Showing sample events while we fix server connectivity.
+            <strong>Note:</strong> Showing sample events while we fix server
+            connectivity.
           </div>
         )}
         <div className="mb-4 flex gap-2">
@@ -118,7 +120,9 @@ const ClubEvents = () => {
                     <Calendar className="h-4 w-4" />
                     <span>
                       {event.eventDetails?.startTime
-                        ? new Date(event.eventDetails.startTime).toLocaleDateString()
+                        ? new Date(
+                            event.eventDetails.startTime
+                          ).toLocaleDateString()
                         : 'Date TBD'}
                     </span>
                   </div>
@@ -126,13 +130,20 @@ const ClubEvents = () => {
                     <Clock className="h-4 w-4" />
                     <span>
                       {event.eventDetails?.startTime
-                        ? new Date(event.eventDetails.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        ? new Date(
+                            event.eventDetails.startTime
+                          ).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
                         : 'Time TBD'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    <span>{event.eventDetails?.location || 'Location TBD'}</span>
+                    <span>
+                      {event.eventDetails?.location || 'Location TBD'}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground text-sm">

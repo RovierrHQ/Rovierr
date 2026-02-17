@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger
 } from '@rov/ui/components/dropdown-menu'
 import { useQueryClient } from '@tanstack/react-query'
+import { Image } from '@unpic/react'
 import { mockPosts } from '@web/data/space-club-data'
 import api, { useMutation, useQuery } from '@web/lib/api-client'
 import {
@@ -72,35 +73,35 @@ const ClubPostFeed = () => {
     rsvpMutation.mutate({ eventPostId, status })
   }
 
-  const getRSVPButtonContent = (
-    currentUserRSVP?: 'going' | 'interested' | 'not_going'
-  ) => {
-    switch (currentUserRSVP) {
-      case 'going':
-        return { icon: Check, text: 'Going', variant: 'default' as const }
-      case 'interested':
-        return { icon: Star, text: 'Interested', variant: 'default' as const }
-      case 'not_going':
-        return { icon: X, text: 'Not Going', variant: 'secondary' as const }
-      default:
-        return { icon: Calendar, text: 'RSVP', variant: 'default' as const }
-    }
-  }
+  // const getRSVPButtonContent = (
+  //   currentUserRSVP?: 'going' | 'interested' | 'not_going'
+  // ) => {
+  //   switch (currentUserRSVP) {
+  //     case 'going':
+  //       return { icon: Check, text: 'Going', variant: 'default' as const }
+  //     case 'interested':
+  //       return { icon: Star, text: 'Interested', variant: 'default' as const }
+  //     case 'not_going':
+  //       return { icon: X, text: 'Not Going', variant: 'secondary' as const }
+  //     default:
+  //       return { icon: Calendar, text: 'RSVP', variant: 'default' as const }
+  //   }
+  // }
 
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+  // const formatTimestamp = (timestamp: string) => {
+  //   const date = new Date(timestamp)
+  //   const now = new Date()
+  //   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
 
-    if (diffInSeconds < 60) return 'Just now'
-    if (diffInSeconds < 3600)
-      return `${Math.floor(diffInSeconds / 60)} minutes ago`
-    if (diffInSeconds < 86_400)
-      return `${Math.floor(diffInSeconds / 3600)} hours ago`
-    if (diffInSeconds < 604_800)
-      return `${Math.floor(diffInSeconds / 86_400)} days ago`
-    return date.toLocaleDateString()
-  }
+  //   if (diffInSeconds < 60) return 'Just now'
+  //   if (diffInSeconds < 3600)
+  //     return `${Math.floor(diffInSeconds / 60)} minutes ago`
+  //   if (diffInSeconds < 86_400)
+  //     return `${Math.floor(diffInSeconds / 3600)} hours ago`
+  //   if (diffInSeconds < 604_800)
+  //     return `${Math.floor(diffInSeconds / 86_400)} days ago`
+  //   return date.toLocaleDateString()
+  // }
 
   if (isLoading) {
     return (
@@ -161,9 +162,10 @@ const ClubPostFeed = () => {
                   {post.content}
                 </div>
                 {post.image && (
-                  <img
+                  <Image
                     alt="Post content"
                     className="mb-4 w-full rounded-lg"
+                    layout="fullWidth"
                     src={post.image}
                   />
                 )}

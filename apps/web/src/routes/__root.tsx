@@ -10,7 +10,7 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { CommandMenu } from '@web/components/command-menu'
-import { ThemeProvider } from '@web/components/providers/theme-provider'
+import { ThemeProvider } from '@web/components/theme/provider'
 import i18n, { setSSRLanguage } from '@web/lib/i18n'
 import { getUserSession } from '@web/services/auth'
 import { NuqsAdapter } from 'nuqs/adapters/tanstack-router'
@@ -151,12 +151,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="pb-16 lg:pb-0 antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          disableTransitionOnChange
-          enableSystem
-        >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <QueryClientProvider client={queryClient}>
             <NuqsAdapter>
               {children}

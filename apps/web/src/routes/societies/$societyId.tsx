@@ -11,6 +11,7 @@ import {
 } from '@rov/ui/components/tooltip'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { Image } from '@unpic/react'
 import api from '@web/lib/api-client'
 import {
   CheckCircle2,
@@ -52,9 +53,10 @@ function SocietyProfilePage() {
         {/* Banner */}
         <div className="relative h-64 w-full overflow-hidden">
           {society.banner ? (
-            <img
+            <Image
               alt="Society Banner"
               className="h-full w-full object-cover"
+              layout="fullWidth"
               src={society.banner}
             />
           ) : (

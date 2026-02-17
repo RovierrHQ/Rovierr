@@ -64,7 +64,7 @@ export const ConversationList: FC<ConversationListProps> = ({
           </p>
           <div className="space-y-2 w-full max-w-sm">
             {connections.slice(0, 3).map((connection) => (
-              <Card key={connection.id} className="p-3">
+              <Card className="p-3" key={connection.id}>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={connection.avatar} />
@@ -85,12 +85,12 @@ export const ConversationList: FC<ConversationListProps> = ({
                     </p>
                   </div>
                   <Button
-                    size="sm"
-                    variant="outline"
                     onClick={() => {
                       // Create new conversation logic would go here
                       console.log('Start conversation with', connection.id)
                     }}
+                    size="sm"
+                    variant="outline"
                   >
                     Message
                   </Button>
@@ -103,8 +103,8 @@ export const ConversationList: FC<ConversationListProps> = ({
         <div className="space-y-1">
           {conversations.map((conversation) => (
             <Card
-              key={conversation.id}
               className="cursor-pointer transition-colors hover:bg-accent/50 border-0 rounded-none"
+              key={conversation.id}
               onClick={() => onSelect(conversation.id)}
             >
               <div className="p-4">
@@ -115,26 +115,33 @@ export const ConversationList: FC<ConversationListProps> = ({
                       {conversation.participant.name[0]}
                     </AvatarFallback>
                   </Avatar>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <p className="font-medium text-sm truncate">
                         {conversation.participant.name}
                       </p>
                       <span className="text-xs text-muted-foreground">
-                        {conversation.updatedAt && formatTime(conversation.updatedAt)}
+                        {conversation.updatedAt &&
+                          formatTime(conversation.updatedAt)}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground truncate">
                         {conversation.lastMessage?.content || 'No messages yet'}
                       </p>
-                      {conversation.unreadCount && conversation.unreadCount > 0 && (
-                        <Badge variant="destructive" className="ml-2 px-2 py-0 text-xs min-w-[20px] text-center">
-                          {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
-                        </Badge>
-                      )}
+                      {conversation.unreadCount &&
+                        conversation.unreadCount > 0 && (
+                          <Badge
+                            className="ml-2 px-2 py-0 text-xs min-w-[20px] text-center"
+                            variant="destructive"
+                          >
+                            {conversation.unreadCount > 99
+                              ? '99+'
+                              : conversation.unreadCount}
+                          </Badge>
+                        )}
                     </div>
                   </div>
                 </div>

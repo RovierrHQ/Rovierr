@@ -4,8 +4,8 @@ import { Button } from '@rov/ui/components/button'
 import { Card, CardContent } from '@rov/ui/components/card'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
-import { Link } from '@tanstack/react-router'
 import { cn } from '@rov/ui/lib/utils'
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
 export default function LoginForm({
@@ -150,8 +150,14 @@ export default function LoginForm({
       </Card>
       <div className="text-balance text-center text-muted-foreground text-xs *:[a]:underline *:[a]:underline-offset-4 *:[a]:hover:text-primary">
         By clicking continue, you agree to our{' '}
-        <Link className="hover:text-primary" to="/terms-and-service">Terms of Service</Link> and{' '}
-        <Link className="hover:text-primary" to="/privacy-policy">Privacy Policy</Link>.
+        <Link className="hover:text-primary" to="/terms-and-service">
+          Terms of Service
+        </Link>{' '}
+        and{' '}
+        <Link className="hover:text-primary" to="/privacy-policy">
+          Privacy Policy
+        </Link>
+        .
       </div>
     </div>
   )

@@ -1,30 +1,26 @@
 import { cn } from '@rov/ui/lib/utils'
-import type { HTMLAttributes } from 'react'
-import { forwardRef } from 'react'
 
-const Kbd = forwardRef<HTMLElement, HTMLAttributes<HTMLElement>>(
-  ({ className, ...props }, ref) => (
+function Kbd({ className, ...props }: React.ComponentProps<'kbd'>) {
+  return (
     <kbd
       className={cn(
-        'inline-flex min-h-[20px] items-center justify-center rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground',
+        "bg-muted text-muted-foreground in-data-[slot=tooltip-content]:bg-background/20 in-data-[slot=tooltip-content]:text-background dark:in-data-[slot=tooltip-content]:bg-background/10 h-5 w-fit min-w-5 gap-1 rounded-sm px-1 font-sans text-xs font-medium [&_svg:not([class*='size-'])]:size-3 pointer-events-none inline-flex items-center justify-center select-none",
         className
       )}
-      ref={ref}
+      data-slot="kbd"
       {...props}
     />
   )
-)
-Kbd.displayName = 'Kbd'
+}
 
-const KbdGroup = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      className={cn('inline-flex items-center gap-1', className)}
-      ref={ref}
+function KbdGroup({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <kbd
+      className={cn('gap-1 inline-flex items-center', className)}
+      data-slot="kbd-group"
       {...props}
     />
   )
-)
-KbdGroup.displayName = 'KbdGroup'
+}
 
 export { Kbd, KbdGroup }

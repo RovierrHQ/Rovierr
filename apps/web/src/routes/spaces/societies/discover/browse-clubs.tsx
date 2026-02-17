@@ -1,9 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import BrowseClubs from '@web/components/clubs/societies/browse-clubs'
 
-export const Route = createFileRoute('/spaces/societies/discover/browse-clubs')({
-  component: BrowseClubsPage
-})
+export const Route = createFileRoute('/spaces/societies/discover/browse-clubs')(
+  {
+    component: BrowseClubsPage
+  }
+)
 
 function BrowseClubsPage() {
   return (
