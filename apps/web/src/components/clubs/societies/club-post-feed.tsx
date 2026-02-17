@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { PostCommentPanel } from './post-comment-panel'
 
 const ClubPostFeed = () => {
   const queryClient = useQueryClient()
@@ -73,35 +74,35 @@ const ClubPostFeed = () => {
     rsvpMutation.mutate({ eventPostId, status })
   }
 
-  // const getRSVPButtonContent = (
-  //   currentUserRSVP?: 'going' | 'interested' | 'not_going'
-  // ) => {
-  //   switch (currentUserRSVP) {
-  //     case 'going':
-  //       return { icon: Check, text: 'Going', variant: 'default' as const }
-  //     case 'interested':
-  //       return { icon: Star, text: 'Interested', variant: 'default' as const }
-  //     case 'not_going':
-  //       return { icon: X, text: 'Not Going', variant: 'secondary' as const }
-  //     default:
-  //       return { icon: Calendar, text: 'RSVP', variant: 'default' as const }
-  //   }
-  // }
+  const getRSVPButtonContent = (
+    currentUserRSVP?: 'going' | 'interested' | 'not_going'
+  ) => {
+    switch (currentUserRSVP) {
+      case 'going':
+        return { icon: Check, text: 'Going', variant: 'default' as const }
+      case 'interested':
+        return { icon: Star, text: 'Interested', variant: 'default' as const }
+      case 'not_going':
+        return { icon: X, text: 'Not Going', variant: 'secondary' as const }
+      default:
+        return { icon: Calendar, text: 'RSVP', variant: 'default' as const }
+    }
+  }
 
-  // const formatTimestamp = (timestamp: string) => {
-  //   const date = new Date(timestamp)
-  //   const now = new Date()
-  //   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
 
-  //   if (diffInSeconds < 60) return 'Just now'
-  //   if (diffInSeconds < 3600)
-  //     return `${Math.floor(diffInSeconds / 60)} minutes ago`
-  //   if (diffInSeconds < 86_400)
-  //     return `${Math.floor(diffInSeconds / 3600)} hours ago`
-  //   if (diffInSeconds < 604_800)
-  //     return `${Math.floor(diffInSeconds / 86_400)} days ago`
-  //   return date.toLocaleDateString()
-  // }
+    if (diffInSeconds < 60) return 'Just now'
+    if (diffInSeconds < 3600)
+      return `${Math.floor(diffInSeconds / 60)} minutes ago`
+    if (diffInSeconds < 86_400)
+      return `${Math.floor(diffInSeconds / 3600)} hours ago`
+    if (diffInSeconds < 604_800)
+      return `${Math.floor(diffInSeconds / 86_400)} days ago`
+    return date.toLocaleDateString()
+  }
 
   if (isLoading) {
     return (
@@ -154,13 +155,15 @@ const ClubPostFeed = () => {
                     </div>
                   </div>
                   <div className="text-muted-foreground text-sm">
-                    {post.createdAt}
+                    {formatTimestamp(post.createdAt)}
                   </div>
                 </div>
 
-                <div className="prose prose-sm mb-4 max-w-none leading-relaxed">
-                  {post.content}
-                </div>
+                <div
+                  className="prose prose-sm mb-4 max-w-none leading-relaxed"
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: expected
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
                 {post.imageUrl && (
                   <Image
                     alt="Post content"
@@ -174,11 +177,32 @@ const ClubPostFeed = () => {
                     <div className="flex items-center gap-4 text-sm">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
-                        <span>{post.eventDetails.eventDate}</span>
+                        <span>
+                          {(() => {
+                            const d = post.eventDetails.eventDate as
+                              | string
+                              | Date
+                            return d instanceof Date
+                              ? d.toLocaleDateString()
+                              : String(d)
+                          })()}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
-                        <span>{post.eventDetails.eventTime}</span>
+                        <span>
+                          {(() => {
+                            const t = post.eventDetails.eventTime as
+                              | string
+                              | Date
+                            return t instanceof Date
+                              ? t.toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })
+                              : String(t)
+                          })()}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />
@@ -193,7 +217,9 @@ const ClubPostFeed = () => {
                     onClick={() => handleLike(post.id)}
                     variant="secondary"
                   >
-                    <Heart className="h-4 w-4" />
+                    <Heart
+                      className={`h-4 w-4 ${post.isLikedByCurrentUser ? 'fill-red-500 text-red-500' : ''}`}
+                    />
                     <span className="text-sm">{post.likeCount}</span>
                   </Button>
                   <Button
@@ -211,26 +237,39 @@ const ClubPostFeed = () => {
                     <Share2 className="h-4 w-4" />
                     <span className="text-sm">Share</span>
                   </Button>
-                  {post.type === 'event' && (
+                  {post.type === 'event' && post.eventDetails?.id && (
                     <DropdownMenu>
                       <DropdownMenuTrigger
-                        render={() => (
+                        render={(props) => (
                           <Button
                             className="ml-auto gap-2"
                             disabled={rsvpMutation.isPending}
                             size="sm"
-                            variant="default"
+                            variant={
+                              getRSVPButtonContent(post.currentUserRSVP).variant
+                            }
+                            {...props}
                           >
-                            <Calendar className="h-4 w-4" />
-                            RSVP ({post.rsvpCount || 0})
-                            <ChevronDown className="h-3 w-3" />
+                            {(() => {
+                              const { icon: Icon, text } = getRSVPButtonContent(
+                                post.currentUserRSVP
+                              )
+                              return (
+                                <>
+                                  <Icon className="h-4 w-4" />
+                                  {text} ({post.rsvpCount || 0})
+                                  <ChevronDown className="h-3 w-3" />
+                                </>
+                              )
+                            })()}
                           </Button>
                         )}
                       />
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() =>
-                            handleRSVP(post.id.toString(), 'going')
+                            post.eventDetails?.id &&
+                            handleRSVP(post.eventDetails.id, 'going')
                           }
                         >
                           <Check className="mr-2 h-4 w-4" />
@@ -238,7 +277,8 @@ const ClubPostFeed = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            handleRSVP(post.id.toString(), 'interested')
+                            post.eventDetails?.id &&
+                            handleRSVP(post.eventDetails.id, 'interested')
                           }
                         >
                           <Star className="mr-2 h-4 w-4" />
@@ -246,7 +286,8 @@ const ClubPostFeed = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            handleRSVP(post.id.toString(), 'not_going')
+                            post.eventDetails?.id &&
+                            handleRSVP(post.eventDetails.id, 'not_going')
                           }
                         >
                           <X className="mr-2 h-4 w-4" />
@@ -263,31 +304,18 @@ const ClubPostFeed = () => {
 
         {/* Infinite scroll trigger */}
         <div className="py-4 text-center" ref={observerTarget}>
-          {error && (
-            <div className="text-sm text-muted-foreground">
-              Showing sample posts while connecting to server...
-            </div>
-          )}
+          {/* {isFetchingNextPage && (
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
+          )} */}
         </div>
       </div>
 
-      {/* Comment Panel - Placeholder for now */}
+      {/* Comment Panel */}
       {selectedPostId && (
-        <Card className="w-1/2 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Comments</h3>
-            <Button
-              onClick={() => setSelectedPostId(null)}
-              size="sm"
-              variant="ghost"
-            >
-              Close
-            </Button>
-          </div>
-          <p className="text-muted-foreground text-center py-8">
-            Comments coming soon...
-          </p>
-        </Card>
+        <PostCommentPanel
+          onClose={() => setSelectedPostId(null)}
+          postId={selectedPostId}
+        />
       )}
     </div>
   )
