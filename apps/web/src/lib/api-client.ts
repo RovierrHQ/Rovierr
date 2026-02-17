@@ -9,7 +9,7 @@ import {
 import type { AppType } from 'api'
 
 const api = treaty<AppType>(
-  process.env.VITE_API_URL || 'http://localhost:3001',
+  import.meta.env.VITE_API_URL || 'http://localhost:3001',
   {
     fetch: {
       credentials: 'include',

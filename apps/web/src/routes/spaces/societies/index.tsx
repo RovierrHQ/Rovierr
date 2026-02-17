@@ -2,7 +2,7 @@ import { buttonVariants } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { cn } from '@rov/ui/lib/utils'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { authClient } from '@web/lib/auth-client'
 import {
   Calendar,
@@ -15,6 +15,9 @@ import {
 } from 'lucide-react'
 
 export const Route = createFileRoute('/spaces/societies/')({
+  beforeLoad: () => {
+    throw redirect({ to: '/spaces/societies/campus-feed' })
+  },
   component: SocietiesIndex
 })
 
