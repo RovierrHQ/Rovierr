@@ -1,5 +1,9 @@
+'use client'
+
+import type { Treaty } from '@elysiajs/eden'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
+import { Calendar as CalendarComponent } from '@rov/ui/components/calendar'
 import { Card } from '@rov/ui/components/card'
 import {
   Dialog,
@@ -9,8 +13,14 @@ import {
 } from '@rov/ui/components/dialog'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@rov/ui/components/popover'
 import { Switch } from '@rov/ui/components/switch'
 import { useQueryClient } from '@tanstack/react-query'
+import { Image } from '@unpic/react'
 import api, { useMutation } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import {
@@ -21,12 +31,24 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { RichTextEditor } from './rich-text-editor'
+
+type UploadMediaResponse = Awaited<
+  ReturnType<(typeof api)['campus-feed']['posts']['media']['post']>
+>
 
 export const ClubPostPromptCard = () => {
   const [postDialogOpen, setPostDialogOpen] = useState(false)
   const [postContent, setPostContent] = useState('')
+  const [selectedImagePreview, setSelectedImagePreview] = useState<
+    string | null
+  >(null)
+  const [selectedImageS3Url, setSelectedImageS3Url] = useState<string | null>(
+    null
+  )
+  const [isUploading, setIsUploading] = useState(false)
   const [isEventPost, setIsEventPost] = useState(false)
-  const [eventDate, setEventDate] = useState('')
+  const [eventDate, setEventDate] = useState<Date | undefined>(undefined)
   const [eventTime, setEventTime] = useState('')
   const [eventLocation, setEventLocation] = useState('')
   const queryClient = useQueryClient()
@@ -34,8 +56,10 @@ export const ClubPostPromptCard = () => {
 
   const resetForm = () => {
     setPostContent('')
+    setSelectedImagePreview(null)
+    setSelectedImageS3Url(null)
     setIsEventPost(false)
-    setEventDate('')
+    setEventDate(undefined)
     setEventTime('')
     setEventLocation('')
     setPostDialogOpen(false)
@@ -48,9 +72,7 @@ export const ClubPostPromptCard = () => {
       resetForm()
     },
     onError: (error) => {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to create post'
-      )
+      toast.error(error.value.message || 'Failed to create post')
     }
   })
 
@@ -63,20 +85,70 @@ export const ClubPostPromptCard = () => {
         resetForm()
       },
       onError: (error) => {
-        toast.error(
-          error instanceof Error ? error.message : 'Failed to create event post'
-        )
+        toast.error(error.value.message || 'Failed to create event post')
       }
     }
   )
 
+  const uploadMediaMutation = useMutation(api['campus-feed'].posts.media.post, {
+    onError: (error) => {
+      toast.error(error.value.message || 'Failed to upload image')
+      setIsUploading(false)
+    }
+  })
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      return
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB')
+      return
+    }
+
+    setIsUploading(true)
+
+    // Convert to base64
+    const reader = new FileReader()
+    reader.onloadend = async () => {
+      const base64Data = reader.result as string
+
+      try {
+        const res = await uploadMediaMutation.mutateAsync({
+          base64Data,
+          mediaType: 'image'
+        })
+        setSelectedImagePreview(res.url)
+        setSelectedImageS3Url(res.s3KeyUrl)
+        setIsUploading(false)
+      } catch (error) {
+        toast.error(
+          (error as Treaty.Error<UploadMediaResponse>).value.message ||
+            'Failed to upload image'
+        )
+        setIsUploading(false)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
   const handlePost = () => {
-    if (!postContent.trim()) {
+    // Strip HTML tags to check if there's actual content
+    const textContent = postContent.replace(/<[^>]*>/g, '').trim()
+    if (!textContent) {
       toast.error('Post content cannot be empty')
       return
     }
 
     if (isEventPost) {
+      // Validate event fields
       if (!(eventDate && eventTime && eventLocation)) {
         toast.error('Please fill in all event details')
         return
@@ -84,15 +156,17 @@ export const ClubPostPromptCard = () => {
 
       createEventMutation.mutate({
         content: postContent,
+        imageUrl: selectedImageS3Url || undefined,
         type: 'event',
         visibility: 'public',
-        eventDate,
+        eventDate: eventDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
         eventTime,
         location: eventLocation
       })
     } else {
       createPostMutation.mutate({
         content: postContent,
+        imageUrl: selectedImageS3Url || undefined,
         type: 'post',
         visibility: 'public'
       })
@@ -166,13 +240,27 @@ export const ClubPostPromptCard = () => {
             {isEventPost && (
               <div className="space-y-3 rounded-lg border border-border bg-accent/50 p-4">
                 <div className="space-y-2">
-                  <Label htmlFor="event-date">Event Date</Label>
-                  <Input
-                    id="event-date"
-                    onChange={(e) => setEventDate(e.target.value)}
-                    type="date"
-                    value={eventDate}
-                  />
+                  <Label>Event Date</Label>
+                  <Popover>
+                    <PopoverTrigger>
+                      <Button
+                        className="w-full justify-start text-left font-normal"
+                        variant="outline"
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {eventDate
+                          ? eventDate.toLocaleDateString()
+                          : 'Pick a date'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-auto p-0">
+                      <CalendarComponent
+                        mode="single"
+                        onSelect={setEventDate}
+                        selected={eventDate}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="event-time">Event Time</Label>
@@ -195,29 +283,58 @@ export const ClubPostPromptCard = () => {
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="post-content">Content</Label>
-              <textarea
-                className="min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={
-                  createPostMutation.isPending || createEventMutation.isPending
-                }
-                id="post-content"
-                onChange={(e) => setPostContent(e.target.value)}
-                placeholder="What's on your mind?"
-                value={postContent}
-              />
-            </div>
+            <RichTextEditor
+              content={postContent}
+              disabled={
+                createPostMutation.isPending ||
+                createEventMutation.isPending ||
+                isUploading
+              }
+              onChange={setPostContent}
+              placeholder="What's on your mind?"
+            />
+
+            {selectedImagePreview && (
+              <div className="relative">
+                <Image
+                  alt="Selected"
+                  className="w-full rounded-lg"
+                  layout="fullWidth"
+                  src={selectedImagePreview}
+                />
+                <Button
+                  className="absolute top-2 right-2"
+                  onClick={() => {
+                    setSelectedImagePreview(null)
+                    setSelectedImageS3Url(null)
+                  }}
+                  size="sm"
+                  variant="destructive"
+                >
+                  Remove
+                </Button>
+              </div>
+            )}
 
             <div className="flex items-center justify-between rounded-lg border border-border p-3">
               <span className="font-medium text-sm">Add to your post</span>
               <div className="flex gap-2">
-                <Button disabled size="icon" variant="ghost">
-                  <ImageIcon className="h-5 w-5 text-primary" />
+                <input
+                  accept="image/*"
+                  className="hidden"
+                  id="image-upload"
+                  onChange={handleImageSelect}
+                  type="file"
+                />
+                <Button disabled={isUploading} size="icon" variant="ghost">
+                  <label className="cursor-pointer" htmlFor="image-upload">
+                    <ImageIcon className="h-5 w-5 text-primary" />
+                  </label>
                 </Button>
                 <Button disabled size="icon" variant="ghost">
                   <VideoIcon className="h-5 w-5 text-muted-foreground" />
                 </Button>
+
                 <Button disabled size="icon" variant="ghost">
                   <MapPin className="h-5 w-5 text-muted-foreground" />
                 </Button>
@@ -226,17 +343,22 @@ export const ClubPostPromptCard = () => {
             <Button
               className="w-full"
               disabled={
-                !postContent.trim() ||
+                !postContent.replace(/<[^>]*>/g, '').trim() ||
                 createPostMutation.isPending ||
-                createEventMutation.isPending
+                createEventMutation.isPending ||
+                isUploading
               }
               onClick={handlePost}
             >
-              {createPostMutation.isPending || createEventMutation.isPending
-                ? 'Posting...'
-                : isEventPost
-                  ? 'Create Event'
-                  : 'Post'}
+              {(() => {
+                if (isUploading) return 'Uploading...'
+                if (
+                  createPostMutation.isPending ||
+                  createEventMutation.isPending
+                )
+                  return 'Posting...'
+                return isEventPost ? 'Create Event' : 'Post'
+              })()}
             </Button>
           </div>
         </DialogContent>
