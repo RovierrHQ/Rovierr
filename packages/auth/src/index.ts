@@ -320,6 +320,15 @@ export function createAuth(config: AuthConfig) {
   })
 }
 
+// Export permissions
+export {
+  ac,
+  defaultMember,
+  defaultPresident,
+  defaultVicePresident,
+  statement
+} from './permissions'
+
 // Export types
 export type Auth = ReturnType<typeof createAuth>
 export type Session = {
