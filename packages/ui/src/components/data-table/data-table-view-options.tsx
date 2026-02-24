@@ -22,8 +22,8 @@ import * as React from 'react'
 
 interface DataTableViewOptionsProps<TData>
   extends React.ComponentProps<typeof PopoverContent> {
-  table: Table<TData>
   disabled?: boolean
+  table: Table<TData>
 }
 
 export function DataTableViewOptions<TData>({

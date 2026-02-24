@@ -10,7 +10,7 @@
     "./client": "./src/client.ts"
   },
   "scripts": {
-    "check-types": "tsc -b",
+    "check-types": "tsgo -b || tsc -b",
     "dev-d": "docker compose -f ../../docker-compose.yml up --build realtime"
   },
   "dependencies": {

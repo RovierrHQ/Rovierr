@@ -8,7 +8,7 @@
     "db-seed": "./src/index.ts"
   },
   "scripts": {
-    "check-types": "tsc -b",
+    "check-types": "tsgo -b || tsc -b",
     "seed": "bun run src/index.ts",
     "seed:dev": "bun run src/index.ts --verbose",
     "test": "bun test"

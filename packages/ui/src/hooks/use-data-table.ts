@@ -50,18 +50,18 @@ interface UseDataTableProps<TData>
       | 'manualSorting'
     >,
     Required<Pick<TableOptions<TData>, 'pageCount'>> {
+  clearOnDefault?: boolean
+  debounceMs?: number
+  enableAdvancedFilter?: boolean
+  history?: 'push' | 'replace'
   initialState?: Omit<Partial<TableState>, 'sorting'> & {
     sorting?: ExtendedColumnSort<TData>[]
   }
   queryKeys?: Partial<QueryKeys>
-  history?: 'push' | 'replace'
-  debounceMs?: number
-  throttleMs?: number
-  clearOnDefault?: boolean
-  enableAdvancedFilter?: boolean
   scroll?: boolean
   shallow?: boolean
   startTransition?: React.TransitionStartFunction
+  throttleMs?: number
 }
 
 export function useDataTable<TData>(props: UseDataTableProps<TData>) {

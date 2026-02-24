@@ -8,10 +8,7 @@ import type { SeedModule, SeedOptions, SeedResult } from '../types'
 import { chunk, DEFAULT_BATCH_SIZE } from '../utils/batch'
 
 interface ProgramCSVRow {
-  institutionSlug: string
   code: string
-  name: string
-  description?: string
   degreeLevel:
     | 'higher_secondary'
     | 'secondary'
@@ -21,15 +18,14 @@ interface ProgramCSVRow {
     | 'diploma'
     | 'certificate'
     | 'other'
+  description?: string
+  institutionSlug: string
   isVerified: string
+  name: string
 }
 
 interface ProgramRecord {
-  id: string
-  institutionId: string
   code: string
-  name: string
-  description?: string
   degreeLevel:
     | 'higher_secondary'
     | 'secondary'
@@ -39,7 +35,11 @@ interface ProgramRecord {
     | 'diploma'
     | 'certificate'
     | 'other'
+  description?: string
+  id: string
+  institutionId: string
   isVerified: boolean
+  name: string
 }
 
 /**

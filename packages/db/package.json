@@ -7,7 +7,7 @@
     "./schema/issue": "./src/schema/issue.ts"
   },
   "scripts": {
-    "type-check": "tsc -b",
+    "type-check": "tsgo -b || tsc -b",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate",

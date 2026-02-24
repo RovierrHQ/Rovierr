@@ -10,13 +10,13 @@ declare module '@tanstack/react-table' {
 
   // biome-ignore lint/style/useConsistentTypeDefinitions: required by react-table
   interface ColumnMeta<TData extends RowData, TValue> {
+    icon?: React.FC<React.SVGProps<SVGSVGElement>>
     label?: string
-    placeholder?: string
-    variant?: FilterVariant
     options?: Option[]
+    placeholder?: string
     range?: [number, number]
     unit?: string
-    icon?: React.FC<React.SVGProps<SVGSVGElement>>
+    variant?: FilterVariant
   }
 }
 

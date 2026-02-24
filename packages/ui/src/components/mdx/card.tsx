@@ -2,8 +2,8 @@ import { cn } from '@rov/ui/lib/utils'
 import { Link } from '@tanstack/react-router'
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  href?: string
   disabled?: boolean
+  href?: string
 }
 
 export function MdxCard({

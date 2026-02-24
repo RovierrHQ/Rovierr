@@ -19,20 +19,19 @@ import type {
 import { chunk, DEFAULT_BATCH_SIZE } from '../utils/batch'
 
 interface CourseJSON {
-  code: string
-  title: string
-  career: string
-  units: string
-  grading: string
-  components: string
-  campus: string
   academic_group: string
-  requirements: string
+  assessments?: Record<string, string>
+  campus: string
+  career: string
+  code: string
+  components: string
   description: string
+  grading: string
   outcome: string
-  syllabus: string
-  required_readings: string
   recommended_readings: string
+  required_readings: string
+  requirements: string
+  syllabus: string
   terms?: {
     [termName: string]: {
       [sectionName: string]: {
@@ -45,34 +44,35 @@ interface CourseJSON {
       }
     }
   }
-  assessments?: Record<string, string>
+  title: string
+  units: string
 }
 
 interface CourseRecord {
-  id: string
-  institutionId: string
   code: string
-  title: string
-  description: string | null
+  createdBy: string | null
   defaultCredits: string | null
   departmentId: string | null
-  createdBy: string | null
+  description: string | null
+  id: string
+  institutionId: string
   isVerified: boolean
+  title: string
 }
 
 interface CourseOfferingRecord {
-  id: string
-  courseId: string
-  termId: string
-  section: string | null
-  instructor: string | null
   capacity: string | null
+  courseId: string
+  id: string
+  instructor: string | null
   schedule: string | null
+  section: string | null
+  termId: string
 }
 
 interface CourseOfferingWithHelpers extends CourseOfferingRecord {
-  termName?: string
   academicYear?: string
+  termName?: string
 }
 
 /**

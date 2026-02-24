@@ -14,15 +14,15 @@ import {
 
 export interface AnimatedGridPatternProps
   extends ComponentPropsWithoutRef<'svg'> {
-  width?: number
+  duration?: number
   height?: number
+  maxOpacity?: number
+  numSquares?: number
+  repeatDelay?: number
+  strokeDasharray?: any
+  width?: number
   x?: number
   y?: number
-  strokeDasharray?: any
-  numSquares?: number
-  maxOpacity?: number
-  duration?: number
-  repeatDelay?: number
 }
 
 export default function AnimatedGridPattern({

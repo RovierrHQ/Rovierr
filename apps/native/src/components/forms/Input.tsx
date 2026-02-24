@@ -14,16 +14,16 @@ import ThemedText from '../ThemedText'
 export type InputVariant = 'animated' | 'classic' | 'underlined' | 'inline'
 
 interface CustomTextInputProps extends TextInputProps {
-  label?: string
-  rightIcon?: IconName
-  onRightIconPress?: () => void
-  error?: string
-  isPassword?: boolean
   className?: string
   containerClassName?: string
-  isMultiline?: boolean
-  variant?: InputVariant
+  error?: string
   inRow?: boolean
+  isMultiline?: boolean
+  isPassword?: boolean
+  label?: string
+  onRightIconPress?: () => void
+  rightIcon?: IconName
+  variant?: InputVariant
 }
 
 const Input: React.FC<CustomTextInputProps> = ({
