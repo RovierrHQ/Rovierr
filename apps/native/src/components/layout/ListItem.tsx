@@ -20,21 +20,21 @@ type IconConfig = {
 }
 
 interface ListItemProps extends PressableProps {
-  title: React.ReactNode
-  subtitle?: React.ReactNode
-  leading?: React.ReactNode
   avatar?: {
     src?: string
     name?: string
     size?: 'xs' | 'sm' | 'md'
   }
+  className?: string
+  disabled?: boolean
+  href?: Href
   icon?: IconConfig
+  leading?: React.ReactNode
+  style?: ViewStyle
+  subtitle?: React.ReactNode
+  title: React.ReactNode
   trailing?: React.ReactNode
   trailingIcon?: IconConfig
-  disabled?: boolean
-  className?: string
-  style?: ViewStyle
-  href?: Href
 }
 
 const ListItem = forwardRef<View, ListItemProps>((props, ref) => {

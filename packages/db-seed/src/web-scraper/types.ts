@@ -1,10 +1,10 @@
 /** biome-ignore-all lint: ok */
 export interface ScraperConfig {
   baseUrl: string
-  rateLimit?: number // Requests per second
-  timeout?: number // Request timeout in ms
-  retries?: number // Max retry attempts
   headers?: Record<string, string>
+  rateLimit?: number // Requests per second
+  retries?: number // Max retry attempts
+  timeout?: number // Request timeout in ms
 }
 
 export interface DataTransformer<TInput, TOutput> {

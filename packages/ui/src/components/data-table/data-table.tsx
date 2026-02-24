@@ -13,8 +13,8 @@ import { flexRender, type Table as TanstackTable } from '@tanstack/react-table'
 import type * as React from 'react'
 
 interface DataTableProps<TData> extends React.ComponentProps<'div'> {
-  table: TanstackTable<TData>
   actionBar?: React.ReactNode
+  table: TanstackTable<TData>
 }
 
 export function DataTable<TData>({

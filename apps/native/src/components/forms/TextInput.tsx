@@ -13,15 +13,15 @@ import ThemedText from '../ThemedText'
 import type { InputVariant } from './Input'
 
 interface CustomTextInputProps extends TextInputProps {
-  label?: string
-  rightIcon?: IconName
-  onRightIconPress?: () => void
-  error?: string
-  isPassword?: boolean
-  disabled?: boolean
   className?: string
   containerClassName?: string
+  disabled?: boolean
+  error?: string
   isMultiline?: boolean
+  isPassword?: boolean
+  label?: string
+  onRightIconPress?: () => void
+  rightIcon?: IconName
   variant?: InputVariant
 }
 

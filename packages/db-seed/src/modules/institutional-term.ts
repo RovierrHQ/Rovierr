@@ -13,22 +13,22 @@ import type {
 import { chunk, DEFAULT_BATCH_SIZE } from '../utils/batch'
 
 interface InstitutionalTermCSVRow {
-  institution_slug: string
-  term_name: string
   academic_year: string
-  start_date: string
   end_date: string
+  institution_slug: string
+  start_date: string
+  term_name: string
   term_type: string
 }
 
 interface InstitutionalTermRecord {
+  academicYear: string
+  endDate: string
   id: string
   institutionId: string
-  termName: string
-  academicYear: string
-  startDate: string
-  endDate: string
   institutionSlug?: string
+  startDate: string
+  termName: string
 }
 
 /**
