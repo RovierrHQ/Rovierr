@@ -8,7 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "type-check": "tsc -b"
+    "type-check": "tsgo -b || tsc -b"
   },
   "dependencies": {
     "@elysiajs/eden": "^1.4.6",

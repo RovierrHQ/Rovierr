@@ -6,8 +6,8 @@
     "verbatimModuleSyntax": true,
     "strict": true,
     "skipLibCheck": true,
-    "baseUrl": "./",
     "paths": {
+      "*": ["./*"],
       "@api/*": ["./src/*"],
       "@web/*": ["../web/src/*"]
     },
