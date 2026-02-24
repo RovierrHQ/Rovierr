@@ -2,7 +2,9 @@ import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
 import { Progress } from '@rov/ui/components/progress'
 import { createFileRoute, useParams, useRouter } from '@tanstack/react-router'
-import api, { useQuery as useTreatyQuery } from '@web/lib/api-client'
+import { Image } from '@unpic/react'
+import { ImageUploadDialog } from '@web/components/shared/image-upload-dialog'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { ArrowLeft, ArrowRight, Check, Loader2, Save } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -26,9 +28,18 @@ function OnboardingWizard() {
   const [isSaving, setIsSaving] = useState(false)
 
   // Fetch society data
-  const { data: society, isLoading } = useTreatyQuery(
-    ['society', societyId],
-    () => api.society({ id: societyId }).get()
+  const { data: society, isLoading } = useQuery({
+    queryKey: ['society', societyId],
+    queryFn: async () => {
+      const response = await api.society({ id: societyId }).get()
+      return response.data ?? null
+    },
+    enabled: !!societyId
+  })
+
+  // Mutations for completing onboarding
+  const completeOnboardingMutation = useMutation(() =>
+    api.society({ id: societyId })['complete-onboarding'].post()
   )
 
   const totalSteps = 3
@@ -67,7 +78,7 @@ function OnboardingWizard() {
   const handleComplete = async () => {
     try {
       setIsSaving(true)
-      await api.society({ id: societyId })['complete-onboarding'].post()
+      await completeOnboardingMutation.mutateAsync()
       toast.success('Onboarding completed!')
       router.navigate({
         to: '/spaces/societies/mine/$clubID',
@@ -88,7 +99,7 @@ function OnboardingWizard() {
     )
   }
 
-  if (!society?.data) {
+  if (!society) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p>Society not found</p>
@@ -96,7 +107,7 @@ function OnboardingWizard() {
     )
   }
 
-  const societyData = society.data
+  const societyData = society
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
@@ -130,7 +141,9 @@ function OnboardingWizard() {
 
       {/* Step Content */}
       <Card className="p-6">
-        {currentStep === 1 && <Step1VisualBranding society={societyData} />}
+        {currentStep === 1 && (
+          <Step1VisualBranding society={societyData} societyId={societyId} />
+        )}
         {currentStep === 2 && (
           <Step2ContactInfo society={societyData} societyId={societyId} />
         )}
@@ -192,10 +205,59 @@ function OnboardingWizard() {
 
 // Step 1: Visual Branding
 function Step1VisualBranding({
-  society: _society
+  society,
+  societyId
 }: {
   society: Record<string, unknown>
+  societyId: string
 }) {
+  const [logoDialogOpen, setLogoDialogOpen] = useState(false)
+  const [bannerDialogOpen, setBannerDialogOpen] = useState(false)
+  const [primaryColor, setPrimaryColor] = useState(
+    (society.primaryColor as string) || '#3b82f6'
+  )
+  const [isSaving, setIsSaving] = useState(false)
+
+  const updateFieldsMutation = useMutation(
+    api.society['']..fields.patch
+  )
+
+  const handleSaveLogo = async (croppedImage: string) => {
+    try {
+      setIsSaving(true)
+      await updateFieldsMutation.mutateAsync({ logo: croppedImage })
+      toast.success('Logo updated!')
+    } catch {
+      toast.error('Failed to update logo')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleSaveBanner = async (croppedImage: string) => {
+    try {
+      setIsSaving(true)
+      await updateFieldsMutation.mutateAsync({ banner: croppedImage })
+      toast.success('Banner updated!')
+    } catch {
+      toast.error('Failed to update banner')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleSaveColor = async () => {
+    try {
+      setIsSaving(true)
+      await updateFieldsMutation.mutateAsync({ primaryColor })
+      toast.success('Primary color updated!')
+    } catch {
+      toast.error('Failed to update primary color')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -213,9 +275,23 @@ function Step1VisualBranding({
           <p className="text-muted-foreground text-sm">
             Upload a square logo (minimum 200x200px, max 5MB)
           </p>
-          <div className="mt-2 flex h-32 w-32 items-center justify-center rounded-lg border-2 border-dashed">
-            <span className="text-muted-foreground text-sm">Upload Logo</span>
-          </div>
+          <button
+            className="mt-2 flex h-32 w-32 items-center justify-center rounded-lg border-2 border-dashed hover:border-primary/50 transition-colors"
+            onClick={() => setLogoDialogOpen(true)}
+            type="button"
+          >
+            {society.logo ? (
+              <Image
+                alt="Society Logo"
+                className="h-full w-full object-cover rounded-lg"
+                height={128}
+                src={society.logo as string}
+                width={128}
+              />
+            ) : (
+              <span className="text-muted-foreground text-sm">Upload Logo</span>
+            )}
+          </button>
         </div>
 
         <div>
@@ -225,9 +301,25 @@ function Step1VisualBranding({
           <p className="text-muted-foreground text-sm">
             Upload a banner image (minimum 1200x400px, max 10MB)
           </p>
-          <div className="mt-2 flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed">
-            <span className="text-muted-foreground text-sm">Upload Banner</span>
-          </div>
+          <button
+            className="mt-2 flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed hover:border-primary/50 transition-colors"
+            onClick={() => setBannerDialogOpen(true)}
+            type="button"
+          >
+            {society.banner ? (
+              <Image
+                alt="Society Banner"
+                className="h-full w-full object-cover rounded-lg"
+                height={128}
+                src={society.banner as string}
+                width={512}
+              />
+            ) : (
+              <span className="text-muted-foreground text-sm">
+                Upload Banner
+              </span>
+            )}
+          </button>
         </div>
 
         <div>
@@ -240,9 +332,48 @@ function Step1VisualBranding({
           <p className="text-muted-foreground text-sm">
             Choose a color that represents your society
           </p>
-          <input className="mt-2 h-10 w-20" id="primaryColor" type="color" />
+          <div className="mt-2 flex items-center gap-4">
+            <input
+              className="h-10 w-20"
+              id="primaryColor"
+              onChange={(e) => setPrimaryColor(e.target.value)}
+              type="color"
+              value={primaryColor}
+            />
+            <Button disabled={isSaving} onClick={handleSaveColor} size="sm">
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Color'
+              )}
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Image Upload Dialogs */}
+      <ImageUploadDialog
+        currentImageUrl={society.logo as string | undefined}
+        description="Upload and crop your society's logo (square format recommended)"
+        onOpenChange={setLogoDialogOpen}
+        onSave={handleSaveLogo}
+        open={logoDialogOpen}
+        title="Upload Society Logo"
+        type="profile"
+      />
+
+      <ImageUploadDialog
+        currentImageUrl={society.banner as string | undefined}
+        description="Upload and crop your society's banner (wide format recommended)"
+        onOpenChange={setBannerDialogOpen}
+        onSave={handleSaveBanner}
+        open={bannerDialogOpen}
+        title="Upload Society Banner"
+        type="banner"
+      />
     </div>
   )
 }
@@ -266,10 +397,14 @@ function Step2ContactInfo({
   })
   const [isSaving, setIsSaving] = useState(false)
 
+  const updateFieldsMutation = useMutation((data: Record<string, unknown>) =>
+    api.society({ id: societyId }).fields.patch(data)
+  )
+
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      await api.society({ id: societyId }).fields.patch(formData)
+      await updateFieldsMutation.mutateAsync(formData)
       toast.success('Contact information saved!')
     } catch (_error) {
       toast.error('Failed to save contact information')
@@ -431,10 +566,14 @@ function Step3AdditionalDetails({
   })
   const [isSaving, setIsSaving] = useState(false)
 
+  const updateFieldsMutation = useMutation((data: Record<string, unknown>) =>
+    api.society({ id: societyId }).fields.patch(data)
+  )
+
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      await api.society({ id: societyId }).fields.patch({
+      await updateFieldsMutation.mutateAsync({
         foundingYear: formData.foundingYear,
         meetingSchedule: formData.meetingSchedule,
         membershipRequirements: formData.membershipRequirements,
