@@ -66,7 +66,7 @@ export function CreateTeamDialog({
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {trigger && <DialogTrigger>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Team</DialogTitle>

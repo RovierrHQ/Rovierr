@@ -69,7 +69,9 @@ export function ReportsCharts() {
                 borderRadius: '8px',
                 color: 'var(--card-foreground)'
               }}
-              formatter={(value: number) => `$${value.toLocaleString()}`}
+              formatter={(value: number | undefined) =>
+                value ? `$${value.toLocaleString()}` : '$0'
+              }
             />
             <Bar dataKey="amount" fill="var(--primary)" radius={[8, 8, 0, 0]} />
           </BarChart>
@@ -91,7 +93,7 @@ export function ReportsCharts() {
                 dataKey="value"
                 fill="var(--primary)"
                 label={({ name, percent }) =>
-                  `${name} ${(percent ?? 0 * 100).toFixed(0)}%`
+                  `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
                 }
                 labelLine={false}
                 outerRadius={100}
@@ -107,7 +109,9 @@ export function ReportsCharts() {
                   borderRadius: '8px',
                   color: 'var(--card-foreground)'
                 }}
-                formatter={(value: number) => `$${value.toLocaleString()}`}
+                formatter={(value: number | undefined) =>
+                  value ? `$${value.toLocaleString()}` : '$0'
+                }
               />
             </PieChart>
           </ResponsiveContainer>
@@ -130,7 +134,9 @@ export function ReportsCharts() {
                   borderRadius: '8px',
                   color: 'var(--card-foreground)'
                 }}
-                formatter={(value: number) => `$${value.toLocaleString()}`}
+                formatter={(value: number | undefined) =>
+                  value ? `$${value.toLocaleString()}` : '$0'
+                }
               />
               <Legend />
               <Line
