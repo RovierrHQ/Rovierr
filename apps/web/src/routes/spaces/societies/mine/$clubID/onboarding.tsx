@@ -30,16 +30,13 @@ function OnboardingWizard() {
   // Fetch society data
   const { data: society, isLoading } = useQuery({
     queryKey: ['society', societyId],
-    queryFn: async () => {
-      const response = await api.society({ id: societyId }).get()
-      return response.data ?? null
-    },
+    queryFn: () => api.society({ id: societyId }).get(),
     enabled: !!societyId
   })
 
   // Mutations for completing onboarding
   const completeOnboardingMutation = useMutation(() =>
-    api.society({ id: societyId })['complete-onboarding'].post()
+    api.society['']({ organizationId: societyId })['complete-onboarding'].post()
   )
 
   const totalSteps = 3
@@ -219,7 +216,7 @@ function Step1VisualBranding({
   const [isSaving, setIsSaving] = useState(false)
 
   const updateFieldsMutation = useMutation(
-    api.society['']..fields.patch
+    api.society['']({ organizationId: societyId }).fields.patch
   )
 
   const handleSaveLogo = async (croppedImage: string) => {
@@ -398,7 +395,7 @@ function Step2ContactInfo({
   const [isSaving, setIsSaving] = useState(false)
 
   const updateFieldsMutation = useMutation((data: Record<string, unknown>) =>
-    api.society({ id: societyId }).fields.patch(data)
+    api.society['']({ organizationId: societyId }).fields.patch(data)
   )
 
   const handleSave = async () => {
@@ -567,7 +564,7 @@ function Step3AdditionalDetails({
   const [isSaving, setIsSaving] = useState(false)
 
   const updateFieldsMutation = useMutation((data: Record<string, unknown>) =>
-    api.society({ id: societyId }).fields.patch(data)
+    api.society['']({ organizationId: societyId }).fields.patch(data)
   )
 
   const handleSave = async () => {
