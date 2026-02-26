@@ -75,7 +75,7 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         toast.success('Join request approved')
         setSelectedRequests(new Set())
       },
-      onError: (err: any) => {
+      onError: (err) => {
         toast.error(err.message || 'Failed to approve join request')
       }
     }
@@ -98,7 +98,7 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         setRequestToReject(null)
         setSelectedRequests(new Set())
       },
-      onError: (err: any) => {
+      onError: (err) => {
         toast.error(err.message || 'Failed to reject join request')
       }
     }
@@ -123,7 +123,7 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         toast.success('Join requests approved')
         setSelectedRequests(new Set())
       },
-      onError: (err: any) => {
+      onError: (err) => {
         toast.error(err.message || 'Failed to approve join requests')
       }
     }
@@ -145,8 +145,8 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         toast.success('Join requests rejected')
         setSelectedRequests(new Set())
       },
-      onError: (err: any) => {
-        toast.error(err.message || 'Failed to reject join requests')
+      onError: (err) => {
+        toast.error(err.value || 'Failed to reject join requests')
       }
     }
   )
@@ -190,7 +190,7 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
     if (selectedRequests.size === requests.length) {
       setSelectedRequests(new Set())
     } else {
-      setSelectedRequests(new Set(requests.map((r: any) => r.id)))
+      setSelectedRequests(new Set(requests.map((r) => r.id)))
     }
   }
 
@@ -298,7 +298,7 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
                 Select all ({requests.length})
               </span>
             </div>
-            {requests.map((request: any) => (
+            {requests.map((request) => (
               <div
                 className="flex items-center gap-4 rounded-lg border p-4"
                 key={request.id}

@@ -113,7 +113,7 @@ export function ChangeRoleDialog({
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Change Role</DialogTitle>

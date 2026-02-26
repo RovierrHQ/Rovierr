@@ -367,7 +367,7 @@ export function InviteMemberDialog({
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>
+      <DialogTrigger>
         {trigger ?? (
           <Button>
             <UserPlus className="mr-2 h-4 w-4" />
