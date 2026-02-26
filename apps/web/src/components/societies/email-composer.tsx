@@ -1,6 +1,13 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@rov/ui/components/dialog'
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import {
@@ -60,6 +67,8 @@ export function EmailComposer({
   isSending = false
 }: EmailComposerProps) {
   const [subject, setSubject] = useState('')
+  const [linkUrl, setLinkUrl] = useState('')
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [errors, setErrors] = useState<{
     subject?: string
     body?: string
@@ -168,7 +177,11 @@ export function EmailComposer({
       {/* Variable Picker */}
       <div className="space-y-2">
         <Label>Insert Variable</Label>
-        <Select onValueChange={insertVariable}>
+        <Select
+          onValueChange={(value) => {
+            if (typeof value === 'string') insertVariable(value)
+          }}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select a variable to insert" />
           </SelectTrigger>
@@ -228,12 +241,7 @@ export function EmailComposer({
           </Button>
           <Button
             className={editor.isActive('link') ? 'bg-muted' : ''}
-            onClick={() => {
-              const url = window.prompt('Enter URL')
-              if (url) {
-                editor.chain().focus().setLink({ href: url }).run()
-              }
-            }}
+            onClick={() => setLinkDialogOpen(true)}
             size="sm"
             type="button"
             variant="ghost"
@@ -242,6 +250,62 @@ export function EmailComposer({
           </Button>
         </div>
       )}
+
+      <Dialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setLinkDialogOpen(false)
+            setLinkUrl('')
+          }
+        }}
+        open={linkDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enter URL</DialogTitle>
+          </DialogHeader>
+          <Input
+            onChange={(e) => setLinkUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && linkUrl.trim()) {
+                editor?.chain().focus().setLink({ href: linkUrl.trim() }).run()
+                setLinkDialogOpen(false)
+                setLinkUrl('')
+              }
+            }}
+            placeholder="https://..."
+            value={linkUrl}
+          />
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setLinkDialogOpen(false)
+                setLinkUrl('')
+              }}
+              type="button"
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (linkUrl.trim()) {
+                  editor
+                    ?.chain()
+                    .focus()
+                    .setLink({ href: linkUrl.trim() })
+                    .run()
+                  setLinkDialogOpen(false)
+                  setLinkUrl('')
+                }
+              }}
+              type="button"
+            >
+              Insert link
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Editor */}
       <div className="space-y-2">

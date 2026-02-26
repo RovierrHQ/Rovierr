@@ -215,8 +215,8 @@ function Step1VisualBranding({
   )
   const [isSaving, setIsSaving] = useState(false)
 
-  const updateFieldsMutation = useMutation(
-    api.society['']({ organizationId: societyId }).fields.patch
+  const updateFieldsMutation = useMutation((data: Record<string, unknown>) =>
+    api.society['']({ organizationId: societyId }).fields.patch(data)
   )
 
   const handleSaveLogo = async (croppedImage: string) => {

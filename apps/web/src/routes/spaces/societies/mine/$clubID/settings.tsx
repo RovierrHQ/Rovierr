@@ -15,6 +15,7 @@ import {
   useRouter,
   useSearch
 } from '@tanstack/react-router'
+import { Image } from '@unpic/react'
 import { ImageUploadDialog } from '@web/components/shared/image-upload-dialog'
 import api from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
@@ -25,7 +26,10 @@ import { z } from 'zod'
 
 export const Route = createFileRoute('/spaces/societies/mine/$clubID/settings')(
   {
-    component: SocietySettingsPage
+    component: SocietySettingsPage,
+    validateSearch: (s: Record<string, unknown>) => ({
+      tab: (s?.tab as string | undefined) || undefined
+    })
   }
 )
 
@@ -61,7 +65,11 @@ function SocietySettingsPage() {
   const { data: society, isLoading } = useQuery({
     queryKey: ['society', societyId],
     queryFn: async () => {
-      const response = await api.society({ id: societyId }).get()
+      const response = await api
+        .society({
+          id: societyId
+        })
+        .get()
       return response.data ?? null
     },
     enabled: !!societyId
@@ -83,14 +91,14 @@ function SocietySettingsPage() {
           <p className="text-muted-foreground">
             You don&apos;t have permission to access settings for this society.
           </p>
-          <Button asChild className="mt-4" variant="outline">
-            <Link
-              params={{ clubID: societyId }}
-              to="/spaces/societies/mine/$clubID"
-            >
+          <Link
+            params={{ clubID: societyId }}
+            to="/spaces/societies/mine/$clubID"
+          >
+            <Button className="mt-4" variant="outline">
               Back to Dashboard
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </Card>
       </div>
     )
@@ -136,19 +144,53 @@ function SocietySettingsPage() {
         </TabsList>
 
         <TabsContent value="general">
-          <GeneralTab society={society} societyId={societyId} />
+          <GeneralTab
+            society={{
+              description: society.description ?? undefined,
+              tags: society.tags ?? undefined,
+              type: society.type ?? undefined,
+              visibility: society.visibility ?? undefined
+            }}
+            societyId={societyId}
+          />
         </TabsContent>
 
         <TabsContent value="branding">
-          <BrandingTab society={society} societyId={societyId} />
+          <BrandingTab
+            society={{
+              logo: society.logo ?? undefined,
+              banner: society.banner ?? undefined
+            }}
+            societyId={societyId}
+          />
         </TabsContent>
 
         <TabsContent value="social">
-          <SocialLinksTab society={society} societyId={societyId} />
+          <SocialLinksTab
+            society={{
+              instagram: society.instagram ?? undefined,
+              facebook: society.facebook ?? undefined,
+              twitter: society.twitter ?? undefined,
+              linkedin: society.linkedin ?? undefined,
+              whatsapp: society.whatsapp ?? undefined,
+              telegram: society.telegram ?? undefined,
+              website: society.website ?? undefined
+            }}
+            societyId={societyId}
+          />
         </TabsContent>
 
         <TabsContent value="details">
-          <DetailsTab society={society} societyId={societyId} />
+          <DetailsTab
+            society={{
+              foundingYear: society.foundingYear ?? undefined,
+              meetingSchedule: society.meetingSchedule ?? undefined,
+              membershipRequirements:
+                society.membershipRequirements ?? undefined,
+              goals: society.goals ?? undefined
+            }}
+            societyId={societyId}
+          />
         </TabsContent>
 
         <TabsContent value="registration">
@@ -179,21 +221,35 @@ function GeneralTab({
     validators: {
       onSubmit: z.object({
         description: z.string().min(1).max(1000),
-        tags: z.array(z.string()),
+        tags: z.string(),
         type: z.enum(['student', 'university']),
         visibility: z.enum(['public', 'campus_only', 'private'])
       })
     },
     defaultValues: {
       description: society.description || '',
-      tags: society.tags || [],
-      type: society.type || 'student',
-      visibility: society.visibility || 'public'
+      tags: society.tags?.length ? society.tags.join(', ') : '',
+      type: (society.type || 'student') as 'student' | 'university',
+      visibility: (society.visibility || 'public') as
+        | 'public'
+        | 'campus_only'
+        | 'private'
     },
     onSubmit: async ({ value }) => {
       try {
         setIsSaving(true)
-        await api.society({ id: societyId }).fields.patch(value)
+        const tags = value.tags
+          ? value.tags
+              .split(',')
+              .map((t) => t.trim())
+              .filter(Boolean)
+          : []
+        await api.society['']({ organizationId: societyId }).fields.patch({
+          description: value.description,
+          tags,
+          type: value.type,
+          visibility: value.visibility
+        })
         queryClient.invalidateQueries({ queryKey: ['society', societyId] })
         toast.success('Settings saved successfully!')
       } catch (_error) {
@@ -226,7 +282,10 @@ function GeneralTab({
 
         <form.AppField
           children={(field) => (
-            <field.TagInput label="Tags" placeholder="Add tags" />
+            <field.Text
+              label="Tags"
+              placeholder="Comma-separated tags (e.g. tech, social)"
+            />
           )}
           name="tags"
         />
@@ -292,7 +351,7 @@ function BrandingTab({
 
   const handleLogoSave = async (croppedImage: string) => {
     try {
-      await api.society({ id: societyId }).fields.patch({
+      await api.society['']({ organizationId: societyId }).fields.patch({
         logo: croppedImage
       })
       queryClient.invalidateQueries({ queryKey: ['society', societyId] })
@@ -305,7 +364,7 @@ function BrandingTab({
 
   const handleLogoRemove = async () => {
     try {
-      await api.society({ id: societyId }).fields.patch({
+      await api.society['']({ organizationId: societyId }).fields.patch({
         logo: ''
       })
       queryClient.invalidateQueries({ queryKey: ['society', societyId] })
@@ -318,7 +377,7 @@ function BrandingTab({
 
   const handleBannerSave = async (croppedImage: string) => {
     try {
-      await api.society({ id: societyId }).fields.patch({
+      await api.society['']({ organizationId: societyId }).fields.patch({
         banner: croppedImage
       })
       queryClient.invalidateQueries({ queryKey: ['society', societyId] })
@@ -331,7 +390,7 @@ function BrandingTab({
 
   const handleBannerRemove = async () => {
     try {
-      await api.society({ id: societyId }).fields.patch({
+      await api.society['']({ organizationId: societyId }).fields.patch({
         banner: ''
       })
       queryClient.invalidateQueries({ queryKey: ['society', societyId] })
@@ -362,10 +421,11 @@ function BrandingTab({
             </p>
             <div className="flex items-center gap-4">
               {society.logo && (
-                <img
+                <Image
                   alt="Society logo"
                   className="h-24 w-24 rounded-lg object-cover"
                   height={96}
+                  layout="fixed"
                   src={society.logo}
                   width={96}
                 />
@@ -385,10 +445,11 @@ function BrandingTab({
             </p>
             <div className="space-y-4">
               {society.banner && (
-                <img
+                <Image
                   alt="Society banner"
                   className="h-32 w-full rounded-lg object-cover"
                   height={128}
+                  layout="fullWidth"
                   src={society.banner}
                 />
               )}
@@ -455,28 +516,36 @@ function SocialLinksTab({
   const form = useAppForm({
     validators: {
       onSubmit: z.object({
-        instagram: z.string().optional(),
-        facebook: z.string().optional(),
-        twitter: z.string().optional(),
-        linkedin: z.string().optional(),
-        whatsapp: z.string().optional(),
-        telegram: z.string().optional(),
-        website: z.string().optional()
+        instagram: z.string(),
+        facebook: z.string(),
+        twitter: z.string(),
+        linkedin: z.string(),
+        whatsapp: z.string(),
+        telegram: z.string(),
+        website: z.string()
       })
     },
     defaultValues: {
-      instagram: society.instagram || undefined,
-      facebook: society.facebook || undefined,
-      twitter: society.twitter || undefined,
-      linkedin: society.linkedin || undefined,
-      whatsapp: society.whatsapp || undefined,
-      telegram: society.telegram || undefined,
-      website: society.website || undefined
+      instagram: society.instagram ?? '',
+      facebook: society.facebook ?? '',
+      twitter: society.twitter ?? '',
+      linkedin: society.linkedin ?? '',
+      whatsapp: society.whatsapp ?? '',
+      telegram: society.telegram ?? '',
+      website: society.website ?? ''
     },
     onSubmit: async ({ value }) => {
       try {
         setIsSaving(true)
-        await api.society({ id: societyId }).fields.patch(value)
+        await api.society['']({ organizationId: societyId }).fields.patch({
+          instagram: value.instagram || undefined,
+          facebook: value.facebook || undefined,
+          twitter: value.twitter || undefined,
+          linkedin: value.linkedin || undefined,
+          whatsapp: value.whatsapp || undefined,
+          telegram: value.telegram || undefined,
+          website: value.website || undefined
+        })
         queryClient.invalidateQueries({ queryKey: ['society', societyId] })
         toast.success('Social links saved successfully!')
       } catch (_error) {
@@ -596,22 +665,22 @@ function DetailsTab({
   const form = useAppForm({
     validators: {
       onSubmit: z.object({
-        foundingYear: z.number().optional(),
-        meetingSchedule: z.string().optional(),
-        membershipRequirements: z.string().optional(),
-        goals: z.string().optional()
+        foundingYear: z.union([z.number(), z.undefined()]),
+        meetingSchedule: z.string(),
+        membershipRequirements: z.string(),
+        goals: z.string()
       })
     },
     defaultValues: {
-      foundingYear: society.foundingYear || undefined,
-      meetingSchedule: society.meetingSchedule || undefined,
-      membershipRequirements: society.membershipRequirements || undefined,
-      goals: society.goals || undefined
+      foundingYear: society.foundingYear ?? undefined,
+      meetingSchedule: society.meetingSchedule ?? '',
+      membershipRequirements: society.membershipRequirements ?? '',
+      goals: society.goals ?? ''
     },
     onSubmit: async ({ value }) => {
       try {
         setIsSaving(true)
-        await api.society({ id: societyId }).fields.patch(value)
+        await api.society['']({ organizationId: societyId }).fields.patch(value)
         queryClient.invalidateQueries({ queryKey: ['society', societyId] })
         toast.success('Details saved successfully!')
       } catch (_error) {
@@ -694,7 +763,7 @@ function DetailsTab({
 
 // Registration Tab
 function RegistrationTab({
-  society,
+  society: _society,
   societyId
 }: {
   society: { slug?: string } | null

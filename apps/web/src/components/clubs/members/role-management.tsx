@@ -1,5 +1,15 @@
 'use client'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@rov/ui/components/alert-dialog'
 import { Button } from '@rov/ui/components/button'
 import {
   Card,
@@ -41,6 +51,10 @@ export function RoleManagement({ organizationId }: RoleManagementProps) {
   const queryClient = useQueryClient()
   const [editingRole, setEditingRole] = useState<string | null>(null)
   const [creatingRole, setCreatingRole] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   const {
     data: rolesData,
@@ -133,14 +147,7 @@ export function RoleManagement({ organizationId }: RoleManagementProps) {
   })
 
   const handleDeleteRole = (roleId: string, roleName: string) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete the role "${roleName}"? This action cannot be undone.`
-      )
-    ) {
-      return
-    }
-    deleteRoleMutation.mutate(roleId)
+    setDeleteConfirm({ id: roleId, name: roleName })
   }
 
   if (isLoading) {
@@ -176,94 +183,125 @@ export function RoleManagement({ organizationId }: RoleManagementProps) {
   // All roles (no separation between built-in and custom)
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Roles & Permissions</CardTitle>
-            <CardDescription>
-              Manage roles and their permissions for this organization
-            </CardDescription>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Roles & Permissions</CardTitle>
+              <CardDescription>
+                Manage roles and their permissions for this organization
+              </CardDescription>
+            </div>
+            {canManageRoles && (
+              <Dialog onOpenChange={setCreatingRole} open={creatingRole}>
+                <DialogTrigger render={(props) => <Button {...props} />}>
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Role
+                  </Button>
+                </DialogTrigger>
+                <CreateRoleDialog
+                  onClose={() => setCreatingRole(false)}
+                  onCreate={(roleName, permissions) => {
+                    createRoleMutation.mutate({ roleName, permissions })
+                  }}
+                  organizationId={organizationId}
+                />
+              </Dialog>
+            )}
           </div>
-          {canManageRoles && (
-            <Dialog onOpenChange={setCreatingRole} open={creatingRole}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Role
-                </Button>
-              </DialogTrigger>
-              <CreateRoleDialog
-                onClose={() => setCreatingRole(false)}
-                onCreate={(roleName, permissions) => {
-                  createRoleMutation.mutate({ roleName, permissions })
-                }}
-                organizationId={organizationId}
-              />
-            </Dialog>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {roles.length === 0 ? (
-            <div className="py-12 text-center">
-              <Shield className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-              <p className="mb-2 font-medium text-muted-foreground">
-                No roles found
-              </p>
-              <p className="mb-4 text-muted-foreground text-sm">
-                Create roles with specific permissions for this organization
-              </p>
-              {canManageRoles && (
-                <Button onClick={() => setCreatingRole(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Role
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {roles.map((role) => {
-                // Only allow deletion of custom roles (not built-in ones)
-                const builtInRoles = ['owner', 'admin', 'member']
-                const isBuiltIn = builtInRoles.includes(role.role)
-                return (
-                  <RoleCard
-                    canManage={canManageRoles}
-                    key={role.id}
-                    onDelete={
-                      isBuiltIn
-                        ? undefined
-                        : () => handleDeleteRole(role.id, role.role)
-                    }
-                    onEdit={() => setEditingRole(role.id)}
-                    organizationId={organizationId}
-                    role={role}
-                  />
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </CardContent>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {roles.length === 0 ? (
+              <div className="py-12 text-center">
+                <Shield className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                <p className="mb-2 font-medium text-muted-foreground">
+                  No roles found
+                </p>
+                <p className="mb-4 text-muted-foreground text-sm">
+                  Create roles with specific permissions for this organization
+                </p>
+                {canManageRoles && (
+                  <Button onClick={() => setCreatingRole(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Role
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {roles.map((role) => {
+                  // Only allow deletion of custom roles (not built-in ones)
+                  const builtInRoles = ['owner', 'admin', 'member']
+                  const isBuiltIn = builtInRoles.includes(role.role)
+                  return (
+                    <RoleCard
+                      canManage={canManageRoles}
+                      key={role.id}
+                      onDelete={
+                        isBuiltIn
+                          ? undefined
+                          : () => handleDeleteRole(role.id, role.role)
+                      }
+                      onEdit={() => setEditingRole(role.id)}
+                      organizationId={organizationId}
+                      role={role}
+                    />
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </CardContent>
 
-      {/* Edit Role Dialog */}
-      {editingRole && (
-        <Dialog
-          onOpenChange={(open) => {
-            if (!open) setEditingRole(null)
-          }}
-          open={!!editingRole}
-        >
-          <EditRoleDialog
-            onClose={() => setEditingRole(null)}
-            organizationId={organizationId}
-            roleId={editingRole}
-          />
-        </Dialog>
-      )}
-    </Card>
+        {/* Edit Role Dialog */}
+        {editingRole && (
+          <Dialog
+            onOpenChange={(open) => {
+              if (!open) setEditingRole(null)
+            }}
+            open={!!editingRole}
+          >
+            <EditRoleDialog
+              onClose={() => setEditingRole(null)}
+              organizationId={organizationId}
+              roleId={editingRole}
+            />
+          </Dialog>
+        )}
+      </Card>
+      <AlertDialog
+        onOpenChange={(open) => !open && setDeleteConfirm(null)}
+        open={!!deleteConfirm}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete role</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the role &quot;
+              {deleteConfirm?.name}
+              &quot;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteConfirm) {
+                  deleteRoleMutation.mutate(deleteConfirm.id)
+                  setDeleteConfirm(null)
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 

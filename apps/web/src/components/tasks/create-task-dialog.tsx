@@ -48,9 +48,9 @@ export function CreateTaskDialog({
   )
 
   // Fetch organization members (filtered to exclude 'member' role)
-  const { data: membersData, isLoading: isLoadingMembers } = useQuery(
-    ['organization-members', organizationId],
-    async () => {
+  const { data: membersData, isLoading: isLoadingMembers } = useQuery({
+    queryKey: ['organization-members', organizationId],
+    queryFn: async () => {
       const result = await authClient.organization.listMembers({
         query: {
           limit: 1000,
@@ -71,10 +71,8 @@ export function CreateTaskDialog({
           : {}) as Headers
       } as any
     },
-    {
-      enabled: !!organizationId && open
-    }
-  )
+    enabled: !!organizationId && open
+  })
 
   // Extract and filter members (exclude 'member' role)
   const availableAssignees = useMemo(() => {
@@ -140,7 +138,7 @@ export function CreateTaskDialog({
     const title = formData.get('title') as string
     const description = (formData.get('description') as string) || undefined
     const dueAt = formData.get('dueAt') as string
-    const startAt = formData.get('startAt') as string
+    const _startAt = formData.get('startAt') as string
 
     if (!title) {
       toast.error('Please fill in the task title')

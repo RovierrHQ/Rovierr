@@ -10,6 +10,7 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { Slider } from '@rov/ui/components/slider'
+import { Image as UnpicImage } from '@unpic/react'
 import { Loader2, Upload, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import type { Area, Point } from 'react-easy-crop'
@@ -225,7 +226,9 @@ export function ImageUploadDialog({
                   id="zoom-slider"
                   max={3}
                   min={1}
-                  onValueChange={(value) => setZoom(value[0] ?? 1)}
+                  onValueChange={(value) =>
+                    setZoom((value as number[])[0] ?? 1)
+                  }
                   step={0.1}
                   value={[zoom]}
                 />
@@ -251,7 +254,7 @@ export function ImageUploadDialog({
             <div className="space-y-4">
               {currentImageUrl && (
                 <div className="relative overflow-hidden rounded-lg border">
-                  <img
+                  <UnpicImage
                     alt={
                       type === 'profile' ? 'Current profile' : 'Current banner'
                     }
