@@ -105,11 +105,11 @@ function ConnectionRequestsPage() {
       user?: {
         id: string
         name?: string
-        username?: string
-        image?: string
-        bio?: string
+        username?: string | null
+        image?: string | null
+        bio?: string | null
         isVerified?: boolean
-      }
+      } | null
     },
     type: 'received' | 'sent'
   ) => {
