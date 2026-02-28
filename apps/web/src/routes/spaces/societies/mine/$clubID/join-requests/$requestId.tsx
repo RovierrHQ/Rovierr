@@ -26,6 +26,137 @@ export const Route = createFileRoute(
   component: JoinRequestDetailPage
 })
 
+// ── 1. Status Badge ──────────────────────────────────────────────────────────
+function StatusBadge({ status }: { status: string }) {
+  const className =
+    status === 'approved'
+      ? 'bg-green-100 text-green-700'
+      : status === 'rejected'
+        ? 'bg-red-100 text-red-700'
+        : 'bg-yellow-100 text-yellow-700'
+
+  return (
+    <div
+      className={`flex items-center gap-2 rounded-full px-4 py-2 ${className}`}
+    >
+      {status === 'approved' && <CheckCircle className="h-5 w-5" />}
+      {status === 'rejected' && <XCircle className="h-5 w-5" />}
+      {status !== 'approved' && status !== 'rejected' && (
+        <Loader2 className="h-5 w-5" />
+      )}
+      <span className="font-semibold capitalize">
+        {status.replace('_', ' ')}
+      </span>
+    </div>
+  )
+}
+
+// ── 2. Reject Dialog ─────────────────────────────────────────────────────────
+function RejectDialog({
+  isPending,
+  onConfirm,
+  onCancel
+}: {
+  isPending: boolean
+  onConfirm: (reason: string) => void
+  onCancel: () => void
+}) {
+  const [reason, setReason] = useState('')
+
+  return (
+    <div className="space-y-2 rounded-lg border-2 border-red-200 bg-red-50 p-4">
+      <p className="font-medium">Rejection Reason</p>
+      <Textarea
+        onChange={(e) => setReason(e.target.value)}
+        placeholder="Provide a reason for rejection..."
+        rows={3}
+        value={reason}
+      />
+      <div className="flex gap-2">
+        <Button
+          disabled={isPending}
+          onClick={() => {
+            if (!reason.trim()) {
+              toast.error('Please provide a reason for rejection')
+              return
+            }
+            onConfirm(reason)
+          }}
+          variant="destructive"
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Rejecting...
+            </>
+          ) : (
+            'Confirm Rejection'
+          )}
+        </Button>
+        <Button onClick={onCancel} variant="outline">
+          Cancel
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// ── 3. Payment Verification ──────────────────────────────────────────────────
+function PaymentVerification({
+  isVerifying,
+  isMarking,
+  onVerify,
+  onMarkNotVerified
+}: {
+  isVerifying: boolean
+  isMarking: boolean
+  onVerify: (notes?: string) => void
+  onMarkNotVerified: (reason: string) => void
+}) {
+  const [notes, setNotes] = useState('')
+
+  return (
+    <div className="space-y-4 rounded-lg border-2 border-yellow-200 bg-yellow-50 p-4">
+      <p className="font-medium">Payment Verification Required</p>
+      <Textarea
+        onChange={(e) => setNotes(e.target.value)}
+        placeholder="Add notes about payment verification..."
+        rows={3}
+        value={notes}
+      />
+      <div className="flex gap-2">
+        <Button
+          disabled={isVerifying}
+          onClick={() => onVerify(notes || undefined)}
+        >
+          {isVerifying ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Verifying...
+            </>
+          ) : (
+            'Verify Payment'
+          )}
+        </Button>
+        <Button
+          disabled={isMarking}
+          onClick={() => {
+            if (!notes.trim()) {
+              toast.error('Please provide a reason')
+              return
+            }
+            onMarkNotVerified(notes)
+          }}
+          variant="outline"
+        >
+          Mark as Not Verified
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// ── Main Page ────────────────────────────────────────────────────────────────
 function JoinRequestDetailPage() {
   const params = useParams({
     from: '/spaces/societies/mine/$clubID/join-requests/$requestId'
@@ -34,9 +165,7 @@ function JoinRequestDetailPage() {
   const queryClient = useQueryClient()
   const societyId = params.clubID
   const requestId = params.requestId
-  const [rejectionReason, setRejectionReason] = useState('')
   const [showRejectDialog, setShowRejectDialog] = useState(false)
-  const [verificationNotes, setVerificationNotes] = useState('')
 
   // Check if user has permission
   const { data: canManage } = useTanstackQuery({
@@ -44,9 +173,7 @@ function JoinRequestDetailPage() {
     queryFn: async () => {
       try {
         const result = await authClient.organization.hasPermission({
-          permissions: {
-            organization: ['update']
-          },
+          permissions: { organization: ['update'] },
           organizationId: societyId
         })
         return result.data
@@ -77,9 +204,7 @@ function JoinRequestDetailPage() {
       }).approve.post(),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['join-request', requestId]
-        })
+        queryClient.invalidateQueries({ queryKey: ['join-request', requestId] })
         toast.success('Join request approved successfully!')
         router.navigate({
           to: '/spaces/societies/mine/$clubID/join-requests',
@@ -100,9 +225,7 @@ function JoinRequestDetailPage() {
       }).reject.post({ reason: variables.reason }),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['join-request', requestId]
-        })
+        queryClient.invalidateQueries({ queryKey: ['join-request', requestId] })
         toast.success('Join request rejected')
         router.navigate({
           to: '/spaces/societies/mine/$clubID/join-requests',
@@ -123,9 +246,7 @@ function JoinRequestDetailPage() {
         .verify.post({ notes: variables.notes }),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['join-request', requestId]
-        })
+        queryClient.invalidateQueries({ queryKey: ['join-request', requestId] })
         toast.success('Payment verified successfully!')
       },
       onError: () => {
@@ -142,9 +263,7 @@ function JoinRequestDetailPage() {
         .unverify.post({ reason: variables.reason }),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['join-request', requestId]
-        })
+        queryClient.invalidateQueries({ queryKey: ['join-request', requestId] })
         toast.success('Payment marked as not verified')
       },
       onError: () => {
@@ -153,36 +272,7 @@ function JoinRequestDetailPage() {
     }
   )
 
-  const handleApprove = () => {
-    approveMutation.mutate({ id: requestId })
-  }
-
-  const handleReject = () => {
-    if (!rejectionReason.trim()) {
-      toast.error('Please provide a reason for rejection')
-      return
-    }
-    rejectMutation.mutate({ id: requestId, reason: rejectionReason })
-  }
-
-  const handleVerifyPayment = () => {
-    verifyPaymentMutation.mutate({
-      id: requestId,
-      notes: verificationNotes || undefined
-    })
-  }
-
-  const handleMarkNotVerified = () => {
-    if (!verificationNotes.trim()) {
-      toast.error('Please provide a reason')
-      return
-    }
-    markNotVerifiedMutation.mutate({
-      id: requestId,
-      reason: verificationNotes
-    })
-  }
-
+  // ── Loading / Access / Not Found guards ─────────────────────────────────
   if (isLoading || canManage === undefined) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -217,25 +307,17 @@ function JoinRequestDetailPage() {
     )
   }
 
+  // ── Data ─────────────────────────────────────────────────────────────────
   const req = request
-
   const canApprove =
     req.status === 'pending' || req.status === 'payment_completed'
   const canReject = req.status === 'pending'
   const needsPaymentVerification = req.paymentStatus === 'pending'
 
-  const getStatusClassName = () => {
-    if (req.status === 'approved') {
-      return 'bg-green-100 text-green-700'
-    }
-    if (req.status === 'rejected') {
-      return 'bg-red-100 text-red-700'
-    }
-    return 'bg-yellow-100 text-yellow-700'
-  }
-
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+      {/* Back button */}
       <div className="mb-6">
         <Button
           onClick={() =>
@@ -269,18 +351,7 @@ function JoinRequestDetailPage() {
                 Current application status
               </p>
             </div>
-            <div
-              className={`flex items-center gap-2 rounded-full px-4 py-2 ${getStatusClassName()}`}
-            >
-              {req.status === 'approved' && <CheckCircle className="h-5 w-5" />}
-              {req.status === 'rejected' && <XCircle className="h-5 w-5" />}
-              {req.status !== 'approved' && req.status !== 'rejected' && (
-                <Loader2 className="h-5 w-5" />
-              )}
-              <span className="font-semibold capitalize">
-                {req.status.replace('_', ' ')}
-              </span>
-            </div>
+            <StatusBadge status={req.status} />
           </div>
         </Card>
 
@@ -345,39 +416,17 @@ function JoinRequestDetailPage() {
                   {req.paymentStatus.replace('_', ' ')}
                 </p>
               </div>
-
               {needsPaymentVerification && (
-                <div className="space-y-4 rounded-lg border-2 border-yellow-200 bg-yellow-50 p-4">
-                  <p className="font-medium">Payment Verification Required</p>
-                  <Textarea
-                    onChange={(e) => setVerificationNotes(e.target.value)}
-                    placeholder="Add notes about payment verification..."
-                    rows={3}
-                    value={verificationNotes}
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      disabled={verifyPaymentMutation.isPending}
-                      onClick={handleVerifyPayment}
-                    >
-                      {verifyPaymentMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Verifying...
-                        </>
-                      ) : (
-                        'Verify Payment'
-                      )}
-                    </Button>
-                    <Button
-                      disabled={markNotVerifiedMutation.isPending}
-                      onClick={handleMarkNotVerified}
-                      variant="outline"
-                    >
-                      Mark as Not Verified
-                    </Button>
-                  </div>
-                </div>
+                <PaymentVerification
+                  isMarking={markNotVerifiedMutation.isPending}
+                  isVerifying={verifyPaymentMutation.isPending}
+                  onMarkNotVerified={(reason) =>
+                    markNotVerifiedMutation.mutate({ id: requestId, reason })
+                  }
+                  onVerify={(notes) =>
+                    verifyPaymentMutation.mutate({ id: requestId, notes })
+                  }
+                />
               )}
             </div>
           </Card>
@@ -389,62 +438,36 @@ function JoinRequestDetailPage() {
             <h2 className="mb-4 font-semibold text-lg">Actions</h2>
             <div className="space-y-4">
               {canApprove && (
-                <div>
-                  <Button
-                    className="w-full"
-                    disabled={approveMutation.isPending}
-                    onClick={handleApprove}
-                    size="lg"
-                  >
-                    {approveMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Approving...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="mr-2 h-4 w-4" />
-                        Approve Application
-                      </>
-                    )}
-                  </Button>
-                </div>
+                <Button
+                  className="w-full"
+                  disabled={approveMutation.isPending}
+                  onClick={() => approveMutation.mutate({ id: requestId })}
+                  size="lg"
+                >
+                  {approveMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Approving...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Approve Application
+                    </>
+                  )}
+                </Button>
               )}
 
               {canReject && (
                 <div className="space-y-2">
                   {showRejectDialog ? (
-                    <div className="space-y-2 rounded-lg border-2 border-red-200 bg-red-50 p-4">
-                      <p className="font-medium">Rejection Reason</p>
-                      <Textarea
-                        onChange={(e) => setRejectionReason(e.target.value)}
-                        placeholder="Provide a reason for rejection..."
-                        rows={3}
-                        value={rejectionReason}
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          disabled={rejectMutation.isPending}
-                          onClick={handleReject}
-                          variant="destructive"
-                        >
-                          {rejectMutation.isPending ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Rejecting...
-                            </>
-                          ) : (
-                            'Confirm Rejection'
-                          )}
-                        </Button>
-                        <Button
-                          onClick={() => setShowRejectDialog(false)}
-                          variant="outline"
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
+                    <RejectDialog
+                      isPending={rejectMutation.isPending}
+                      onCancel={() => setShowRejectDialog(false)}
+                      onConfirm={(reason) =>
+                        rejectMutation.mutate({ id: requestId, reason })
+                      }
+                    />
                   ) : (
                     <Button
                       className="w-full"
