@@ -20,8 +20,11 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { Skeleton } from '@rov/ui/components/skeleton'
-import { useQueryClient } from '@tanstack/react-query'
-import api, { useMutation, useQuery } from '@web/lib/api-client'
+import {
+  useQueryClient,
+  useQuery as useTanstackQuery
+} from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { format } from 'date-fns'
 import { MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
@@ -41,13 +44,15 @@ export function TaskDetailDialog({
 }: TaskDetailDialogProps) {
   const queryClient = useQueryClient()
 
-  const { data: taskDetails, isLoading } = useQuery(
-    ['tasks', 'getTaskDetails', taskId],
-    () => api.tasks({ taskId: taskId || '' }).get(),
-    {
-      enabled: !!taskId
-    }
-  )
+  const { data: taskDetails, isLoading } = useTanstackQuery({
+    queryKey: ['tasks', 'getTaskDetails', taskId],
+    queryFn: async () => {
+      const { data, error } = await api.tasks({ taskId: taskId || '' }).get()
+      if (error) throw error
+      return data
+    },
+    enabled: !!taskId
+  })
 
   const updateTaskMutation = useMutation(api.tasks.update.put)
 

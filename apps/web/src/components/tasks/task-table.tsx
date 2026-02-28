@@ -17,7 +17,6 @@ import {
   TableHeader,
   TableRow
 } from '@rov/ui/components/table'
-
 import api, { useMutation, useQueryClient } from '@web/lib/api-client'
 import { format } from 'date-fns'
 import { Calendar, MessageSquare, UserPlus } from 'lucide-react'
@@ -36,15 +35,34 @@ type TaskTableProps = {
 export function TaskTable({
   tasks,
   isLoading,
-  organizationId,
+  //organizationId,
   onTaskClick,
   onStatusChange
 }: TaskTableProps) {
   const queryClient = useQueryClient()
 
   const updateTaskMutation = useMutation(
-    (data: { id: string; status: 'todo' | 'in_progress' | 'done' }) =>
-      api.tasks['update-task'].patch(data)
+    (data: {
+      taskId: string
+      title?: string
+      description?: string
+      priority?: 'low' | 'medium' | 'high'
+      status?: 'todo' | 'in_progress' | 'done'
+      visibility?: 'private' | 'assignees' | 'club'
+      dueAt?: string
+      startAt?: string
+      isAllDay?: boolean
+    }) => api.tasks.update.put(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['tasks'] })
+        toast.success('Task updated successfully')
+      },
+      onError: (error) => {
+        toast.error('Failed to update task')
+        console.error(error)
+      }
+    }
   )
 
   const handleStatusChange = async (
@@ -53,7 +71,7 @@ export function TaskTable({
   ) => {
     try {
       await updateTaskMutation.mutateAsync({
-        id: taskId,
+        taskId,
         status: newStatus
       })
       toast.success('Task status updated')
