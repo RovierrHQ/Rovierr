@@ -1,6 +1,6 @@
 'use client'
 
-import type { EmailDetails } from '@rov/orpc-contracts'
+import type { EmailDetails } from '@api/societies/society-email/schemas'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'

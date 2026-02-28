@@ -6,10 +6,7 @@ import {
   useQuery as useTanstackQuery
 } from '@tanstack/react-query'
 import { createFileRoute, useParams, useRouter } from '@tanstack/react-router'
-import api, {
-  useMutation as useTreatyMutation,
-  useQuery as useTreatyQuery
-} from '@web/lib/api-client'
+import api, { useMutation as useTreatyMutation } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import {
   ArrowLeft,
@@ -52,7 +49,7 @@ function JoinRequestDetailPage() {
           },
           organizationId: societyId
         })
-        return result?.data?.success ?? false
+        return result.data
       } catch {
         return false
       }
@@ -61,22 +58,22 @@ function JoinRequestDetailPage() {
   })
 
   // Fetch join request details
-  const { data: request, isLoading } = useTreatyQuery(
-    ['registration', 'joinRequest', 'get', requestId],
-    () =>
-      api.society.registration['join-request']({
-        query: { id: requestId }
-      }),
-    {
-      enabled: !!requestId && canManage === true
-    }
-  )
+  const { data: request, isLoading } = useTanstackQuery({
+    queryKey: ['registration', 'joinRequest', 'get', requestId],
+    queryFn: async () => {
+      const res = await api.society.registration['join-request']({
+        id: requestId
+      }).get()
+      return res.data
+    },
+    enabled: !!requestId
+  })
 
   // Approve mutation
   const approveMutation = useTreatyMutation(
     (variables: { id: string }) =>
       api.society.registration['join-request']({
-        query: { id: variables.id }
+        id: variables.id
       }).approve.post(),
     {
       onSuccess: () => {
@@ -99,10 +96,8 @@ function JoinRequestDetailPage() {
   const rejectMutation = useTreatyMutation(
     (variables: { id: string; reason: string }) =>
       api.society.registration['join-request']({
-        query: { id: variables.id }
-      }).reject.post({
-        body: { reason: variables.reason }
-      }),
+        id: variables.id
+      }).reject.post({ reason: variables.reason }),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
@@ -123,13 +118,9 @@ function JoinRequestDetailPage() {
   // Verify payment mutation
   const verifyPaymentMutation = useTreatyMutation(
     (variables: { id: string; notes?: string }) =>
-      api.society.registration
-        .payment({
-          query: { id: variables.id }
-        })
-        .verify.post({
-          body: { notes: variables.notes }
-        }),
+      api.society.registration['join-request']
+        .payment({ id: variables.id })
+        .verify.post({ notes: variables.notes }),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
@@ -146,13 +137,9 @@ function JoinRequestDetailPage() {
   // Mark payment as not verified mutation
   const markNotVerifiedMutation = useTreatyMutation(
     (variables: { id: string; reason: string }) =>
-      api.society.registration
-        .payment({
-          query: { id: variables.id }
-        })
-        .unverify.post({
-          body: { reason: variables.reason }
-        }),
+      api.society.registration['join-request']
+        .payment({ id: variables.id })
+        .unverify.post({ reason: variables.reason }),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
@@ -217,7 +204,7 @@ function JoinRequestDetailPage() {
     )
   }
 
-  if (!request?.data) {
+  if (!request) {
     return (
       <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
         <Card className="p-6">
@@ -230,7 +217,7 @@ function JoinRequestDetailPage() {
     )
   }
 
-  const req = request.data
+  const req = request
 
   const canApprove =
     req.status === 'pending' || req.status === 'payment_completed'

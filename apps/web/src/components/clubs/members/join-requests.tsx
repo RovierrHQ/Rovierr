@@ -45,23 +45,26 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
     data: joinRequestsData,
     isLoading,
     error
-  } = useQuery(['join-requests', organizationId], async () => {
-    const response = await api.societyRegistration.joinRequest.list.get({
-      query: {
-        societyId: organizationId,
-        status: ['pending'],
-        limit: 100,
-        offset: 0
-      }
-    })
-    return response
+  } = useQuery({
+    queryKey: ['join-requests', organizationId],
+    queryFn: async () => {
+      const response = await api.society.registration['join-request'].list.get({
+        query: {
+          societyId: organizationId,
+          status: ['pending'],
+          limit: 100,
+          offset: 0
+        }
+      })
+      return response
+    }
   })
 
   const approveMutation = useMutation(
     async (requestId: string) => {
-      const response = await api.societyRegistration.joinRequest.approve.post({
-        body: { id: requestId }
-      })
+      const response = await api.society.registration['join-request']({
+        id: requestId
+      }).approve.post()
       return response
     },
     {
@@ -75,17 +78,21 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         toast.success('Join request approved')
         setSelectedRequests(new Set())
       },
-      onError: (err) => {
-        toast.error(err.message || 'Failed to approve join request')
+      onError: (err: unknown) => {
+        const message =
+          (err as { value?: { message?: string } })?.value?.message ||
+          (err instanceof Error && err.message) ||
+          'Failed to approve join request'
+        toast.error(message)
       }
     }
   )
 
   const rejectMutation = useMutation(
     async (requestId: string) => {
-      const response = await api.societyRegistration.joinRequest.reject.post({
-        body: { id: requestId }
-      })
+      const response = await api.society.registration['join-request']({
+        id: requestId
+      }).reject.post()
       return response
     },
     {
@@ -98,18 +105,21 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         setRequestToReject(null)
         setSelectedRequests(new Set())
       },
-      onError: (err) => {
-        toast.error(err.message || 'Failed to reject join request')
+      onError: (err: unknown) => {
+        const message =
+          (err as { value?: { message?: string } })?.value?.message ||
+          (err instanceof Error && err.message) ||
+          'Failed to approve join request'
+        toast.error(message)
       }
     }
   )
 
   const bulkApproveMutation = useMutation(
     async (ids: string[]) => {
-      const response =
-        await api.societyRegistration.joinRequest.bulkApprove.post({
-          body: { ids }
-        })
+      const response = await api.society.registration['join-request'][
+        'bulk-approve'
+      ].post({ ids })
       return response
     },
     {
@@ -123,18 +133,21 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         toast.success('Join requests approved')
         setSelectedRequests(new Set())
       },
-      onError: (err) => {
-        toast.error(err.message || 'Failed to approve join requests')
+      onError: (err: unknown) => {
+        const message =
+          (err as { value?: { message?: string } })?.value?.message ||
+          (err instanceof Error && err.message) ||
+          'Failed to approve join request'
+        toast.error(message)
       }
     }
   )
 
   const bulkRejectMutation = useMutation(
     async (ids: string[]) => {
-      const response =
-        await api.societyRegistration.joinRequest.bulkReject.post({
-          body: { ids }
-        })
+      const response = await api.society.registration['join-request'][
+        'bulk-reject'
+      ].post({ ids })
       return response
     },
     {
@@ -145,8 +158,12 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         toast.success('Join requests rejected')
         setSelectedRequests(new Set())
       },
-      onError: (err) => {
-        toast.error(err.value || 'Failed to reject join requests')
+      onError: (err: unknown) => {
+        const message =
+          (err as { value?: { message?: string } })?.value?.message ||
+          (err instanceof Error && err.message) ||
+          'Failed to approve join request'
+        toast.error(message)
       }
     }
   )
