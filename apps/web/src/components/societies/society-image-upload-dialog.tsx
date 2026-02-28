@@ -25,9 +25,7 @@ export function SocietyImageUploadDialog({
 
   const updateMutation = useMutation({
     mutationFn: async (croppedImage: string) => {
-      const response = await api.society['']({
-        id: organizationId
-      }).fields.patch({
+      const response = await api.society['']({ organizationId }).fields.patch({
         [type]: croppedImage
       })
       return response
@@ -54,9 +52,7 @@ export function SocietyImageUploadDialog({
 
   const removeMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.society['']({
-        id: organizationId
-      }).fields.patch({
+      const response = await api.society['']({ organizationId }).fields.patch({
         [type]: ''
       })
       return response
