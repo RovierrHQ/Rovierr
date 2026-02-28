@@ -70,7 +70,7 @@ export function AssigneeSelector({
     <div className="space-y-2">
       <Label>Assignees</Label>
       <Popover onOpenChange={setPopoverOpen} open={popoverOpen}>
-        <PopoverTrigger asChild>
+        <PopoverTrigger>
           <Button
             className="w-full justify-start"
             type="button"
