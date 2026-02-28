@@ -141,7 +141,7 @@ export function CreateTaskDialog({
     const title = formData.get('title') as string
     const description = (formData.get('description') as string) || undefined
     const dueAt = formData.get('dueAt') as string
-    const _startAt = formData.get('startAt') as string
+    // const _startAt = formData.get('startAt') as string
 
     if (!title) {
       toast.error('Please fill in the task title')
