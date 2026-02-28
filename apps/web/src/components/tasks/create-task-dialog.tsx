@@ -20,7 +20,8 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { Textarea } from '@rov/ui/components/textarea'
-import api, { useMutation, useQuery, useQueryClient } from '@web/lib/api-client'
+import { useQuery as useTanstackQuery } from '@tanstack/react-query'
+import api, { useMutation, useQueryClient } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -48,7 +49,7 @@ export function CreateTaskDialog({
   )
 
   // Fetch organization members (filtered to exclude 'member' role)
-  const { data: membersData, isLoading: isLoadingMembers } = useQuery({
+  const { data: membersData, isLoading: isLoadingMembers } = useTanstackQuery({
     queryKey: ['organization-members', organizationId],
     queryFn: async () => {
       const result = await authClient.organization.listMembers({
@@ -69,14 +70,14 @@ export function CreateTaskDialog({
         headers: (typeof Headers !== 'undefined'
           ? new Headers()
           : {}) as Headers
-      } as any
+      }
     },
     enabled: !!organizationId && open
   })
 
   // Extract and filter members (exclude 'member' role)
   const availableAssignees = useMemo(() => {
-    const data = membersData as {
+    const data = membersData?.data as {
       members: {
         role?: string | string[]
         user: { id: string; name: string; email: string; image?: string | null }
@@ -94,17 +95,19 @@ export function CreateTaskDialog({
 
   const createMutation = useMutation(
     (data: {
-      clubId: string
       title: string
       description?: string
-      assigneeId?: string
+      contextType: 'club'
+      contextId: string
       priority: 'low' | 'medium' | 'high'
-      dueDate?: Date
-    }) =>
-      api.tasks['create-task'].post({
-        ...data,
-        dueDate: data.dueDate ? data.dueDate.toISOString() : undefined
-      }),
+      status: 'todo'
+      visibility: 'assignees'
+      dueAt?: string
+      startAt?: string
+      isAllDay: boolean
+      assigneeIds: string[]
+    }) => api.tasks.create.post(data),
+
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
@@ -147,18 +150,18 @@ export function CreateTaskDialog({
 
     try {
       await createMutation.mutateAsync({
-        clubId: organizationId, // Start with required fields that match the mutation definition above
+        contextType: 'club',
+        contextId: organizationId, // Start with required fields that match the mutation definition above
         title,
         description,
+        status: 'todo',
+        visibility: 'assignees',
         priority,
-        dueDate: dueAt ? new Date(dueAt) : undefined,
+        dueAt: dueAt ? new Date(dueAt).toISOString() : undefined,
         // startAt, // Not in mutation definition
-        // isAllDay, // Not in mutation definition
+        isAllDay, // Not in mutation definition
         // assigneeIds: ... // Mutation expects assigneeId (string), not array
-        assigneeId:
-          selectedAssignees.size > 0
-            ? Array.from(selectedAssignees)[0]
-            : undefined
+        assigneeIds: Array.from(selectedAssignees)
       })
       // Reset form if it still exists (before dialog closes)
       if (form) {
