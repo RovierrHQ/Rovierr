@@ -28,7 +28,7 @@ function DiscussionPage() {
   const clubID = params.clubID
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFilter, setSelectedFilter] = useState<
-    'all' | 'pinned' | 'resolved' | 'unresolved'
+    'all' | 'pinned' | 'resolved' | 'unanswered'
   >('all')
   const [selectedThread, setSelectedThread] = useState<string | null>(null)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
@@ -66,7 +66,7 @@ function DiscussionPage() {
   const { data: selectedThreadData } = useQuery({
     queryKey: ['discussion', 'thread', 'get', selectedThread],
     queryFn: () =>
-      api.discussion.thread.get({
+      api.discussion.thread({ id: selectedThread || '' }).get({
         query: { id: selectedThread || '' }
       }),
     enabled: !!selectedThread
@@ -77,7 +77,7 @@ function DiscussionPage() {
     if (selectedFilter === 'all') return true
     if (selectedFilter === 'pinned') return thread.isPinned
     if (selectedFilter === 'resolved') return false // TODO: implement resolved status
-    if (selectedFilter === 'unresolved') return false // TODO: implement resolved status
+    if (selectedFilter === 'unanswered') return false // TODO: implement resolved status
     return true
   })
 
