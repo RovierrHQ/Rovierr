@@ -1,6 +1,5 @@
 'use client'
 
-import type { EmailDetails } from '@api/societies/society-email/schemas'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
@@ -15,6 +14,20 @@ import {
 import { Separator } from '@rov/ui/components/separator'
 import { formatDistanceToNow } from 'date-fns'
 import { Calendar, CheckCircle, Mail, User, X, XCircle } from 'lucide-react'
+
+/** Matches API emailDetailsSchema (society-email/schemas.ts). Cannot import from API. */
+type EmailDetails = {
+  id: string
+  subject: string
+  bodyHtml: string
+  recipientCount: number
+  successCount: number
+  failureCount: number
+  status: 'completed' | 'failed'
+  sentAt: string | null
+  sender: { id: string; name: string; email: string; image: string | null }
+  organization: { id: string; name: string }
+}
 
 type EmailDetailsModalProps = {
   open: boolean

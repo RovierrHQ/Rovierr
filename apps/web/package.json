@@ -15,7 +15,7 @@
     "preview": "bun run build && vite preview",
     "cf-typegen": "wrangler types",
     "postinstall": "bun run cf-typegen",
-    "type-check": "tsgo -b || tsc -b"
+    "type-check": "tsgo"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.22.1",
