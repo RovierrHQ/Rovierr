@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle
 } from '@rov/ui/components/card'
+import { useQuery as useTanstackQuery } from '@tanstack/react-query'
 
 type PreviewEmailResponse = {
   previewSubject: string
@@ -56,7 +57,7 @@ function EmailPage() {
   const [showDetails, setShowDetails] = useState(false)
 
   // Get organization details
-  const { data: organization } = useQuery({
+  const { data: organization } = useTanstackQuery({
     queryKey: ['society', 'getById', { id: clubID }],
     queryFn: async () => {
       const response = await api.society({ id: clubID }).get()
@@ -87,10 +88,7 @@ function EmailPage() {
   // Get email details when selected
   const { data: emailDetails, isLoading: isLoadingDetails } = useQuery({
     queryKey: ['societyEmail', 'get', { emailId: selectedEmailId }],
-    queryFn: () =>
-      api.society.email(selectedEmailId || '').get({
-        params: { emailId: selectedEmailId || '' }
-      }),
+    queryFn: () => api.society.email({ emailId: selectedEmailId || '' }).get(),
     enabled: !!selectedEmailId && showDetails
   })
 
