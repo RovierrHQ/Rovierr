@@ -148,5 +148,5 @@ export type ListEmailsInput = z.infer<typeof listEmailsSchema>
 export type SendEmailResponse = z.infer<typeof sendEmailResponseSchema>
 export type PreviewEmailResponse = z.infer<typeof previewEmailResponseSchema>
 export type EmailHistoryItem = z.infer<typeof emailHistoryItemSchema>
-export type ListEmailsRespnse = z.infer<typeof listEmailsResponseSchema>
+export type ListEmailsResponse = z.infer<typeof listEmailsResponseSchema>
 export type EmailDetails = z.infer<typeof emailDetailsSchema>
