@@ -1,9 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
-
-function RouteComponent() {
-  return <div>Hello Network!</div>
-}
+import Network from '@web/components/clubs/discover/network'
 
 export const Route = createFileRoute('/spaces/societies/discover/network')({
-  component: RouteComponent
+  component: NetworkPage
 })
+
+function NetworkPage() {
+  return (
+    <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+      <Network />
+    </div>
+  )
+}

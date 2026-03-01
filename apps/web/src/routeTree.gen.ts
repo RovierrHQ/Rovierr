@@ -33,6 +33,7 @@ import { Route as SpacesCareerRouteImport } from './routes/spaces/career'
 import { Route as SpacesAcademicsRouteImport } from './routes/spaces/academics'
 import { Route as SocietiesSocietyIdRouteImport } from './routes/societies/$societyId'
 import { Route as PeopleRequestsRouteImport } from './routes/people/requests'
+import { Route as PeoplePeopleRouteImport } from './routes/people/people'
 import { Route as JoinSocietySlugRouteImport } from './routes/join/$societySlug'
 import { Route as AppsQueraRouteImport } from './routes/apps/quera'
 import { Route as SpacesSocietiesIndexRouteImport } from './routes/spaces/societies/index'
@@ -201,6 +202,11 @@ const SocietiesSocietyIdRoute = SocietiesSocietyIdRouteImport.update({
 const PeopleRequestsRoute = PeopleRequestsRouteImport.update({
   id: '/requests',
   path: '/requests',
+  getParentRoute: () => PeopleRoute,
+} as any)
+const PeoplePeopleRoute = PeoplePeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
   getParentRoute: () => PeopleRoute,
 } as any)
 const JoinSocietySlugRoute = JoinSocietySlugRouteImport.update({
@@ -499,6 +505,7 @@ export interface FileRoutesByFullPath {
   '/terms-and-service': typeof TermsAndServiceRoute
   '/apps/quera': typeof AppsQueraRouteWithChildren
   '/join/$societySlug': typeof JoinSocietySlugRouteWithChildren
+  '/people/people': typeof PeoplePeopleRoute
   '/people/requests': typeof PeopleRequestsRoute
   '/societies/$societyId': typeof SocietiesSocietyIdRoute
   '/spaces/academics': typeof SpacesAcademicsRouteWithChildren
@@ -568,6 +575,7 @@ export interface FileRoutesByTo {
   '/roadmap': typeof RoadmapRoute
   '/signup': typeof SignupRoute
   '/terms-and-service': typeof TermsAndServiceRoute
+  '/people/people': typeof PeoplePeopleRoute
   '/people/requests': typeof PeopleRequestsRoute
   '/societies/$societyId': typeof SocietiesSocietyIdRoute
   '/spaces/personal': typeof SpacesPersonalRoute
@@ -636,6 +644,7 @@ export interface FileRoutesById {
   '/terms-and-service': typeof TermsAndServiceRoute
   '/apps/quera': typeof AppsQueraRouteWithChildren
   '/join/$societySlug': typeof JoinSocietySlugRouteWithChildren
+  '/people/people': typeof PeoplePeopleRoute
   '/people/requests': typeof PeopleRequestsRoute
   '/societies/$societyId': typeof SocietiesSocietyIdRoute
   '/spaces/academics': typeof SpacesAcademicsRouteWithChildren
@@ -713,6 +722,7 @@ export interface FileRouteTypes {
     | '/terms-and-service'
     | '/apps/quera'
     | '/join/$societySlug'
+    | '/people/people'
     | '/people/requests'
     | '/societies/$societyId'
     | '/spaces/academics'
@@ -782,6 +792,7 @@ export interface FileRouteTypes {
     | '/roadmap'
     | '/signup'
     | '/terms-and-service'
+    | '/people/people'
     | '/people/requests'
     | '/societies/$societyId'
     | '/spaces/personal'
@@ -849,6 +860,7 @@ export interface FileRouteTypes {
     | '/terms-and-service'
     | '/apps/quera'
     | '/join/$societySlug'
+    | '/people/people'
     | '/people/requests'
     | '/societies/$societyId'
     | '/spaces/academics'
@@ -1094,6 +1106,13 @@ declare module '@tanstack/react-router' {
       path: '/requests'
       fullPath: '/people/requests'
       preLoaderRoute: typeof PeopleRequestsRouteImport
+      parentRoute: typeof PeopleRoute
+    }
+    '/people/people': {
+      id: '/people/people'
+      path: '/people'
+      fullPath: '/people/people'
+      preLoaderRoute: typeof PeoplePeopleRouteImport
       parentRoute: typeof PeopleRoute
     }
     '/join/$societySlug': {
@@ -1507,11 +1526,13 @@ const JoinRouteChildren: JoinRouteChildren = {
 const JoinRouteWithChildren = JoinRoute._addFileChildren(JoinRouteChildren)
 
 interface PeopleRouteChildren {
+  PeoplePeopleRoute: typeof PeoplePeopleRoute
   PeopleRequestsRoute: typeof PeopleRequestsRoute
   PeopleIndexRoute: typeof PeopleIndexRoute
 }
 
 const PeopleRouteChildren: PeopleRouteChildren = {
+  PeoplePeopleRoute: PeoplePeopleRoute,
   PeopleRequestsRoute: PeopleRequestsRoute,
   PeopleIndexRoute: PeopleIndexRoute,
 }

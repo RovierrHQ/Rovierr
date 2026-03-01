@@ -4,9 +4,14 @@ import {
   type UseMutationOptions,
   type UseQueryOptions,
   useMutation as useTanstackMutation,
-  useQuery as useTanstackQuery
+  useQuery as useTanstackQuery,
+  useQueryClient as useTanstackQueryClient
 } from '@tanstack/react-query'
 import type { AppType } from 'api'
+
+export function useQueryClient() {
+  return useTanstackQueryClient()
+}
 
 const api = treaty<AppType>(
   import.meta.env.VITE_API_URL || 'http://localhost:3001',

@@ -4,7 +4,7 @@ import {
   SidebarProvider,
   SidebarTrigger
 } from '@rov/ui/components/sidebar'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useParams } from '@tanstack/react-router'
 import { CreateThreadDialog } from '@web/components/discussions/create-thread-dialog'
 import { DiscussionFilters } from '@web/components/discussions/discussion-filters'
 import { DiscussionList } from '@web/components/discussions/discussion-list'
@@ -22,29 +22,63 @@ export const Route = createFileRoute(
 })
 
 function DiscussionPage() {
-  const { clubID } = Route.useParams()
-  const [selectedThread, setSelectedThread] = useState<string | null>(null)
+  const params = useParams({
+    from: '/spaces/societies/mine/$clubID/discussion'
+  })
+  const clubID = params.clubID
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFilter, setSelectedFilter] = useState<
-    'all' | 'trending' | 'recent' | 'unanswered'
+    'all' | 'pinned' | 'resolved' | 'unanswered'
   >('all')
+  const [selectedThread, setSelectedThread] = useState<string | null>(null)
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
-  // Get threads for this club
+  // Get threads for this club - matching legacy query structure
   const { data: threadsData, isLoading } = useQuery({
-    queryKey: ['discussion', 'threads', clubID],
+    queryKey: [
+      'discussion',
+      'thread',
+      'list',
+      {
+        contextType: 'society',
+        contextId: clubID,
+        search: searchQuery,
+        sortBy: 'recent',
+        limit: 50,
+        offset: 0
+      }
+    ],
     queryFn: () =>
       api.discussion.thread.list.get({
-        query: { contextType: 'society', contextId: clubID }
+        query: {
+          contextType: 'society',
+          contextId: clubID,
+          search: searchQuery || undefined,
+          sortBy: 'recent',
+          limit: 50,
+          offset: 0
+        }
       }),
     enabled: !!clubID
   })
 
   // Fetch full thread with replies when one is selected
-  const { data: fullThreadData, isLoading: isThreadLoading } = useQuery({
+  const { data: selectedThreadData } = useQuery({
     queryKey: ['discussion', 'thread', 'get', selectedThread],
     queryFn: () =>
-      api.discussion.thread({ id: selectedThread as string }).get(),
+      api.discussion.thread({ id: selectedThread || '' }).get({
+        query: { id: selectedThread || '' }
+      }),
     enabled: !!selectedThread
+  })
+
+  // Filter discussions based on selected filter (matching legacy logic)
+  const filteredThreads = (threadsData?.threads ?? []).filter((thread) => {
+    if (selectedFilter === 'all') return true
+    if (selectedFilter === 'pinned') return thread.isPinned
+    if (selectedFilter === 'resolved') return false // TODO: implement resolved status
+    if (selectedFilter === 'unanswered') return false // TODO: implement resolved status
+    return true
   })
 
   if (isLoading) {
@@ -78,83 +112,81 @@ function DiscussionPage() {
       <SpacesSidebar />
       <SidebarInset>
         <div className="flex h-screen">
-          <div className="flex-1 p-6">
+          {/* Left Panel - Discussions List */}
+          <div
+            className={`flex flex-col flex-1 p-6 ${
+              selectedThread ? 'w-1/2' : 'w-full'
+            } transition-all`}
+          >
             <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <SidebarTrigger />
-                  <h1 className="text-2xl font-bold">Discussions</h1>
-                  <MessageSquare className="h-6 w-6 text-muted-foreground" />
+                  <div>
+                    <h1 className="text-2xl font-bold">Discussions</h1>
+                    <p className="text-sm text-muted-foreground">
+                      Ask questions, share resources, and collaborate with
+                      members
+                    </p>
+                  </div>
                 </div>
-                <CreateThreadDialog
-                  contextId={clubID}
-                  contextType="society"
-                  onOpenChange={() => {}}
-                  open={true}
-                />
+                {!selectedThread && (
+                  <Button onClick={() => setCreateDialogOpen(true)} size="lg">
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    New Discussion
+                  </Button>
+                )}
               </div>
+
+              <DiscussionFilters
+                onFilterChange={setSelectedFilter}
+                onSearchChange={setSearchQuery}
+                searchQuery={searchQuery}
+                selectedFilter={selectedFilter}
+              />
             </div>
 
-            {selectedThread ? (
-              <div>
-                <Button
-                  className="mb-4"
-                  onClick={() => setSelectedThread(null)}
-                  variant="ghost"
-                >
-                  ← Back to all discussions
-                </Button>
-                {isThreadLoading ? (
-                  <div className="animate-pulse space-y-4">
-                    <div className="h-8 bg-muted rounded w-3/4" />
-                    <div className="h-4 bg-muted rounded w-1/2" />
-                    <div className="space-y-2">
-                      {Array.from({ length: 3 }).map((_, i) => (
-                        <div
-                          className="h-16 bg-muted rounded"
-                          key={`thread-skeleton-${i}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ) : fullThreadData ? (
-                  <ThreadView
-                    discussion={fullThreadData}
-                    onClose={() => setSelectedThread(null)}
-                    replies={fullThreadData.replies ?? []}
-                  />
-                ) : null}
-              </div>
-            ) : (
-              <div>
-                <DiscussionStats
-                  activeUsers={threadsData?.threads.length ?? 0}
-                  totalReplies={
-                    threadsData?.threads.reduce(
-                      (acc, thread) => acc + (thread.replyCount ?? 0),
-                      0
-                    ) ?? 0
-                  }
-                  totalThreads={threadsData?.total ?? 0}
-                />
-
-                <DiscussionFilters
-                  onFilterChange={setSelectedFilter}
-                  onSearchChange={setSearchQuery}
-                  searchQuery={searchQuery}
-                  selectedFilter={selectedFilter}
-                />
-
-                <DiscussionList
-                  loading={isLoading}
-                  onThreadClick={(threadId) => setSelectedThread(threadId)}
-                  threads={threadsData?.threads ?? []}
-                />
-              </div>
+            {/* Stats Cards - Only show when no thread selected */}
+            {!selectedThread && (
+              <DiscussionStats
+                activeToday={
+                  filteredThreads.filter((d) =>
+                    d.createdAt.includes(new Date().toISOString())
+                  ).length
+                }
+                totalDiscussions={threadsData?.total ?? 0}
+                userContributions={0}
+              />
             )}
+
+            {/* Discussions List */}
+            <div className="flex-1 overflow-y-auto pr-4">
+              <DiscussionList
+                loading={isLoading}
+                onThreadClick={(threadId) => setSelectedThread(threadId)}
+                threads={filteredThreads}
+              />
+            </div>
           </div>
+
+          {/* Right Panel - Thread View (Slack-style) */}
+          {selectedThread && selectedThreadData && (
+            <ThreadView
+              discussion={selectedThreadData}
+              onClose={() => setSelectedThread(null)}
+              replies={selectedThreadData.replies ?? []}
+            />
+          )}
         </div>
       </SidebarInset>
+
+      {/* Create Thread Dialog */}
+      <CreateThreadDialog
+        contextId={clubID}
+        contextType="society"
+        onOpenChange={setCreateDialogOpen}
+        open={createDialogOpen}
+      />
     </SidebarProvider>
   )
 }

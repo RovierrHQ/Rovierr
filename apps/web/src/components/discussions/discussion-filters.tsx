@@ -1,12 +1,12 @@
 import { Button } from '@rov/ui/components/button'
 import { Input } from '@rov/ui/components/input'
-import { Search, TrendingUp } from 'lucide-react'
+import { Pin, Search } from 'lucide-react'
 
 type DiscussionFiltersProps = {
   searchQuery: string
   onSearchChange: (query: string) => void
-  selectedFilter: 'all' | 'trending' | 'recent' | 'unanswered'
-  onFilterChange: (filter: 'all' | 'trending' | 'recent' | 'unanswered') => void
+  selectedFilter: 'all' | 'pinned' | 'resolved' | 'unanswered'
+  onFilterChange: (filter: 'all' | 'pinned' | 'resolved' | 'unanswered') => void
 }
 
 export function DiscussionFilters({
@@ -33,22 +33,22 @@ export function DiscussionFilters({
           size="sm"
           variant={selectedFilter === 'all' ? 'default' : 'outline'}
         >
-          All Threads
+          All
         </Button>
         <Button
-          onClick={() => onFilterChange('trending')}
+          onClick={() => onFilterChange('pinned')}
           size="sm"
-          variant={selectedFilter === 'trending' ? 'default' : 'outline'}
+          variant={selectedFilter === 'pinned' ? 'default' : 'outline'}
         >
-          <TrendingUp className="mr-2 h-4 w-4" />
-          Trending
+          <Pin className="mr-2 h-4 w-4" />
+          Pinned
         </Button>
         <Button
-          onClick={() => onFilterChange('recent')}
+          onClick={() => onFilterChange('resolved')}
           size="sm"
-          variant={selectedFilter === 'recent' ? 'default' : 'outline'}
+          variant={selectedFilter === 'resolved' ? 'default' : 'outline'}
         >
-          Recent
+          Resolved
         </Button>
         <Button
           onClick={() => onFilterChange('unanswered')}

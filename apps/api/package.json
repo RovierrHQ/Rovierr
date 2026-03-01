@@ -11,7 +11,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsgo",
     "type-check": "tsgo -b || tsc -b",
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
