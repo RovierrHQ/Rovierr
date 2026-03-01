@@ -105,10 +105,8 @@ function TasksPage() {
       </div>
 
       <TaskFilters
-        onPriorityFilterChange={(val) =>
-          updateFilters({ priority: val as any })
-        }
-        onStatusFilterChange={(val) => updateFilters({ status: val as any })}
+        onPriorityFilterChange={(val) => updateFilters({ priority: val })}
+        onStatusFilterChange={(val) => updateFilters({ status: val })}
         priorityFilter={priority}
         statusFilter={status}
       />
