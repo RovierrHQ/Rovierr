@@ -1,3 +1,4 @@
+import type { Society } from '@api/routers/society/schemas'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
@@ -33,13 +34,19 @@ export const Route = createFileRoute('/spaces/societies/mine/$clubID/')({
   component: ClubProfilePage
 })
 
+type ClubData = {
+  id: string
+  name: string
+  logo?: string | null
+}
+
 // Banner Component
 function ClubBanner({
   society,
   canManageSettings,
   onBannerClick
 }: {
-  society: any
+  society: Society | null | undefined
   canManageSettings: boolean
   onBannerClick: () => void
 }) {
@@ -72,14 +79,15 @@ function ClubBanner({
 }
 
 // Avatar Component
+
 function ClubAvatar({
   club,
   society,
   canManageSettings,
   onLogoClick
 }: {
-  club: any
-  society: any
+  club: ClubData
+  society: Society | null | undefined
   canManageSettings: boolean
   onLogoClick: () => void
 }) {
@@ -153,6 +161,131 @@ function ClubNotFound() {
   )
 }
 
+function ClubInfo({
+  society,
+  club,
+  clubID,
+  canManageSettings
+}: {
+  society: Society | null | undefined
+  club: ClubData
+  clubID: string
+  canManageSettings: boolean
+}) {
+  return (
+    <div className="flex-1 space-y-3 pt-0 text-center sm:space-y-4 sm:pt-6 sm:text-left">
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+          <h1 className="text-balance font-bold text-2xl text-foreground tracking-tight sm:text-3xl">
+            {society?.name || club.name}
+          </h1>
+          {society?.isVerified ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-emerald-500 transition-colors hover:bg-emerald-500/15">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span className="font-medium text-xs">Verified</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs" side="bottom">
+                  <p className="text-sm">
+                    This organization has been verified and is an official
+                    society.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : null}
+          {society && (
+            <Badge
+              variant={society.type === 'university' ? 'default' : 'secondary'}
+            >
+              {society.type === 'university'
+                ? 'Official Organization'
+                : 'Student Society'}
+            </Badge>
+          )}
+        </div>
+        {society?.description && (
+          <p className="mx-auto line-clamp-2 max-w-lg text-pretty text-muted-foreground text-sm leading-relaxed sm:mx-0">
+            {society.description}
+          </p>
+        )}
+      </div>
+
+      {/* Badges */}
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+        {society?.tags?.slice(0, 3).map((tag: string) => (
+          <Badge
+            className="border border-border/50 bg-secondary/50 text-foreground"
+            key={tag}
+            variant="secondary"
+          >
+            {tag}
+          </Badge>
+        ))}
+        {society?.memberCount !== undefined && (
+          <Badge
+            className="border border-border/50 bg-secondary/50 text-foreground"
+            variant="secondary"
+          >
+            {society.memberCount}{' '}
+            {society.memberCount === 1 ? 'Member' : 'Members'}
+          </Badge>
+        )}
+        {society?.foundingYear && (
+          <Badge
+            className="border border-border/50 bg-secondary/50 text-foreground"
+            variant="secondary"
+          >
+            Founded {society.foundingYear}
+          </Badge>
+        )}
+      </div>
+
+      {/* Location & Website */}
+      <div className="flex flex-col gap-2 text-muted-foreground text-xs sm:flex-row sm:flex-wrap sm:gap-4 sm:text-sm">
+        {society?.institutionName && (
+          <div className="flex items-center justify-center gap-1 md:justify-start">
+            <MapPin className="h-4 w-4 flex-shrink-0" />
+            <span className="transition-colors hover:text-primary">
+              {society.institutionName}
+            </span>
+          </div>
+        )}
+        {society?.website && (
+          <a
+            className="flex items-center justify-center gap-1 transition-colors hover:text-primary md:justify-start"
+            href={society.website}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <Globe className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">Website</span>
+          </a>
+        )}
+      </div>
+
+      {/* Settings Button */}
+      {canManageSettings && (
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+          <Button size="sm" variant="outline">
+            <Link
+              params={{ clubID }}
+              search={{ tab: 'general' }}
+              to="/spaces/societies/mine/$clubID/settings"
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </Link>
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function ClubProfilePage() {
   const params = useParams({ from: '/spaces/societies/mine/$clubID/' })
   const clubID = params.clubID
@@ -170,7 +303,7 @@ function ClubProfilePage() {
     queryKey: ['society', clubID],
     queryFn: () => api.society({ id: clubID }).get()
   })
-  const society = societyData?.data
+  const society = societyData
 
   // Check if user has permission to manage settings using hasPermission
   const { data: canManageSettingsData } = useQuery({
@@ -227,127 +360,12 @@ function ClubProfilePage() {
               />
 
               {/* Info */}
-              <div className="flex-1 space-y-3 pt-0 text-center sm:space-y-4 sm:pt-6 sm:text-left">
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                    <h1 className="text-balance font-bold text-2xl text-foreground tracking-tight sm:text-3xl">
-                      {society?.name || club.name}
-                    </h1>
-
-                    {society?.isVerified ? (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <div className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-emerald-500 transition-colors hover:bg-emerald-500/15">
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                              <span className="font-medium text-xs">
-                                Verified
-                              </span>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-xs" side="bottom">
-                            <p className="text-sm">
-                              This organization has been verified and is an
-                              official society.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ) : null}
-
-                    {society && (
-                      <Badge
-                        variant={
-                          society.type === 'university'
-                            ? 'default'
-                            : 'secondary'
-                        }
-                      >
-                        {society.type === 'university'
-                          ? 'Official Organization'
-                          : 'Student Society'}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {society?.description && (
-                    <p className="mx-auto line-clamp-2 max-w-lg text-pretty text-muted-foreground text-sm leading-relaxed sm:mx-0">
-                      {society.description}
-                    </p>
-                  )}
-                </div>
-
-                {/* Badges */}
-                <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                  {society?.tags &&
-                    society.tags.length > 0 &&
-                    society.tags.slice(0, 3).map((tag: string) => (
-                      <Badge
-                        className="border border-border/50 bg-secondary/50 text-foreground"
-                        key={tag}
-                        variant="secondary"
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  {society?.memberCount !== undefined && (
-                    <Badge
-                      className="border border-border/50 bg-secondary/50 text-foreground"
-                      variant="secondary"
-                    >
-                      {society.memberCount}{' '}
-                      {society.memberCount === 1 ? 'Member' : 'Members'}
-                    </Badge>
-                  )}
-                  {society?.foundingYear && (
-                    <Badge
-                      className="border border-border/50 bg-secondary/50 text-foreground"
-                      variant="secondary"
-                    >
-                      Founded {society.foundingYear}
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Location & Website */}
-                <div className="flex flex-col gap-2 text-muted-foreground text-xs sm:flex-row sm:flex-wrap sm:gap-4 sm:text-sm">
-                  {society?.institutionName && (
-                    <div className="flex items-center justify-center gap-1 md:justify-start">
-                      <MapPin className="h-4 w-4 flex-shrink-0" />
-                      <span className="transition-colors hover:text-primary">
-                        {society.institutionName}
-                      </span>
-                    </div>
-                  )}
-
-                  {society?.website && (
-                    <a
-                      className="flex items-center justify-center gap-1 transition-colors hover:text-primary md:justify-start"
-                      href={society.website}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      <Globe className="h-4 w-4 flex-shrink-0" />
-                      <span className="truncate">Website</span>
-                    </a>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                  {canManageSettings && (
-                    <Button size="sm" variant="outline">
-                      <Link
-                        params={{ clubID }}
-                        to="/spaces/societies/mine/$clubID/settings"
-                      >
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </div>
+              <ClubInfo
+                canManageSettings={canManageSettings}
+                club={club}
+                clubID={clubID}
+                society={society}
+              />
             </div>
           </div>
         </div>
@@ -366,6 +384,7 @@ function ClubProfilePage() {
                   completion={society.profileCompletionPercentage ?? 0}
                   society={{
                     ...society,
+                    foundingYear: society.foundingYear ?? undefined,
                     profileCompletionPercentage:
                       society.profileCompletionPercentage ?? 0,
                     onboardingCompleted: society.onboardingCompleted ?? false,
@@ -505,19 +524,19 @@ function ProfileCompletionCard({
 }: {
   completion: number
   society: {
-    logo?: string
-    banner?: string
-    instagram?: string
-    facebook?: string
-    twitter?: string
-    linkedin?: string
-    whatsapp?: string
-    telegram?: string
-    website?: string
-    foundingYear?: number
-    meetingSchedule?: string
-    membershipRequirements?: string
-    goals?: string
+    logo?: string | null
+    banner?: string | null
+    instagram?: string | null
+    facebook?: string | null
+    twitter?: string | null
+    linkedin?: string | null
+    whatsapp?: string | null
+    telegram?: string | null
+    website?: string | null
+    foundingYear?: number | undefined
+    meetingSchedule?: string | null
+    membershipRequirements?: string | null
+    goals?: string | null
     profileCompletionPercentage?: number
     onboardingCompleted?: boolean
     createdAt: Date
@@ -611,6 +630,7 @@ function ProfileCompletionCard({
         <Button className="mt-4 w-full" variant="outline">
           <Link
             params={{ clubID: societyId }}
+            search={{ tab: 'default' }}
             to="/spaces/societies/mine/$clubID/settings"
           >
             Complete Profile
