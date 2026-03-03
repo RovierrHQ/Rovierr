@@ -5,7 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", ".wrangler/**"],
-      "env": ["NODE_ENV"]
+      "env": ["NODE_ENV", "CLOUDFLARE_ENV"]
     },
     "dev": {
       "persistent": true,
