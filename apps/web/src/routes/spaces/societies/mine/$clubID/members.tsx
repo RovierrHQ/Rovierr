@@ -32,7 +32,6 @@ function MembersPage() {
     return organizations.find((org) => org.id === clubID)
   }, [organizations, clubID])
 
-  // Check if user has organization update permission
   const { data: canManageSettingsData } = useQuery({
     queryKey: ['user-permission-settings', clubID],
     queryFn: async () => {
@@ -55,7 +54,7 @@ function MembersPage() {
 
   if (isLoadingOrgs) {
     return (
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl overflow-auto px-4 py-6 sm:px-6 lg:px-8">
         <Card>
           <CardHeader>
             <Skeleton className="h-8 w-48" />
@@ -73,7 +72,7 @@ function MembersPage() {
 
   if (!club) {
     return (
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl overflow-auto px-4 py-6 sm:px-6 lg:px-8">
         <Card>
           <CardContent className="p-6">
             <p className="text-muted-foreground">
@@ -86,7 +85,7 @@ function MembersPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-7xl overflow-auto px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6">
         <h1 className="mb-2 font-bold text-3xl">Members</h1>
         {canManageSettings && (
