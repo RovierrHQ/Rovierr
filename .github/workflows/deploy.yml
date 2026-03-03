@@ -33,4 +33,4 @@ jobs:
         run: bun run build
       - name: Deploy Web
         working-directory: apps/web
-        run: bunx wrangler deploy
+        run: bunx wrangler deploy -e ${{ vars.CLOUDFLARE_ENV }}
