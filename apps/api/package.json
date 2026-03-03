@@ -11,8 +11,8 @@
     }
   },
   "scripts": {
-    "build": "tsc",
-    "type-check": "tsc -b",
+    "build": "tsgo",
+    "type-check": "tsgo -b || tsc -b",
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
     "db:push": "drizzle-kit push",

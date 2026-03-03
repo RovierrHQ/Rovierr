@@ -10,13 +10,13 @@ import {
 import { cn } from '@rov/ui/lib/utils'
 
 interface DataTableSkeletonProps extends React.ComponentProps<'div'> {
-  columnCount: number
-  rowCount?: number
-  filterCount?: number
   cellWidths?: string[]
-  withViewOptions?: boolean
-  withPagination?: boolean
+  columnCount: number
+  filterCount?: number
+  rowCount?: number
   shrinkZero?: boolean
+  withPagination?: boolean
+  withViewOptions?: boolean
 }
 
 export function DataTableSkeleton({

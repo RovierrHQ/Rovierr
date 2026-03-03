@@ -4,28 +4,37 @@ import {
   type UseMutationOptions,
   type UseQueryOptions,
   useMutation as useTanstackMutation,
-  useQuery as useTanstackQuery
+  useQuery as useTanstackQuery,
+  useQueryClient as useTanstackQueryClient
 } from '@tanstack/react-query'
 import type { AppType } from 'api'
 
-const api = treaty<AppType>(process.env.NEXT_PUBLIC_SERVER_URL || '', {
-  fetch: {
-    credentials: 'include',
-    mode: 'cors'
+export function useQueryClient() {
+  return useTanstackQueryClient()
+}
+
+const api = treaty<AppType>(
+  import.meta.env.VITE_API_URL || 'http://localhost:3001',
+  {
+    fetch: {
+      credentials: 'include',
+      mode: 'cors'
+    }
   }
-})
+)
 
 /**
  * Typed useQuery hook for Eden Treaty endpoints
  * Automatically infers data and error types from the Treaty response
- * Usage: const { data, error } = useQuery(['user', 'profile'], () => api.user.profile.get())
+ * Usage: const { data, error } = useQuery({ queryKey: ['user', 'profile'], queryFn: () => api.user.profile.get() })
  */
 export function useQuery<
   T extends Record<number, unknown> = Record<number, unknown>
 >(
-  queryKey: QueryKey,
-  treatyFn: () => Promise<Treaty.TreatyResponse<T>>,
-  options?: Omit<
+  options: {
+    queryKey: QueryKey
+    queryFn: () => Promise<Treaty.TreatyResponse<T>>
+  } & Omit<
     UseQueryOptions<
       Treaty.Data<Treaty.TreatyResponse<T>>,
       Treaty.Error<Treaty.TreatyResponse<T>>
@@ -37,9 +46,9 @@ export function useQuery<
     Treaty.Data<Treaty.TreatyResponse<T>>,
     Treaty.Error<Treaty.TreatyResponse<T>>
   >({
-    queryKey,
+    ...options,
     queryFn: async () => {
-      const response = await treatyFn()
+      const response = await options.queryFn()
 
       if (response.error) {
         throw response.error
@@ -50,8 +59,7 @@ export function useQuery<
       }
 
       throw new Error('No data returned from API')
-    },
-    ...options
+    }
   })
 }
 

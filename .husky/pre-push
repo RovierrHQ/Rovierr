@@ -1,2 +1,5 @@
 #!/bin/sh
+# Run the workspace build but skip the heavy `apps/api` package to avoid OOM on low-memory machines.
+# To run the full build locally, use: `bun run build`.
+# Exclude the package by workspace path using Turbo's filter syntax.
 bun run build

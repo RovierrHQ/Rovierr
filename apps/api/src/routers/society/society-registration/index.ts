@@ -75,20 +75,21 @@ async function hasOrganizationUpdatePermission(
 }
 
 export const societyRegistrationRouter = new Elysia({
+  name: 'registration',
   prefix: '/registration'
 })
   .use(betterAuth)
   // ============================================================================
   // Registration Settings Management
   // ============================================================================
-  .group('', { auth: true }, (app) =>
+  .group('/settings', { auth: true }, (app) =>
     app
       /**
        * Get registration settings for a society
        * GET /registration/settings
        */
       .get(
-        '/settings',
+        '/',
         async ({ query, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -174,7 +175,7 @@ export const societyRegistrationRouter = new Elysia({
        * POST /registration/settings
        */
       .post(
-        '/settings',
+        '/',
         async ({ body, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -224,7 +225,7 @@ export const societyRegistrationRouter = new Elysia({
        * PATCH /registration/settings/:id
        */
       .patch(
-        '/settings/:id',
+        '/:id',
         async ({ params, body, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -272,14 +273,14 @@ export const societyRegistrationRouter = new Elysia({
   // ============================================================================
   // Join Request Management
   // ============================================================================
-  .group('', { auth: true }, (app) =>
+  .group('join-request', { auth: true }, (app) =>
     app
       /**
        * Create a join request
        * POST /registration/join-request
        */
       .post(
-        '/join-request',
+        '/',
         async ({ body, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -350,7 +351,7 @@ export const societyRegistrationRouter = new Elysia({
        * POST /registration/join-request/simple
        */
       .post(
-        '/join-request/simple',
+        '/simple',
         async ({ body, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -405,10 +406,10 @@ export const societyRegistrationRouter = new Elysia({
 
       /**
        * List join requests for a society
-       * GET /registration/join-request
+       * GET /registration/join-request/list
        */
       .get(
-        '/join-request',
+        '/list',
         async ({ query, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -457,7 +458,7 @@ export const societyRegistrationRouter = new Elysia({
        * GET /registration/join-request/:id
        */
       .get(
-        '/join-request/:id',
+        '/:id',
         async ({ params, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -540,7 +541,7 @@ export const societyRegistrationRouter = new Elysia({
        * POST /registration/join-request/:id/approve
        */
       .post(
-        '/join-request/:id/approve',
+        '/:id/approve',
         async ({ params, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -600,7 +601,7 @@ export const societyRegistrationRouter = new Elysia({
        * POST /registration/join-request/:id/reject
        */
       .post(
-        '/join-request/:id/reject',
+        '/:id/reject',
         async ({ params, body, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -650,7 +651,7 @@ export const societyRegistrationRouter = new Elysia({
        * POST /registration/join-request/bulk-approve
        */
       .post(
-        '/join-request/bulk-approve',
+        '/bulk-approve',
         async ({ body, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -698,7 +699,7 @@ export const societyRegistrationRouter = new Elysia({
        * POST /registration/join-request/bulk-reject
        */
       .post(
-        '/join-request/bulk-reject',
+        '/bulk-reject',
         async ({ body, headers, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -747,7 +748,7 @@ export const societyRegistrationRouter = new Elysia({
        * GET /registration/join-request/user-status
        */
       .get(
-        '/join-request/user-status',
+        '/user-status',
         async ({ query, user }) => {
           if (!user) {
             throw new Error('User not authenticated')
@@ -780,7 +781,7 @@ export const societyRegistrationRouter = new Elysia({
 
       /**
        * Verify payment for a join request
-       * POST /registration/payment/:id/verify
+       * POST /registration/join-request/payment/:id/verify
        */
       .post(
         '/payment/:id/verify',
@@ -1152,7 +1153,7 @@ export const societyRegistrationRouter = new Elysia({
   // ============================================================================
   // QR Code Generation
   // ============================================================================
-  .group('', { auth: true }, (app) =>
+  .group('qr-code', { auth: true }, (app) =>
     app
       /**
        * Generate QR code for registration URL

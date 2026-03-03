@@ -1,5 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/spaces/')({
-  component: () => null
+  beforeLoad: () => {
+    console.log('redirecting to /spaces/societies/campus-feed')
+    throw redirect({ to: '/spaces/societies/campus-feed' })
+  }
 })

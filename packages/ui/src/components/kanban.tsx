@@ -310,12 +310,15 @@ function Kanban<T>(props: KanbanProps<T>) {
     [activeId, value, getItemValue]
   )
 
-  const onDragStart = React.useCallback((event: DragStartEvent) => {
-    kanbanProps.onDragStart?.(event)
+  const onDragStart = React.useCallback(
+    (event: DragStartEvent) => {
+      kanbanProps.onDragStart?.(event)
 
-    if (event.activatorEvent.defaultPrevented) return
-    setActiveId(event.active.id)
-  }, [])
+      if (event.activatorEvent.defaultPrevented) return
+      setActiveId(event.active.id)
+    },
+    [kanbanProps.onDragStart]
+  )
 
   const onDragOver = React.useCallback(
     (event: DragOverEvent) => {
@@ -374,7 +377,7 @@ function Kanban<T>(props: KanbanProps<T>) {
         hasMovedRef.current = true
       }
     },
-    [value, getColumn, getItemValue, onValueChange]
+    [value, getColumn, getItemValue, onValueChange, kanbanProps.onDragOver]
   )
 
   const onDragEnd = React.useCallback(
@@ -454,17 +457,27 @@ function Kanban<T>(props: KanbanProps<T>) {
       setActiveId(null)
       hasMovedRef.current = false
     },
-    [value, getColumn, getItemValue, onValueChange, onMove]
+    [
+      value,
+      getColumn,
+      getItemValue,
+      onValueChange,
+      onMove,
+      kanbanProps.onDragEnd
+    ]
   )
 
-  const onDragCancel = React.useCallback((event: DragCancelEvent) => {
-    kanbanProps.onDragCancel?.(event)
+  const onDragCancel = React.useCallback(
+    (event: DragCancelEvent) => {
+      kanbanProps.onDragCancel?.(event)
 
-    if (event.activatorEvent.defaultPrevented) return
+      if (event.activatorEvent.defaultPrevented) return
 
-    setActiveId(null)
-    hasMovedRef.current = false
-  }, [])
+      setActiveId(null)
+      hasMovedRef.current = false
+    },
+    [kanbanProps.onDragCancel]
+  )
 
   const announcements: Announcements = React.useMemo(
     () => ({
@@ -708,10 +721,10 @@ const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true })
 
 interface KanbanColumnProps extends useRender.ComponentProps<'div'> {
-  value: UniqueIdentifier
-  children?: React.ReactNode
   asHandle?: boolean
+  children?: React.ReactNode
   disabled?: boolean
+  value: UniqueIdentifier
 }
 
 function KanbanColumn(props: KanbanColumnProps) {
@@ -901,9 +914,9 @@ function useKanbanItemContext(consumerName: string) {
 }
 
 interface KanbanItemProps extends useRender.ComponentProps<'div'> {
-  value: UniqueIdentifier
   asHandle?: boolean
   disabled?: boolean
+  value: UniqueIdentifier
 }
 
 function KanbanItem(props: KanbanItemProps) {
@@ -1065,13 +1078,13 @@ const dropAnimation: DropAnimation = {
 
 interface KanbanOverlayProps
   extends Omit<React.ComponentProps<typeof DragOverlay>, 'children'> {
-  container?: Element | DocumentFragment | null
   children?:
     | React.ReactNode
     | ((params: {
         value: UniqueIdentifier
         variant: 'column' | 'item'
       }) => React.ReactNode)
+  container?: Element | DocumentFragment | null
 }
 
 function KanbanOverlay(props: KanbanOverlayProps) {

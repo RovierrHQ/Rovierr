@@ -2,10 +2,7 @@
   "extends": "@rov/config/react-library.json",
   "compilerOptions": {
     "outDir": "dist",
-    "baseUrl": ".",
-    "paths": {
-      "@rov/ui/*": ["./src/*"]
-    },
+    "paths": { "*": ["./*"], "@rov/ui/*": ["./src/*"] },
     "strictNullChecks": true
   },
   "include": ["src"],

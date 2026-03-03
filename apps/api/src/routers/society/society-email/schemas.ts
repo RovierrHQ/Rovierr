@@ -57,8 +57,8 @@ export const previewEmailSchema = z.object({
  */
 export const listEmailsSchema = z.object({
   organizationId: z.string().min(1, 'Organization ID is required'),
-  limit: z.number().min(1).max(100).default(50),
-  offset: z.number().min(0).default(0)
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0)
 })
 
 // ============================================================================
@@ -118,7 +118,7 @@ export const emailHistoryItemSchema = selectSocietyEmailSchema
  */
 export const listEmailsResponseSchema = z.object({
   emails: z.array(emailHistoryItemSchema),
-  total: z.number(),
+  total: z.coerce.number(),
   hasMore: z.boolean()
 })
 

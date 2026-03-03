@@ -3,8 +3,8 @@ import type React from 'react'
 import { Text, type TextProps } from 'react-native'
 
 interface ThemedTextProps extends TextProps {
-  className?: string
   children: React.ReactNode
+  className?: string
 }
 
 export default function ThemedText({

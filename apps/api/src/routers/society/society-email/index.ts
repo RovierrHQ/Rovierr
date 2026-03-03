@@ -68,9 +68,9 @@ async function isOrganizationPresident(
   return memberRecord?.role === 'owner' || memberRecord?.role === 'president'
 }
 
-export const societyEmailRouter = new Elysia({ prefix: '/email' })
+export const societyEmailRouter = new Elysia({ name: '/email' })
   .use(betterAuth)
-  .group('', { auth: true }, (app) =>
+  .group('/email', { auth: true }, (app) =>
     app
       /**
        * Send mass email to all society members

@@ -14,17 +14,17 @@ import type {
 import { chunk, DEFAULT_BATCH_SIZE } from '../utils/batch'
 
 interface FacultyCSVRow {
+  description?: string
   institutionSlug: string
   name: string
-  description?: string
   website?: string
 }
 
 interface FacultyRecord {
+  description?: string
   id: string
   institutionId: string
   name: string
-  description?: string
   website?: string
 }
 

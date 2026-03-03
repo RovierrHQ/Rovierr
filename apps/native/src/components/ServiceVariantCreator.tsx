@@ -27,9 +27,9 @@ type Option = {
 }
 
 interface Variant extends Record<string, string | null> {
-  price: string
   deliveryDays: string
   image: null
+  price: string
 }
 
 const ServiceVariantCreator: React.FC<ServiceVariantCreatorProps> = ({

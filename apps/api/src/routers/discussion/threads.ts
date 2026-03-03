@@ -13,9 +13,9 @@ import { ReplyService, ThreadService } from './service'
 const replyService = new ReplyService(db)
 const threadService = new ThreadService(db)
 
-export const threadsRouter = new Elysia({ prefix: '/thread' })
+export const threadsRouter = new Elysia({ name: 'thread' })
   .use(betterAuth)
-  .group('', { auth: true }, (app) =>
+  .group('/thread', { auth: true }, (app) =>
     app
       // ============================================================================
       // Thread CRUD Operations

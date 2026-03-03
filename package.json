@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.13",
+    "@typescript/native-preview": "^7.0.0-dev.20260223.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "shadcn": "^3.8.2",

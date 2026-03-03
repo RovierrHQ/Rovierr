@@ -10,7 +10,7 @@
     "./client": "./src/client.ts"
   },
   "scripts": {
-    "check-types": "tsc -b",
+    "check-types": "tsgo -b || tsc -b",
     "dev-d": "docker compose -f ../../docker-compose.yml up --build realtime"
   },
   "dependencies": {
@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "@rov/config": "workspace:*"
   }
 }

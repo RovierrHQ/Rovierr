@@ -6,7 +6,7 @@
     "./client-native": "./src/client-native.ts"
   },
   "scripts": {
-    "type-check": "tsc -b"
+    "type-check": "tsgo -b || tsc -b"
   },
   "devDependencies": {
     "@rov/config": "workspace:*"

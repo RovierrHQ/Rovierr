@@ -64,9 +64,9 @@ export class ThreadService {
       unanswered,
       following,
       search,
-      sortBy,
-      limit,
-      offset
+      sortBy = 'recent',
+      limit = 50,
+      offset = 0
     } = query
 
     // Build where conditions
