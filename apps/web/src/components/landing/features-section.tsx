@@ -1,9 +1,7 @@
-'use client'
-
+import FeatureCard from '@web/components/landing/feature-card'
 import { Briefcase, GraduationCap, Mail, Users } from 'lucide-react'
-import FeatureCard from './feature-card'
 
-interface FeaturesSectionProps {
+type FeaturesSectionProps = {
   className?: string
 }
 
@@ -44,7 +42,6 @@ export default function FeaturesSection({
   return (
     <section className={`px-4 py-20 ${className}`}>
       <div className="container mx-auto max-w-6xl">
-        {/* Section Heading */}
         <div className="mb-16 text-center">
           <h2 className="font-bold text-3xl text-neutral-900 md:text-4xl dark:text-neutral-100">
             Why Choose Rovierr
@@ -54,7 +51,6 @@ export default function FeaturesSection({
           </p>
         </div>
 
-        {/* Features Grid */}
         <div className="space-y-16 md:space-y-24">
           {features.map((feature, index) => (
             <FeatureCard

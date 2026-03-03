@@ -1,15 +1,10 @@
 {
-  "extends": "../typescript-config/react-library.json",
+  "extends": "@rov/config/react-library.json",
   "compilerOptions": {
-    "rootDir": "src",
     "outDir": "dist",
-    "composite": true,
-    "jsx": "react-jsx",
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "paths": { "*": ["./*"], "@rov/ui/*": ["./src/*"] },
+    "strictNullChecks": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

@@ -13,7 +13,7 @@ import {
 import { Search, UserPlus, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-interface Member {
+type Member = {
   userId?: string
   user?: {
     id?: string
@@ -23,7 +23,7 @@ interface Member {
   role?: string | string[]
 }
 
-interface AssigneeSelectorProps {
+type AssigneeSelectorProps = {
   organizationId: string
   availableAssignees: Member[]
   isLoading: boolean
@@ -70,7 +70,7 @@ export function AssigneeSelector({
     <div className="space-y-2">
       <Label>Assignees</Label>
       <Popover onOpenChange={setPopoverOpen} open={popoverOpen}>
-        <PopoverTrigger asChild>
+        <PopoverTrigger>
           <Button
             className="w-full justify-start"
             type="button"

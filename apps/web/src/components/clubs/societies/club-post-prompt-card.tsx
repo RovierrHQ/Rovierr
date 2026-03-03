@@ -1,5 +1,6 @@
 'use client'
 
+import type { Treaty } from '@elysiajs/eden'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import { Calendar as CalendarComponent } from '@rov/ui/components/calendar'
@@ -18,8 +19,10 @@ import {
   PopoverTrigger
 } from '@rov/ui/components/popover'
 import { Switch } from '@rov/ui/components/switch'
-
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import { Image } from '@unpic/react'
+import api, { useMutation } from '@web/lib/api-client'
+import { authClient } from '@web/lib/auth-client'
 import {
   Calendar,
   Image as ImageIcon,
@@ -28,9 +31,11 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 import { RichTextEditor } from './rich-text-editor'
+
+type UploadMediaResponse = Awaited<
+  ReturnType<(typeof api)['campus-feed']['posts']['media']['post']>
+>
 
 export const ClubPostPromptCard = () => {
   const [postDialogOpen, setPostDialogOpen] = useState(false)
@@ -60,40 +65,37 @@ export const ClubPostPromptCard = () => {
     setPostDialogOpen(false)
   }
 
-  const createPostMutation = useMutation(
-    orpc.campusFeed.create.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
-        toast.success('Post created successfully!')
-        resetForm()
-      },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to create post')
-      }
-    })
-  )
+  const createPostMutation = useMutation(api['campus-feed'].posts.post, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
+      toast.success('Post created successfully!')
+      resetForm()
+    },
+    onError: (error) => {
+      toast.error(error.value.message || 'Failed to create post')
+    }
+  })
 
   const createEventMutation = useMutation(
-    orpc.campusFeed.createEvent.mutationOptions({
+    api['campus-feed'].posts.events.post,
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
         toast.success('Event post created successfully!')
         resetForm()
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to create event post')
+      onError: (error) => {
+        toast.error(error.value.message || 'Failed to create event post')
       }
-    })
+    }
   )
 
-  const uploadMediaMutation = useMutation(
-    orpc.campusFeed.uploadMedia.mutationOptions({
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to upload image')
-        setIsUploading(false)
-      }
-    })
-  )
+  const uploadMediaMutation = useMutation(api['campus-feed'].posts.media.post, {
+    onError: (error) => {
+      toast.error(error.value.message || 'Failed to upload image')
+      setIsUploading(false)
+    }
+  })
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -119,17 +121,19 @@ export const ClubPostPromptCard = () => {
       const base64Data = reader.result as string
 
       try {
-        const result = await uploadMediaMutation.mutateAsync({
+        const res = await uploadMediaMutation.mutateAsync({
           base64Data,
           mediaType: 'image'
         })
-        // Use presigned URL for preview
-        setSelectedImagePreview(result.url)
-        // Store S3 key URL for posting
-        setSelectedImageS3Url(result.s3KeyUrl)
+        setSelectedImagePreview(res.url)
+        setSelectedImageS3Url(res.s3KeyUrl)
         setIsUploading(false)
-      } catch {
-        // Error handled by mutation
+      } catch (error) {
+        toast.error(
+          (error as Treaty.Error<UploadMediaResponse>).value.message ||
+            'Failed to upload image'
+        )
+        setIsUploading(false)
       }
     }
     reader.readAsDataURL(file)
@@ -238,7 +242,7 @@ export const ClubPostPromptCard = () => {
                 <div className="space-y-2">
                   <Label>Event Date</Label>
                   <Popover>
-                    <PopoverTrigger asChild>
+                    <PopoverTrigger>
                       <Button
                         className="w-full justify-start text-left font-normal"
                         variant="outline"
@@ -292,9 +296,10 @@ export const ClubPostPromptCard = () => {
 
             {selectedImagePreview && (
               <div className="relative">
-                <img
+                <Image
                   alt="Selected"
                   className="w-full rounded-lg"
+                  layout="fullWidth"
                   src={selectedImagePreview}
                 />
                 <Button
@@ -321,12 +326,7 @@ export const ClubPostPromptCard = () => {
                   onChange={handleImageSelect}
                   type="file"
                 />
-                <Button
-                  asChild
-                  disabled={isUploading}
-                  size="icon"
-                  variant="ghost"
-                >
+                <Button disabled={isUploading} size="icon" variant="ghost">
                   <label className="cursor-pointer" htmlFor="image-upload">
                     <ImageIcon className="h-5 w-5 text-primary" />
                   </label>

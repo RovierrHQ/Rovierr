@@ -1,5 +1,3 @@
-'use client'
-
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import {
   DropdownMenu,
@@ -12,55 +10,41 @@ import {
 } from '@rov/ui/components/dropdown-menu'
 import {
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   useSidebar
 } from '@rov/ui/components/sidebar'
-import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
+import { useRouter } from '@tanstack/react-router'
+import { authClient } from '@web/lib/auth-client'
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react'
-import Link from 'next/link'
-import { useHotkeys } from 'react-hotkeys-hook'
-import { authClient } from '@/lib/auth-client'
+import { ThemeToggle } from '../theme/switch'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { data } = authClient.useSession()
-  useHotkeys(
-    'ctrl+u',
-    () => {
-      window.location.href = '/profile'
-    },
-    {
-      enabled: !!data?.user
-    }
-  )
+  const router = useRouter()
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              size="lg"
-            >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage
-                  alt={data?.user?.name}
-                  src={data?.user?.image || ''}
-                />
-                <AvatarFallback className="rounded-lg">
-                  {data?.user?.name
-                    ?.split(' ')
-                    .map((name) => name[0])
-                    .join('')}
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{data?.user?.name}</span>
-                <span className="truncate text-xs">{data?.user?.email}</span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-4" />
-            </SidebarMenuButton>
+          <DropdownMenuTrigger className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground flex w-full items-center gap-2 rounded-lg p-2 text-left text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring">
+            <Avatar className="h-8 w-8 rounded-lg">
+              <AvatarImage
+                alt={data?.user?.name}
+                src={data?.user?.image || ''}
+              />
+              <AvatarFallback className="rounded-lg">
+                {data?.user?.name
+                  ?.split(' ')
+                  .map((name) => name[0])
+                  .join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">{data?.user?.name}</span>
+              <span className="truncate text-xs">{data?.user?.email}</span>
+            </div>
+            <ChevronsUpDown className="ml-auto size-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
@@ -90,36 +74,20 @@ export function NavUser() {
                 </div>
               </div>
             </DropdownMenuLabel>
-            {/* <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+              <DropdownMenuItem
+                onClick={() => router.navigate({ to: '/profile' })}
+              >
+                <BadgeCheck />
+                Profile
               </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator /> */}
-            <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link href="/profile">
-                  <BadgeCheck />
-                  Profile
-                </Link>
-              </DropdownMenuItem>
-              {/* <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                 <div className="flex w-full items-center justify-between">
                   <span>Theme</span>
-                  <AnimatedThemeToggler />
+                  <ThemeToggle />
                 </div>
               </DropdownMenuItem>
             </DropdownMenuGroup>

@@ -1,0 +1,10 @@
+{
+  "root": false,
+  "extends": "//",
+  "overrides": [
+    {
+      "includes": ["e2e/**"],
+      "linter": { "enabled": false }
+    }
+  ]
+}

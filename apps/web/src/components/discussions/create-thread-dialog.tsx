@@ -1,5 +1,3 @@
-'use client'
-
 import { Button } from '@rov/ui/components/button'
 import {
   Dialog,
@@ -9,10 +7,10 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { orpc } from '@/utils/orpc'
 
 const createThreadSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),
@@ -22,7 +20,7 @@ const createThreadSchema = z.object({
   tags: z.array(z.string()).max(5).optional()
 })
 
-interface CreateThreadDialogProps {
+type CreateThreadDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   contextType: 'course' | 'society' | 'event' | 'project'
@@ -38,21 +36,30 @@ export function CreateThreadDialog({
   const queryClient = useQueryClient()
 
   const createMutation = useMutation(
-    orpc.discussion.thread.create.mutationOptions({
+    (data: {
+      title: string
+      content: string
+      type: 'question' | 'announcement' | 'discussion'
+      isAnonymous: boolean
+      tags?: string[]
+      contextType: 'course' | 'society' | 'event' | 'project'
+      contextId: string
+    }) => api.discussion.thread.create.post(data),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: orpc.discussion.thread.list.queryKey({
-            input: { contextType, contextId }
-          })
+          queryKey: ['discussion', 'thread', 'list', contextType, contextId]
         })
         toast.success('Discussion created successfully')
         onOpenChange(false)
         form.reset()
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to create discussion')
+      onError: (error) => {
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to create discussion'
+        )
       }
-    })
+    }
   )
 
   const form = useAppForm({

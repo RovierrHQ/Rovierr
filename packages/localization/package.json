@@ -1,0 +1,23 @@
+{
+  "name": "@rov/localization",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "type": "module",
+  "scripts": {},
+  "devDependencies": {
+    "@rov/config": "workspace:*"
+  },
+  "peerDependencies": {
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "i18next": "25.8.0",
+    "i18next-browser-languagedetector": "8.2.0"
+  }
+}

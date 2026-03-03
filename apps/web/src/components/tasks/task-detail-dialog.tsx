@@ -20,15 +20,18 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { Skeleton } from '@rov/ui/components/skeleton'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  useQueryClient,
+  useQuery as useTanstackQuery
+} from '@tanstack/react-query'
+import api, { useMutation } from '@web/lib/api-client'
 import { format } from 'date-fns'
 import { MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
-import type { Task, TaskAssignee, TaskComment } from './types'
+import type { Task } from './types'
 import { getPriorityColor } from './utils'
 
-interface TaskDetailDialogProps {
+type TaskDetailDialogProps = {
   taskId: string | null
   organizationId: string
   onClose: () => void
@@ -36,24 +39,28 @@ interface TaskDetailDialogProps {
 
 export function TaskDetailDialog({
   taskId,
-  organizationId,
+  organizationId: _,
   onClose
 }: TaskDetailDialogProps) {
   const queryClient = useQueryClient()
 
-  const { data: taskDetails, isLoading } = useQuery({
-    ...orpc.tasks.getTaskDetails.queryOptions({
-      input: { taskId: taskId || '' }
-    }),
+  const { data: taskDetails, isLoading } = useTanstackQuery({
+    queryKey: ['tasks', 'getTaskDetails', taskId],
+    queryFn: async () => {
+      const { data, error } = await api.tasks({ taskId: taskId || '' }).get()
+      if (error) throw error
+      return data
+    },
     enabled: !!taskId
   })
 
-  const updateTaskMutation = useMutation(
-    orpc.tasks.updateTask.mutationOptions()
-  )
+  const updateTaskMutation = useMutation(api.tasks.update.put)
 
   const addCommentMutation = useMutation(
-    orpc.tasks.addComment.mutationOptions()
+    (data: { taskId: string; message: string }) =>
+      api.tasks({ taskId: data.taskId }).comment.post({
+        message: data.message
+      })
   )
 
   const handleUpdateStatus = async (newStatus: Task['status']) => {
@@ -66,14 +73,10 @@ export function TaskDetailDialog({
       })
       toast.success('Task status updated')
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getClubTasks.queryKey({
-          input: { clubId: organizationId }
-        })
+        queryKey: ['tasks', 'getTaskDetails', taskId]
       })
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getTaskDetails.queryKey({
-          input: { taskId }
-        })
+        queryKey: ['tasks', 'getClubTasks']
       })
     } catch (error) {
       toast.error(
@@ -92,14 +95,10 @@ export function TaskDetailDialog({
       })
       toast.success('Comment added')
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getTaskDetails.queryKey({
-          input: { taskId }
-        })
+        queryKey: ['tasks', 'getTaskDetails', taskId]
       })
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getClubTasks.queryKey({
-          input: { clubId: organizationId }
-        })
+        queryKey: ['tasks', 'getClubTasks']
       })
     } catch (error) {
       toast.error(
@@ -189,7 +188,7 @@ export function TaskDetailDialog({
                   <Label>Assignees</Label>
                   <div className="flex flex-wrap gap-2">
                     {taskDetails.assignees.map((assignee) => {
-                      const user = (assignee as TaskAssignee).user
+                      const user = assignee.user
                       const userName =
                         user?.name || user?.email || 'Unknown User'
                       const userImage = user?.image || null
@@ -227,7 +226,7 @@ export function TaskDetailDialog({
                 <div className="space-y-4">
                   {taskDetails.comments && taskDetails.comments.length > 0 ? (
                     taskDetails.comments.map((comment) => {
-                      const user = (comment as TaskComment).user
+                      const user = comment.user
                       const userName =
                         user?.name || user?.email || 'Unknown User'
                       const userImage = user?.image || null

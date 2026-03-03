@@ -1,6 +1,6 @@
 import { BaseScraper } from '../types'
 
-interface InstitutionScraperData {
+type InstitutionScraperData = {
   name: string
   slug: string
   type: 'university' | 'high_school' | 'bootcamp' | 'coaching_center' | 'other'

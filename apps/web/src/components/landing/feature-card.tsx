@@ -1,9 +1,7 @@
-'use client'
-
+import { motion } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
-import { motion } from 'motion/react'
 
-interface FeatureCardProps {
+type FeatureCardProps = {
   title: string
   description: string
   icon: LucideIcon
@@ -26,7 +24,6 @@ export default function FeatureCard({
       viewport={{ once: true, margin: '-100px' }}
       whileInView={{ opacity: 1, y: 0 }}
     >
-      {/* Icon Section */}
       <div
         className={`flex items-center justify-center ${isReversed ? 'md:order-2' : 'md:order-1'}`}
       >
@@ -35,7 +32,6 @@ export default function FeatureCard({
         </div>
       </div>
 
-      {/* Content Section */}
       <div
         className={`space-y-4 text-center md:text-left ${isReversed ? 'md:order-1' : 'md:order-2'}`}
       >

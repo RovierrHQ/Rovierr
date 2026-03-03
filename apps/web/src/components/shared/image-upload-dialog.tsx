@@ -10,13 +10,14 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { Slider } from '@rov/ui/components/slider'
+import { Image as UnpicImage } from '@unpic/react'
 import { Loader2, Upload, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import type { Area, Point } from 'react-easy-crop'
 import Cropper from 'react-easy-crop'
 import { toast } from 'sonner'
 
-interface ImageUploadDialogProps {
+type ImageUploadDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   type: 'profile' | 'banner'
@@ -162,7 +163,7 @@ export function ImageUploadDialog({
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, 0)
       await onSave(croppedImage)
       handleClose()
-    } catch (_error) {
+    } catch {
       toast.error('Failed to process image')
     } finally {
       setIsSaving(false)
@@ -175,7 +176,7 @@ export function ImageUploadDialog({
       setIsSaving(true)
       await onRemove()
       handleClose()
-    } catch (_error) {
+    } catch {
       toast.error('Failed to remove image')
     } finally {
       setIsSaving(false)
@@ -216,7 +217,7 @@ export function ImageUploadDialog({
 
               <div className="space-y-2">
                 <label
-                  className="text-muted-foreground text-sm"
+                  className="text-sm text-muted-foreground"
                   htmlFor="zoom-slider"
                 >
                   Zoom: {Math.round(zoom * 100)}%
@@ -225,7 +226,9 @@ export function ImageUploadDialog({
                   id="zoom-slider"
                   max={3}
                   min={1}
-                  onValueChange={(value) => setZoom(value[0] ?? 1)}
+                  onValueChange={(value) =>
+                    setZoom((value as number[])[0] ?? 1)
+                  }
                   step={0.1}
                   value={[zoom]}
                 />
@@ -251,12 +254,14 @@ export function ImageUploadDialog({
             <div className="space-y-4">
               {currentImageUrl && (
                 <div className="relative overflow-hidden rounded-lg border">
-                  <img
+                  <UnpicImage
                     alt={
                       type === 'profile' ? 'Current profile' : 'Current banner'
                     }
                     className="h-auto w-full object-cover"
+                    height={type === 'profile' ? 200 : 100}
                     src={currentImageUrl}
+                    width={type === 'profile' ? 200 : 400}
                   />
                 </div>
               )}
@@ -272,8 +277,8 @@ export function ImageUploadDialog({
                     <Upload className="h-8 w-8 text-primary" />
                   </div>
                   <div className="text-center">
-                    <p className="font-medium text-sm">Click to upload image</p>
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-sm font-medium">Click to upload image</p>
+                    <p className="text-xs text-muted-foreground">
                       PNG, JPG up to 10MB
                     </p>
                   </div>

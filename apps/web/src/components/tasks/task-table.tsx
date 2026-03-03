@@ -17,15 +17,14 @@ import {
   TableHeader,
   TableRow
 } from '@rov/ui/components/table'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import api, { useMutation, useQueryClient } from '@web/lib/api-client'
 import { format } from 'date-fns'
 import { Calendar, MessageSquare, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 import type { Task } from './types'
 import { getPriorityColor, getStatusIcon } from './utils'
 
-interface TaskTableProps {
+type TaskTableProps = {
   tasks: Task[]
   isLoading: boolean
   organizationId: string
@@ -36,14 +35,34 @@ interface TaskTableProps {
 export function TaskTable({
   tasks,
   isLoading,
-  organizationId,
+  //organizationId,
   onTaskClick,
   onStatusChange
 }: TaskTableProps) {
   const queryClient = useQueryClient()
 
   const updateTaskMutation = useMutation(
-    orpc.tasks.updateTask.mutationOptions()
+    (data: {
+      taskId: string
+      title?: string
+      description?: string
+      priority?: 'low' | 'medium' | 'high'
+      status?: 'todo' | 'in_progress' | 'done'
+      visibility?: 'private' | 'assignees' | 'club'
+      dueAt?: string
+      startAt?: string
+      isAllDay?: boolean
+    }) => api.tasks.update.put(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['tasks'] })
+        toast.success('Task updated successfully')
+      },
+      onError: (error) => {
+        toast.error('Failed to update task')
+        console.error(error)
+      }
+    }
   )
 
   const handleStatusChange = async (
@@ -57,17 +76,15 @@ export function TaskTable({
       })
       toast.success('Task status updated')
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getClubTasks.queryKey({
-          input: { clubId: organizationId }
-        })
+        queryKey: ['tasks', 'getTaskDetails', taskId]
       })
       queryClient.invalidateQueries({
-        queryKey: orpc.tasks.getTaskDetails.queryKey({
-          input: { taskId }
-        })
+        queryKey: ['tasks', 'getClubTasks']
       })
       onStatusChange(taskId, newStatus)
     } catch (error) {
+      // The error toast is handled by the mutation's onError, but we can add more specific handling here if needed
+      // For now, we'll keep the original error message structure if it's not handled by the mutation's onError
       toast.error(
         error instanceof Error ? error.message : 'Failed to update task'
       )

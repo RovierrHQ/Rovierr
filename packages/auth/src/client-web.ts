@@ -1,8 +1,3 @@
-/**
- * Web client-side auth utilities
- * Separate file to avoid bundling Expo modules in web apps
- */
-
 import {
   customSessionClient,
   emailOTPClient,
@@ -20,7 +15,7 @@ import { ac } from './permissions'
 /**
  * Web Auth Client Configuration
  */
-export interface WebAuthClientConfig {
+export type WebAuthClientConfig = {
   baseURL: string
   googleClientId: string
   oneTapOptions?: {
@@ -76,7 +71,7 @@ export function createWebAuthClient(config: WebAuthClientConfig) {
 /**
  * Basic Auth Client Configuration
  */
-export interface BasicAuthClientConfig {
+export type BasicAuthClientConfig = {
   baseURL: string
 }
 

@@ -1,5 +1,15 @@
 'use client'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@rov/ui/components/alert-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import {
@@ -12,13 +22,13 @@ import {
 import { Input } from '@rov/ui/components/input'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { format } from 'date-fns'
 import { Search, Trash2, Users } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
 
-interface TeamMembersProps {
+type TeamMembersProps = {
   organizationId: string
   teamId: string
 }
@@ -50,6 +60,10 @@ function hasData<T>(
 export function TeamMembers({ organizationId, teamId }: TeamMembersProps) {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState('')
+  const [removeConfirm, setRemoveConfirm] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   // Fetch team members
   const {
@@ -140,12 +154,7 @@ export function TeamMembers({ organizationId, teamId }: TeamMembersProps) {
   })
 
   const handleRemoveMember = (userId: string, memberName: string) => {
-    if (
-      !confirm(`Are you sure you want to remove ${memberName} from this team?`)
-    ) {
-      return
-    }
-    removeMemberMutation.mutate(userId)
+    setRemoveConfirm({ id: userId, name: memberName })
   }
 
   if (isLoading) {
@@ -180,110 +189,140 @@ export function TeamMembers({ organizationId, teamId }: TeamMembersProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Team Members ({members.length})</CardTitle>
-            <CardDescription>Manage members in this team</CardDescription>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Team Members ({members.length})</CardTitle>
+              <CardDescription>Manage members in this team</CardDescription>
+            </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              className="pl-9"
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search members by name or email..."
-              value={searchQuery}
-            />
-          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search members by name or email..."
+                value={searchQuery}
+              />
+            </div>
 
-          {/* Members List */}
-          {filteredMembers.length === 0 ? (
-            <div className="py-12 text-center">
-              <Users className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-              <p className="text-muted-foreground">
-                {searchQuery
-                  ? 'No members found matching your search'
-                  : 'No members in this team yet'}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {filteredMembers.map((member) => {
-                const m = member as {
-                  id: string
-                  userId: string
-                  createdAt: Date | string
-                  user?: {
+            {/* Members List */}
+            {filteredMembers.length === 0 ? (
+              <div className="py-12 text-center">
+                <Users className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                <p className="text-muted-foreground">
+                  {searchQuery
+                    ? 'No members found matching your search'
+                    : 'No members in this team yet'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredMembers.map((member) => {
+                  const m = member as {
                     id: string
-                    name?: string
-                    email?: string
-                    image?: string | null
+                    userId: string
+                    createdAt: Date | string
+                    user?: {
+                      id: string
+                      name?: string
+                      email?: string
+                      image?: string | null
+                    }
                   }
-                }
-                return (
-                  <div
-                    className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50"
-                    key={m.id}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          alt={m.user?.name ?? ''}
-                          src={m.user?.image ?? undefined}
-                        />
-                        <AvatarFallback>
-                          {m.user?.name
-                            ?.split(' ')
-                            .map((n: string) => n[0])
-                            .join('')
-                            .toUpperCase()
-                            .slice(0, 2) ?? 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">
-                          {m.user?.name ?? 'Unknown User'}
+                  return (
+                    <div
+                      className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50"
+                      key={m.id}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            alt={m.user?.name ?? ''}
+                            src={m.user?.image ?? undefined}
+                          />
+                          <AvatarFallback>
+                            {m.user?.name
+                              ?.split(' ')
+                              .map((n: string) => n[0])
+                              .join('')
+                              .toUpperCase()
+                              .slice(0, 2) ?? 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">
+                            {m.user?.name ?? 'Unknown User'}
+                          </div>
+                          <div className="text-muted-foreground text-sm">
+                            {m.user?.email ?? ''}
+                          </div>
                         </div>
+                      </div>
+                      <div className="flex items-center gap-4">
                         <div className="text-muted-foreground text-sm">
-                          {m.user?.email ?? ''}
+                          Added{' '}
+                          {m.createdAt
+                            ? format(new Date(m.createdAt), 'MMM d, yyyy')
+                            : 'N/A'}
                         </div>
+                        {canManageMembers && (
+                          <Button
+                            onClick={() =>
+                              handleRemoveMember(
+                                m.userId ?? m.user?.id ?? '',
+                                m.user?.name ?? 'this member'
+                              )
+                            }
+                            size="sm"
+                            variant="ghost"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-muted-foreground text-sm">
-                        Added{' '}
-                        {m.createdAt
-                          ? format(new Date(m.createdAt), 'MMM d, yyyy')
-                          : 'N/A'}
-                      </div>
-                      {canManageMembers && (
-                        <Button
-                          onClick={() =>
-                            handleRemoveMember(
-                              m.userId ?? m.user?.id ?? '',
-                              m.user?.name ?? 'this member'
-                            )
-                          }
-                          size="sm"
-                          variant="ghost"
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      <AlertDialog
+        onOpenChange={(open) => !open && setRemoveConfirm(null)}
+        open={!!removeConfirm}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove member</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove {removeConfirm?.name} from this
+              team?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (removeConfirm) {
+                  removeMemberMutation.mutate(removeConfirm.id)
+                  setRemoveConfirm(null)
+                }
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

@@ -1,5 +1,15 @@
 'use client'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@rov/ui/components/alert-dialog'
 import { Button } from '@rov/ui/components/button'
 import {
   Card,
@@ -17,15 +27,15 @@ import {
 import { Input } from '@rov/ui/components/input'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { format } from 'date-fns'
 import { MoreVertical, Search, Trash2, Users } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
 import { AssignMembersDialog } from './assign-members-dialog'
 import { CreateTeamDialog } from './create-team-dialog'
 
-interface TeamListProps {
+type TeamListProps = {
   organizationId: string
 }
 
@@ -57,6 +67,10 @@ export function TeamList({ organizationId }: TeamListProps) {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   // Fetch teams
   const {
@@ -192,14 +206,7 @@ export function TeamList({ organizationId }: TeamListProps) {
   })
 
   const handleDeleteTeam = (teamId: string, teamName: string) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete "${teamName}"? This will remove all team members from this team.`
-      )
-    ) {
-      return
-    }
-    deleteTeamMutation.mutate(teamId)
+    setDeleteConfirm({ id: teamId, name: teamName })
   }
 
   if (isLoading) {
@@ -308,7 +315,15 @@ export function TeamList({ organizationId }: TeamListProps) {
                           </div>
                           {canManageTeams && (
                             <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
+                              <DropdownMenuTrigger
+                                render={(props) => (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    {...props}
+                                  />
+                                )}
+                              >
                                 <Button size="sm" variant="ghost">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
@@ -372,6 +387,34 @@ export function TeamList({ organizationId }: TeamListProps) {
           teamId={selectedTeamId}
         />
       )}
+      <AlertDialog
+        onOpenChange={(open) => !open && setDeleteConfirm(null)}
+        open={!!deleteConfirm}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete team</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{deleteConfirm?.name}&quot;?
+              This will remove all team members from this team.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteConfirm) {
+                  deleteTeamMutation.mutate(deleteConfirm.id)
+                  setDeleteConfirm(null)
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

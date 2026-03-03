@@ -1,59 +1,54 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from '@rov/ui/components/card'
-import { MessageSquare, ThumbsUp, TrendingUp } from 'lucide-react'
+import { Card } from '@rov/ui/components/card'
 
-interface DiscussionStatsProps {
-  totalDiscussions: number
-  activeToday: number
-  userContributions: number
+type DiscussionStatsProps = {
+  // Legacy props (from legacy-nextjs)
+  totalDiscussions?: number
+  activeToday?: number
+  userContributions?: number
+  // Current props (from web)
+  totalThreads?: number
+  totalReplies?: number
+  activeUsers?: number
 }
 
 export function DiscussionStats({
   totalDiscussions,
   activeToday,
-  userContributions
+  userContributions,
+  totalThreads,
+  totalReplies,
+  activeUsers
 }: DiscussionStatsProps) {
+  // Use legacy props if provided, otherwise use current props
+  const threads = totalDiscussions ?? totalThreads ?? 0
+  const replies = totalReplies ?? 0
+  const users = activeToday ?? activeUsers ?? 0
+
   return (
-    <div className="mb-6 grid gap-4 md:grid-cols-3">
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <MessageSquare className="h-4 w-4" />
-            Total Discussions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="font-bold text-2xl">{totalDiscussions}</div>
-        </CardContent>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <Card className="p-6 text-center">
+        <div className="text-2xl font-bold text-primary mb-1">{threads}</div>
+        <div className="text-sm text-muted-foreground">
+          {totalDiscussions !== undefined
+            ? 'Total Discussions'
+            : 'Total Threads'}
+        </div>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <TrendingUp className="h-4 w-4" />
-            Active Today
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="font-bold text-2xl">{activeToday}</div>
-        </CardContent>
+      <Card className="p-6 text-center">
+        <div className="text-2xl font-bold text-primary mb-1">
+          {replies || (userContributions ?? 0)}
+        </div>
+        <div className="text-sm text-muted-foreground">
+          {totalReplies !== undefined ? 'Total Replies' : 'Contributions'}
+        </div>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <ThumbsUp className="h-4 w-4" />
-            Your Contributions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="font-bold text-2xl">{userContributions}</div>
-          <p className="text-muted-foreground text-xs">posts & replies</p>
-        </CardContent>
+      <Card className="p-6 text-center">
+        <div className="text-2xl font-bold text-primary mb-1">{users}</div>
+        <div className="text-sm text-muted-foreground">
+          {activeToday !== undefined ? 'Active Today' : 'Active Users'}
+        </div>
       </Card>
     </div>
   )

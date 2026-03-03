@@ -23,13 +23,14 @@ import {
   XCircle
 } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
-interface SplitMember {
+type SplitMember = {
   name: string
   amount: number
 }
 
-interface Expense {
+type Expense = {
   id: string
   description: string
   category: string
@@ -50,7 +51,7 @@ interface Expense {
   rejectionReason?: string
 }
 
-interface ExpenseDetailModalProps {
+type ExpenseDetailModalProps = {
   expense: Expense
   isOpen: boolean
   onClose: () => void
@@ -67,18 +68,20 @@ export function ExpenseDetailModal({
 
   const handleApprove = () => {
     // In a real app, this would call an API to approve the expense
-    alert(`Expense ${expense.id} approved!`)
+    toast.success(`Expense ${expense.id} approved!`)
     onClose()
   }
 
   const handleReject = () => {
     // In a real app, this would call an API to reject the expense
-    alert(`Expense ${expense.id} rejected with reason: ${approvalComment}`)
+    toast.success(
+      `Expense ${expense.id} rejected with reason: ${approvalComment}`
+    )
     onClose()
   }
 
   const handleMarkPaid = () => {
-    alert(`Expense ${expense.id} marked as paid!`)
+    toast.success(`Expense ${expense.id} marked as paid!`)
     onClose()
   }
 

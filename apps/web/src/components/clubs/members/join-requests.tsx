@@ -22,14 +22,14 @@ import {
 } from '@rov/ui/components/card'
 import { Checkbox } from '@rov/ui/components/checkbox'
 import { Skeleton } from '@rov/ui/components/skeleton'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { format } from 'date-fns'
 import { Check, ClipboardList, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
 
-interface JoinRequestsProps {
+type JoinRequestsProps = {
   organizationId: string
 }
 
@@ -45,19 +45,29 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
     data: joinRequestsData,
     isLoading,
     error
-  } = useQuery(
-    orpc.societyRegistration.joinRequest.list.queryOptions({
-      input: {
-        societyId: organizationId,
-        status: ['pending'],
-        limit: 100,
-        offset: 0
-      }
-    })
-  )
+  } = useQuery({
+    queryKey: ['join-requests', organizationId],
+    queryFn: async () => {
+      const response = await api.society.registration['join-request'].list.get({
+        query: {
+          societyId: organizationId,
+          status: ['pending'],
+          limit: 100,
+          offset: 0
+        }
+      })
+      return response
+    }
+  })
 
   const approveMutation = useMutation(
-    orpc.societyRegistration.joinRequest.approve.mutationOptions({
+    async (requestId: string) => {
+      const response = await api.society.registration['join-request']({
+        id: requestId
+      }).approve.post()
+      return response
+    },
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['join-requests', organizationId]
@@ -68,14 +78,24 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         toast.success('Join request approved')
         setSelectedRequests(new Set())
       },
-      onError: (err: Error) => {
-        toast.error(err.message || 'Failed to approve join request')
+      onError: (err: unknown) => {
+        const message =
+          (err as { value?: { message?: string } })?.value?.message ||
+          (err instanceof Error && err.message) ||
+          'Failed to approve join request'
+        toast.error(message)
       }
-    })
+    }
   )
 
   const rejectMutation = useMutation(
-    orpc.societyRegistration.joinRequest.reject.mutationOptions({
+    async (requestId: string) => {
+      const response = await api.society.registration['join-request']({
+        id: requestId
+      }).reject.post()
+      return response
+    },
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['join-requests', organizationId]
@@ -85,14 +105,24 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         setRequestToReject(null)
         setSelectedRequests(new Set())
       },
-      onError: (err: Error) => {
-        toast.error(err.message || 'Failed to reject join request')
+      onError: (err: unknown) => {
+        const message =
+          (err as { value?: { message?: string } })?.value?.message ||
+          (err instanceof Error && err.message) ||
+          'Failed to approve join request'
+        toast.error(message)
       }
-    })
+    }
   )
 
   const bulkApproveMutation = useMutation(
-    orpc.societyRegistration.joinRequest.bulkApprove.mutationOptions({
+    async (ids: string[]) => {
+      const response = await api.society.registration['join-request'][
+        'bulk-approve'
+      ].post({ ids })
+      return response
+    },
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['join-requests', organizationId]
@@ -103,14 +133,24 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         toast.success('Join requests approved')
         setSelectedRequests(new Set())
       },
-      onError: (err: Error) => {
-        toast.error(err.message || 'Failed to approve join requests')
+      onError: (err: unknown) => {
+        const message =
+          (err as { value?: { message?: string } })?.value?.message ||
+          (err instanceof Error && err.message) ||
+          'Failed to approve join request'
+        toast.error(message)
       }
-    })
+    }
   )
 
   const bulkRejectMutation = useMutation(
-    orpc.societyRegistration.joinRequest.bulkReject.mutationOptions({
+    async (ids: string[]) => {
+      const response = await api.society.registration['join-request'][
+        'bulk-reject'
+      ].post({ ids })
+      return response
+    },
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['join-requests', organizationId]
@@ -118,14 +158,18 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
         toast.success('Join requests rejected')
         setSelectedRequests(new Set())
       },
-      onError: (err: Error) => {
-        toast.error(err.message || 'Failed to reject join requests')
+      onError: (err: unknown) => {
+        const message =
+          (err as { value?: { message?: string } })?.value?.message ||
+          (err instanceof Error && err.message) ||
+          'Failed to approve join request'
+        toast.error(message)
       }
-    })
+    }
   )
 
   const handleApprove = async (requestId: string) => {
-    await approveMutation.mutateAsync({ id: requestId })
+    await approveMutation.mutateAsync(requestId)
   }
 
   const handleRejectClick = (requestId: string) => {
@@ -135,21 +179,17 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
 
   const handleConfirmReject = async () => {
     if (!requestToReject) return
-    await rejectMutation.mutateAsync({ id: requestToReject })
+    await rejectMutation.mutateAsync(requestToReject)
   }
 
   const handleBulkApprove = async () => {
     if (selectedRequests.size === 0) return
-    await bulkApproveMutation.mutateAsync({
-      ids: Array.from(selectedRequests)
-    })
+    await bulkApproveMutation.mutateAsync(Array.from(selectedRequests))
   }
 
   const handleBulkReject = async () => {
     if (selectedRequests.size === 0) return
-    await bulkRejectMutation.mutateAsync({
-      ids: Array.from(selectedRequests)
-    })
+    await bulkRejectMutation.mutateAsync(Array.from(selectedRequests))
   }
 
   const toggleRequestSelection = (requestId: string) => {
@@ -292,7 +332,7 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
                   <AvatarFallback>
                     {request.userName
                       .split(' ')
-                      .map((n) => n[0])
+                      .map((n: string) => n[0])
                       .join('')
                       .toUpperCase()
                       .slice(0, 2)}

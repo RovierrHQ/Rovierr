@@ -1,239 +1,155 @@
-'use client'
-
-import type { ConversationWithLastMessage } from '@rov/orpc-contracts'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
-import { Input } from '@rov/ui/components/input'
-import { ScrollArea } from '@rov/ui/components/scroll-area'
-import { Separator } from '@rov/ui/components/separator'
-import { cn } from '@rov/ui/lib/utils'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { formatDistanceToNow } from 'date-fns'
-import { MessageCircle, Search, UserPlus } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
+import { Badge } from '@rov/ui/components/badge'
+import { Button } from '@rov/ui/components/button'
+import { Card } from '@rov/ui/components/card'
+import { MessageCircle, Users } from 'lucide-react'
+import type { FC } from 'react'
 
-interface ConversationListProps {
-  conversations: ConversationWithLastMessage[]
-  connections: Array<{
+type Connection = {
+  id: string
+  name: string
+  avatar?: string
+  type: 'user' | 'group'
+}
+
+type Conversation = {
+  id: string
+  participant: {
     id: string
-    user: {
-      id: string
-      name: string
-      username: string | null
-      image: string | null
-    } | null
-  }>
+    name: string
+    avatar?: string
+  }
+  lastMessage?: {
+    content: string
+    timestamp: string
+  }
+  unreadCount?: number
+  updatedAt: string
+}
+
+type ConversationListProps = {
+  conversations: Conversation[]
+  connections: Connection[]
   onSelect: (conversationId: string) => void
 }
 
-export function ConversationList({
+export const ConversationList: FC<ConversationListProps> = ({
   conversations,
   connections,
   onSelect
-}: ConversationListProps) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const queryClient = useQueryClient()
+}) => {
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60_000)
+    const diffHours = Math.floor(diffMs / 3_600_000)
+    const diffDays = Math.floor(diffMs / 86_400_000)
 
-  const createConversationMutation = useMutation(
-    orpc.chat.getOrCreateConversation.mutationOptions({
-      onSuccess: (data) => {
-        queryClient.invalidateQueries({
-          queryKey: ['chat', 'listConversations']
-        })
-        onSelect(data.id)
-      },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to start conversation')
-      }
-    })
-  )
-
-  const filteredConversations = conversations.filter((conv) => {
-    if (!searchQuery) return true
-    const query = searchQuery.toLowerCase()
-    return (
-      conv.otherParticipant?.name.toLowerCase().includes(query) ||
-      conv.lastMessage?.content.toLowerCase().includes(query)
-    )
-  })
-
-  const filteredConnections = connections.filter((conn) => {
-    if (!searchQuery) return true
-    const query = searchQuery.toLowerCase()
-    return conn.user?.name.toLowerCase().includes(query)
-  })
-
-  // Filter out connections that already have conversations
-  const conversationUserIds = new Set(
-    conversations.map((conv) => conv.otherParticipant?.id).filter(Boolean)
-  )
-  const connectionsWithoutConversations = filteredConnections.filter(
-    (conn) => conn.user && !conversationUserIds.has(conn.user.id)
-  )
-
-  const handleStartChat = (userId: string) => {
-    createConversationMutation.mutate({ userId })
-  }
-
-  if (conversations.length === 0 && connections.length === 0) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-        <MessageCircle className="mb-4 h-12 w-12 text-muted-foreground" />
-        <h3 className="mb-2 font-semibold text-lg">No conversations yet</h3>
-        <p className="text-muted-foreground text-sm">
-          Connect with people to start chatting
-        </p>
-      </div>
-    )
+    if (diffMins < 1) return 'now'
+    if (diffMins < 60) return `${diffMins}m`
+    if (diffHours < 24) return `${diffHours}h`
+    if (diffDays < 7) return `${diffDays}d`
+    return date.toLocaleDateString()
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="px-4 pb-4">
-        <div className="relative">
-          <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            className="pl-9"
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search conversations..."
-            value={searchQuery}
-          />
-        </div>
-      </div>
-
-      <ScrollArea className="flex-1">
-        <div className="space-y-1 px-2">
-          {connectionsWithoutConversations.length > 0 && (
-            <>
-              <div className="px-3 py-2 font-semibold text-muted-foreground text-xs uppercase">
-                Start New Chat
-              </div>
-              {connectionsWithoutConversations.map((connection) => {
-                const user = connection.user
-                if (!user) return null
-
-                return (
-                  <button
-                    className="flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-accent"
-                    disabled={createConversationMutation.isPending}
-                    key={connection.id}
-                    onClick={() => handleStartChat(user.id)}
-                    type="button"
+    <div className="flex-1 overflow-y-auto">
+      {conversations.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+          <MessageCircle className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No conversations yet</h3>
+          <p className="text-muted-foreground mb-4">
+            Start a conversation with someone from your connections
+          </p>
+          <div className="space-y-2 w-full max-w-sm">
+            {connections.slice(0, 3).map((connection) => (
+              <Card className="p-3" key={connection.id}>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={connection.avatar} />
+                    <AvatarFallback>
+                      {connection.type === 'group' ? (
+                        <Users className="h-4 w-4" />
+                      ) : (
+                        connection.name[0]
+                      )}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {connection.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {connection.type === 'group' ? 'Group' : 'User'}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      // Create new conversation logic would go here
+                      console.log('Start conversation with', connection.id)
+                    }}
+                    size="sm"
+                    variant="outline"
                   >
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={user.image || undefined} />
-                      <AvatarFallback>
-                        {user.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')
-                          .toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="truncate font-medium">{user.name}</h4>
-                      {user.username && (
-                        <p className="truncate text-muted-foreground text-sm">
-                          @{user.username}
-                        </p>
-                      )}
-                    </div>
-                    <UserPlus className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                )
-              })}
-              {filteredConversations.length > 0 && (
-                <Separator className="my-2" />
-              )}
-            </>
-          )}
-
-          {filteredConversations.length > 0 && (
-            <>
-              <div className="px-3 py-2 font-semibold text-muted-foreground text-xs uppercase">
-                Recent Conversations
-              </div>
-              {filteredConversations.map((conversation) => (
-                <button
-                  className={cn(
-                    'flex w-full items-start gap-3 rounded-lg p-3 text-left transition-colors hover:bg-accent',
-                    conversation.unreadCount > 0 && 'bg-accent/50'
-                  )}
-                  key={conversation.id}
-                  onClick={() => onSelect(conversation.id)}
-                  type="button"
-                >
-                  <div className="relative">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage
-                        src={conversation.otherParticipant?.image || undefined}
-                      />
-                      <AvatarFallback>
-                        {conversation.otherParticipant?.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')
-                          .toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    {conversation.unreadCount > 0 && (
-                      <div className="-top-1 -right-1 absolute flex h-5 w-5 items-center justify-center rounded-full bg-primary">
-                        <span className="font-medium text-primary-foreground text-xs">
-                          {conversation.unreadCount > 9
-                            ? '9+'
-                            : conversation.unreadCount}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-1 flex items-center justify-between">
-                      <h4
-                        className={cn(
-                          'truncate font-medium',
-                          conversation.unreadCount > 0 && 'font-semibold'
-                        )}
-                      >
-                        {conversation.otherParticipant?.name}
-                      </h4>
-                      {conversation.lastMessageAt && (
-                        <span className="ml-2 flex-shrink-0 text-muted-foreground text-xs">
-                          {formatDistanceToNow(
-                            new Date(conversation.lastMessageAt),
-                            {
-                              addSuffix: false
-                            }
-                          )}
-                        </span>
-                      )}
-                    </div>
-
-                    {conversation.lastMessage && (
-                      <p
-                        className={cn(
-                          'truncate text-muted-foreground text-sm',
-                          conversation.unreadCount > 0 && 'font-medium'
-                        )}
-                      >
-                        {conversation.lastMessage.content}
-                      </p>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </>
-          )}
-
-          {filteredConversations.length === 0 &&
-            connectionsWithoutConversations.length === 0 && (
-              <div className="py-8 text-center text-muted-foreground text-sm">
-                No conversations found
-              </div>
-            )}
+                    Message
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
-      </ScrollArea>
+      ) : (
+        <div className="space-y-1">
+          {conversations.map((conversation) => (
+            <Card
+              className="cursor-pointer transition-colors hover:bg-accent/50 border-0 rounded-none"
+              key={conversation.id}
+              onClick={() => onSelect(conversation.id)}
+            >
+              <div className="p-4">
+                <div className="flex items-start gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={conversation.participant.avatar} />
+                    <AvatarFallback>
+                      {conversation.participant.name[0]}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-medium text-sm truncate">
+                        {conversation.participant.name}
+                      </p>
+                      <span className="text-xs text-muted-foreground">
+                        {conversation.updatedAt &&
+                          formatTime(conversation.updatedAt)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground truncate">
+                        {conversation.lastMessage?.content || 'No messages yet'}
+                      </p>
+                      {conversation.unreadCount &&
+                        conversation.unreadCount > 0 && (
+                          <Badge
+                            className="ml-2 px-2 py-0 text-xs min-w-[20px] text-center"
+                            variant="destructive"
+                          >
+                            {conversation.unreadCount > 99
+                              ? '99+'
+                              : conversation.unreadCount}
+                          </Badge>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,5 +1,15 @@
 'use client'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@rov/ui/components/alert-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
@@ -26,15 +36,15 @@ import {
 } from '@rov/ui/components/select'
 import { Skeleton } from '@rov/ui/components/skeleton'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { format } from 'date-fns'
 import { MoreVertical, Search, Trash2, UserCog } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
 import { ChangeRoleDialog } from './change-role-dialog'
 import { InviteMemberDialog } from './invite-member-dialog'
 
-interface MemberListProps {
+type MemberListProps = {
   organizationId: string
 }
 
@@ -43,6 +53,10 @@ export function MemberList({ organizationId }: MemberListProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
   const [page, setPage] = useState(0)
+  const [removeConfirm, setRemoveConfirm] = useState<{
+    id: string
+    name: string
+  } | null>(null)
   const limit = 20
 
   // Fetch members
@@ -163,14 +177,7 @@ export function MemberList({ organizationId }: MemberListProps) {
   )
 
   const handleRemoveMember = (memberId: string, memberName: string) => {
-    if (
-      !confirm(
-        `Are you sure you want to remove ${memberName} from this organization?`
-      )
-    ) {
-      return
-    }
-    removeMemberMutation.mutate(memberId)
+    setRemoveConfirm({ id: memberId, name: memberName })
   }
 
   if (isLoading) {
@@ -237,7 +244,10 @@ export function MemberList({ organizationId }: MemberListProps) {
                 value={searchQuery}
               />
             </div>
-            <Select onValueChange={setRoleFilter} value={roleFilter}>
+            <Select
+              onValueChange={(value) => setRoleFilter(value ?? 'all')}
+              value={roleFilter}
+            >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
@@ -336,10 +346,16 @@ export function MemberList({ organizationId }: MemberListProps) {
                           <td className="p-4">
                             <div className="flex justify-end">
                               <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button size="sm" variant="ghost">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
+                                <DropdownMenuTrigger
+                                  render={(props) => (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      {...props}
+                                    />
+                                  )}
+                                >
+                                  <MoreVertical className="h-4 w-4" />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <ChangeRoleDialog
@@ -409,6 +425,34 @@ export function MemberList({ organizationId }: MemberListProps) {
           )}
         </div>
       </CardContent>
+      <AlertDialog
+        onOpenChange={(open) => !open && setRemoveConfirm(null)}
+        open={!!removeConfirm}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove member</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove {removeConfirm?.name} from this
+              organization?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (removeConfirm) {
+                  removeMemberMutation.mutate(removeConfirm.id)
+                  setRemoveConfirm(null)
+                }
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }

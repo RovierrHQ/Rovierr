@@ -2,7 +2,7 @@ import { CircularDependencyError } from '../errors'
 import type { DependencyGraph, SeedModule } from '../types'
 
 export class DependencyResolver {
-  private graph: DependencyGraph = new Map()
+  private readonly graph: DependencyGraph = new Map()
 
   constructor(modules: SeedModule[]) {
     this.buildGraph(modules)

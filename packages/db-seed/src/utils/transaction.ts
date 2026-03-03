@@ -1,7 +1,7 @@
 import type { DB } from '@rov/db'
 
 export class TransactionManager {
-  private db: DB
+  private readonly db: DB
   private inTransaction = false
 
   constructor(db: DB) {

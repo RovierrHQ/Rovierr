@@ -1,7 +1,6 @@
 'use client'
 
 import {
-  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -9,6 +8,8 @@ import {
   CommandList,
   CommandSeparator
 } from '@rov/ui/components/command'
+import { Dialog, DialogContent } from '@rov/ui/components/dialog'
+import { useRouter } from '@tanstack/react-router'
 import {
   BookOpen,
   Briefcase,
@@ -30,10 +31,9 @@ import {
   Wallet,
   Zap
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-interface MenuItem {
+type MenuItem = {
   id: string
   label: string
   icon: React.ComponentType<{ className?: string }>
@@ -205,115 +205,117 @@ export function CommandMenu() {
 
   const handleSelect = (href: string) => {
     setOpen(false)
-    router.push(href)
+    router.navigate({ to: href })
   }
 
   return (
-    <CommandDialog onOpenChange={setOpen} open={open}>
-      <CommandInput placeholder="Search for pages and sections..." />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+    <Dialog onOpenChange={setOpen} open={open}>
+      <DialogContent className="overflow-hidden p-0 shadow-lg">
+        <CommandInput placeholder="Search for pages and sections..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
 
-        <CommandGroup heading="Quick Actions">
-          {commandItems.slice(0, 1).map((item) => {
-            const Icon = item.icon
-            return (
-              <CommandItem
-                key={item.id}
-                onSelect={() => handleSelect(item.href)}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </CommandItem>
-            )
-          })}
-        </CommandGroup>
+          <CommandGroup heading="Quick Actions">
+            {commandItems.slice(0, 1).map((item) => {
+              const Icon = item.icon
+              return (
+                <CommandItem
+                  key={item.id}
+                  onSelect={() => handleSelect(item.href)}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
 
-        <CommandSeparator />
+          <CommandSeparator />
 
-        <CommandGroup heading="Spaces">
-          {commandItems.slice(1, 6).map((item) => {
-            const Icon = item.icon
-            return (
-              <CommandItem
-                key={item.id}
-                onSelect={() => handleSelect(item.href)}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </CommandItem>
-            )
-          })}
-        </CommandGroup>
+          <CommandGroup heading="Spaces">
+            {commandItems.slice(1, 6).map((item) => {
+              const Icon = item.icon
+              return (
+                <CommandItem
+                  key={item.id}
+                  onSelect={() => handleSelect(item.href)}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
 
-        <CommandSeparator />
+          <CommandSeparator />
 
-        <CommandGroup heading="Education & Academics">
-          {commandItems.slice(6, 10).map((item) => {
-            const Icon = item.icon
-            return (
-              <CommandItem
-                key={item.id}
-                onSelect={() => handleSelect(item.href)}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </CommandItem>
-            )
-          })}
-        </CommandGroup>
+          <CommandGroup heading="Education & Academics">
+            {commandItems.slice(6, 10).map((item) => {
+              const Icon = item.icon
+              return (
+                <CommandItem
+                  key={item.id}
+                  onSelect={() => handleSelect(item.href)}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
 
-        <CommandSeparator />
+          <CommandSeparator />
 
-        <CommandGroup heading="Social">
-          {commandItems.slice(10, 14).map((item) => {
-            const Icon = item.icon
-            return (
-              <CommandItem
-                key={item.id}
-                onSelect={() => handleSelect(item.href)}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </CommandItem>
-            )
-          })}
-        </CommandGroup>
+          <CommandGroup heading="Social">
+            {commandItems.slice(10, 14).map((item) => {
+              const Icon = item.icon
+              return (
+                <CommandItem
+                  key={item.id}
+                  onSelect={() => handleSelect(item.href)}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
 
-        <CommandSeparator />
+          <CommandSeparator />
 
-        <CommandGroup heading="Career">
-          {commandItems.slice(14, 18).map((item) => {
-            const Icon = item.icon
-            return (
-              <CommandItem
-                key={item.id}
-                onSelect={() => handleSelect(item.href)}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </CommandItem>
-            )
-          })}
-        </CommandGroup>
+          <CommandGroup heading="Career">
+            {commandItems.slice(14, 18).map((item) => {
+              const Icon = item.icon
+              return (
+                <CommandItem
+                  key={item.id}
+                  onSelect={() => handleSelect(item.href)}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
 
-        <CommandSeparator />
+          <CommandSeparator />
 
-        <CommandGroup heading="Personal">
-          {commandItems.slice(18).map((item) => {
-            const Icon = item.icon
-            return (
-              <CommandItem
-                key={item.id}
-                onSelect={() => handleSelect(item.href)}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </CommandItem>
-            )
-          })}
-        </CommandGroup>
-      </CommandList>
-    </CommandDialog>
+          <CommandGroup heading="Personal">
+            {commandItems.slice(18).map((item) => {
+              const Icon = item.icon
+              return (
+                <CommandItem
+                  key={item.id}
+                  onSelect={() => handleSelect(item.href)}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
+        </CommandList>
+      </DialogContent>
+    </Dialog>
   )
 }

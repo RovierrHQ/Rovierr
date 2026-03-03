@@ -1,6 +1,5 @@
 'use client'
 
-import type { EmailHistoryItem } from '@rov/orpc-contracts'
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Badge } from '@rov/ui/components/badge'
 import { Button } from '@rov/ui/components/button'
@@ -15,8 +14,17 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { ChevronLeft, ChevronRight, Eye, Mail } from 'lucide-react'
 
-interface EmailHistoryProps {
-  emails: EmailHistoryItem[]
+type EmailHistoryProps = {
+  emails: {
+    id: string
+    subject: string
+    recipientCount: number
+    successCount: number
+    failureCount: number
+    status: 'completed' | 'failed'
+    sentAt: string | null
+    sender: { id: string; name: string; image: string | null }
+  }[]
   total: number
   hasMore: boolean
   currentPage: number

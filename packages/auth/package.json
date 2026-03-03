@@ -1,36 +1,24 @@
 {
   "name": "@rov/auth",
-  "version": "0.0.0",
-  "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./permissions": "./src/permissions.ts",
-    "./client": "./src/client.ts",
-    "./client/web": "./src/client-web.ts",
-    "./client/native": "./src/client-native.ts"
+    "./client-web": "./src/client-web.ts",
+    "./client-native": "./src/client-native.ts"
   },
   "scripts": {
-    "check-types": "tsc -b"
-  },
-  "dependencies": {
-    "better-auth": "1.3.34",
-    "@better-auth/expo": "1.3.34",
-    "@better-auth/core": "1.3.34",
-    "@rov/db": "workspace:*",
-    "drizzle-orm": "0.44.5",
-    "nanoid": "5.1.6"
-  },
-  "peerDependencies": {
-    "react": ">=18.0.0"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": false
-    }
+    "type-check": "tsgo -b || tsc -b"
   },
   "devDependencies": {
-    "typescript": "5.9.2"
+    "@rov/config": "workspace:*"
+  },
+  "peerDependencies": {
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "@better-auth/expo": "^1.4.18",
+    "@rov/db": "workspace:*",
+    "better-auth": "^1.4.18",
+    "drizzle-orm": "^0.45.1",
+    "nanoid": "^5.1.6"
   }
 }

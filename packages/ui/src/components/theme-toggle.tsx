@@ -1,61 +1,45 @@
 'use client'
 
-import { cn } from '@rov/ui/lib/utils'
-import { useIsClient } from '@uidotdev/usehooks'
-import { Moon, SunDim } from 'lucide-react'
-import { useTheme } from 'next-themes'
-import { useRef } from 'react'
-import { flushSync } from 'react-dom'
+import { Moon01Icon, Sun01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Button } from '@rov/ui/components/button'
+import { useEffect, useState } from 'react'
 
-type props = {
-  className?: string
-}
+export function AnimatedThemeToggler() {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [mounted, setMounted] = useState(false)
 
-export const AnimatedThemeToggler = ({ className }: props) => {
-  const buttonRef = useRef<HTMLButtonElement | null>(null)
-  const { theme, setTheme } = useTheme()
-  const changeTheme = async () => {
-    if (!buttonRef.current) return
+  useEffect(() => {
+    setMounted(true)
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
+    if (savedTheme) {
+      setTheme(savedTheme)
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark')
+    }
+  }, [])
 
-    await document.startViewTransition(() => {
-      flushSync(() => {
-        setTheme(theme === 'dark' ? 'light' : 'dark')
-      })
-    }).ready
-
-    const { top, left, width, height } =
-      buttonRef.current.getBoundingClientRect()
-    const y = top + height / 2
-    const x = left + width / 2
-
-    const right = window.innerWidth - left
-    const bottom = window.innerHeight - top
-    const maxRad = Math.hypot(Math.max(left, right), Math.max(top, bottom))
-
-    document.documentElement.animate(
-      {
-        clipPath: [
-          `circle(0px at ${x}px ${y}px)`,
-          `circle(${maxRad}px at ${x}px ${y}px)`
-        ]
-      },
-      {
-        duration: 700,
-        easing: 'ease-in-out',
-        pseudoElement: '::view-transition-new(root)'
-      }
-    )
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(newTheme)
+    localStorage.setItem('theme', newTheme)
+    document.documentElement.classList.toggle('dark', newTheme === 'dark')
   }
-  const isClient = useIsClient()
-  if (!isClient) return
+
+  if (!mounted) {
+    return null
+  }
+
   return (
-    <button
-      className={cn('cursor-pointer', className)}
-      onClick={changeTheme}
-      ref={buttonRef}
-      type="button"
-    >
-      {theme === 'dark' ? <SunDim /> : <Moon />}
-    </button>
+    <Button onClick={toggleTheme} size="sm" variant="ghost">
+      <HugeiconsIcon
+        className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+        icon={Sun01Icon}
+      />
+      <HugeiconsIcon
+        className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+        icon={Moon01Icon}
+      />
+      <span className="sr-only">Toggle theme</span>
+    </Button>
   )
 }

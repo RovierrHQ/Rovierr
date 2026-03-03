@@ -18,7 +18,7 @@ import {
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-interface PermissionEditorProps {
+type PermissionEditorProps = {
   permissions: Record<string, string[]>
   onChange: (permissions: Record<string, string[]>) => void
   initialPermissions?: Record<string, string[]>
@@ -123,7 +123,7 @@ export function PermissionEditor({
                 onOpenChange={() => toggleResource(resource)}
                 open={isExpanded}
               >
-                <CollapsibleTrigger asChild>
+                <CollapsibleTrigger>
                   <div className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50">
                     <div className="flex items-center gap-2">
                       {isExpanded ? (

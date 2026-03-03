@@ -1,1 +1,44 @@
-{}
+{
+  "dependencyTypes": ["dev", "prod", "peer", "overrides"],
+  "source": ["package.json", "apps/*/package.json", "packages/*/package.json"],
+  "semverGroups": [
+    {
+      "label": "Use exact versions for workspace packages",
+      "packages": ["@rov/**"],
+      "range": ""
+    },
+    {
+      "label": "Use caret ranges for all other packages",
+      "packages": ["**"],
+      "range": "^"
+    }
+  ],
+  "versionGroups": [
+    {
+      "label": "Pin React to 19.1.0 for Expo compatibility",
+      "dependencies": ["react", "react-dom"],
+      "pinVersion": "19.1.0"
+    },
+    {
+      "label": "Pin @types/react to 19.1.x for Expo compatibility",
+      "dependencies": ["@types/react"],
+      "pinVersion": "~19.1.10"
+    },
+    {
+      "label": "Use the highest version found for each package",
+      "packages": ["**"],
+      "dependencies": ["**"],
+      "isIgnored": true,
+      "ignoredDependencies": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "expo",
+        "expo-*",
+        "react-native",
+        "react-native-*",
+        "@react-navigation/*"
+      ]
+    }
+  ]
+}

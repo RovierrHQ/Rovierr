@@ -13,11 +13,11 @@ import {
 import { Input } from '@rov/ui/components/input'
 import { Label } from '@rov/ui/components/label'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { authClient } from '@web/lib/auth-client'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
 
-interface CreateTeamDialogProps {
+type CreateTeamDialogProps = {
   organizationId: string
   trigger?: React.ReactNode
 }
@@ -66,7 +66,7 @@ export function CreateTeamDialog({
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {trigger && <DialogTrigger>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Team</DialogTitle>

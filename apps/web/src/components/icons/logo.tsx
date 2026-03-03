@@ -9,6 +9,7 @@ function Logo({ className }: { className?: string }) {
       width="16"
       xmlns="http://www.w3.org/2000/svg"
     >
+      <title>Rovierr</title>
       <g clipPath="url(#clip0_2380_4290)">
         <path
           d="M8.00001 4.25C8.00001 6.32107 6.35535 8 4.32655 8H0.653076V4.25C0.653076 2.17893 2.29774 0.5 4.32655 0.5C6.35535 0.5 8.00001 2.17893 8.00001 4.25Z"

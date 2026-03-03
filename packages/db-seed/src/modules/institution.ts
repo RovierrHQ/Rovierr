@@ -16,28 +16,28 @@ import type {
 import { chunk, DEFAULT_BATCH_SIZE } from '../utils/batch'
 
 interface InstitutionCSVRow {
+  address?: string
+  city: string
+  country: string
+  logo?: string
   name: string
   slug: string
   type: 'university' | 'high_school' | 'bootcamp' | 'coaching_center' | 'other'
-  country: string
-  city: string
-  address?: string
-  website?: string
   validEmailDomains: string
-  logo?: string
+  website?: string
 }
 
 interface InstitutionRecord {
+  address?: string
+  city: string
+  country: string
   id: string
+  logo?: string
   name: string
   slug: string
   type: 'university' | 'high_school' | 'bootcamp' | 'coaching_center' | 'other'
-  country: string
-  city: string
-  address?: string
-  website?: string
   validEmailDomains: string[]
-  logo?: string
+  website?: string
 }
 
 /**

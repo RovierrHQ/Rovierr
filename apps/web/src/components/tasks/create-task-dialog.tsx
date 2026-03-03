@@ -20,15 +20,15 @@ import {
   SelectValue
 } from '@rov/ui/components/select'
 import { Textarea } from '@rov/ui/components/textarea'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useQuery as useTanstackQuery } from '@tanstack/react-query'
+import api, { useMutation, useQueryClient } from '@web/lib/api-client'
+import { authClient } from '@web/lib/auth-client'
 import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 import { AssigneeSelector } from './assignee-selector'
 import type { TaskPriority } from './types'
 
-interface CreateTaskDialogProps {
+type CreateTaskDialogProps = {
   open: boolean
   organizationId: string
   onOpenChange: (open: boolean) => void
@@ -49,7 +49,7 @@ export function CreateTaskDialog({
   )
 
   // Fetch organization members (filtered to exclude 'member' role)
-  const { data: membersData, isLoading: isLoadingMembers } = useQuery({
+  const { data: membersData, isLoading: isLoadingMembers } = useTanstackQuery({
     queryKey: ['organization-members', organizationId],
     queryFn: async () => {
       const result = await authClient.organization.listMembers({
@@ -59,32 +59,72 @@ export function CreateTaskDialog({
           organizationId
         }
       })
-      return result
+
+      return {
+        data: result.data,
+        error: result.error ? { status: 500, value: result.error } : null,
+        status: result.error ? 500 : 200,
+        response: (typeof Response !== 'undefined'
+          ? new Response()
+          : {}) as Response,
+        headers: (typeof Headers !== 'undefined'
+          ? new Headers()
+          : {}) as Headers
+      }
     },
     enabled: !!organizationId && open
   })
 
   // Extract and filter members (exclude 'member' role)
   const availableAssignees = useMemo(() => {
-    if (!membersData?.data) return []
-    const members = membersData.data.members || []
-    return members.filter((member: { role?: string | string[] }) => {
+    const data = membersData?.data as {
+      members: {
+        role?: string | string[]
+        user: { id: string; name: string; email: string; image?: string | null }
+      }[]
+    }
+    if (!data?.members) return []
+
+    return data.members.filter((member) => {
       const role = Array.isArray(member.role) ? member.role[0] : member.role
       return role && role !== 'member'
     })
   }, [membersData])
 
-  const createTaskMutation = useMutation(
-    orpc.tasks.createTask.mutationOptions({
+  const queryClient = useQueryClient()
+
+  const createMutation = useMutation(
+    (data: {
+      title: string
+      description?: string
+      contextType: 'club'
+      contextId: string
+      priority: 'low' | 'medium' | 'high'
+      status: 'todo'
+      visibility: 'assignees'
+      dueAt?: string
+      startAt?: string
+      isAllDay: boolean
+      assigneeIds: string[]
+    }) => api.tasks.create.post(data),
+
+    {
       onSuccess: () => {
-        toast.success('Task created successfully')
-        handleClose()
+        queryClient.invalidateQueries({
+          queryKey: ['tasks', 'getClubTasks']
+        })
+        onOpenChange(false)
         onSuccess()
+        if (formRef.current) {
+          formRef.current.reset()
+        }
+        toast.success('Task created successfully')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to create task')
+      onError: (error) => {
+        toast.error('Failed to create task')
+        console.error(error)
       }
-    })
+    }
   )
 
   const handleClose = () => {
@@ -101,7 +141,7 @@ export function CreateTaskDialog({
     const title = formData.get('title') as string
     const description = (formData.get('description') as string) || undefined
     const dueAt = formData.get('dueAt') as string
-    const startAt = formData.get('startAt') as string
+    // const _startAt = formData.get('startAt') as string
 
     if (!title) {
       toast.error('Please fill in the task title')
@@ -109,18 +149,19 @@ export function CreateTaskDialog({
     }
 
     try {
-      await createTaskMutation.mutateAsync({
+      await createMutation.mutateAsync({
+        contextType: 'club',
+        contextId: organizationId, // Start with required fields that match the mutation definition above
         title,
         description,
-        contextType: 'club',
-        contextId: organizationId,
+        status: 'todo',
+        visibility: 'assignees',
         priority,
-        visibility: 'club',
-        dueAt: dueAt || undefined,
-        startAt: startAt || undefined,
-        isAllDay,
-        assigneeIds:
-          selectedAssignees.size > 0 ? Array.from(selectedAssignees) : undefined
+        dueAt: dueAt ? new Date(dueAt).toISOString() : undefined,
+        // startAt, // Not in mutation definition
+        isAllDay, // Not in mutation definition
+        // assigneeIds: ... // Mutation expects assigneeId (string), not array
+        assigneeIds: Array.from(selectedAssignees)
       })
       // Reset form if it still exists (before dialog closes)
       if (form) {
@@ -207,8 +248,8 @@ export function CreateTaskDialog({
             <Button onClick={handleClose} type="button" variant="outline">
               Cancel
             </Button>
-            <Button disabled={createTaskMutation.isPending} type="submit">
-              {createTaskMutation.isPending ? 'Creating...' : 'Create Task'}
+            <Button disabled={createMutation.isPending} type="submit">
+              {createMutation.isPending ? 'Creating...' : 'Create Task'}
             </Button>
           </DialogFooter>
         </form>

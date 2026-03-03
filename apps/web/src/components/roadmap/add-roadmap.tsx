@@ -8,14 +8,14 @@ import {
   DialogTitle
 } from '@rov/ui/components/dialog'
 import { useAppForm } from '@rov/ui/components/form/index'
-import { useMutation } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
+import api, { useMutation } from '@web/lib/api-client'
+import { authClient } from '@web/lib/auth-client'
 import { Loader2 } from 'lucide-react'
-import { redirect } from 'next/navigation'
 import { type ReactNode, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { authClient } from '@/lib/auth-client'
-import { orpc, queryClient } from '@/utils/orpc'
 
 const roadmapSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters long'),
@@ -26,17 +26,17 @@ const roadmapSchema = z.object({
 })
 
 const AddRoadmap = ({ children }: { children: ReactNode }) => {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
+  const queryClient = useQueryClient()
   const { data: session } = authClient.useSession()
-  const { mutateAsync } = useMutation(
-    orpc.roadmap.create.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: orpc.roadmap.list.key()
-        })
-      }
-    })
-  )
+  const { mutateAsync } = useMutation(api.roadmap.create.post, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['roadmap', 'list']
+      })
+    }
+  })
   const form = useAppForm({
     validators: {
       onSubmit: roadmapSchema
@@ -70,7 +70,9 @@ const AddRoadmap = ({ children }: { children: ReactNode }) => {
   return (
     <div>
       <div
-        onClick={() => (session?.user.id ? setOpen(true) : redirect('/login'))}
+        onClick={() =>
+          session?.user.id ? setOpen(true) : router.navigate({ to: '/login' })
+        }
       >
         {children}
       </div>

@@ -4,62 +4,44 @@ import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import { Separator } from '@rov/ui/components/separator'
 import { Textarea } from '@rov/ui/components/textarea'
-
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
+import { authClient } from '@web/lib/auth-client'
 import { Heart, Loader2, Send, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
-import { orpc } from '@/utils/orpc'
 
-interface PostCommentPanelProps {
+type PostCommentPanelProps = {
   postId: string
   onClose: () => void
 }
 
 export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
   const [commentText, setCommentText] = useState('')
-  const queryClient = useQueryClient()
   const { data: session } = authClient.useSession()
 
   const { data, isLoading } = useQuery({
     queryKey: ['campus-feed', 'comments', postId],
-    queryFn: async () => {
-      return await orpc.campusFeed.getComments.call({
-        postId,
-        limit: 50,
-        offset: 0
+    queryFn: () =>
+      api['campus-feed'].interactions.posts({ postId }).comments.get({
+        query: { limit: 50, offset: 0, postId }
       })
-    }
   })
 
   const commentMutation = useMutation(
-    orpc.campusFeed.comment.mutationOptions({
+    api['campus-feed'].interactions.comments.post,
+    {
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['campus-feed', 'comments', postId]
-        })
-        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
         toast.success('Comment posted successfully')
         setCommentText('')
       },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to post comment')
+      onError: (error) => {
+        toast.error(error.value.message || 'Failed to post comment')
       }
-    })
+    }
   )
 
-  const likeCommentMutation = useMutation(
-    orpc.campusFeed.likeComment.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['campus-feed', 'comments', postId]
-        })
-      },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to like comment')
-      }
-    })
+  const likeCommentMutation = useMutation((commentId: string) =>
+    api['campus-feed'].interactions.comments({ commentId }).like.post()
   )
 
   const handleSubmit = () => {
@@ -141,9 +123,7 @@ export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
                       <Button
                         className="flex items-center gap-2 transition-colors hover:text-foreground"
                         disabled={likeCommentMutation.isPending}
-                        onClick={() =>
-                          likeCommentMutation.mutate({ commentId: comment.id })
-                        }
+                        onClick={() => likeCommentMutation.mutate(comment.id)}
                         size="sm"
                         variant="secondary"
                       >

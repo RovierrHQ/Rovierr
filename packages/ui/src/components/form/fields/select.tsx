@@ -47,7 +47,13 @@ const getIcon = (o: Option) => {
   return o.icon
 }
 function Select({ label, placeholder, options, ...props }: Props) {
-  const { onValueChange, value, ...rest } = props
+  const {
+    onValueChange,
+    value,
+    multiple: _multiple,
+    defaultValue: _defaultValue,
+    ...rest
+  } = props
   const field = useFieldContext<string>()
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
   const currentValue = (value as string | undefined) ?? field.state.value
@@ -56,18 +62,19 @@ function Select({ label, placeholder, options, ...props }: Props) {
   )
   const selectedIcon = selectedOption ? getIcon(selectedOption) : null
 
-  const handleChange = (val: string) => {
-    if (typeof onValueChange === 'function') {
-      onValueChange(val)
-    } else {
-      field.handleChange(val)
+  const handleChange = (val: string | null) => {
+    const stringVal = val as string
+    field.handleChange(stringVal)
+    if (onValueChange && typeof onValueChange === 'function') {
+      // Call with the value only - if it expects more args, they'll be undefined
+      ;(onValueChange as (value: string | null) => void)(val)
     }
   }
   return (
     <Field data-invalid={isInvalid} orientation="responsive">
       <FieldContent>
         {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
-        <SelectBase
+        <SelectBase<string>
           name={field.name}
           {...rest}
           onValueChange={handleChange}
@@ -85,7 +92,12 @@ function Select({ label, placeholder, options, ...props }: Props) {
               {selectedOption && getLabel(selectedOption)}
             </SelectValue>
           </SelectTrigger>
-          <SelectContent position="popper" side="bottom">
+          <SelectContent
+            align="start"
+            alignOffset={0}
+            side="bottom"
+            sideOffset={4}
+          >
             {options.map((option) => {
               const icon = getIcon(option)
               return (

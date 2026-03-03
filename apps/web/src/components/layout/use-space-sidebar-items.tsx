@@ -1,5 +1,3 @@
-'use client'
-
 import type * as lr from 'lucide-react'
 import {
   createContext,
@@ -16,7 +14,7 @@ export type SidebarNodeType =
   | 'collapsible'
   | 'empty-state'
 
-export interface SidebarNode {
+export type SidebarNode = {
   id: string
   title: string
   type: SidebarNodeType
@@ -32,7 +30,7 @@ export interface SidebarNode {
   }>
 }
 
-export interface SidebarTree {
+export type SidebarTree = {
   nodes: SidebarNode[]
 }
 
@@ -40,7 +38,7 @@ export interface SidebarTree {
 // This avoids JSON serialization issues with icon functions and infinite loops
 let persistedSidebarTree: SidebarTree | null = null
 
-interface SpaceSidebarItemsContextValue {
+type SpaceSidebarItemsContextValue = {
   sidebarTree: SidebarTree | null
   setSidebarTree: (tree: SidebarTree | null) => void
 }

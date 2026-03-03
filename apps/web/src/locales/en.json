@@ -1,0 +1,8 @@
+{
+  "name": "Todo App",
+  "nav": {
+    "logIn": "Log in",
+    "logOut": "Log out",
+    "userMenu": "User menu"
+  }
+}

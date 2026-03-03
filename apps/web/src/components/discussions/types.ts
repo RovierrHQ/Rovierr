@@ -1,34 +1,21 @@
-export interface Discussion {
-  id: string
-  title: string
-  content: string
-  author: {
-    name: string
-    avatar: string | null
-    role: string
-  }
-  isPinned: boolean
-  isResolved: boolean
-  replies: number
-  upvotes: number
-  createdAt: string
-  tags: string[]
-  userVote?: 'up' | 'down' | null
-  contextType: 'course' | 'society' | 'event' | 'project'
-  contextId: string
-}
+import type { Treaty } from '@elysiajs/eden'
+import type api from '@web/lib/api-client'
 
-export interface Reply {
-  threadId: string
-  id: string
-  content: string
-  author: {
-    name: string
-    avatar: string | null
-    role: string
-  }
-  upvotes: number
-  createdAt: string
-  isAnswer?: boolean
-  userVote?: 'up' | 'down' | null
-}
+// Infer from treaty list response: GET /discussion/thread/list
+type ThreadListResponse = Awaited<
+  ReturnType<typeof api.discussion.thread.list.get>
+>
+type ThreadListData = Treaty.Data<ThreadListResponse>
+
+export type ThreadListItem = ThreadListData['threads'][number]
+
+// Infer from treaty get-by-id response: GET /discussion/thread/:id
+type ThreadRoute = ReturnType<typeof api.discussion.thread>
+type GetThreadResponse = Awaited<ReturnType<ThreadRoute['get']>>
+type GetThreadData = Treaty.Data<GetThreadResponse>
+
+export type Discussion = GetThreadData
+export type Reply = NonNullable<Discussion['replies']>[number]
+
+/** Thread from list (no replies) or full thread (with replies). Use for ThreadView when source may be list or get-by-id. */
+export type ThreadViewDiscussion = ThreadListItem | Discussion

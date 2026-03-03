@@ -1,44 +1,18 @@
-/**
- * Hook for subscribing to user presence updates
- */
-'use client'
-
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { authClient } from '@/lib/auth-client'
-import { useCentrifugo } from '@/lib/centrifuge'
-import { orpc } from '@/utils/orpc'
+import { useCentrifugo } from '@rov/realtime/client'
+import { authClient } from '@web/lib/auth-client'
 
 export function usePresence() {
-  const queryClient = useQueryClient()
   const { data: session } = authClient.useSession()
 
-  // Get Centrifugo connection token
-  const { data: centrifugoAuth } = useQuery(
-    orpc.realtime.getConnectionToken.queryOptions({
-      enabled: !!session?.user?.id,
-      staleTime: 55 * 60 * 1000 // 55 minutes (token expires in 1 hour)
-    })
-  )
-
-  // Subscribe to presence updates
-  useCentrifugo<{
-    type: string
-    userId: string
-    status: 'online' | 'away' | 'offline'
-    lastSeenAt: string
-  }>(
+  // Subscribe to presence updates for the current user
+  useCentrifugo(
     {
-      token: centrifugoAuth?.token
+      url: import.meta.env.VITE_CENTRIFUGO_URL
     },
-    `chat:${session?.user?.id}`,
+    `presence:${session?.user?.id}`,
     (data) => {
-      if (data.type === 'presence') {
-        // Update presence cache
-        queryClient.setQueryData(['presence', data.userId], {
-          status: data.status,
-          lastSeenAt: data.lastSeenAt
-        })
-      }
+      // Handle presence updates
+      console.log('Presence update:', data)
     }
   )
 }

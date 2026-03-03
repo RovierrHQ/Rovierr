@@ -2,11 +2,11 @@ import { Button } from '@rov/ui/components/button'
 import { Input } from '@rov/ui/components/input'
 import { Pin, Search } from 'lucide-react'
 
-interface DiscussionFiltersProps {
+type DiscussionFiltersProps = {
   searchQuery: string
   onSearchChange: (query: string) => void
-  selectedFilter: 'all' | 'pinned' | 'resolved' | 'unresolved'
-  onFilterChange: (filter: 'all' | 'pinned' | 'resolved' | 'unresolved') => void
+  selectedFilter: 'all' | 'pinned' | 'resolved' | 'unanswered'
+  onFilterChange: (filter: 'all' | 'pinned' | 'resolved' | 'unanswered') => void
 }
 
 export function DiscussionFilters({
@@ -16,18 +16,18 @@ export function DiscussionFilters({
   onFilterChange
 }: DiscussionFiltersProps) {
   return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-      <div className="relative max-w-md flex-1">
-        <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+    <div className="mb-6 space-y-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          className="pl-9"
+          className="pl-10"
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search discussions..."
           value={searchQuery}
         />
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           onClick={() => onFilterChange('all')}
           size="sm"
@@ -40,7 +40,7 @@ export function DiscussionFilters({
           size="sm"
           variant={selectedFilter === 'pinned' ? 'default' : 'outline'}
         >
-          <Pin className="mr-1 h-3 w-3" />
+          <Pin className="mr-2 h-4 w-4" />
           Pinned
         </Button>
         <Button
@@ -51,11 +51,11 @@ export function DiscussionFilters({
           Resolved
         </Button>
         <Button
-          onClick={() => onFilterChange('unresolved')}
+          onClick={() => onFilterChange('unanswered')}
           size="sm"
-          variant={selectedFilter === 'unresolved' ? 'default' : 'outline'}
+          variant={selectedFilter === 'unanswered' ? 'default' : 'outline'}
         >
-          Unresolved
+          Unanswered
         </Button>
       </div>
     </div>

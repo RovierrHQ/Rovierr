@@ -1,40 +1,56 @@
 {
   "expo": {
-    "name": "rovierr",
+    "newArchEnabled": true,
+    "name": "Rovierr",
     "slug": "rovierr",
     "version": "1.0.0",
+    "runtimeVersion": "1.0.0",
     "scheme": "rovierr",
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": ["expo-router", "expo-secure-store", "expo-web-browser"],
+    "platforms": ["ios", "android"],
     "experiments": {
-      "typedRoutes": true,
-      "tsconfigPaths": true
+      "tsconfigPaths": true,
+      "typedRoutes": true
     },
-    "newArchEnabled": true,
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-asset",
+      "@react-native-community/datetimepicker",
+      "expo-secure-store"
+    ],
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./src/assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./src/assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.amanvarshney01.mybettertapp"
+      "bundleIdentifier": "com.comrovierr.rovierr"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.amanvarshney01.mybettertapp",
-      "edgeToEdgeEnabled": true
+      "softwareKeyboardLayoutMode": "pan",
+      "predictiveBackGestureEnabled": false,
+      "package": "com.comrovierr.rovierr"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "da376216-d29c-49c4-9d4e-b3f75f036b55"
+      }
+    },
+    "owner": "thomino",
+    "updates": {
+      "url": "https://u.expo.dev/da376216-d29c-49c4-9d4e-b3f75f036b55"
     }
   }
 }

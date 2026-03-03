@@ -1,5 +1,7 @@
 'use client'
 
+import { X } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { Badge } from '@rov/ui/components/badge'
 import {
   Field,
@@ -8,7 +10,6 @@ import {
   FieldLabel
 } from '@rov/ui/components/field'
 import { Input } from '@rov/ui/components/input'
-import { XIcon } from 'lucide-react'
 import { type ComponentProps, type KeyboardEvent, useRef } from 'react'
 import { useFieldContext } from '../context'
 
@@ -71,7 +72,7 @@ function TagInput({ label, placeholder, description, ...props }: Props) {
                   onClick={() => removeTag(tag)}
                   type="button"
                 >
-                  <XIcon className="size-3" />
+                  <HugeiconsIcon className="size-3" icon={X} strokeWidth={2} />
                 </button>
               </Badge>
             ))}

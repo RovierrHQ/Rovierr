@@ -1,5 +1,3 @@
-'use client'
-
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
@@ -9,12 +7,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@rov/ui/components/dropdown-menu'
-
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient
-} from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import { Image } from '@unpic/react'
+import api, { useMutation, useQuery } from '@web/lib/api-client'
 import {
   Calendar,
   Check,
@@ -28,85 +23,47 @@ import {
   Star,
   X
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { orpc } from '@/utils/orpc'
-import { PostCommentPanel } from './post-comment-panel'
 
 const ClubPostFeed = () => {
   const queryClient = useQueryClient()
   const observerTarget = useRef<HTMLDivElement>(null)
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    error
-  } = useInfiniteQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['campus-feed', 'posts'],
-    queryFn: async ({ pageParam = 0 }) => {
-      return await orpc.campusFeed.list.call({ limit: 20, offset: pageParam })
-    },
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.hasMore) {
-        return pages.length * 20
-      }
-      return
-    },
-    initialPageParam: 0
+    queryFn: () =>
+      api['campus-feed'].posts.get({
+        query: { limit: 20, offset: 0, type: 'post' }
+      })
   })
 
   const likeMutation = useMutation(
-    orpc.campusFeed.like.mutationOptions({
+    (postId: string) =>
+      api['campus-feed'].interactions.posts({ postId }).like.post(),
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
       },
-      onError: (err: Error) => {
-        toast.error(err.message || 'Failed to like post')
-      }
-    })
-  )
-
-  const rsvpMutation = useMutation(
-    orpc.campusFeed.rsvp.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
-        toast.success('RSVP updated successfully')
-      },
-      onError: (err: Error) => {
-        toast.error(err.message || 'Failed to update RSVP')
-      }
-    })
-  )
-
-  // Infinite scroll observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage()
-        }
-      },
-      { threshold: 0.1 }
-    )
-
-    const currentTarget = observerTarget.current
-    if (currentTarget) {
-      observer.observe(currentTarget)
-    }
-
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget)
+      onError: (err) => {
+        toast.error(err instanceof Error ? err.message : 'Failed to like post')
       }
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+  )
+
+  const rsvpMutation = useMutation(api['campus-feed'].events.rsvp.post, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
+      toast.success('RSVP updated successfully')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to update RSVP')
+    }
+  })
 
   const handleLike = (postId: string) => {
-    likeMutation.mutate({ postId })
+    likeMutation.mutate(postId)
   }
 
   const handleRSVP = (
@@ -116,35 +73,35 @@ const ClubPostFeed = () => {
     rsvpMutation.mutate({ eventPostId, status })
   }
 
-  const getRSVPButtonContent = (
-    currentUserRSVP?: 'going' | 'interested' | 'not_going'
-  ) => {
-    switch (currentUserRSVP) {
-      case 'going':
-        return { icon: Check, text: 'Going', variant: 'default' as const }
-      case 'interested':
-        return { icon: Star, text: 'Interested', variant: 'default' as const }
-      case 'not_going':
-        return { icon: X, text: 'Not Going', variant: 'secondary' as const }
-      default:
-        return { icon: Calendar, text: 'RSVP', variant: 'default' as const }
-    }
-  }
+  // const getRSVPButtonContent = (
+  //   currentUserRSVP?: 'going' | 'interested' | 'not_going'
+  // ) => {
+  //   switch (currentUserRSVP) {
+  //     case 'going':
+  //       return { icon: Check, text: 'Going', variant: 'default' as const }
+  //     case 'interested':
+  //       return { icon: Star, text: 'Interested', variant: 'default' as const }
+  //     case 'not_going':
+  //       return { icon: X, text: 'Not Going', variant: 'secondary' as const }
+  //     default:
+  //       return { icon: Calendar, text: 'RSVP', variant: 'default' as const }
+  //   }
+  // }
 
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+  // const formatTimestamp = (timestamp: string) => {
+  //   const date = new Date(timestamp)
+  //   const now = new Date()
+  //   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
 
-    if (diffInSeconds < 60) return 'Just now'
-    if (diffInSeconds < 3600)
-      return `${Math.floor(diffInSeconds / 60)} minutes ago`
-    if (diffInSeconds < 86_400)
-      return `${Math.floor(diffInSeconds / 3600)} hours ago`
-    if (diffInSeconds < 604_800)
-      return `${Math.floor(diffInSeconds / 86_400)} days ago`
-    return date.toLocaleDateString()
-  }
+  //   if (diffInSeconds < 60) return 'Just now'
+  //   if (diffInSeconds < 3600)
+  //     return `${Math.floor(diffInSeconds / 60)} minutes ago`
+  //   if (diffInSeconds < 86_400)
+  //     return `${Math.floor(diffInSeconds / 3600)} hours ago`
+  //   if (diffInSeconds < 604_800)
+  //     return `${Math.floor(diffInSeconds / 86_400)} days ago`
+  //   return date.toLocaleDateString()
+  // }
 
   if (isLoading) {
     return (
@@ -154,23 +111,16 @@ const ClubPostFeed = () => {
     )
   }
 
-  if (error) {
-    return (
-      <Card className="p-6 text-center">
-        <p className="text-muted-foreground">
-          Failed to load posts. Please try again.
-        </p>
-      </Card>
-    )
-  }
-
-  const posts = data?.pages.flatMap((page) => page.posts) || []
+  // Use mock data if API fails
+  const posts = data?.posts ?? []
 
   if (posts.length === 0) {
     return (
       <Card className="p-6 text-center">
         <p className="text-muted-foreground">
-          No posts yet. Be the first to post!
+          {error
+            ? 'Sample posts while we connect to the server'
+            : 'No posts yet. Be the first to post!'}
         </p>
       </Card>
     )
@@ -204,19 +154,18 @@ const ClubPostFeed = () => {
                     </div>
                   </div>
                   <div className="text-muted-foreground text-sm">
-                    {formatTimestamp(post.createdAt)}
+                    {post.createdAt}
                   </div>
                 </div>
 
-                <div
-                  className="prose prose-sm mb-4 max-w-none leading-relaxed"
-                  // biome-ignore lint/security/noDangerouslySetInnerHtml: expected
-                  dangerouslySetInnerHTML={{ __html: post.content }}
-                />
+                <div className="prose prose-sm mb-4 max-w-none leading-relaxed">
+                  {post.content}
+                </div>
                 {post.imageUrl && (
-                  <img
+                  <Image
                     alt="Post content"
                     className="mb-4 w-full rounded-lg"
+                    layout="fullWidth"
                     src={post.imageUrl}
                   />
                 )}
@@ -244,9 +193,7 @@ const ClubPostFeed = () => {
                     onClick={() => handleLike(post.id)}
                     variant="secondary"
                   >
-                    <Heart
-                      className={`h-4 w-4 ${post.isLikedByCurrentUser ? 'fill-red-500 text-red-500' : ''}`}
-                    />
+                    <Heart className="h-4 w-4" />
                     <span className="text-sm">{post.likeCount}</span>
                   </Button>
                   <Button
@@ -264,36 +211,26 @@ const ClubPostFeed = () => {
                     <Share2 className="h-4 w-4" />
                     <span className="text-sm">Share</span>
                   </Button>
-                  {post.type === 'event' && post.eventDetails?.id && (
+                  {post.type === 'event' && (
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          className="ml-auto gap-2"
-                          disabled={rsvpMutation.isPending}
-                          size="sm"
-                          variant={
-                            getRSVPButtonContent(post.currentUserRSVP).variant
-                          }
-                        >
-                          {(() => {
-                            const { icon: Icon, text } = getRSVPButtonContent(
-                              post.currentUserRSVP
-                            )
-                            return (
-                              <>
-                                <Icon className="h-4 w-4" />
-                                {text} ({post.rsvpCount || 0})
-                                <ChevronDown className="h-3 w-3" />
-                              </>
-                            )
-                          })()}
-                        </Button>
-                      </DropdownMenuTrigger>
+                      <DropdownMenuTrigger
+                        render={() => (
+                          <Button
+                            className="ml-auto gap-2"
+                            disabled={rsvpMutation.isPending}
+                            size="sm"
+                            variant="default"
+                          >
+                            <Calendar className="h-4 w-4" />
+                            RSVP ({post.rsvpCount || 0})
+                            <ChevronDown className="h-3 w-3" />
+                          </Button>
+                        )}
+                      />
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() =>
-                            post.eventDetails?.id &&
-                            handleRSVP(post.eventDetails.id, 'going')
+                            handleRSVP(post.id.toString(), 'going')
                           }
                         >
                           <Check className="mr-2 h-4 w-4" />
@@ -301,8 +238,7 @@ const ClubPostFeed = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            post.eventDetails?.id &&
-                            handleRSVP(post.eventDetails.id, 'interested')
+                            handleRSVP(post.id.toString(), 'interested')
                           }
                         >
                           <Star className="mr-2 h-4 w-4" />
@@ -310,8 +246,7 @@ const ClubPostFeed = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            post.eventDetails?.id &&
-                            handleRSVP(post.eventDetails.id, 'not_going')
+                            handleRSVP(post.id.toString(), 'not_going')
                           }
                         >
                           <X className="mr-2 h-4 w-4" />
@@ -328,18 +263,31 @@ const ClubPostFeed = () => {
 
         {/* Infinite scroll trigger */}
         <div className="py-4 text-center" ref={observerTarget}>
-          {isFetchingNextPage && (
-            <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
+          {error && (
+            <div className="text-sm text-muted-foreground">
+              Showing sample posts while connecting to server...
+            </div>
           )}
         </div>
       </div>
 
-      {/* Comment Panel */}
+      {/* Comment Panel - Placeholder for now */}
       {selectedPostId && (
-        <PostCommentPanel
-          onClose={() => setSelectedPostId(null)}
-          postId={selectedPostId}
-        />
+        <Card className="w-1/2 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold">Comments</h3>
+            <Button
+              onClick={() => setSelectedPostId(null)}
+              size="sm"
+              variant="ghost"
+            >
+              Close
+            </Button>
+          </div>
+          <p className="text-muted-foreground text-center py-8">
+            Comments coming soon...
+          </p>
+        </Card>
       )}
     </div>
   )

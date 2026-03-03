@@ -1,0 +1,166 @@
+name: Playwright Tests
+on:
+  pull_request:
+    branches: [main]
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  setup:
+    name: Setup
+    timeout-minutes: 1
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.branch_name.outputs.current_branch }}
+    steps:
+      - name: Get branch name
+        id: branch_name
+        uses: tj-actions/branch-names@v8
+
+  create_neon_branch_and_run_tests:
+    name: Create Neon Branch and Run E2E Tests
+    needs: setup
+    permissions:
+      contents: read
+      pull-requests: write
+    if: |
+      github.event_name == 'pull_request' && (
+      github.event.action == 'synchronize' || github.event.action == 'opened' || github.event.action == 'reopened')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Neon Branch
+        id: create_neon_branch
+        uses: neondatabase/create-branch-action@v6
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch_name: preview/pr-${{ github.event.number }}-${{ needs.setup.outputs.branch }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+          role: neondb_owner
+
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Restore Playwright browsers
+        uses: actions/cache/restore@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock', 'apps/web/package.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright Browsers
+        run: bunx playwright install --with-deps
+
+      - name: Save Playwright browsers
+        if: always() && steps.playwright-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock', 'apps/web/package.json') }}
+
+      - name: Push schema to database
+        run: cd packages/db && bun run db:push
+        env:
+          DATABASE_URL: ${{ steps.create_neon_branch.outputs.db_url_pooled }}
+
+      - name: Create API .dev.vars for Wrangler
+        run: |
+          mkdir -p apps/api
+          {
+            printf 'NODE_ENV=development\n'
+            printf 'DATABASE_URL=%s\n' "$DATABASE_URL"
+            printf 'BETTER_AUTH_SECRET=%s\n' "$BETTER_AUTH_SECRET"
+            printf 'BETTER_AUTH_URL=http://127.0.0.1:3001\n'
+            printf 'CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000\n'
+            printf 'GOOGLE_CLIENT_ID=%s\n' "$GOOGLE_CLIENT_ID"
+            printf 'GOOGLE_CLIENT_SECRET=%s\n' "$GOOGLE_CLIENT_SECRET"
+          } > apps/api/.dev.vars
+        env:
+          DATABASE_URL: ${{ steps.create_neon_branch.outputs.db_url_pooled }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          GOOGLE_CLIENT_ID: ""
+          GOOGLE_CLIENT_SECRET: ""
+
+      - name: Build API and dependencies
+        run: bun run build -- --filter=api
+
+      - name: Start API (port 3001)
+        run: |
+          cd apps/api && bun run dev &
+          echo "Waiting for API on :3001..."
+          timeout 60 bash -c 'until curl -sf http://127.0.0.1:3001/ > /dev/null 2>&1; do sleep 1; done'
+          echo "API ready"
+
+      - name: Run Playwright tests
+        run: cd apps/web && bun run test:e2e
+        env:
+          DATABASE_URL: ${{ steps.create_neon_branch.outputs.db_url_pooled }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          # Use localhost so saved auth cookie (domain: localhost) is sent to the API
+          VITE_API_URL: http://localhost:3001
+          VITE_APP_URL: http://localhost:3000
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 30
+
+      - uses: daun/playwright-report-summary@v3
+        if: always() && !cancelled()
+        with:
+          report-file: apps/web/playwright-results.json
+          comment-title: "Playwright E2E"
+          test-command: "cd apps/web && bun run test:e2e"
+
+      - name: Post Schema Diff Comment to PR
+        uses: neondatabase/schema-diff-action@v1
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          compare_branch: preview/pr-${{ github.event.number }}-${{ needs.setup.outputs.branch }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+
+  delete_neon_branch:
+    name: Delete Neon Branch and Apply Migrations on Merge
+    needs: setup
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Neon Branch
+        uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: preview/pr-${{ github.event.number }}-${{ needs.setup.outputs.branch }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+
+      - name: Checkout and apply migrations to production
+        if: github.event.pull_request.merged == true
+        uses: actions/checkout@v4
+
+      - name: Apply migrations to production
+        if: github.event.pull_request.merged == true
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install and push schema
+        if: github.event.pull_request.merged == true
+        run: |
+          bun install --frozen-lockfile
+          cd packages/db && bun run db:push
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

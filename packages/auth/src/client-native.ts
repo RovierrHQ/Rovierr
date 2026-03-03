@@ -4,18 +4,30 @@
  */
 
 import { expoClient } from '@better-auth/expo/client'
+import {
+  customSessionClient,
+  emailOTPClient,
+  inferOrgAdditionalFields,
+  organizationClient,
+  phoneNumberClient,
+  twoFactorClient,
+  usernameClient
+} from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/react'
+import type { Auth } from './index'
+import { ac } from './permissions'
 
 /**
  * Native Auth Client Configuration
  */
-export interface NativeAuthClientConfig {
+export type NativeAuthClientConfig = {
   baseURL: string
   storagePrefix?: string
   storage: {
     getItem: (key: string) => string | null
     setItem: (key: string, value: string) => void
   }
+  scheme: string
 }
 
 /**
@@ -27,9 +39,25 @@ export function createNativeAuthClient(config: NativeAuthClientConfig) {
     baseURL: config.baseURL,
     plugins: [
       expoClient({
-        storagePrefix: config.storagePrefix || 'app',
+        storagePrefix: config.storagePrefix || 'rovierr',
+        scheme: config.scheme,
         storage: config.storage
-      })
+      }),
+      emailOTPClient(),
+      organizationClient({
+        ac,
+        teams: {
+          enabled: true
+        },
+        dynamicAccessControl: {
+          enabled: true
+        },
+        schema: inferOrgAdditionalFields<Auth>()
+      }),
+      phoneNumberClient(),
+      twoFactorClient(),
+      usernameClient(),
+      customSessionClient<Auth>()
     ]
   })
 }

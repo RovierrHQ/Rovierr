@@ -1,5 +1,7 @@
 'use client'
 
+import { CalendarIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { Calendar as CalendarBase } from '@rov/ui/components/calendar'
 import {
   Field,
@@ -18,7 +20,6 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@rov/ui/components/popover'
-import { CalendarIcon } from 'lucide-react'
 import * as React from 'react'
 import { useFieldContext } from '../context'
 
@@ -86,9 +87,9 @@ export default function Calendar({ label, placeholder, description }: Props) {
         />
         <InputGroupAddon align="inline-end">
           <Popover onOpenChange={setOpen} open={open}>
-            <PopoverTrigger asChild>
+            <PopoverTrigger>
               <InputGroupButton id="date-picker" variant="ghost">
-                <CalendarIcon className="size-3.5" />
+                <HugeiconsIcon className="size-3.5" icon={CalendarIcon} />
                 <span className="sr-only">Select date</span>
               </InputGroupButton>
             </PopoverTrigger>

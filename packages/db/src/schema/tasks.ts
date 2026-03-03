@@ -10,7 +10,7 @@ export const tasks = pgTable('tasks', {
   id: primaryId,
   title: text('title').notNull(),
   description: text('description'),
-  contextType: text('context_type').notNull(), // "personal" | "club"
+  contextType: text('context_type', { enum: ['personal', 'club'] }).notNull(), // "personal" | "club"
   contextId: text('context_id').notNull(), // user_id if personal, club_id if club
   createdBy: text('created_by')
     .notNull()

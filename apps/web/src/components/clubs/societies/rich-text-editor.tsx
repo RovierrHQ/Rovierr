@@ -1,6 +1,15 @@
 'use client'
 
 import { Button } from '@rov/ui/components/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@rov/ui/components/dialog'
+import { Input } from '@rov/ui/components/input'
+import { Label } from '@rov/ui/components/label'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -12,9 +21,9 @@ import {
   ListOrdered,
   Smile
 } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
-interface RichTextEditorProps {
+type RichTextEditorProps = {
   content: string
   onChange: (content: string) => void
   placeholder?: string
@@ -58,22 +67,32 @@ export function RichTextEditor({
     }
   }, [content, editor])
 
+  const [promptState, setPromptState] = useState<
+    { type: 'link'; value: string } | { type: 'emoji'; value: string } | null
+  >(null)
+
   if (!editor) {
     return null
   }
 
-  const addLink = () => {
-    const url = window.prompt('Enter URL:')
-    if (url) {
-      editor.chain().focus().setLink({ href: url }).run()
+  const applyLink = () => {
+    if (promptState?.type === 'link' && promptState.value.trim()) {
+      editor.chain().focus().setLink({ href: promptState.value.trim() }).run()
     }
+    setPromptState(null)
+  }
+  const applyEmoji = () => {
+    if (promptState?.type === 'emoji' && promptState.value.trim()) {
+      editor.chain().focus().insertContent(promptState.value.trim()).run()
+    }
+    setPromptState(null)
   }
 
+  const addLink = () => {
+    setPromptState({ type: 'link', value: '' })
+  }
   const addEmoji = () => {
-    const emoji = window.prompt('Enter emoji (or paste):')
-    if (emoji) {
-      editor.chain().focus().insertContent(emoji).run()
-    }
+    setPromptState({ type: 'emoji', value: '' })
   }
 
   return (
@@ -121,6 +140,51 @@ export function RichTextEditor({
           <Smile className="h-4 w-4" />
         </Button>
       </div>
+
+      <Dialog
+        onOpenChange={(open) => !open && setPromptState(null)}
+        open={!!promptState}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {promptState?.type === 'link' ? 'Enter URL' : 'Enter emoji'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="prompt-input">
+              {promptState?.type === 'link' ? 'URL' : 'Emoji (or paste)'}
+            </Label>
+            <Input
+              id="prompt-input"
+              onChange={(e) =>
+                setPromptState(
+                  promptState ? { ...promptState, value: e.target.value } : null
+                )
+              }
+              placeholder={
+                promptState?.type === 'link' ? 'https://...' : 'e.g. 🙂'
+              }
+              value={promptState?.value ?? ''}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setPromptState(null)}
+              type="button"
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={promptState?.type === 'link' ? applyLink : applyEmoji}
+              type="button"
+            >
+              Insert
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Editor */}
       <EditorContent editor={editor} />
