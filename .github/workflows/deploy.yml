@@ -21,7 +21,7 @@ jobs:
       VITE_API_URL: ${{ github.ref == 'refs/heads/main' && 'https://api.rovierr.com' || 'https://api-dev.rovierr.com'}}
       VITE_POSTHOG_KEY: phc_VsakQ4uVnJDdqVEF9jHGAjnY94dnCGMXG5mHxVzUNnX
       VITE_POSTHOG_HOST: https://us.i.posthog.com
-      VITE_CENTRIFUGO_URL: https://free-allegra-rovierr-c3f621a5.koyeb.app
+      VITE_CENTRIFUGO_URL: wss://free-allegra-rovierr-c3f621a5.koyeb.app/connection/websocket
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
