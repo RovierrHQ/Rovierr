@@ -1,47 +1,31 @@
 /**
  * For more details on how to configure Wrangler, refer to:
  * https://developers.cloudflare.com/workers/wrangler/configuration/
+ *
+ * Multi-environment: deploy with -e dev or -e production (e.g. wrangler deploy -e dev).
+ * dev → rovierr-web-dev @ dev.rovierr.com
+ * production → rovierr-web-production @ rovierr.com
+ *
+ * Custom domains: zone rovierr.com must be in your Cloudflare account.
+ * If dev.rovierr.com has an existing CNAME in DNS, remove it so Wrangler can create the Custom Domain.
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "starter-template",
+	"name": "rovierr-web",
 	"compatibility_date": "2025-09-02",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
+	"compatibility_flags": ["nodejs_compat"],
 	"main": "@tanstack/react-start/server-entry",
-	"observability": {
-		"enabled": true
-	},
-	"routes": [
-		{ "pattern": "starter.rejoanahmed.com", "custom_domain": true }
-	],
-	/**
-	 * Smart Placement
-	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-	 */
-	// "placement": {  "mode": "smart" }
-	/**
-	 * Bindings
-	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
-	 * databases, object storage, AI inference, real-time communication and more.
-	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
-	 */
-	/**
-	 * Environment Variables
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-	 * Note: Use secrets to store sensitive data.
-	 * https://developers.cloudflare.com/workers/configuration/secrets/
-	 */
-	// "vars": {  "MY_VARIABLE": "production_value" }
-	/**
-	 * Static Assets
-	 * https://developers.cloudflare.com/workers/static-assets/binding/
-	 */
-	// "assets": {  "directory": "./public/",  "binding": "ASSETS" }
-	/**
-	 * Service Bindings (communicate between multiple Workers)
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-	 */
-	// "services": [  {   "binding": "MY_SERVICE",   "service": "my-service"  } ]
+	"observability": { "enabled": true },
+	"env": {
+		"dev": {
+			"routes": [
+				{ "pattern": "dev.rovierr.com", "custom_domain": true }
+			]
+		},
+		"production": {
+			"routes": [
+				{ "pattern": "rovierr.com", "custom_domain": true }
+			]
+		}
+	}
 }

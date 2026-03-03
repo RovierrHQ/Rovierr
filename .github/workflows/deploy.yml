@@ -1,0 +1,36 @@
+# Deploy API and Web to Cloudflare Workers by branch.
+# dev branch → CLOUDFLARE_ENV=dev (rovierr-api-dev, rovierr-web-dev, dev.rovierr.com)
+# main branch → CLOUDFLARE_ENV=production (rovierr-api-production, rovierr-web-production, rovierr.com)
+#
+# Required secrets: CLOUDFLARE_API_TOKEN
+# Per-env secrets: set in dashboard or `wrangler secret put <KEY> -e dev` / `-e production`
+name: Deploy
+on:
+  push:
+    branches: [dev, main]
+jobs:
+  deploy:
+    name: Deploy API and Web
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
+      VITE_APP_URL: ${{ github.ref == 'refs/heads/main' && 'https://rovierr.com' || 'https://dev.rovierr.com' }}
+      VITE_API_URL: ${{ github.ref == 'refs/heads/main' && 'https://api.rovierr.com' || 'https://api-dev.rovierr.com'}}
+      VITE_POSTHOG_KEY: phc_VsakQ4uVnJDdqVEF9jHGAjnY94dnCGMXG5mHxVzUNnX
+      VITE_POSTHOG_HOST: https://us.i.posthog.com
+      VITE_CENTRIFUGO_URL: https://free-allegra-rovierr-c3f621a5.koyeb.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Cache for Turbo
+        uses: rharkor/caching-for-turbo@v2.2.1
+      - name: Build
+        run: bun run build
+      - name: Deploy Web
+        working-directory: apps/web
+        run: bunx wrangler deploy
