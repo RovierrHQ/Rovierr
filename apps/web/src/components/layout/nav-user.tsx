@@ -10,24 +10,43 @@ import {
 } from '@rov/ui/components/dropdown-menu'
 import {
   SidebarMenu,
+  SidebarMenuButton,
   SidebarMenuItem,
   useSidebar
 } from '@rov/ui/components/sidebar'
-import { useRouter } from '@tanstack/react-router'
+import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
+import { useNavigate } from '@tanstack/react-router'
 import { authClient } from '@web/lib/auth-client'
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react'
-import { ThemeToggle } from '../theme/switch'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { data } = authClient.useSession()
-  const router = useRouter()
+  const navigate = useNavigate()
+
+  useHotkeys(
+    'ctrl+u',
+    () => {
+      navigate({ to: '/profile' })
+    },
+    {
+      enabled: !!data?.user
+    }
+  )
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground flex w-full items-center gap-2 rounded-lg p-2 text-left text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring">
+          <DropdownMenuTrigger
+            render={
+              <SidebarMenuButton
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                size="lg"
+              />
+            }
+          >
             <Avatar className="h-8 w-8 rounded-lg">
               <AvatarImage
                 alt={data?.user?.name}
@@ -75,9 +94,7 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuGroup>
-              <DropdownMenuItem
-                onClick={() => router.navigate({ to: '/profile' })}
-              >
+              <DropdownMenuItem onClick={() => navigate({ to: '/profile' })}>
                 <BadgeCheck />
                 Profile
               </DropdownMenuItem>
@@ -87,7 +104,7 @@ export function NavUser() {
               <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                 <div className="flex w-full items-center justify-between">
                   <span>Theme</span>
-                  <ThemeToggle />
+                  <AnimatedThemeToggler />
                 </div>
               </DropdownMenuItem>
             </DropdownMenuGroup>
