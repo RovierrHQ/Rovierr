@@ -1,4 +1,7 @@
 /** biome-ignore-all lint: ok */
+
+import { existsSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
 import type { DB } from '@rov/db'
 import { institution } from '@rov/db/schema'
 import { file } from 'bun'
@@ -38,34 +41,55 @@ interface InstitutionRecord {
 }
 
 /**
- * Load institutions from CSV file
+ * Load institutions from all CSV files in data/instituitions
  */
 async function loadInstitutionsFromCSV(): Promise<InstitutionRecord[]> {
-  const csvPath = `${import.meta.dir}/../data/institutions.csv`
-  const csvFile = file(csvPath)
-  const csvContent = await csvFile.text()
+  const candidates = [
+    join(import.meta.dir, '..', 'data', 'instituitions'),
+    join(process.cwd(), 'src', 'data', 'instituitions')
+  ]
+  const institutionsDir = candidates.find((p) => existsSync(p))
+  if (!institutionsDir) {
+    throw new Error(
+      `Institutions data directory not found. Tried: ${candidates.join(', ')}`
+    )
+  }
 
-  const records = parse(csvContent, {
-    columns: true,
-    skip_empty_lines: true,
-    trim: true
-  }) as InstitutionCSVRow[]
+  const files = readdirSync(institutionsDir).filter((f) => f.endsWith('.csv'))
+  const allRecords: InstitutionRecord[] = []
 
-  return records.map((row) => ({
-    id: nanoid(),
-    name: row.name,
-    slug: row.slug,
-    type: row.type,
-    country: row.country,
-    city: row.city,
-    address: row.address || undefined,
-    website: row.website || undefined,
-    validEmailDomains: row.validEmailDomains
-      .split('|')
-      .map((d) => d.trim())
-      .filter(Boolean),
-    logo: row.logo || undefined
-  }))
+  for (const filename of files) {
+    const csvPath = join(institutionsDir, filename)
+    const csvFile = file(csvPath)
+    const csvContent = await csvFile.text()
+
+    const records = parse(csvContent, {
+      columns: true,
+      relax_column_count: true,
+      skip_empty_lines: true,
+      trim: true
+    }) as InstitutionCSVRow[]
+
+    for (const row of records) {
+      allRecords.push({
+        id: nanoid(),
+        name: row.name,
+        slug: row.slug,
+        type: row.type,
+        country: row.country,
+        city: row.city,
+        address: row.address || undefined,
+        website: row.website || undefined,
+        validEmailDomains: (row.validEmailDomains ?? '')
+          .split('|')
+          .map((d) => d.trim())
+          .filter(Boolean),
+        logo: row.logo || undefined
+      })
+    }
+  }
+
+  return allRecords
 }
 
 /**
@@ -109,8 +133,11 @@ export const institutionSeed: SeedModule<{
     try {
       const csvData = await loadInstitutionsFromCSV()
       data = [...data, ...csvData]
-    } catch {
-      // Failed to load CSV
+    } catch (err) {
+      throw new Error(
+        `Failed to load institutions CSV: ${(err as Error).message}`,
+        { cause: err as Error }
+      )
     }
 
     // Load from scraper if enabled

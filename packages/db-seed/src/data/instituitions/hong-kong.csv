@@ -1,0 +1,9 @@
+name,slug,type,country,city,address,website,validEmailDomains,logo
+"Chinese University of Hong Kong",cuhk,university,"Hong Kong",Shatin,"Shatin, New Territories, Hong Kong",https://www.cuhk.edu.hk,cuhk.edu.hk|link.cuhk.edu.hk,
+"University of Hong Kong",hku,university,"Hong Kong","Pok Fu Lam","Pok Fu Lam, Hong Kong",https://www.hku.hk,hku.hk|connect.hku.hk,
+"Hong Kong University of Science and Technology",hkust,university,"Hong Kong","Clear Water Bay","Clear Water Bay, Kowloon, Hong Kong",https://www.hkust.edu.hk,ust.hk|connect.ust.hk,
+"City University of Hong Kong",cityu,university,"Hong Kong","Kowloon Tong","83 Tat Chee Avenue, Kowloon, Hong Kong",https://www.cityu.edu.hk,cityu.edu.hk|my.cityu.edu.hk,
+"Hong Kong Polytechnic University",polyu,university,"Hong Kong","Hung Hom","11 Yuk Choi Rd, Hung Hom, Hong Kong",https://www.polyu.edu.hk,polyu.edu.hk|connect.polyu.edu.hk,
+"Hong Kong Baptist University",hkbu,university,"Hong Kong","Kowloon Tong","224 Waterloo Road, Kowloon Tong, Hong Kong",https://www.hkbu.edu.hk,hkbu.edu.hk|life.hkbu.edu.hk,
+"Lingnan University",ln,university,"Hong Kong","Tuen Mun","8 Castle Peak Road, Tuen Mun, Hong Kong",https://www.ln.edu.hk,ln.edu.hk|ln.hk,
+"Education University of Hong Kong",eduhk,university,"Hong Kong","Tai Po","10 Lo Ping Road, Tai Po, Hong Kong",https://www.eduhk.hk,eduhk.hk|s.eduhk.hk,
