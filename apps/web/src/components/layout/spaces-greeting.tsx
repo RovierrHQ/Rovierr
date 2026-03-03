@@ -1,16 +1,12 @@
 import { authClient } from '@web/lib/auth-client'
 
-export function SpacesHeader() {
-  const { data: session } = authClient.useSession()
-
+export const SpacesHeader = () => {
+  const { data } = authClient.useSession()
   return (
-    <div>
-      <h1 className="text-2xl font-bold">
-        Welcome back, {session?.user?.name || 'User'}!
-      </h1>
-      <p className="text-muted-foreground">
-        Here's what's happening in your spaces today.
-      </p>
+    <div className="flex items-center gap-2 px-4">
+      <h2 className="font-semibold text-3xl leading-normal">
+        Hey {data?.user.displayUsername || data?.user.name} 👋
+      </h2>
     </div>
   )
 }

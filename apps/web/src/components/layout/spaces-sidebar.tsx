@@ -3,7 +3,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
   SidebarRail
 } from '@rov/ui/components/sidebar'
 import { ChatDrawer } from '@web/components/chat/chat-drawer'
@@ -24,11 +23,9 @@ function SpacesSidebarContent({ ...props }: ComponentProps<typeof Sidebar>) {
         <SpaceSwitcher spaces={spaces} />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu>
-          {sidebarTree?.nodes.map((node) => (
-            <SidebarNodeRenderer key={node.id} node={node} />
-          ))}
-        </SidebarMenu>
+        {sidebarTree?.nodes.map((node) => (
+          <SidebarNodeRenderer key={node.id} node={node} />
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <ChatDrawer />

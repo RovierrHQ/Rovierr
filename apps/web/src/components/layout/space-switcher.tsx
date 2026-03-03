@@ -1,5 +1,3 @@
-'use client'
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,23 +19,22 @@ import {
   TooltipTrigger
 } from '@rov/ui/components/tooltip'
 import { cn } from '@rov/ui/lib/utils'
-import { useHotkey } from '@tanstack/react-hotkeys'
-import { useLocation, useRouter } from '@tanstack/react-router'
+import { useNavigate, useRouterState } from '@tanstack/react-router'
 import type { ISpaces } from '@web/types/types-space-sidebar-data'
 import { ChevronsUpDown, Info } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
   const { isMobile } = useSidebar()
   const [activeSpace, setActiveSpace] = useState(
     spaces.find((space) => space.isActive)
   )
-  const router = useRouter()
-  const location = useLocation()
+  const navigate = useNavigate()
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
   const isInitialMount = useRef(true)
   const userChangedSpace = useRef(false)
 
-  // Cycle to next space
   const cycleToNextSpace = () => {
     const currentIndex = spaces.findIndex(
       (space) => space.name === activeSpace?.name
@@ -47,65 +44,46 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
     setActiveSpace(spaces[nextIndex])
   }
 
-  useHotkey('Shift+Tab', cycleToNextSpace, { preventDefault: true })
+  useHotkeys('shift+tab', cycleToNextSpace, { preventDefault: true })
 
-  // Sync activeSpace with current route when route changes (but don't redirect)
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
-      // Set active space based on current route
-      const currentSpace = spaces.find((space) =>
-        location.pathname.startsWith(space.url)
-      )
-      if (currentSpace && currentSpace.name !== activeSpace?.name) {
-        setActiveSpace(currentSpace)
-      }
-      return
     }
-
-    // If user didn't explicitly change space, sync with route
-    if (!userChangedSpace.current) {
-      const currentSpace = spaces.find((space) =>
-        location.pathname.startsWith(space.url)
-      )
-      if (currentSpace && currentSpace.name !== activeSpace?.name) {
-        setActiveSpace(currentSpace)
-      }
-      return
+    if (userChangedSpace.current) return
+    const currentSpace = spaces.find((space) => pathname.startsWith(space.url))
+    if (currentSpace && currentSpace.name !== activeSpace?.name) {
+      setActiveSpace(currentSpace)
     }
+  }, [pathname])
 
-    // User explicitly changed space - reset flag and navigate
+  useEffect(() => {
+    if (isInitialMount.current) return
+    if (!userChangedSpace.current) return
     userChangedSpace.current = false
-
-    // Don't redirect if we're already on the active space URL or a child route
-    if (activeSpace?.url && location.pathname.startsWith(activeSpace.url)) {
-      return
+    if (activeSpace?.url && !pathname.startsWith(activeSpace.url)) {
+      navigate({ to: activeSpace.url })
     }
+  }, [activeSpace])
 
-    // Navigate to the new space
-    if (activeSpace?.url) {
-      router.navigate({ to: activeSpace.url })
-    }
-  }, [activeSpace, router, location.pathname, spaces])
-
-  // Handle explicit space change from dropdown
   const handleSpaceChange = (space: ISpaces) => {
     userChangedSpace.current = true
     setActiveSpace(space)
   }
 
-  if (!activeSpace) {
-    return null
-  }
+  if (!activeSpace) return null
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <SidebarMenuButton
-            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            render={DropdownMenuTrigger}
-            size="lg"
+          <DropdownMenuTrigger
+            render={
+              <SidebarMenuButton
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                size="lg"
+              />
+            }
           >
             <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
               <activeSpace.logo className="size-4" />
@@ -115,7 +93,7 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
               <span className="truncate text-xs">{activeSpace.plan}</span>
             </div>
             <ChevronsUpDown className="ml-auto" />
-          </SidebarMenuButton>
+          </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
@@ -139,6 +117,8 @@ export function SpaceSwitcher({ spaces }: { spaces: ISpaces[] }) {
                   </TooltipContent>
                 </Tooltip>
               </DropdownMenuLabel>
+            </DropdownMenuGroup>
+            <DropdownMenuGroup>
               {spaces.map((space) => (
                 <DropdownMenuItem
                   className={cn(
