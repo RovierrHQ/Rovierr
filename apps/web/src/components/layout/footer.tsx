@@ -1,6 +1,8 @@
+'use client'
+
 import { Link } from '@tanstack/react-router'
-import Logo from '@web/components/icons/logo'
 import { Github, Linkedin, Twitter } from 'lucide-react'
+import Logo from '../icons/logo'
 
 type FooterProps = {
   className?: string
@@ -49,7 +51,9 @@ export default function Footer({ className = '' }: FooterProps) {
       className={`border-neutral-200 border-t bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 ${className}`}
     >
       <div className="container mx-auto px-4 py-12">
+        {/* Main Footer Content */}
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+          {/* Brand Section */}
           <div className="space-y-4">
             <Link className="flex items-center gap-2 font-bold" to="/">
               <div className="flex size-6 items-center justify-center rounded-md border bg-sidebar-primary text-white">
@@ -63,6 +67,7 @@ export default function Footer({ className = '' }: FooterProps) {
             </p>
           </div>
 
+          {/* Product Links */}
           <div>
             <h3 className="mb-4 font-semibold text-neutral-900 text-sm dark:text-neutral-100">
               Product
@@ -81,6 +86,7 @@ export default function Footer({ className = '' }: FooterProps) {
             </ul>
           </div>
 
+          {/* Company Links */}
           <div>
             <h3 className="mb-4 font-semibold text-neutral-900 text-sm dark:text-neutral-100">
               Company
@@ -99,6 +105,7 @@ export default function Footer({ className = '' }: FooterProps) {
             </ul>
           </div>
 
+          {/* Legal Links */}
           <div>
             <h3 className="mb-4 font-semibold text-neutral-900 text-sm dark:text-neutral-100">
               Legal
@@ -118,25 +125,28 @@ export default function Footer({ className = '' }: FooterProps) {
           </div>
         </div>
 
+        {/* Bottom Section */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-neutral-200 border-t pt-8 md:flex-row dark:border-neutral-800">
+          {/* Copyright */}
           <p className="text-neutral-600 text-sm dark:text-neutral-400">
             © {currentYear} Rovierr. All rights reserved.
           </p>
 
+          {/* Social Links */}
           <div className="flex items-center gap-4">
             {footerLinks.social.map((social) => {
               const Icon = social.icon
               return (
-                <Link
+                <a
                   aria-label={social.label}
                   className="text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                  href={social.href}
                   key={social.href}
                   rel="noopener noreferrer"
                   target="_blank"
-                  to={social.href}
                 >
                   <Icon className="size-5" />
-                </Link>
+                </a>
               )
             })}
           </div>
