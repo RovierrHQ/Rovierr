@@ -31,9 +31,13 @@ import { toast } from 'sonner'
 
 type JoinRequestsProps = {
   organizationId: string
+  showHeader?: boolean
 }
 
-export function JoinRequests({ organizationId }: JoinRequestsProps) {
+export function JoinRequests({
+  organizationId,
+  showHeader = true
+}: JoinRequestsProps) {
   const queryClient = useQueryClient()
   const [selectedRequests, setSelectedRequests] = useState<Set<string>>(
     new Set()
@@ -245,50 +249,52 @@ export function JoinRequests({ organizationId }: JoinRequestsProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Join Requests</CardTitle>
-            <CardDescription>
-              Review and manage requests to join this society
-            </CardDescription>
-          </div>
-          {requests.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Button
-                disabled={
-                  selectedRequests.size === 0 ||
-                  approveMutation.isPending ||
-                  rejectMutation.isPending ||
-                  bulkApproveMutation.isPending ||
-                  bulkRejectMutation.isPending
-                }
-                onClick={handleBulkApprove}
-                size="sm"
-                variant="outline"
-              >
-                <Check className="mr-2 h-4 w-4" />
-                Approve Selected ({selectedRequests.size})
-              </Button>
-              <Button
-                disabled={
-                  selectedRequests.size === 0 ||
-                  approveMutation.isPending ||
-                  rejectMutation.isPending ||
-                  bulkApproveMutation.isPending ||
-                  bulkRejectMutation.isPending
-                }
-                onClick={handleBulkReject}
-                size="sm"
-                variant="outline"
-              >
-                <X className="mr-2 h-4 w-4" />
-                Reject Selected ({selectedRequests.size})
-              </Button>
+      {showHeader && (
+        <CardHeader>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>Join Requests</CardTitle>
+              <CardDescription>
+                Review and manage requests to join this society
+              </CardDescription>
             </div>
-          )}
-        </div>
-      </CardHeader>
+            {requests.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  disabled={
+                    selectedRequests.size === 0 ||
+                    approveMutation.isPending ||
+                    rejectMutation.isPending ||
+                    bulkApproveMutation.isPending ||
+                    bulkRejectMutation.isPending
+                  }
+                  onClick={handleBulkApprove}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Check className="mr-2 h-4 w-4" />
+                  Approve ({selectedRequests.size})
+                </Button>
+                <Button
+                  disabled={
+                    selectedRequests.size === 0 ||
+                    approveMutation.isPending ||
+                    rejectMutation.isPending ||
+                    bulkApproveMutation.isPending ||
+                    bulkRejectMutation.isPending
+                  }
+                  onClick={handleBulkReject}
+                  size="sm"
+                  variant="outline"
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Reject ({selectedRequests.size})
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+      )}
       <CardContent>
         {requests.length === 0 ? (
           <div className="py-12 text-center">

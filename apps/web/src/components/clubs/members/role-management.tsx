@@ -40,6 +40,7 @@ import { PermissionEditor } from './permission-editor'
 
 type RoleManagementProps = {
   organizationId: string
+  showHeader?: boolean
 }
 
 const createRoleSchema = z.object({
@@ -47,7 +48,10 @@ const createRoleSchema = z.object({
   description: z.string().optional()
 })
 
-export function RoleManagement({ organizationId }: RoleManagementProps) {
+export function RoleManagement({
+  organizationId,
+  showHeader = true
+}: RoleManagementProps) {
   const queryClient = useQueryClient()
   const [editingRole, setEditingRole] = useState<string | null>(null)
   const [creatingRole, setCreatingRole] = useState(false)
@@ -185,33 +189,35 @@ export function RoleManagement({ organizationId }: RoleManagementProps) {
   return (
     <>
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Roles & Permissions</CardTitle>
-              <CardDescription>
-                Manage roles and their permissions for this organization
-              </CardDescription>
+        {showHeader && (
+          <CardHeader>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle>Roles & Permissions</CardTitle>
+                <CardDescription>
+                  Manage roles and their permissions for this organization
+                </CardDescription>
+              </div>
+              {canManageRoles && (
+                <Dialog onOpenChange={setCreatingRole} open={creatingRole}>
+                  <DialogTrigger render={(props) => <Button {...props} />}>
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Role
+                    </Button>
+                  </DialogTrigger>
+                  <CreateRoleDialog
+                    onClose={() => setCreatingRole(false)}
+                    onCreate={(roleName, permissions) => {
+                      createRoleMutation.mutate({ roleName, permissions })
+                    }}
+                    organizationId={organizationId}
+                  />
+                </Dialog>
+              )}
             </div>
-            {canManageRoles && (
-              <Dialog onOpenChange={setCreatingRole} open={creatingRole}>
-                <DialogTrigger render={(props) => <Button {...props} />}>
-                  <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Role
-                  </Button>
-                </DialogTrigger>
-                <CreateRoleDialog
-                  onClose={() => setCreatingRole(false)}
-                  onCreate={(roleName, permissions) => {
-                    createRoleMutation.mutate({ roleName, permissions })
-                  }}
-                  organizationId={organizationId}
-                />
-              </Dialog>
-            )}
-          </div>
-        </CardHeader>
+          </CardHeader>
+        )}
         <CardContent>
           <div className="space-y-4">
             {roles.length === 0 ? (
