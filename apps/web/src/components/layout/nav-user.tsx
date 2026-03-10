@@ -10,92 +10,142 @@ import {
 } from '@rov/ui/components/dropdown-menu'
 import {
   SidebarMenu,
+  SidebarMenuButton,
   SidebarMenuItem,
   useSidebar
 } from '@rov/ui/components/sidebar'
-import { useRouter } from '@tanstack/react-router'
+import { AnimatedThemeToggler } from '@rov/ui/components/theme-toggle'
+import { useNavigate } from '@tanstack/react-router'
 import { authClient } from '@web/lib/auth-client'
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react'
-import { ThemeToggle } from '../theme/switch'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { data } = authClient.useSession()
-  const router = useRouter()
+  const navigate = useNavigate()
+
+  useHotkeys('ctrl+u', () => navigate({ to: '/profile' }), {
+    enabled: !!data?.user
+  })
+
+  const initials = data?.user?.name
+    ?.split(' ')
+    .map((n) => n[0])
+    .join('')
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground flex w-full items-center gap-2 rounded-lg p-2 text-left text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring">
+          {/*
+            Base UI's MenuPrimitive.Trigger does NOT support asChild.
+            Use the `render` prop to swap the underlying element with
+            SidebarMenuButton so both get merged into one DOM node.
+          */}
+          <DropdownMenuTrigger
+            className="w-full"
+            render={
+              <SidebarMenuButton
+                className="data-[popup-open]:bg-sidebar-accent data-[popup-open]:text-sidebar-accent-foreground"
+                size="lg"
+              />
+            }
+          >
             <Avatar className="h-8 w-8 rounded-lg">
               <AvatarImage
-                alt={data?.user?.name}
-                src={data?.user?.image || ''}
+                alt={data?.user?.name ?? 'User'}
+                src={data?.user?.image ?? ''}
               />
               <AvatarFallback className="rounded-lg">
-                {data?.user?.name
-                  ?.split(' ')
-                  .map((name) => name[0])
-                  .join('')}
+                {initials ?? 'U'}
               </AvatarFallback>
             </Avatar>
+
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{data?.user?.name}</span>
               <span className="truncate text-xs">{data?.user?.email}</span>
             </div>
+
             <ChevronsUpDown className="ml-auto size-4" />
           </DropdownMenuTrigger>
+
           <DropdownMenuContent
             align="end"
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? 'bottom' : 'right'}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage
-                    alt={data?.user?.name}
-                    src={data?.user?.image || ''}
-                  />
-                  <AvatarFallback className="rounded-lg">
-                    {data?.user?.name
-                      ?.split(' ')
-                      .map((name) => name[0])
-                      .join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {data?.user?.name}
-                  </span>
-                  <span className="truncate text-xs">{data?.user?.email}</span>
+            {/*
+              Base UI REQUIRES DropdownMenuLabel (→ MenuPrimitive.GroupLabel)
+              to live inside DropdownMenuGroup (→ MenuPrimitive.Group).
+              Placing it outside throws "MenuGroupRootContext is missing".
+            */}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage
+                      alt={data?.user?.name ?? 'User'}
+                      src={data?.user?.image ?? ''}
+                    />
+                    <AvatarFallback className="rounded-lg">
+                      {initials ?? 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">
+                      {data?.user?.name}
+                    </span>
+                    <span className="truncate text-xs">
+                      {data?.user?.email}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </DropdownMenuLabel>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
+
+            <DropdownMenuSeparator />
+
+            {/* ── Profile & Edit ───────────────────────────────────────── */}
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => navigate({ to: '/profile' })}>
+                <BadgeCheck className="mr-2 h-4 w-4" />
+                Profile &amp; Edit
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+
+            <DropdownMenuSeparator />
+
+            {/* ── Theme toggle ─────────────────────────────────────────── */}
+            <DropdownMenuGroup>
+              {/*
+                closeOnClick={false} prevents the menu from closing when
+                the theme toggler is clicked (Base UI equivalent of
+                Radix's onSelect e.preventDefault()).
+              */}
+              <DropdownMenuItem
+                className="justify-between"
+                closeOnClick={false}
+              >
+                <span>Theme</span>
+                <AnimatedThemeToggler />
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+
+            <DropdownMenuSeparator />
+
+            {/* ── Log out ──────────────────────────────────────────────── */}
             <DropdownMenuGroup>
               <DropdownMenuItem
-                onClick={() => router.navigate({ to: '/profile' })}
+                onClick={() =>
+                  authClient.signOut().then(() => navigate({ to: '/login' }))
+                }
               >
-                <BadgeCheck />
-                Profile
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <div className="flex w-full items-center justify-between">
-                  <span>Theme</span>
-                  <ThemeToggle />
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => authClient.signOut()}>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

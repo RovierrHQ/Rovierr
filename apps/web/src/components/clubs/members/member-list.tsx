@@ -46,9 +46,13 @@ import { InviteMemberDialog } from './invite-member-dialog'
 
 type MemberListProps = {
   organizationId: string
+  showHeader?: boolean
 }
 
-export function MemberList({ organizationId }: MemberListProps) {
+export function MemberList({
+  organizationId,
+  showHeader = true
+}: MemberListProps) {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
@@ -216,48 +220,55 @@ export function MemberList({ organizationId }: MemberListProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Members ({totalMembers})</CardTitle>
-            {hasOrgUpdatePermission && (
-              <CardDescription>
-                Manage organization members and their roles
-              </CardDescription>
+      {showHeader && (
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Members ({totalMembers})</CardTitle>
+              {hasOrgUpdatePermission && (
+                <CardDescription>
+                  Manage organization members and their roles
+                </CardDescription>
+              )}
+            </div>
+            {canInviteMembers && (
+              <InviteMemberDialog organizationId={organizationId} />
             )}
           </div>
-          {canInviteMembers && (
-            <InviteMemberDialog organizationId={organizationId} />
-          )}
-        </div>
-      </CardHeader>
+        </CardHeader>
+      )}
       <CardContent>
         <div className="space-y-4">
           {/* Search and Filter */}
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative flex-1">
               <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
               <Input
                 className="pl-9"
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search members by name or email..."
+                placeholder="Search members..."
                 value={searchQuery}
               />
             </div>
-            <Select
-              onValueChange={(value) => setRoleFilter(value ?? 'all')}
-              value={roleFilter}
-            >
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Filter by role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="owner">Owner</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="member">Member</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select
+                onValueChange={(value) => setRoleFilter(value ?? 'all')}
+                value={roleFilter}
+              >
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="owner">Owner</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
+                </SelectContent>
+              </Select>
+              {!showHeader && canInviteMembers && (
+                <InviteMemberDialog organizationId={organizationId} />
+              )}
+            </div>
           </div>
 
           {/* Members Table */}
@@ -270,10 +281,10 @@ export function MemberList({ organizationId }: MemberListProps) {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-x-auto rounded-lg border">
+              <table className="w-full min-w-[600px]">
                 <thead>
-                  <tr className="border-b">
+                  <tr className="border-b bg-muted/50">
                     <th className="p-4 text-left font-medium text-sm">
                       Member
                     </th>

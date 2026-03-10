@@ -1,12 +1,7 @@
 import { Alert, AlertDescription } from '@rov/ui/components/alert'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from '@rov/ui/components/tabs'
+import { Tabs, TabsContent } from '@rov/ui/components/tabs'
 import { createFileRoute } from '@tanstack/react-router'
 import { ActivityFeed } from '@web/components/expenses/activity-feed'
 import { ExpensesTable } from '@web/components/expenses/expenses-table'
@@ -32,6 +27,54 @@ export const Route = createFileRoute('/spaces/societies/mine/$clubID/expenses')(
   }
 )
 
+// Summary Card Component
+function SummaryCard({
+  title,
+  value,
+  icon: Icon,
+  isActive,
+  onClick,
+  variant = 'default'
+}: {
+  title: string
+  value: string
+  icon: React.ElementType
+  isActive?: boolean
+  onClick?: () => void
+  variant?: 'default' | 'warning' | 'success'
+}) {
+  const variantStyles = {
+    default: 'bg-card hover:bg-accent',
+    warning:
+      'bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 border-amber-200 dark:border-amber-800',
+    success:
+      'bg-green-50 dark:bg-green-950/30 hover:bg-green-100 dark:hover:bg-green-950/50 border-green-200 dark:border-green-800'
+  }
+
+  const iconColors = {
+    default: 'text-primary',
+    warning: 'text-amber-600 dark:text-amber-400',
+    success: 'text-green-600 dark:text-green-400'
+  }
+
+  return (
+    <button
+      className={`flex flex-col items-start rounded-lg border p-4 text-left transition-all ${variantStyles[variant]} ${isActive ? 'ring-2 ring-primary' : ''}`}
+      onClick={onClick}
+    >
+      <div className="flex w-full items-center justify-between">
+        <div
+          className={`rounded-full p-2 ${variant === 'default' ? 'bg-primary/10' : variant === 'warning' ? 'bg-amber-100 dark:bg-amber-900/50' : 'bg-green-100 dark:bg-green-900/50'}`}
+        >
+          <Icon className={`h-5 w-5 ${iconColors[variant]}`} />
+        </div>
+        <span className="text-3xl font-bold">{value}</span>
+      </div>
+      <p className="mt-2 text-sm font-medium text-muted-foreground">{title}</p>
+    </button>
+  )
+}
+
 function ExpensesPage() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [expenseFilter, setExpenseFilter] = useState('all')
@@ -50,24 +93,34 @@ function ExpensesPage() {
           </AlertDescription>
         </Alert>
 
-        <Tabs className="w-full" onValueChange={setActiveTab} value={activeTab}>
-          <TabsList className="mb-6 h-12">
-            <TabsTrigger className="gap-2 px-6" value="dashboard">
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger className="gap-2 px-6" value="expenses">
-              <Receipt className="h-4 w-4" />
-              Expenses
-            </TabsTrigger>
-            <TabsTrigger className="gap-2 px-6" value="reports">
-              <BarChart3 className="h-4 w-4" />
-              Reports
-            </TabsTrigger>
-          </TabsList>
+        {/* Summary Cards */}
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <SummaryCard
+            icon={LayoutDashboard}
+            isActive={activeTab === 'dashboard'}
+            onClick={() => setActiveTab('dashboard')}
+            title="Dashboard"
+            value="Overview"
+          />
+          <SummaryCard
+            icon={Receipt}
+            isActive={activeTab === 'expenses'}
+            onClick={() => setActiveTab('expenses')}
+            title="Expenses"
+            value="Manage"
+          />
+          <SummaryCard
+            icon={BarChart3}
+            isActive={activeTab === 'reports'}
+            onClick={() => setActiveTab('reports')}
+            title="Reports"
+            value="Analytics"
+          />
+        </div>
 
+        <Tabs className="w-full" onValueChange={setActiveTab} value={activeTab}>
           {/* Dashboard Tab */}
-          <TabsContent value="dashboard">
+          <TabsContent className="mt-0" value="dashboard">
             <div className="mb-6">
               <h1 className="mb-2 font-bold text-3xl text-foreground">
                 Dashboard
@@ -204,49 +257,77 @@ function ExpensesPage() {
           </TabsContent>
 
           {/* Expenses Tab */}
-          <TabsContent value="expenses">
+          <TabsContent className="mt-0" value="expenses">
             <div className="mb-6">
               <h1 className="mb-2 font-bold text-3xl text-foreground">
                 Expenses
               </h1>
-              <p className="text-muted-foreground">
-                View and manage all your expense reports.
-              </p>
             </div>
 
-            <Tabs
-              className="w-full"
-              onValueChange={setExpenseFilter}
-              value={expenseFilter}
-            >
-              <TabsList className="mb-6">
-                <TabsTrigger value="all">All Expenses</TabsTrigger>
-                <TabsTrigger value="pending">Pending</TabsTrigger>
-                <TabsTrigger value="approved">Approved</TabsTrigger>
-                <TabsTrigger value="rejected">Rejected</TabsTrigger>
-                <TabsTrigger value="paid">Paid</TabsTrigger>
-              </TabsList>
+            {/* Filter Buttons */}
+            <div className="mb-4 flex gap-2">
+              <Button
+                onClick={() => setExpenseFilter('all')}
+                variant={expenseFilter === 'all' ? 'default' : 'outline'}
+              >
+                All
+              </Button>
+              <Button
+                onClick={() => setExpenseFilter('pending')}
+                variant={expenseFilter === 'pending' ? 'default' : 'outline'}
+              >
+                Pending
+              </Button>
+              <Button
+                onClick={() => setExpenseFilter('approved')}
+                variant={expenseFilter === 'approved' ? 'default' : 'outline'}
+              >
+                Approved
+              </Button>
+              <Button
+                onClick={() => setExpenseFilter('rejected')}
+                variant={expenseFilter === 'rejected' ? 'default' : 'outline'}
+              >
+                Rejected
+              </Button>
+              <Button
+                onClick={() => setExpenseFilter('paid')}
+                variant={expenseFilter === 'paid' ? 'default' : 'outline'}
+              >
+                Paid
+              </Button>
+            </div>
 
-              <TabsContent value="all">
-                <ExpensesTable filterStatus="all" />
-              </TabsContent>
-              <TabsContent value="pending">
-                <ExpensesTable filterStatus="pending" />
-              </TabsContent>
-              <TabsContent value="approved">
-                <ExpensesTable filterStatus="approved" />
-              </TabsContent>
-              <TabsContent value="rejected">
-                <ExpensesTable filterStatus="rejected" />
-              </TabsContent>
-              <TabsContent value="paid">
-                <ExpensesTable filterStatus="paid" />
-              </TabsContent>
-            </Tabs>
+            {/* Filter Description */}
+            <p className="mb-6 text-muted-foreground">
+              {expenseFilter === 'all' &&
+                'Showing all expense reports in the system.'}
+              {expenseFilter === 'pending' &&
+                'Expenses waiting for approval from administrators.'}
+              {expenseFilter === 'approved' &&
+                'Expenses that have been approved and are ready for processing.'}
+              {expenseFilter === 'rejected' &&
+                'Expenses that were not approved.'}
+              {expenseFilter === 'paid' &&
+                'Expenses that have been reimbursed or paid.'}
+            </p>
+
+            {/* Expenses Table based on filter */}
+            {expenseFilter === 'all' && <ExpensesTable filterStatus="all" />}
+            {expenseFilter === 'pending' && (
+              <ExpensesTable filterStatus="pending" />
+            )}
+            {expenseFilter === 'approved' && (
+              <ExpensesTable filterStatus="approved" />
+            )}
+            {expenseFilter === 'rejected' && (
+              <ExpensesTable filterStatus="rejected" />
+            )}
+            {expenseFilter === 'paid' && <ExpensesTable filterStatus="paid" />}
           </TabsContent>
 
           {/* Reports Tab */}
-          <TabsContent value="reports">
+          <TabsContent className="mt-0" value="reports">
             <div className="mb-6">
               <h1 className="mb-2 font-bold text-3xl text-foreground">
                 Reports & Analytics

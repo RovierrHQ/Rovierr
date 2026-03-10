@@ -1,3 +1,5 @@
+'use client'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import { Card } from '@rov/ui/components/card'
@@ -10,6 +12,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { Image } from '@unpic/react'
 import api, { useMutation, useQuery } from '@web/lib/api-client'
+import DOMPurify from 'isomorphic-dompurify'
 import {
   Calendar,
   Check,
@@ -25,6 +28,7 @@ import {
 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { PostCommentPanel } from './post-comment-panel'
 
 const ClubPostFeed = () => {
   const queryClient = useQueryClient()
@@ -62,6 +66,22 @@ const ClubPostFeed = () => {
     }
   })
 
+  const shareMutation = useMutation(
+    (postId: string) =>
+      api['campus-feed'].interactions.posts({ postId }).share.post(),
+    {
+      onSuccess: (data) => {
+        // Copy share URL to clipboard
+        navigator.clipboard.writeText(data.shareUrl)
+        queryClient.invalidateQueries({ queryKey: ['campus-feed', 'posts'] })
+        toast.success('Link copied to clipboard!')
+      },
+      onError: (err) => {
+        toast.error(err instanceof Error ? err.message : 'Failed to share post')
+      }
+    }
+  )
+
   const handleLike = (postId: string) => {
     likeMutation.mutate(postId)
   }
@@ -73,35 +93,13 @@ const ClubPostFeed = () => {
     rsvpMutation.mutate({ eventPostId, status })
   }
 
-  // const getRSVPButtonContent = (
-  //   currentUserRSVP?: 'going' | 'interested' | 'not_going'
-  // ) => {
-  //   switch (currentUserRSVP) {
-  //     case 'going':
-  //       return { icon: Check, text: 'Going', variant: 'default' as const }
-  //     case 'interested':
-  //       return { icon: Star, text: 'Interested', variant: 'default' as const }
-  //     case 'not_going':
-  //       return { icon: X, text: 'Not Going', variant: 'secondary' as const }
-  //     default:
-  //       return { icon: Calendar, text: 'RSVP', variant: 'default' as const }
-  //   }
-  // }
+  const handleShare = (postId: string) => {
+    shareMutation.mutate(postId)
+  }
 
-  // const formatTimestamp = (timestamp: string) => {
-  //   const date = new Date(timestamp)
-  //   const now = new Date()
-  //   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-
-  //   if (diffInSeconds < 60) return 'Just now'
-  //   if (diffInSeconds < 3600)
-  //     return `${Math.floor(diffInSeconds / 60)} minutes ago`
-  //   if (diffInSeconds < 86_400)
-  //     return `${Math.floor(diffInSeconds / 3600)} hours ago`
-  //   if (diffInSeconds < 604_800)
-  //     return `${Math.floor(diffInSeconds / 86_400)} days ago`
-  //   return date.toLocaleDateString()
-  // }
+  const handleCloseComments = () => {
+    setSelectedPostId(null)
+  }
 
   if (isLoading) {
     return (
@@ -158,9 +156,12 @@ const ClubPostFeed = () => {
                   </div>
                 </div>
 
-                <div className="prose prose-sm mb-4 max-w-none leading-relaxed">
-                  {post.content}
-                </div>
+                <div
+                  className="prose prose-sm mb-4 max-w-none leading-relaxed"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(post.content)
+                  }}
+                />
                 {post.imageUrl && (
                   <Image
                     alt="Post content"
@@ -206,6 +207,8 @@ const ClubPostFeed = () => {
                   </Button>
                   <Button
                     className="flex items-center gap-2 transition-colors hover:text-foreground"
+                    disabled={shareMutation.isPending}
+                    onClick={() => handleShare(post.id)}
                     variant="secondary"
                   >
                     <Share2 className="h-4 w-4" />
@@ -271,23 +274,12 @@ const ClubPostFeed = () => {
         </div>
       </div>
 
-      {/* Comment Panel - Placeholder for now */}
+      {/* Comment Panel - Using the actual PostCommentPanel component */}
       {selectedPostId && (
-        <Card className="w-1/2 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Comments</h3>
-            <Button
-              onClick={() => setSelectedPostId(null)}
-              size="sm"
-              variant="ghost"
-            >
-              Close
-            </Button>
-          </div>
-          <p className="text-muted-foreground text-center py-8">
-            Comments coming soon...
-          </p>
-        </Card>
+        <PostCommentPanel
+          onClose={handleCloseComments}
+          postId={selectedPostId.toString()}
+        />
       )}
     </div>
   )

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@rov/ui/components/avatar'
 import { Button } from '@rov/ui/components/button'
 import { Separator } from '@rov/ui/components/separator'
 import { Textarea } from '@rov/ui/components/textarea'
+import { useQueryClient } from '@tanstack/react-query'
 import api, { useMutation, useQuery } from '@web/lib/api-client'
 import { authClient } from '@web/lib/auth-client'
 import { Heart, Loader2, Send, X } from 'lucide-react'
@@ -18,6 +19,7 @@ type PostCommentPanelProps = {
 export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
   const [commentText, setCommentText] = useState('')
   const { data: session } = authClient.useSession()
+  const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
     queryKey: ['campus-feed', 'comments', postId],
@@ -40,8 +42,76 @@ export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
     }
   )
 
-  const likeCommentMutation = useMutation((commentId: string) =>
-    api['campus-feed'].interactions.comments({ commentId }).like.post()
+  const likeCommentMutation = useMutation(
+    (commentId: string) =>
+      api['campus-feed'].interactions.comments({ commentId }).like.post(),
+    {
+      onMutate: async (commentId: string) => {
+        // Cancel any outgoing refetches to avoid overwriting our optimistic update
+        await queryClient.cancelQueries({
+          queryKey: ['campus-feed', 'comments', postId]
+        })
+
+        // Snapshot the previous value
+        const previousComments = queryClient.getQueryData([
+          'campus-feed',
+          'comments',
+          postId
+        ])
+
+        // Optimistically update the specific comment's like state
+        queryClient.setQueryData(
+          ['campus-feed', 'comments', postId],
+          (
+            old:
+              | {
+                  comments: Array<{
+                    id: string
+                    isLikedByCurrentUser: boolean
+                    likeCount: number
+                  }>
+                }
+              | undefined
+          ) => {
+            if (!old) return old
+            return {
+              ...old,
+              comments: old.comments.map((comment) => {
+                if (comment.id === commentId) {
+                  return {
+                    ...comment,
+                    isLikedByCurrentUser: !comment.isLikedByCurrentUser,
+                    likeCount: comment.isLikedByCurrentUser
+                      ? comment.likeCount - 1
+                      : comment.likeCount + 1
+                  }
+                }
+                return comment
+              })
+            }
+          }
+        )
+
+        // Return a context object with the previous value for rollback
+        return { previousComments }
+      },
+      onError: (_err, _commentId, context) => {
+        // Rollback to the previous value on error
+        if (context?.previousComments) {
+          queryClient.setQueryData(
+            ['campus-feed', 'comments', postId],
+            context.previousComments
+          )
+        }
+        toast.error('Failed to like comment')
+      },
+      onSettled: () => {
+        // Always refetch after error or success to ensure server sync
+        queryClient.invalidateQueries({
+          queryKey: ['campus-feed', 'comments', postId]
+        })
+      }
+    }
   )
 
   const handleSubmit = () => {
@@ -122,7 +192,6 @@ export function PostCommentPanel({ postId, onClose }: PostCommentPanelProps) {
                     <div className="mt-2 flex items-center gap-2">
                       <Button
                         className="flex items-center gap-2 transition-colors hover:text-foreground"
-                        disabled={likeCommentMutation.isPending}
                         onClick={() => likeCommentMutation.mutate(comment.id)}
                         size="sm"
                         variant="secondary"

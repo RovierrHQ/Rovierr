@@ -30,10 +30,12 @@ import { InviteMemberDialog } from './invite-member-dialog'
 
 type PendingInvitationsProps = {
   organizationId: string
+  showHeader?: boolean
 }
 
 export function PendingInvitations({
-  organizationId
+  organizationId,
+  showHeader = true
 }: PendingInvitationsProps) {
   const queryClient = useQueryClient()
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
@@ -165,17 +167,21 @@ export function PendingInvitations({
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Pending Invitations</CardTitle>
-            <CardDescription>Manage pending member invitations</CardDescription>
+      {showHeader && (
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Pending Invitations</CardTitle>
+              <CardDescription>
+                Manage pending member invitations
+              </CardDescription>
+            </div>
+            {canInviteMembers && (
+              <InviteMemberDialog organizationId={organizationId} />
+            )}
           </div>
-          {canInviteMembers && (
-            <InviteMemberDialog organizationId={organizationId} />
-          )}
-        </div>
-      </CardHeader>
+        </CardHeader>
+      )}
       <CardContent>
         {invitationsList.length === 0 ? (
           <div className="py-12 text-center">
