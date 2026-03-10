@@ -22,12 +22,7 @@ type PreviewEmailResponse = {
   }
 }
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from '@rov/ui/components/tabs'
+import { Tabs, TabsContent } from '@rov/ui/components/tabs'
 import { useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useParams } from '@tanstack/react-router'
 import { EmailComposer } from '@web/components/societies/email-composer'
@@ -43,12 +38,61 @@ export const Route = createFileRoute('/spaces/societies/mine/$clubID/email')({
   component: EmailPage
 })
 
+// Summary Card Component
+function SummaryCard({
+  title,
+  value,
+  icon: Icon,
+  isActive,
+  onClick,
+  variant = 'default'
+}: {
+  title: string
+  value: string
+  icon: React.ElementType
+  isActive?: boolean
+  onClick?: () => void
+  variant?: 'default' | 'warning' | 'success'
+}) {
+  const variantStyles = {
+    default: 'bg-card hover:bg-accent',
+    warning:
+      'bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 border-amber-200 dark:border-amber-800',
+    success:
+      'bg-green-50 dark:bg-green-950/30 hover:bg-green-100 dark:hover:bg-green-950/50 border-green-200 dark:border-green-800'
+  }
+
+  const iconColors = {
+    default: 'text-primary',
+    warning: 'text-amber-600 dark:text-amber-400',
+    success: 'text-green-600 dark:text-green-400'
+  }
+
+  return (
+    <button
+      className={`flex flex-col items-start rounded-lg border p-4 text-left transition-all ${variantStyles[variant]} ${isActive ? 'ring-2 ring-primary' : ''}`}
+      onClick={onClick}
+    >
+      <div className="flex w-full items-center justify-between">
+        <div
+          className={`rounded-full p-2 ${variant === 'default' ? 'bg-primary/10' : variant === 'warning' ? 'bg-amber-100 dark:bg-amber-900/50' : 'bg-green-100 dark:bg-green-900/50'}`}
+        >
+          <Icon className={`h-5 w-5 ${iconColors[variant]}`} />
+        </div>
+        <span className="text-3xl font-bold">{value}</span>
+      </div>
+      <p className="mt-2 text-sm font-medium text-muted-foreground">{title}</p>
+    </button>
+  )
+}
+
 function EmailPage() {
   const params = useParams({ from: '/spaces/societies/mine/$clubID/email' })
   const queryClient = useQueryClient()
   const clubID = params.clubID
 
   const [currentPage, setCurrentPage] = useState(0)
+  const [activeTab, setActiveTab] = useState('compose')
   const [previewData, setPreviewData] = useState<PreviewEmailResponse | null>(
     null
   )
@@ -181,19 +225,30 @@ function EmailPage() {
         </p>
       </div>
 
-      <Tabs className="space-y-6" defaultValue="compose">
-        <TabsList>
-          <TabsTrigger value="compose">
-            <Mail className="mr-2 h-4 w-4" />
-            Compose Email
-          </TabsTrigger>
-          <TabsTrigger value="history">
-            <History className="mr-2 h-4 w-4" />
-            Email History
-          </TabsTrigger>
-        </TabsList>
+      {/* Summary Cards */}
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <SummaryCard
+          icon={Mail}
+          isActive={activeTab === 'compose'}
+          onClick={() => setActiveTab('compose')}
+          title="Compose Email"
+          value="Send"
+        />
+        <SummaryCard
+          icon={History}
+          isActive={activeTab === 'history'}
+          onClick={() => setActiveTab('history')}
+          title="Email History"
+          value={emailHistory?.total?.toString() || '0'}
+        />
+      </div>
 
-        <TabsContent value="compose">
+      <Tabs
+        className="space-y-6"
+        onValueChange={setActiveTab}
+        value={activeTab}
+      >
+        <TabsContent className="mt-0" value="compose">
           <Card>
             <CardHeader>
               <CardTitle>Compose New Email</CardTitle>
@@ -214,7 +269,7 @@ function EmailPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="history">
+        <TabsContent className="mt-0" value="history">
           <Card>
             <CardHeader>
               <CardTitle>Email History</CardTitle>

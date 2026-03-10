@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UserRouteImport } from './routes/user'
 import { Route as TermsAndServiceRouteImport } from './routes/terms-and-service'
 import { Route as SpacesRouteImport } from './routes/spaces'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -39,6 +40,10 @@ import { Route as AppsQueraRouteImport } from './routes/apps/quera'
 import { Route as SpacesSocietiesIndexRouteImport } from './routes/spaces/societies/index'
 import { Route as SpacesCareerIndexRouteImport } from './routes/spaces/career/index'
 import { Route as SpacesAcademicsIndexRouteImport } from './routes/spaces/academics/index'
+import { Route as ProfileUpdateIndexRouteImport } from './routes/profile/update/index'
+import { Route as ProfileDetailsIndexRouteImport } from './routes/profile/details/index'
+import { Route as ProfileActivityIndexRouteImport } from './routes/profile/activity/index'
+import { Route as ProfileAcademicIndexRouteImport } from './routes/profile/academic/index'
 import { Route as JoinSocietySlugIndexRouteImport } from './routes/join/$societySlug/index'
 import { Route as AppsQueraIndexRouteImport } from './routes/apps/quera/index'
 import { Route as SpacesSocietiesMineRouteImport } from './routes/spaces/societies/mine'
@@ -84,6 +89,11 @@ import { Route as SpacesSocietiesMineClubIDJoinRequestsRequestIdRouteImport } fr
 import { Route as SpacesSocietiesMineClubIDFormsCreateRouteImport } from './routes/spaces/societies/mine/$clubID/forms/create'
 import { Route as SpacesSocietiesMineClubIDFormsFormIdRouteImport } from './routes/spaces/societies/mine/$clubID/forms/$formId'
 
+const UserRoute = UserRouteImport.update({
+  id: '/user',
+  path: '/user',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsAndServiceRoute = TermsAndServiceRouteImport.update({
   id: '/terms-and-service',
   path: '/terms-and-service',
@@ -233,6 +243,26 @@ const SpacesAcademicsIndexRoute = SpacesAcademicsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => SpacesAcademicsRoute,
+} as any)
+const ProfileUpdateIndexRoute = ProfileUpdateIndexRouteImport.update({
+  id: '/update/',
+  path: '/update/',
+  getParentRoute: () => ProfileRoute,
+} as any)
+const ProfileDetailsIndexRoute = ProfileDetailsIndexRouteImport.update({
+  id: '/details/',
+  path: '/details/',
+  getParentRoute: () => ProfileRoute,
+} as any)
+const ProfileActivityIndexRoute = ProfileActivityIndexRouteImport.update({
+  id: '/activity/',
+  path: '/activity/',
+  getParentRoute: () => ProfileRoute,
+} as any)
+const ProfileAcademicIndexRoute = ProfileAcademicIndexRouteImport.update({
+  id: '/academic/',
+  path: '/academic/',
+  getParentRoute: () => ProfileRoute,
 } as any)
 const JoinSocietySlugIndexRoute = JoinSocietySlugIndexRouteImport.update({
   id: '/',
@@ -503,6 +533,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/spaces': typeof SpacesRouteWithChildren
   '/terms-and-service': typeof TermsAndServiceRoute
+  '/user': typeof UserRoute
   '/apps/quera': typeof AppsQueraRouteWithChildren
   '/join/$societySlug': typeof JoinSocietySlugRouteWithChildren
   '/people/people': typeof PeoplePeopleRoute
@@ -532,6 +563,10 @@ export interface FileRoutesByFullPath {
   '/spaces/societies/mine': typeof SpacesSocietiesMineRouteWithChildren
   '/apps/quera/': typeof AppsQueraIndexRoute
   '/join/$societySlug/': typeof JoinSocietySlugIndexRoute
+  '/profile/academic/': typeof ProfileAcademicIndexRoute
+  '/profile/activity/': typeof ProfileActivityIndexRoute
+  '/profile/details/': typeof ProfileDetailsIndexRoute
+  '/profile/update/': typeof ProfileUpdateIndexRoute
   '/spaces/academics/': typeof SpacesAcademicsIndexRoute
   '/spaces/career/': typeof SpacesCareerIndexRoute
   '/spaces/societies/': typeof SpacesSocietiesIndexRoute
@@ -575,6 +610,7 @@ export interface FileRoutesByTo {
   '/roadmap': typeof RoadmapRoute
   '/signup': typeof SignupRoute
   '/terms-and-service': typeof TermsAndServiceRoute
+  '/user': typeof UserRoute
   '/people/people': typeof PeoplePeopleRoute
   '/people/requests': typeof PeopleRequestsRoute
   '/societies/$societyId': typeof SocietiesSocietyIdRoute
@@ -597,6 +633,10 @@ export interface FileRoutesByTo {
   '/spaces/societies/create': typeof SpacesSocietiesCreateRoute
   '/apps/quera': typeof AppsQueraIndexRoute
   '/join/$societySlug': typeof JoinSocietySlugIndexRoute
+  '/profile/academic': typeof ProfileAcademicIndexRoute
+  '/profile/activity': typeof ProfileActivityIndexRoute
+  '/profile/details': typeof ProfileDetailsIndexRoute
+  '/profile/update': typeof ProfileUpdateIndexRoute
   '/spaces/academics': typeof SpacesAcademicsIndexRoute
   '/spaces/career': typeof SpacesCareerIndexRoute
   '/spaces/societies': typeof SpacesSocietiesIndexRoute
@@ -642,6 +682,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/spaces': typeof SpacesRouteWithChildren
   '/terms-and-service': typeof TermsAndServiceRoute
+  '/user': typeof UserRoute
   '/apps/quera': typeof AppsQueraRouteWithChildren
   '/join/$societySlug': typeof JoinSocietySlugRouteWithChildren
   '/people/people': typeof PeoplePeopleRoute
@@ -671,6 +712,10 @@ export interface FileRoutesById {
   '/spaces/societies/mine': typeof SpacesSocietiesMineRouteWithChildren
   '/apps/quera/': typeof AppsQueraIndexRoute
   '/join/$societySlug/': typeof JoinSocietySlugIndexRoute
+  '/profile/academic/': typeof ProfileAcademicIndexRoute
+  '/profile/activity/': typeof ProfileActivityIndexRoute
+  '/profile/details/': typeof ProfileDetailsIndexRoute
+  '/profile/update/': typeof ProfileUpdateIndexRoute
   '/spaces/academics/': typeof SpacesAcademicsIndexRoute
   '/spaces/career/': typeof SpacesCareerIndexRoute
   '/spaces/societies/': typeof SpacesSocietiesIndexRoute
@@ -720,6 +765,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/spaces'
     | '/terms-and-service'
+    | '/user'
     | '/apps/quera'
     | '/join/$societySlug'
     | '/people/people'
@@ -749,6 +795,10 @@ export interface FileRouteTypes {
     | '/spaces/societies/mine'
     | '/apps/quera/'
     | '/join/$societySlug/'
+    | '/profile/academic/'
+    | '/profile/activity/'
+    | '/profile/details/'
+    | '/profile/update/'
     | '/spaces/academics/'
     | '/spaces/career/'
     | '/spaces/societies/'
@@ -792,6 +842,7 @@ export interface FileRouteTypes {
     | '/roadmap'
     | '/signup'
     | '/terms-and-service'
+    | '/user'
     | '/people/people'
     | '/people/requests'
     | '/societies/$societyId'
@@ -814,6 +865,10 @@ export interface FileRouteTypes {
     | '/spaces/societies/create'
     | '/apps/quera'
     | '/join/$societySlug'
+    | '/profile/academic'
+    | '/profile/activity'
+    | '/profile/details'
+    | '/profile/update'
     | '/spaces/academics'
     | '/spaces/career'
     | '/spaces/societies'
@@ -858,6 +913,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/spaces'
     | '/terms-and-service'
+    | '/user'
     | '/apps/quera'
     | '/join/$societySlug'
     | '/people/people'
@@ -887,6 +943,10 @@ export interface FileRouteTypes {
     | '/spaces/societies/mine'
     | '/apps/quera/'
     | '/join/$societySlug/'
+    | '/profile/academic/'
+    | '/profile/activity/'
+    | '/profile/details/'
+    | '/profile/update/'
     | '/spaces/academics/'
     | '/spaces/career/'
     | '/spaces/societies/'
@@ -935,11 +995,19 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SpacesRoute: typeof SpacesRouteWithChildren
   TermsAndServiceRoute: typeof TermsAndServiceRoute
+  UserRoute: typeof UserRoute
   SocietiesSocietyIdRoute: typeof SocietiesSocietyIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/user': {
+      id: '/user'
+      path: '/user'
+      fullPath: '/user'
+      preLoaderRoute: typeof UserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms-and-service': {
       id: '/terms-and-service'
       path: '/terms-and-service'
@@ -1149,6 +1217,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/spaces/academics/'
       preLoaderRoute: typeof SpacesAcademicsIndexRouteImport
       parentRoute: typeof SpacesAcademicsRoute
+    }
+    '/profile/update/': {
+      id: '/profile/update/'
+      path: '/update'
+      fullPath: '/profile/update/'
+      preLoaderRoute: typeof ProfileUpdateIndexRouteImport
+      parentRoute: typeof ProfileRoute
+    }
+    '/profile/details/': {
+      id: '/profile/details/'
+      path: '/details'
+      fullPath: '/profile/details/'
+      preLoaderRoute: typeof ProfileDetailsIndexRouteImport
+      parentRoute: typeof ProfileRoute
+    }
+    '/profile/activity/': {
+      id: '/profile/activity/'
+      path: '/activity'
+      fullPath: '/profile/activity/'
+      preLoaderRoute: typeof ProfileActivityIndexRouteImport
+      parentRoute: typeof ProfileRoute
+    }
+    '/profile/academic/': {
+      id: '/profile/academic/'
+      path: '/academic'
+      fullPath: '/profile/academic/'
+      preLoaderRoute: typeof ProfileAcademicIndexRouteImport
+      parentRoute: typeof ProfileRoute
     }
     '/join/$societySlug/': {
       id: '/join/$societySlug/'
@@ -1542,10 +1638,18 @@ const PeopleRouteWithChildren =
 
 interface ProfileRouteChildren {
   ProfileIndexRoute: typeof ProfileIndexRoute
+  ProfileAcademicIndexRoute: typeof ProfileAcademicIndexRoute
+  ProfileActivityIndexRoute: typeof ProfileActivityIndexRoute
+  ProfileDetailsIndexRoute: typeof ProfileDetailsIndexRoute
+  ProfileUpdateIndexRoute: typeof ProfileUpdateIndexRoute
 }
 
 const ProfileRouteChildren: ProfileRouteChildren = {
   ProfileIndexRoute: ProfileIndexRoute,
+  ProfileAcademicIndexRoute: ProfileAcademicIndexRoute,
+  ProfileActivityIndexRoute: ProfileActivityIndexRoute,
+  ProfileDetailsIndexRoute: ProfileDetailsIndexRoute,
+  ProfileUpdateIndexRoute: ProfileUpdateIndexRoute,
 }
 
 const ProfileRouteWithChildren =
@@ -1809,6 +1913,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SpacesRoute: SpacesRouteWithChildren,
   TermsAndServiceRoute: TermsAndServiceRoute,
+  UserRoute: UserRoute,
   SocietiesSocietyIdRoute: SocietiesSocietyIdRoute,
 }
 export const routeTree = rootRouteImport
